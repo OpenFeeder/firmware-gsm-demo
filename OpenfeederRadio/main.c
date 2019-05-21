@@ -52,15 +52,16 @@ int main(void) {
 
     init_trx();
     printf("Init ok\n");
-    run_tx();
-    //run_rx();
+    test_rx();
+    
+    //test_tx();
     printf("END\n");
-//    while(1) {
+    while(1) {
 //        if (getSyncDate()) {
 //            LED_Toggle();
 //            reset_sync_date();
 //        }
 //
-//    } // on attend la 
+    } // on attend la 
     return -1;
 }

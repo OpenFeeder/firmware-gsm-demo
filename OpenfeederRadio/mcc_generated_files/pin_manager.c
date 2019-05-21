@@ -49,7 +49,6 @@
     Section: Includes
 */
 #include <xc.h>
-#include <stdio.h>
 #include "pin_manager.h"
 
 /**
@@ -69,7 +68,7 @@ void PIN_MANAGER_Initialize(void)
      ***************************************************************************/
     TRISA = 0x0797;
     TRISB = 0x5DBB;
-    TRISC = 0x03CF;
+    TRISC = 0x030F;
 
     /****************************************************************************
      * Setting the Weak Pull Up and Weak Pull Down SFR(s)
@@ -101,24 +100,15 @@ void PIN_MANAGER_Initialize(void)
      ***************************************************************************/
     __builtin_write_OSCCONL(OSCCON & 0xbf); // unlock PPS
 
-    RPOR4bits.RP9R = 0x0007;   //RB9->SPI1:SDO1;
+    RPINR0bits.INT1R = 0x0018;   //RC8->EXT_INT:INT1;
     RPINR18bits.U1RXR = 0x0005;   //RB5->UART1:U1RX;
+    RPINR1bits.INT2R = 0x000A;   //RB10->EXT_INT:INT2;
+    RPOR4bits.RP9R = 0x0007;   //RB9->SPI1:SDO1;
     RPINR20bits.SDI1R = 0x0008;   //RB8->SPI1:SDI1;
     RPOR3bits.RP6R = 0x0003;   //RB6->UART1:U1TX;
     RPOR10bits.RP20R = 0x0008;   //RC4->SPI1:SCK1OUT;
 
     __builtin_write_OSCCONL(OSCCON | 0x40); // lock   PPS
 
-    IEC1bits.CNIE = 1; // Enable CNI interrupt 
 }
 
-/* Interrupt service routine for the CNI interrupt. */
-void __attribute__ (( interrupt, no_auto_psv )) _CNInterrupt ( void )
-{
-    
-    if(IFS1bits.CNIF == 1)
-    {
-        // Clear the flag
-        IFS1bits.CNIF = 0;
-    }
-}

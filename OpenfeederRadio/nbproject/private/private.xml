@@ -3,7 +3,15 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/home/mmadi/Documents/STAGE_M1/OpenfeederRadio/driver/Master.c</file>
+            <file>file:/home/mmadi/Documents/stageM1/firmware-gsm-demo/OpenfeederRadio/main.c</file>
+            <file>file:/home/mmadi/Documents/stageM1/firmware-gsm-demo/OpenfeederRadio/mcc_generated_files/ext_int.c</file>
+            <file>file:/home/mmadi/Documents/stageM1/firmware-gsm-demo/OpenfeederRadio/driver/rx.c</file>
+            <file>file:/home/mmadi/Documents/stageM1/firmware-gsm-demo/OpenfeederRadio/driver/rx.h</file>
+            <file>file:/home/mmadi/Documents/stageM1/firmware-gsm-demo/OpenfeederRadio/test/test.c</file>
+            <file>file:/home/mmadi/Documents/stageM1/firmware-gsm-demo/OpenfeederRadio/driver/trx.c</file>
+            <file>file:/home/mmadi/Documents/stageM1/firmware-gsm-demo/OpenfeederRadio/driver/Services.c</file>
+            <file>file:/home/mmadi/Documents/stageM1/firmware-gsm-demo/OpenfeederRadio/driver/tx.c</file>
+            <file>file:/home/mmadi/Documents/stageM1/firmware-gsm-demo/OpenfeederRadio/driver/types.h</file>
         </group>
     </open-files>
 </project-private>

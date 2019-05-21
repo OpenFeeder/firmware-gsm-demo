@@ -42,3 +42,32 @@ uint8_t test_serial_datetime(uint8_t* datetime) {
 }
 
 
+//test 
+void test_rx() {
+    uint8_t paquet[20];
+    
+    oepn_receive();
+    while (1) {
+        if(srv_receive_rf(paquet, 20, 20) > 0) {
+            printf("recu : %s\n", paquet);
+            LED_BLUE_SetLow();
+        }
+//        if(getflagFFIT() == 1) {
+//            LED_BLUE_SetLow();
+//            restFladFFIT();
+//        }
+    }
+    
+}
+
+void test_tx() {
+    uint8_t *paquet = "PAQUET ENVOIE TEST";
+    while (1) {
+        if (getFlag()==1) {
+            printf("envoie\n");
+            resetFlag(); // on remet le flag a 0 pour eviter d'envoyer indefiniment 
+            srv_send_rf(paquet, 18, 20, 1);
+//            send_byte('A', 20);
+        }
+    }
+}

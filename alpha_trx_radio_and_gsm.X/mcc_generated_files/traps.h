@@ -1,24 +1,24 @@
 /**
-  System Interrupts Generated Driver File 
+  System Traps Generated Driver File 
 
   @Company:
     Microchip Technology Inc.
 
   @File Name:
-    interrupt_manager.h
+    traps.h
 
   @Summary:
-    This is the generated driver implementation file for setting up the
-    interrupts using PIC24 / dsPIC33 / PIC32MM MCUs
+    This is the generated driver implementation file for handling traps
+    using PIC24 / dsPIC33 / PIC32MM MCUs
 
   @Description:
-    This source file provides implementations for PIC24 / dsPIC33 / PIC32MM MCUs interrupts.
+    This source file provides implementations for PIC24 / dsPIC33 / PIC32MM MCUs traps.
     Generation Information : 
-        Product Revision  :  PIC24 / dsPIC33 / PIC32MM MCUs - pic24-dspic-pic32mm : 1.75.1
+        Product Revision  :  PIC24 / dsPIC33 / PIC32MM MCUs - 1.95-b-SNAPSHOT
         Device            :  PIC24FJ128GA204
     The generated drivers are tested against the following:
-        Compiler          :  XC16 v1.35
-        MPLAB             :  MPLAB X v5.05
+        Compiler          :  XC16 v1.36
+        MPLAB             :  MPLAB X v5.10
 */
 /*
     (c) 2016 Microchip Technology Inc. and its subsidiaries. You may use this
@@ -42,21 +42,45 @@
     TERMS.
 */
 
-/**
-    Section: Includes
-*/
-#include <xc.h>
+#ifndef _TRAPS_H
+#define _TRAPS_H
+
+#include <stdint.h>
 
 /**
-    void INTERRUPT_Initialize (void)
-*/
-void INTERRUPT_Initialize (void)
+ * Error codes
+ */
+typedef enum 
 {
-    //    INT1I: INT1 - External Interrupt 1
-    //    Priority: 1
-        IPC5bits.INT1IP = 1;
-    //    INT2I: INT2 - External Interrupt 2
-    //    Priority: 1
-        IPC7bits.INT2IP = 1;
+    /* ----- Traps ----- */
+    TRAPS_OSC_FAIL = 0, /** Oscillator Fail Trap vector */
+    TRAPS_STACK_ERR = 1, /** Stack Error Trap Vector */
+    TRAPS_ADDRESS_ERR = 2, /** Address Error Trap Vector */
+    TRAPS_MATH_ERR = 3, /** Math Error Trap Vector */
+} TRAPS_ERROR_CODE;
 
-}
+/**
+  @Summary
+    Default handler for the traps
+
+  @Description
+    This routine will be called whenever a trap happens. It stores the trap
+    error code and waits forever.
+    This routine has a weak attribute and can be over written.
+
+  @Preconditions
+    None.
+
+  @Returns
+    None.
+
+  @Param
+    None.
+
+  @Example
+    None.
+
+*/
+void __attribute__((naked, noreturn, weak)) TRAPS_halt_on_error(uint16_t code);
+
+#endif

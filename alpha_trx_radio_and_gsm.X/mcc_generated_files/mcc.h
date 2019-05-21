@@ -1,25 +1,25 @@
 /**
-  System Interrupts Generated Driver File 
+  @Generated PIC24 / dsPIC33 / PIC32MM MCUs Header File
 
   @Company:
     Microchip Technology Inc.
 
   @File Name:
-    interrupt_manager.h
+    mcc.h
 
   @Summary:
-    This is the generated driver implementation file for setting up the
-    interrupts using PIC24 / dsPIC33 / PIC32MM MCUs
+    This is the mcc.h file generated using PIC24 / dsPIC33 / PIC32MM MCUs
 
   @Description:
-    This source file provides implementations for PIC24 / dsPIC33 / PIC32MM MCUs interrupts.
-    Generation Information : 
-        Product Revision  :  PIC24 / dsPIC33 / PIC32MM MCUs - pic24-dspic-pic32mm : 1.75.1
+    This header file provides implementations for driver APIs for all modules selected in the GUI.
+    Generation Information :
+        Product Revision  :  PIC24 / dsPIC33 / PIC32MM MCUs - 1.95-b-SNAPSHOT
         Device            :  PIC24FJ128GA204
     The generated drivers are tested against the following:
-        Compiler          :  XC16 v1.35
-        MPLAB             :  MPLAB X v5.05
+        Compiler          :  XC16 v1.36
+        MPLAB             :  MPLAB X v5.10
 */
+
 /*
     (c) 2016 Microchip Technology Inc. and its subsidiaries. You may use this
     software and any derivatives exclusively with Microchip products.
@@ -42,21 +42,40 @@
     TERMS.
 */
 
-/**
-    Section: Includes
-*/
+#ifndef MCC_H
+#define	MCC_H
 #include <xc.h>
+#include "system.h"
+#include "clock.h"
+#include "pin_manager.h"
+#include <stdint.h>
+#include <stdbool.h>
+#include "spi1.h"
+#include "uart1.h"
+#include "rtcc.h"
+#include "ext_int.h"
+#include "interrupt_manager.h"
+#include "traps.h"
+
+#ifndef _XTAL_FREQ
+#define _XTAL_FREQ  4000000UL
+#endif
 
 /**
-    void INTERRUPT_Initialize (void)
-*/
-void INTERRUPT_Initialize (void)
-{
-    //    INT1I: INT1 - External Interrupt 1
-    //    Priority: 1
-        IPC5bits.INT1IP = 1;
-    //    INT2I: INT2 - External Interrupt 2
-    //    Priority: 1
-        IPC7bits.INT2IP = 1;
+ * @Param
+    none
+ * @Returns
+    none
+ * @Description
+    Initializes the oscillator to the default states configured in the
+ *                  MCC GUI
+ * @Example
+    OSCILLATOR_Initialize(void);
+ */
+void OSCILLATOR_Initialize(void) __attribute__((deprecated ("\nThis will be removed in future MCC releases. \nUse CLOCK_Initialize (void) instead. ")));
 
-}
+
+#endif	/* MCC_H */
+/**
+ End of File
+*/

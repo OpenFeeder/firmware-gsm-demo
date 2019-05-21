@@ -50,3 +50,5 @@ modules.order
 Module.symvers
 Mkfile.old
 dkms.conf
+/alpha_trx_radio_and_gsm.X/build/
+/alpha_trx_radio_and_gsm.X/dist/

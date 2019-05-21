@@ -92,49 +92,22 @@ void TMR1_Initialize (void)
     T1CON = 0x8024;
 
     
-    IFS0bits.T1IF = false;
-    IEC0bits.T1IE = true;
 	
     tmr1_obj.timerElapsed = false;
 
 }
 
-//***User Area Begin
-
-/*--------------------------------------------------------*/
-int8_t syncDate = 0; // a 1 tous les x min ==> permet la syncronisation des horloge
-int sync_delais = 1000; //==> x10ms
-int sync_count = 0;
-int8_t getSyncDate() { return syncDate; }
-void reset_sync_date() { syncDate = 0; sync_count = 0; }
-void sync_set_delais(int delais) { sync_delais = delais; }
-/*--------------------------------------------------------*/
-int myCounterTimer = 0;
-int myPeriodeTimer = 100; // une seconde car 100*10ms
-int getMyCounterTimer() { return myCounterTimer; }
-int getMyPeriodeTimer() { return myPeriodeTimer; }
-void setMyCounterTimer(int ms) { myCounterTimer = ms; }
-void setMyPeriodeTimer(int nbPe) { myPeriodeTimer = nbPe; }
-/*--------------------------------------------------------*/
-
-//***User Area END
 
 
-void __attribute__ ( ( interrupt, no_auto_psv ) ) _T1Interrupt (  )
+void TMR1_Tasks_16BitOperation( void )
 {
     /* Check if the Timer Interrupt/Status is set */
-
-    //***User Area Begin
-
-    // ticker function call;
-    // ticker is 1 -> Callback function gets called everytime this ISR executes
-    TMR1_CallBack();
-    
-    //***User Area End
-
+    if(IFS0bits.T1IF)
+    {
     tmr1_obj.count++;
     tmr1_obj.timerElapsed = true;
     IFS0bits.T1IF = false;
+}
 }
 
 
@@ -165,26 +138,12 @@ uint16_t TMR1_Counter16BitGet( void )
 }
 
 
-void __attribute__ ((weak)) TMR1_CallBack(void)
-{
-    // un compteur personnel modifiable 
-    if (myCounterTimer < myPeriodeTimer)
-        myCounterTimer++;
     
-    //un compteur juste pour l'envoie de l'heur non modifiable dynamiquement  
-    if (sync_count < sync_delais)
-        sync_count++;
-    else
-        syncDate = 1;
-}
-
 void TMR1_Start( void )
 {
     /* Reset the status information */
     tmr1_obj.timerElapsed = false;
 
-    /*Enable the interrupt*/
-    IEC0bits.T1IE = true;
 
     /* Start the Timer */
     T1CONbits.TON = 1;
@@ -195,8 +154,6 @@ void TMR1_Stop( void )
     /* Stop the Timer */
     T1CONbits.TON = false;
 
-    /*Disable the interrupt*/
-    IEC0bits.T1IE = false;
 }
 
 bool TMR1_GetElapsedThenClear(void)

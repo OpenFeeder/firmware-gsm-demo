@@ -1,25 +1,25 @@
 /**
-  System Interrupts Generated Driver File 
+  Generated main.c file from MPLAB Code Configurator
 
-  @Company:
+  @Company
     Microchip Technology Inc.
 
-  @File Name:
-    interrupt_manager.h
+  @File Name
+    main.c
 
-  @Summary:
-    This is the generated driver implementation file for setting up the
-    interrupts using PIC24 / dsPIC33 / PIC32MM MCUs
+  @Summary
+    This is the generated main.c using PIC24 / dsPIC33 / PIC32MM MCUs.
 
-  @Description:
-    This source file provides implementations for PIC24 / dsPIC33 / PIC32MM MCUs interrupts.
-    Generation Information : 
-        Product Revision  :  PIC24 / dsPIC33 / PIC32MM MCUs - pic24-dspic-pic32mm : 1.75.1
+  @Description
+    This source file provides main entry point for system intialization and application code development.
+    Generation Information :
+        Product Revision  :  PIC24 / dsPIC33 / PIC32MM MCUs - 1.95-b-SNAPSHOT
         Device            :  PIC24FJ128GA204
     The generated drivers are tested against the following:
-        Compiler          :  XC16 v1.35
-        MPLAB             :  MPLAB X v5.05
+        Compiler          :  XC16 v1.36
+        MPLAB 	          :  MPLAB X v5.10
 */
+
 /*
     (c) 2016 Microchip Technology Inc. and its subsidiaries. You may use this
     software and any derivatives exclusively with Microchip products.
@@ -43,20 +43,26 @@
 */
 
 /**
-    Section: Includes
+  Section: Included Files
 */
-#include <xc.h>
+#include "mcc_generated_files/system.h"
 
-/**
-    void INTERRUPT_Initialize (void)
-*/
-void INTERRUPT_Initialize (void)
+/*
+                         Main application
+ */
+int main(void)
 {
-    //    INT1I: INT1 - External Interrupt 1
-    //    Priority: 1
-        IPC5bits.INT1IP = 1;
-    //    INT2I: INT2 - External Interrupt 2
-    //    Priority: 1
-        IPC7bits.INT2IP = 1;
+    // initialize the device
+    SYSTEM_Initialize();
 
+    while (1)
+    {
+        // Add your application code
+    }
+
+    return 1;
 }
+/**
+ End of File
+*/
+

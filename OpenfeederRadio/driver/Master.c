@@ -240,24 +240,24 @@ int8_t mster_trait_error(Paquet *errRecu) {
 }
 
 int8_t mster_state_machine_day() {
-    Paquet errRecu;
-    int delais = 300;
-    printf("Master : on transmet l'horloge et on attend les erreures possible\n");
-        // machine a etat pour la journee 
-    if (getSyncDate()){
-        printf("Master : mise a jour de l'horloge\n");
-        LED_Toggle();
-        reset_sync_date();
-        //mettre a jour mon horloge en recuperant l'horloge depuis le GSM
-        //et apres transmettre mon horloge aux autres OFs
-        mster_send_date(5, 5); // arbitraire 
-    }else { // on ecoute le slave 
-        if(mster_lesten_slave(delais, &errRecu)) {
-            printf("Master : erreur est recu de [%d]\n", errRecu.pSrc);
-            // traitement de l'erreur avec ack au slave qui vien d'envoyer l'erreur 
-            mster_trait_error(&errRecu);
-        }
-    }
+//    Paquet errRecu;
+//    int delais = 300;
+//    printf("Master : on transmet l'horloge et on attend les erreures possible\n");
+//        // machine a etat pour la journee 
+//    if (getSyncDate()){
+//        printf("Master : mise a jour de l'horloge\n");
+//        LED_Toggle();
+//        reset_sync_date();
+//        //mettre a jour mon horloge en recuperant l'horloge depuis le GSM
+//        //et apres transmettre mon horloge aux autres OFs
+//        mster_send_date(5, 5); // arbitraire 
+//    }else { // on ecoute le slave 
+//        if(mster_lesten_slave(delais, &errRecu)) {
+//            printf("Master : erreur est recu de [%d]\n", errRecu.pSrc);
+//            // traitement de l'erreur avec ack au slave qui vien d'envoyer l'erreur 
+//            mster_trait_error(&errRecu);
+//        }
+//    }
     return 1;
 }
 

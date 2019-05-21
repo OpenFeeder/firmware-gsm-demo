@@ -52,5 +52,9 @@ void wait_clock(int* compteur);
 int read_data(uint8_t* buffer, int size, int delais);
 
 
+//
+oepn_receive();
+int8_t readData();
+
 #endif	/* RX_H */
 

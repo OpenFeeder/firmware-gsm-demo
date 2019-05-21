@@ -11,26 +11,13 @@
         <itemPath>mcc_generated_files/rtcc.h</itemPath>
         <itemPath>mcc_generated_files/pin_manager.h</itemPath>
         <itemPath>mcc_generated_files/uart1.h</itemPath>
-        <itemPath>mcc_generated_files/traps.h</itemPath>
         <itemPath>mcc_generated_files/clock.h</itemPath>
+        <itemPath>mcc_generated_files/traps.h</itemPath>
         <itemPath>mcc_generated_files/spi1.h</itemPath>
         <itemPath>mcc_generated_files/mcc.h</itemPath>
         <itemPath>mcc_generated_files/system.h</itemPath>
-        <itemPath>mcc_generated_files/tmr1.h</itemPath>
         <itemPath>mcc_generated_files/ext_int.h</itemPath>
       </logicalFolder>
-      <itemPath>driver/rx.h</itemPath>
-      <itemPath>driver/trx.h</itemPath>
-      <itemPath>driver/tx.h</itemPath>
-      <itemPath>driver/types.h</itemPath>
-      <itemPath>debug/debug.h</itemPath>
-      <itemPath>test/test.h</itemPath>
-      <itemPath>temps/temps.h</itemPath>
-      <itemPath>driver/ComporteementSlave.h</itemPath>
-      <itemPath>driver/Services.h</itemPath>
-      <itemPath>driver/Timer.h</itemPath>
-      <itemPath>driver/Master.h</itemPath>
-      <itemPath>driver/Slave.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LinkerScript"
                    displayName="Linker Files"
@@ -43,28 +30,17 @@
                      displayName="MCC Generated Files"
                      projectFiles="true">
         <itemPath>mcc_generated_files/spi1.c</itemPath>
-        <itemPath>mcc_generated_files/system.c</itemPath>
         <itemPath>mcc_generated_files/rtcc.c</itemPath>
-        <itemPath>mcc_generated_files/traps.c</itemPath>
+        <itemPath>mcc_generated_files/system.c</itemPath>
         <itemPath>mcc_generated_files/clock.c</itemPath>
+        <itemPath>mcc_generated_files/traps.c</itemPath>
         <itemPath>mcc_generated_files/interrupt_manager.c</itemPath>
         <itemPath>mcc_generated_files/uart1.c</itemPath>
         <itemPath>mcc_generated_files/mcc.c</itemPath>
         <itemPath>mcc_generated_files/pin_manager.c</itemPath>
-        <itemPath>mcc_generated_files/tmr1.c</itemPath>
         <itemPath>mcc_generated_files/ext_int.c</itemPath>
       </logicalFolder>
-      <itemPath>driver/rx.c</itemPath>
-      <itemPath>driver/trx.c</itemPath>
-      <itemPath>driver/tx.c</itemPath>
-      <itemPath>debug/debug.c</itemPath>
-      <itemPath>test/test.c</itemPath>
-      <itemPath>temps/temps.c</itemPath>
       <itemPath>main.c</itemPath>
-      <itemPath>driver/Services.c</itemPath>
-      <itemPath>driver/Timer.c</itemPath>
-      <itemPath>driver/Slave.c</itemPath>
-      <itemPath>driver/Master.c</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"
@@ -73,12 +49,6 @@
       <itemPath>MyConfig.mc3</itemPath>
     </logicalFolder>
   </logicalFolder>
-  <sourceRootList>
-    <Elem>driver</Elem>
-    <Elem>debug</Elem>
-    <Elem>test</Elem>
-    <Elem>temps</Elem>
-  </sourceRootList>
   <projectmakefile>Makefile</projectmakefile>
   <confs>
     <conf name="default" type="2">
@@ -241,105 +211,6 @@
         <property key="relaxed-math" value="false"/>
         <property key="save-temps" value="false"/>
       </C30Global>
-      <PKOBSKDEPlatformTool>
-        <property key="AutoSelectMemRanges" value="auto"/>
-        <property key="SecureSegment.SegmentProgramming" value="FullChipProgramming"/>
-        <property key="ToolFirmwareFilePath"
-                  value="Press to browse for a specific firmware version"/>
-        <property key="ToolFirmwareOption.UseLatestFirmware" value="true"/>
-        <property key="firmware.download.all" value="false"/>
-        <property key="memories.configurationmemory" value="true"/>
-        <property key="memories.dataflash" value="true"/>
-        <property key="memories.eeprom" value="true"/>
-        <property key="memories.id" value="true"/>
-        <property key="memories.programmemory" value="true"/>
-        <property key="memories.programmemory.ranges" value="0-157f7"/>
-        <property key="memories.userotp" value="true"/>
-        <property key="programoptions.donoteraseauxmem" value="false"/>
-        <property key="programoptions.eraseb4program" value="true"/>
-        <property key="programoptions.preservedataflash" value="false"/>
-        <property key="programoptions.preservedataflash.ranges" value=""/>
-        <property key="programoptions.preserveeeprom" value="false"/>
-        <property key="programoptions.preserveeeprom.ranges"
-                  value="${memories.eedata.default}"/>
-        <property key="programoptions.preserveprogram.ranges" value=""/>
-        <property key="programoptions.preserveprogramrange" value="false"/>
-        <property key="programoptions.usehighvoltageonmclr" value="false"/>
-        <property key="programoptions.uselvpprogramming" value="true"/>
-      </PKOBSKDEPlatformTool>
-      <pkob4hybrid>
-        <property key="ADC 1" value="true"/>
-        <property key="AutoSelectMemRanges" value="auto"/>
-        <property key="COMPARATOR" value="true"/>
-        <property key="CRC" value="true"/>
-        <property key="CTMU" value="true"/>
-        <property key="DMA" value="true"/>
-        <property key="Freeze All Other Peripherals" value="true"/>
-        <property key="HLVD" value="true"/>
-        <property key="I2C 1" value="true"/>
-        <property key="I2C 2" value="true"/>
-        <property key="INPUT CAPTURE 1" value="true"/>
-        <property key="INPUT CAPTURE 2" value="true"/>
-        <property key="INPUT CAPTURE 3" value="true"/>
-        <property key="INPUT CAPTURE 4" value="true"/>
-        <property key="INPUT CAPTURE 5" value="true"/>
-        <property key="INPUT CAPTURE 6" value="true"/>
-        <property key="MODULATOR OUTPUT MODULE" value="true"/>
-        <property key="OSCTUN" value="true"/>
-        <property key="OUTPUT COMPARE 1" value="true"/>
-        <property key="OUTPUT COMPARE 2" value="true"/>
-        <property key="OUTPUT COMPARE 3" value="true"/>
-        <property key="OUTPUT COMPARE 4" value="true"/>
-        <property key="OUTPUT COMPARE 5" value="true"/>
-        <property key="OUTPUT COMPARE 6" value="true"/>
-        <property key="REFO" value="true"/>
-        <property key="RTCC" value="true"/>
-        <property key="SPI 1" value="true"/>
-        <property key="SPI 2" value="true"/>
-        <property key="SPI 3" value="true"/>
-        <property key="TIMER 1" value="true"/>
-        <property key="TIMER 2" value="true"/>
-        <property key="TIMER 3" value="true"/>
-        <property key="TIMER 4" value="true"/>
-        <property key="TIMER 5" value="true"/>
-        <property key="ToolFirmwareFilePath"
-                  value="Press to browse for a specific firmware version"/>
-        <property key="ToolFirmwareOption.UseLatestFirmware" value="true"/>
-        <property key="UART 1" value="true"/>
-        <property key="UART 2" value="true"/>
-        <property key="UART 3" value="true"/>
-        <property key="UART 4" value="true"/>
-        <property key="communication.interface"
-                  value="${communication.interface.default}"/>
-        <property key="communication.speed" value="${communication.speed.default}"/>
-        <property key="debugoptions.useswbreakpoints" value="false"/>
-        <property key="memories.aux" value="false"/>
-        <property key="memories.bootflash" value="true"/>
-        <property key="memories.configurationmemory" value="true"/>
-        <property key="memories.configurationmemory2" value="true"/>
-        <property key="memories.dataflash" value="true"/>
-        <property key="memories.eeprom" value="true"/>
-        <property key="memories.exclude.configurationmemory" value="true"/>
-        <property key="memories.flashdata" value="true"/>
-        <property key="memories.id" value="true"/>
-        <property key="memories.instruction.ram.ranges"
-                  value="${memories.instruction.ram.ranges}"/>
-        <property key="memories.programmemory" value="true"/>
-        <property key="memories.programmemory.ranges" value="0-157f7"/>
-        <property key="programoptions.donoteraseauxmem" value="false"/>
-        <property key="programoptions.eraseb4program" value="true"/>
-        <property key="programoptions.pgmentry.voltage" value="low"/>
-        <property key="programoptions.pgmspeed" value="Med"/>
-        <property key="programoptions.preservedataflash" value="false"/>
-        <property key="programoptions.preserveeeprom" value="false"/>
-        <property key="programoptions.preserveeeprom.ranges" value=""/>
-        <property key="programoptions.preserveprogram.ranges" value=""/>
-        <property key="programoptions.preserveprogramrange" value="false"/>
-        <property key="programoptions.preserveuserid" value="false"/>
-        <property key="programoptions.programcalmem" value="false"/>
-        <property key="programoptions.programuserotp" value="false"/>
-        <property key="programoptions.testmodeentrymethod" value="VDDFirst"/>
-      </pkob4hybrid>
     </conf>
   </confs>
 </configurationDescriptor>

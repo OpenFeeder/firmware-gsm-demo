@@ -41,17 +41,28 @@
     MICROCHIP PROVIDES THIS SOFTWARE CONDITIONALLY UPON YOUR ACCEPTANCE OF THESE
     TERMS.
 */
+
+#include "pin_manager.h"
+#include "clock.h"
 #include "system.h"
+#include "stdint.h"
+#include "ext_int.h"
+#include "interrupt_manager.h"
+#include "traps.h"
+#include "uart1.h"
+#include "spi1.h"
+#include "rtcc.h"
 #include "tmr1.h"
 
 void SYSTEM_Initialize(void)
 {
     PIN_MANAGER_Initialize();
-    CLOCK_Initialize();
     INTERRUPT_Initialize();
+    CLOCK_Initialize();
     RTCC_Initialize();
     SPI1_Initialize();
     UART1_Initialize();
+    EXT_INT_Initialize();
     TMR1_Initialize();
 }
 

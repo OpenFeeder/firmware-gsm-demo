@@ -48,7 +48,6 @@ int read_data(uint8_t* buffer, int size, int delais) {
         }
         reg_in.reg = ecrire_reg(0xB000);
         buffer[i] = reg_in.octets.d;
-        //printf("buff %d\n", buffer[i]);
         if (reg_in.octets.d == 0)
             return i;
     }
@@ -79,3 +78,15 @@ void receive_datetime(uint8_t* buffer) {
 }
 
 
+//test 
+void oepn_receive() {
+    configure_rx();
+    open_rx();
+    //init buffer 
+}
+
+int8_t readData() {
+    registre reg_in;
+    reg_in.reg = ecrire_reg(0xB000);
+    return reg_in.octets.d;
+}
