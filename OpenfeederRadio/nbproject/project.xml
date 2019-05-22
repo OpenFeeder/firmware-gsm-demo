@@ -17,6 +17,7 @@
                 <sourceRootElem>debug</sourceRootElem>
                 <sourceRootElem>test</sourceRootElem>
                 <sourceRootElem>temps</sourceRootElem>
+                <sourceRootElem>alpha_trx_driver</sourceRootElem>
             </sourceRootList>
             <confList>
                 <confElem>

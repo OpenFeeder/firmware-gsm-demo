@@ -50,11 +50,11 @@
 #include "pin_manager.h"
 #include <stdint.h>
 #include <stdbool.h>
+#include "spi1.h"
 #include "uart1.h"
 #include "rtcc.h"
 #include "interrupt_manager.h"
 #include "traps.h"
-#include "spi1.h"
 #include "ext_int.h"
 
 #ifndef _XTAL_FREQ

@@ -5,14 +5,14 @@ void init_trx() {
     nRES_SetHigh();  //reset du bus nRes == 1 
     ecrire_reg(0x0000);
 
-    ecrire_reg(0xA640);
-    ecrire_reg(0x9098);
-    ecrire_reg(0xC2AC);
-    ecrire_reg(0xCA81);
+    ecrire_reg(0xA640); //fHz setting
+    ecrire_reg(0x9098); //receive controle command
+    ecrire_reg(0xC2AC); //data filter command
+    ecrire_reg(0xCA81); //fifo and reset  mode command
 
-    ecrire_reg(0xE000);
+    ecrire_reg(0xE000); //wake-up Timer command 
 
-    ecrire_reg(0xC800);
+    ecrire_reg(0xC800); //low Duty-cycle commande
     
     __delay32(SLEEP_AFTER_INIT);
 }

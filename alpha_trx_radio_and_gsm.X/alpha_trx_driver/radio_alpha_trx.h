@@ -714,7 +714,7 @@ void radioAlphaTRX_Init(void);
  * @param cmd_write : commande a transmettre 
  * @return : l'etat du registre
  */
-uint16_t radioTransceiver_Command(uint16_t cmd_write); // Envoyer une commande au module RF
+uint16_t radioAlphaTRX_Command(uint16_t cmd_write); // Envoyer une commande au module RF
 
 
 /**
@@ -722,7 +722,7 @@ uint16_t radioTransceiver_Command(uint16_t cmd_write); // Envoyer une commande a
  */
 void radioTransceiver_nIRQ_Service(void); // Interrupt on nIRQ RF module
 void radioTransceiver_Received_Pattern_Init(void); // Initialiser la detection d'une nouvelle donnee
-uint16_t radioTransceiver_Command(uint16_t cmd_write); // Envoyer une commande au module RF
+uint16_t radioAlphaTRX_Command(uint16_t cmd_write); // Envoyer une commande au module RF
 void radioTransceiver_Send_Init(void); // Configuration en mode TX avant l'envoie de donnee
 void radioTransceiver_Send_Byte(uint8_t data_send); // Transmission d'une donnee par le module RF
 unsigned int radioTransceiver_ConfigFq(unsigned char freq_selected); // Selection de la frequence pour le module RF

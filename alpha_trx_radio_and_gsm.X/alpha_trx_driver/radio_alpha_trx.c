@@ -26,14 +26,32 @@
 #include "radio_alpha_trx.h"
 
  /******************************************************************************/
-//
+
+/**-------------------------->> V A R I A B L E S <<---------------------------*/
+CFG_SET_CMD_VAL RF_ConfigSet; // Configuration Setting Command
+PWR_MGMT_CMD_VAL RF_PowerManagement; // Power Management Command
+FQ_SET_CMD_VAL RF_FrequencySet; // Frequency Setting Command
+RX_CTRL_CMD_VAL RF_ReceiverControl; // Receiver Control Command
+RX_FIFO_READ_CMD_VAL RF_FIFO_Read; // Receiver FIFO Read
+FIFO_RST_MODE_CMD_VAL RF_FIFOandResetMode; // FIFO and Reset Mode Command
+STATUS_READ_VAL RF_StatusRead; // Status Read Command
+
+
+/**-------------------------->> D E F I N I T I O N <<-------------------------*/
+
 void radioAlphaTRX_Init(void) {
-#if defined(UART_DEBUG)
-    printf("Anzilane\n");
-#endif
+    
+    RF_StatusRead.Val = 0;
+    do {
+        RF_StatusRead.Val = radioAlphaTRX_Command( STATUS_READ_CMD ); // intitial SPI transfer added to avoid power-up problem
+//#if defined(UART_DEBUG)
+        //printf( "An other Wait until RFM12B is out of power-up reset, status: 0x%04X\r\n", RF_StatusRead.Val );
+//#endif
+    }while ( RF_StatusRead.bits.b14_POR );    
+
 }
 
-uint16_t radioTransceiver_Command(uint16_t cmd_write) {
+uint16_t radioAlphaTRX_Command(uint16_t cmd_write) {
     WORD_VAL_T receiveData;
     WORD_VAL_T sendData;
     sendData.word = cmd_write;

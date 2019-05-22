@@ -57,7 +57,7 @@ volatile int getFlag() { return Flag; }
 void resetFlag() { Flag = 0; }
 
 volatile int8_t buffer[20];
-volatile flagFFIT = 0;
+volatile int8_t flagFFIT = 0;
 int8_t i = 0;
 int8_t * getBuffer() { return buffer; }
 int8_t getflagFFIT() { return flagFFIT; }
@@ -85,7 +85,7 @@ void __attribute__ ( ( interrupt, no_auto_psv ) ) _INT2Interrupt(void)
 {
     //***User Area Begin->code: INT2 - External Interrupt 2***
 //    i++;
-    LED_BLUE_SetHigh();
+    LED_BLUE_Toggle();
 //    if (i > 100) {
 //        printf("%d\n", i );
 //        i = 0;

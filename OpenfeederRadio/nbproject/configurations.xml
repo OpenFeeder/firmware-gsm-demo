@@ -31,6 +31,7 @@
       <itemPath>driver/Timer.h</itemPath>
       <itemPath>driver/Master.h</itemPath>
       <itemPath>driver/Slave.h</itemPath>
+      <itemPath>alpha_trx_driver/radio_alpha_trx.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LinkerScript"
                    displayName="Linker Files"
@@ -65,6 +66,7 @@
       <itemPath>driver/Timer.c</itemPath>
       <itemPath>driver/Slave.c</itemPath>
       <itemPath>driver/Master.c</itemPath>
+      <itemPath>alpha_trx_driver/radio_alpha_trx.c</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"
@@ -78,6 +80,7 @@
     <Elem>debug</Elem>
     <Elem>test</Elem>
     <Elem>temps</Elem>
+    <Elem>alpha_trx_driver</Elem>
   </sourceRootList>
   <projectmakefile>Makefile</projectmakefile>
   <confs>
