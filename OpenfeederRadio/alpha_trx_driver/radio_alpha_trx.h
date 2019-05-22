@@ -732,12 +732,24 @@ void radioAlphaTRX_Received_Init(void);
 void radioAlphaTRX_Send_Init(void); 
 
 /**
- * 
+ * transmet un octet seulement si le nIRQ est a l'etat bas 
+ * @param data_send : l'octet a transmettre 
  */
+void radioAlphaTRX_Send_Byte(uint8_t data_send);
+
+/**
+ * transmission flot d'octets a la suite 
+ * @param bytes : tableau d'octet
+ * @param size : la taille du tableau 
+ * @return : nombre d'octets effectivement transmise 
+ */
+int8_t radioAlphaTRX_Send_data(uint8_t* bytes, int8_t size);
+
+
 void radioTransceiver_nIRQ_Service(void); // Interrupt on nIRQ RF module
 uint16_t radioAlphaTRX_Command(uint16_t cmd_write); // Envoyer une commande au module RF
 
-void radioTransceiver_Send_Byte(uint8_t data_send); // Transmission d'une donnee par le module RF
+
 unsigned int radioTransceiver_ConfigFq(unsigned char freq_selected); // Selection de la frequence pour le module RF
 
 #endif	/* XC_HEADER_TEMPLATE_H */

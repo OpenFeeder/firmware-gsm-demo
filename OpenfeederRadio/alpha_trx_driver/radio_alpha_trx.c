@@ -161,8 +161,43 @@ void radioAlphaTRX_Send_Init(void) {
     printf( "status: 0x%04X\r\n", RF_PowerManagement.Val);
 }
 
+// Transmission d'une donnee par le module RF
+void radioAlphaTRX_Send_Byte(uint8_t data_send) {
+    WORD_VAL_T sendData;
+    sendData.byte.high = 0xB8; // c'est le bit de poid fort d'abord 
+    sendData.byte.low = data_send;
+    radioAlphaTRX_Command(sendData.word);
+} 
 
-// Envoyer une commande au module RF
+
+int8_t radioAlphaTRX_Send_data(uint8_t* bytes, int8_t size) {
+    int i;
+
+    //preamble
+    radioAlphaTRX_Send_Byte(0xAA);
+    radioAlphaTRX_Send_Byte(0xAA);
+    radioAlphaTRX_Send_Byte(0xAA);
+    
+    //peut générer des probleme à surveiller
+    //synchro pattern
+    radioAlphaTRX_Send_Byte(0x2D);
+    radioAlphaTRX_Send_Byte(0xD4);
+    for (i = 0; i < size; i++) {
+         // cela veux dire que nous n'avons pas pu transmetre un octe 
+         // alors les données sont erronnée 
+        if (radioAlphaTRX_Send_Byte(bytes[i]) == 0)
+            break;
+        
+        //TODO : un temps d'attente pour permetre la recuperation du msg 
+    }
+
+    //dummy bytes
+    radioAlphaTRX_Send_Byte(0x00);
+    radioAlphaTRX_Send_Byte(0x00);
+    return i;
+}
+
+// Envoyer une commande au module RF (par liaison SPI)
 uint16_t radioAlphaTRX_Command(uint16_t cmd_write) {
     WORD_VAL_T receiveData;
     WORD_VAL_T sendData;
