@@ -56,6 +56,444 @@
 */
 /**
   @Summary
+    Sets the GPIO pin, RB10, high using LATB10.
+
+  @Description
+    Sets the GPIO pin, RB10, high using LATB10.
+
+  @Preconditions
+    The RB10 must be set to an output.
+
+  @Returns
+    None.
+
+  @Param
+    None.
+
+  @Example
+    <code>
+    // Set RB10 high (1)
+    nIRQ_SetHigh();
+    </code>
+
+*/
+#define nIRQ_SetHigh()          _LATB10 = 1
+/**
+  @Summary
+    Sets the GPIO pin, RB10, low using LATB10.
+
+  @Description
+    Sets the GPIO pin, RB10, low using LATB10.
+
+  @Preconditions
+    The RB10 must be set to an output.
+
+  @Returns
+    None.
+
+  @Param
+    None.
+
+  @Example
+    <code>
+    // Set RB10 low (0)
+    nIRQ_SetLow();
+    </code>
+
+*/
+#define nIRQ_SetLow()           _LATB10 = 0
+/**
+  @Summary
+    Toggles the GPIO pin, RB10, using LATB10.
+
+  @Description
+    Toggles the GPIO pin, RB10, using LATB10.
+
+  @Preconditions
+    The RB10 must be set to an output.
+
+  @Returns
+    None.
+
+  @Param
+    None.
+
+  @Example
+    <code>
+    // Toggle RB10
+    nIRQ_Toggle();
+    </code>
+
+*/
+#define nIRQ_Toggle()           _LATB10 ^= 1
+/**
+  @Summary
+    Reads the value of the GPIO pin, RB10.
+
+  @Description
+    Reads the value of the GPIO pin, RB10.
+
+  @Preconditions
+    None.
+
+  @Returns
+    None.
+
+  @Param
+    None.
+
+  @Example
+    <code>
+    uint16_t portValue;
+
+    // Read RB10
+    postValue = nIRQ_GetValue();
+    </code>
+
+*/
+#define nIRQ_GetValue()         _RB10
+/**
+  @Summary
+    Configures the GPIO pin, RB10, as an input.
+
+  @Description
+    Configures the GPIO pin, RB10, as an input.
+
+  @Preconditions
+    None.
+
+  @Returns
+    None.
+
+  @Param
+    None.
+
+  @Example
+    <code>
+    // Sets the RB10 as an input
+    nIRQ_SetDigitalInput();
+    </code>
+
+*/
+#define nIRQ_SetDigitalInput()  _TRISB10 = 1
+/**
+  @Summary
+    Configures the GPIO pin, RB10, as an output.
+
+  @Description
+    Configures the GPIO pin, RB10, as an output.
+
+  @Preconditions
+    None.
+
+  @Returns
+    None.
+
+  @Param
+    None.
+
+  @Example
+    <code>
+    // Sets the RB10 as an output
+    nIRQ_SetDigitalOutput();
+    </code>
+
+*/
+#define nIRQ_SetDigitalOutput() _TRISB10 = 0
+/**
+  @Summary
+    Sets the GPIO pin, RB13, high using LATB13.
+
+  @Description
+    Sets the GPIO pin, RB13, high using LATB13.
+
+  @Preconditions
+    The RB13 must be set to an output.
+
+  @Returns
+    None.
+
+  @Param
+    None.
+
+  @Example
+    <code>
+    // Set RB13 high (1)
+    nRES_SetHigh();
+    </code>
+
+*/
+#define nRES_SetHigh()          _LATB13 = 1
+/**
+  @Summary
+    Sets the GPIO pin, RB13, low using LATB13.
+
+  @Description
+    Sets the GPIO pin, RB13, low using LATB13.
+
+  @Preconditions
+    The RB13 must be set to an output.
+
+  @Returns
+    None.
+
+  @Param
+    None.
+
+  @Example
+    <code>
+    // Set RB13 low (0)
+    nRES_SetLow();
+    </code>
+
+*/
+#define nRES_SetLow()           _LATB13 = 0
+/**
+  @Summary
+    Toggles the GPIO pin, RB13, using LATB13.
+
+  @Description
+    Toggles the GPIO pin, RB13, using LATB13.
+
+  @Preconditions
+    The RB13 must be set to an output.
+
+  @Returns
+    None.
+
+  @Param
+    None.
+
+  @Example
+    <code>
+    // Toggle RB13
+    nRES_Toggle();
+    </code>
+
+*/
+#define nRES_Toggle()           _LATB13 ^= 1
+/**
+  @Summary
+    Reads the value of the GPIO pin, RB13.
+
+  @Description
+    Reads the value of the GPIO pin, RB13.
+
+  @Preconditions
+    None.
+
+  @Returns
+    None.
+
+  @Param
+    None.
+
+  @Example
+    <code>
+    uint16_t portValue;
+
+    // Read RB13
+    postValue = nRES_GetValue();
+    </code>
+
+*/
+#define nRES_GetValue()         _RB13
+/**
+  @Summary
+    Configures the GPIO pin, RB13, as an input.
+
+  @Description
+    Configures the GPIO pin, RB13, as an input.
+
+  @Preconditions
+    None.
+
+  @Returns
+    None.
+
+  @Param
+    None.
+
+  @Example
+    <code>
+    // Sets the RB13 as an input
+    nRES_SetDigitalInput();
+    </code>
+
+*/
+#define nRES_SetDigitalInput()  _TRISB13 = 1
+/**
+  @Summary
+    Configures the GPIO pin, RB13, as an output.
+
+  @Description
+    Configures the GPIO pin, RB13, as an output.
+
+  @Preconditions
+    None.
+
+  @Returns
+    None.
+
+  @Param
+    None.
+
+  @Example
+    <code>
+    // Sets the RB13 as an output
+    nRES_SetDigitalOutput();
+    </code>
+
+*/
+#define nRES_SetDigitalOutput() _TRISB13 = 0
+/**
+  @Summary
+    Sets the GPIO pin, RB15, high using LATB15.
+
+  @Description
+    Sets the GPIO pin, RB15, high using LATB15.
+
+  @Preconditions
+    The RB15 must be set to an output.
+
+  @Returns
+    None.
+
+  @Param
+    None.
+
+  @Example
+    <code>
+    // Set RB15 high (1)
+    nSEL_SetHigh();
+    </code>
+
+*/
+#define nSEL_SetHigh()          _LATB15 = 1
+/**
+  @Summary
+    Sets the GPIO pin, RB15, low using LATB15.
+
+  @Description
+    Sets the GPIO pin, RB15, low using LATB15.
+
+  @Preconditions
+    The RB15 must be set to an output.
+
+  @Returns
+    None.
+
+  @Param
+    None.
+
+  @Example
+    <code>
+    // Set RB15 low (0)
+    nSEL_SetLow();
+    </code>
+
+*/
+#define nSEL_SetLow()           _LATB15 = 0
+/**
+  @Summary
+    Toggles the GPIO pin, RB15, using LATB15.
+
+  @Description
+    Toggles the GPIO pin, RB15, using LATB15.
+
+  @Preconditions
+    The RB15 must be set to an output.
+
+  @Returns
+    None.
+
+  @Param
+    None.
+
+  @Example
+    <code>
+    // Toggle RB15
+    nSEL_Toggle();
+    </code>
+
+*/
+#define nSEL_Toggle()           _LATB15 ^= 1
+/**
+  @Summary
+    Reads the value of the GPIO pin, RB15.
+
+  @Description
+    Reads the value of the GPIO pin, RB15.
+
+  @Preconditions
+    None.
+
+  @Returns
+    None.
+
+  @Param
+    None.
+
+  @Example
+    <code>
+    uint16_t portValue;
+
+    // Read RB15
+    postValue = nSEL_GetValue();
+    </code>
+
+*/
+#define nSEL_GetValue()         _RB15
+/**
+  @Summary
+    Configures the GPIO pin, RB15, as an input.
+
+  @Description
+    Configures the GPIO pin, RB15, as an input.
+
+  @Preconditions
+    None.
+
+  @Returns
+    None.
+
+  @Param
+    None.
+
+  @Example
+    <code>
+    // Sets the RB15 as an input
+    nSEL_SetDigitalInput();
+    </code>
+
+*/
+#define nSEL_SetDigitalInput()  _TRISB15 = 1
+/**
+  @Summary
+    Configures the GPIO pin, RB15, as an output.
+
+  @Description
+    Configures the GPIO pin, RB15, as an output.
+
+  @Preconditions
+    None.
+
+  @Returns
+    None.
+
+  @Param
+    None.
+
+  @Example
+    <code>
+    // Sets the RB15 as an output
+    nSEL_SetDigitalOutput();
+    </code>
+
+*/
+#define nSEL_SetDigitalOutput() _TRISB15 = 0
+/**
+  @Summary
     Sets the GPIO pin, RB8, high using LATB8.
 
   @Description

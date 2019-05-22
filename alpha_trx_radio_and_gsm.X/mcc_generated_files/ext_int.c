@@ -61,7 +61,6 @@
  void __attribute__ ((weak)) EX_INT1_CallBack(void)
 {
     // Add your custom callback code here
-    printf("Je suis bien config\n");
 }
 
 /**
@@ -76,6 +75,23 @@ void __attribute__ ( ( interrupt, no_auto_psv ) ) _INT1Interrupt(void)
 	//***User Area End->code: INT1 - External Interrupt 1***
     EX_INT1_InterruptFlagClear();
 }
+ void __attribute__ ((weak)) EX_INT2_CallBack(void)
+{
+    // Add your custom callback code here
+}
+
+/**
+  Interrupt Handler for EX_INT2 - INT2
+*/
+void __attribute__ ( ( interrupt, no_auto_psv ) ) _INT2Interrupt(void)
+{
+    //***User Area Begin->code: INT2 - External Interrupt 2***
+	
+	EX_INT2_CallBack();
+    
+	//***User Area End->code: INT2 - External Interrupt 2***
+    EX_INT2_InterruptFlagClear();
+}
 /**
     Section: External Interrupt Initializers
  */
@@ -84,6 +100,7 @@ void __attribute__ ( ( interrupt, no_auto_psv ) ) _INT1Interrupt(void)
 
     Initializer for the following external interrupts
     INT1
+    INT2
 */
 void EXT_INT_Initialize(void)
 {
@@ -96,4 +113,13 @@ void EXT_INT_Initialize(void)
     EX_INT1_InterruptFlagClear();   
     EX_INT1_PositiveEdgeSet();
     EX_INT1_InterruptEnable();
+    /*******
+     * INT2
+     * Clear the interrupt flag
+     * Set the external interrupt edge detect
+     * Enable the interrupt, if enabled in the UI. 
+     ********/
+    EX_INT2_InterruptFlagClear();   
+    EX_INT2_NegativeEdgeSet();
+    EX_INT2_InterruptEnable();
 }

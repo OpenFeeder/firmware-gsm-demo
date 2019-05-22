@@ -45,18 +45,18 @@
 #include "pin_manager.h"
 #include "clock.h"
 #include "system.h"
-#include "spi1.h"
 #include "uart1.h"
 #include "rtcc.h"
-#include "ext_int.h"
 #include "interrupt_manager.h"
 #include "traps.h"
+#include "spi1.h"
+#include "ext_int.h"
 
 void SYSTEM_Initialize(void)
 {
     PIN_MANAGER_Initialize();
-    CLOCK_Initialize();
     INTERRUPT_Initialize();
+    CLOCK_Initialize();
     SPI1_Initialize();
     UART1_Initialize();
     RTCC_Initialize();

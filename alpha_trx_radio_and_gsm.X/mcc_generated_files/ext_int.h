@@ -233,6 +233,178 @@ extern "C" {
 */
 void EX_INT1_CallBack(void);
 
+/**
+  @Summary
+    Clears the interrupt flag for INT2
+
+  @Description
+    This routine clears the interrupt flag for the external interrupt, INT2.
+ 
+  @Preconditions
+    None.
+
+  @Returns
+    None.
+
+  @Param
+    None.
+
+  @Example
+    <code>
+    void __attribute__ ( ( interrupt, no_auto_psv ) ) _INT2Interrupt(void)
+    {
+        // User Area Begin->code: INT2 - External Interrupt 2
+
+        // User Area End->code: INT2 - External Interrupt 2
+        EX_INT2_InterruptFlagClear();
+    }
+    </code>
+
+*/
+#define EX_INT2_InterruptFlagClear()       (IFS1bits.INT2IF = 0)
+/**
+  @Summary
+    Clears the interrupt enable for INT2
+
+  @Description
+    This routine clears the interrupt enable for the external interrupt, INT2.
+    After calling this routine, external interrupts on this pin will not be serviced by the 
+    interrupt handler, _INT2Interrupt.
+
+  @Preconditions
+    None.
+
+  @Returns
+    None.
+
+  @Param
+    None.
+
+  @Example
+    Changing the external interrupt edge detect from negative to positive
+    <code>
+    // clear the interrupt enable
+    EX_INT2_InterruptDisable();
+    // change the edge
+    EX_INT2_PositiveEdgeSet();
+    // clear the interrupt flag and re-enable the interrupt
+    EX_INT2_InterruptFlagClear();
+    EX_INT2_InterruptEnable();
+    </code>
+
+*/
+#define EX_INT2_InterruptDisable()     (IEC1bits.INT2IE = 0)
+/**
+  @Summary
+    Clears the interrupt enable for INT2
+
+  @Description
+    This routine clears the interrupt enable for the external interrupt, INT2.
+    After calling this routine, external interrupts on this pin will be serviced by the 
+    interrupt handler, _INT2Interrupt.
+ 
+  @Preconditions
+    None.
+
+  @Returns
+    None.
+
+  @Param
+    None.
+
+  @Example
+    Setting the external interrupt to handle positive edge interrupts
+    <code>
+    // set the edge
+    EX_INT2_PositiveEdgeSet();
+    // clear the interrupt flag and enable the interrupt
+    EX_INT2_InterruptFlagClear();
+    EX_INT2_InterruptEnable();
+    </code>
+
+*/
+#define EX_INT2_InterruptEnable()       (IEC1bits.INT2IE = 1)
+/**
+  @Summary
+    Sets the edge detect of the external interrupt to negative edge.
+
+  @Description
+    This routine set the edge detect of the extern interrupt to negative edge.  
+    After this routine is called the interrupt flag will be set when the external 
+    interrupt pins level transitions from a high to low level.
+ 
+  @Preconditions
+    None.
+
+  @Returns
+    None.
+
+  @Param
+    None.
+
+  @Example
+    Setting the external interrupt to handle negative edge interrupts
+    <code>
+    // set the edge
+    EX_INT2_NegativeEdgeSet();
+    // clear the interrupt flag and enable the interrupt
+    EX_INT2_InterruptFlagClear();
+    EX_INT2_InterruptEnable();
+    </code>
+
+*/
+#define EX_INT2_NegativeEdgeSet()          (INTCON2bits.INT2EP = 1)
+/**
+  @Summary
+    Sets the edge detect of the external interrupt to positive edge.
+
+  @Description
+    This routine set the edge detect of the extern interrupt to positive edge.  
+    After this routine is called the interrupt flag will be set when the external 
+    interrupt pins level transitions from a low to high level.
+ 
+  @Preconditions
+    None.
+
+  @Returns
+    None.
+
+  @Param
+    None.
+
+  @Example
+    Setting the external interrupt to handle positive edge interrupts
+    <code>
+    // set the edge
+    EX_INT2_PositiveEdgeSet();
+    // clear the interrupt flag and enable the interrupt
+    EX_INT2_InterruptFlagClear();
+    EX_INT2_InterruptEnable();
+    </code>
+
+*/
+#define EX_INT2_PositiveEdgeSet()          (INTCON2bits.INT2EP = 0)
+
+/**
+  @Summary
+    Callback for EX_INT2.
+
+  @Description
+    This routine is callback for EX_INT2
+
+  @Param
+    None.
+
+  @Returns
+    None
+ 
+  @Example 
+	<code>
+    EX_INT2_CallBack();
+    </code>
+*/
+void EX_INT2_CallBack(void);
+
 
 /**
     Section: External Interrupt Initializers
@@ -247,6 +419,7 @@ void EX_INT1_CallBack(void);
 
     The following external interrupts will be initialized:
     INT1 - EX_INT1
+    INT2 - EX_INT2
  
   @Preconditions
     None.

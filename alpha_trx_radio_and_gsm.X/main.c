@@ -46,6 +46,7 @@
   Section: Included Files
 */
 #include "mcc_generated_files/system.h"
+#include "radio_alpha_trx.h"
 
 /*
                          Main application
@@ -54,7 +55,7 @@ int main(void)
 {
     // initialize the device
     SYSTEM_Initialize();
-
+    radioAlphaTRX_Init();
     while (1)
     {
         // Add your application code

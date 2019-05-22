@@ -55,5 +55,8 @@ void INTERRUPT_Initialize (void)
     //    INT1I: INT1 - External Interrupt 1
     //    Priority: 1
         IPC5bits.INT1IP = 1;
+    //    INT2I: INT2 - External Interrupt 2
+    //    Priority: 1
+        IPC7bits.INT2IP = 1;
 
 }
