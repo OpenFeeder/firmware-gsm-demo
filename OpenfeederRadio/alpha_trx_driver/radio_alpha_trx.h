@@ -757,30 +757,62 @@ int8_t radioAlphaTRX_Send_data(uint8_t* bytes, int8_t size);
  */
 int8_t radioAlphaTRX_wait_nIRQ(int timeout);
 
-
-uint16_t radioAlphaTRX_Command(uint16_t cmd_write); // Envoyer une commande au module RF
-
-//
-void radioTransceiver_nIRQ_Service(void); // Interrupt on nIRQ RF module
-
-unsigned int radioTransceiver_ConfigFq(unsigned char freq_selected); // Selection de la frequence pour le module RF
-
-
-
  /******************************************************************************/
  /******************************************************************************/
  /******************** PARAMETRE DE CAPTURE DE LA TRAME RECU *******************/
  /***************************                ***********************************/
  /*****************                                         ********************/
 
-int8_t getError_FFOV();
-void resetError_FFOV();
-int8_t getB_Read();
-void setB_Read(int8_t set);
-int8_t getB_Write();
-void setB_Write(int8_t set);
-int8_t * getBuf(int8_t indice);
-void resetBuf(int8_t indice);
+/**
+ * verification si on depasse la capacite de stockage des paquets 
+ * @return 1 si overflow : 0 si non 
+ */
 
+int8_t getError_FFOV();
+/**
+ * remet a 0 la condition d'overflow 
+ */
+void resetError_FFOV();
+
+/**
+ * 
+ * @return : le pointeur sur le prochain buffeur a lire 
+ */
+int8_t getB_Read();
+
+/**
+ * incremente le pointeur de lecture des paquet 
+ * @param set : l'increment 
+ */
+void setB_Read(int8_t set);
+
+/**
+ * 
+ * @return : le pointeur d'ecriture 
+ */
+int8_t getB_Write();
+
+/**
+ * incremente le pointeur d'ecriture 
+ * @param set : l'increment 
+ */
+void setB_Write(int8_t set);
+
+/**
+ * 
+ * @param indice : < NB_BUF et >= 0
+ * @return 
+ */
+int8_t * getBuf(int8_t indice);
+
+/**
+ * eface un buffeur 
+ * @param indice
+ */
+void resetBuf(int8_t indice);
+ /****************                                         *********************/
+ /*************************                     ********************************/
+ /******************************************************************************/
+ /******************************************************************************/
 
 #endif	/* XC_HEADER_TEMPLATE_H */

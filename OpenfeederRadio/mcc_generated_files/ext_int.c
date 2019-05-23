@@ -88,7 +88,6 @@ void __attribute__ ( ( interrupt, no_auto_psv ) ) _INT2Interrupt(void)
     //***User Area Begin->code: INT2 - External Interrupt 2***
     if (nFFIT_GetValue()) {
         EX_INT2_InterruptDisable(); 
-        WORD_VAL_T reg_in;
         radioAlphaTRX_capture_frame();
         EX_INT2_InterruptEnable(); 
     }
