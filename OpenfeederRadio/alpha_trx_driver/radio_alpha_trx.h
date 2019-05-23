@@ -664,12 +664,12 @@ typedef enum {
 /** ------------------------>> FIFO_RST_MODE_CMD_POR <<------------------------*/
 //FIXME: Correction des testes de 2 bits vers 1 bits
 
-/** Status d'?tat du fonctionnement du module RF */
+/** Status d'etat du fonctionnement du module RF */
 typedef union {
     uint8_t Val;
 
     struct {
-        unsigned RX_Buffer_In_Use : 1; // flag permettant d'identifier la m?moire tampon en cours d'utilisation (0 pour Buffer1 et 1 pour Buffer2)
+        unsigned RX_Buffer_In_Use : 1; // flag permettant d'identifier la memoire tampon en cours d'utilisation (0 pour Buffer1 et 1 pour Buffer2)
         unsigned RX_Buffer1_Read : 1; // flag de reception d'une nouvelle trame dans le buffer 1
         unsigned RX_Buffer2_Read : 1; // flag de reception d'une nouvelle trame dans le buffer 2
         unsigned TX_Mode_Start : 1; // flag
@@ -750,6 +750,12 @@ int8_t radioAlphaTRX_Send_Byte(uint8_t data_send, int8_t timeout);
  */
 int8_t radioAlphaTRX_Send_data(uint8_t* bytes, int8_t size);
 
+/**
+ * 
+ * @param timeout : le nombre de fois qu'il faut attendre le nIRQ en cas de non reponse
+ * @return : 1 on a pas depassé le delais : 0 sinon  
+ */
+int8_t radioAlphaTRX_wait_nIRQ(int timeout);
 
 
 uint16_t radioAlphaTRX_Command(uint16_t cmd_write); // Envoyer une commande au module RF
@@ -758,5 +764,23 @@ uint16_t radioAlphaTRX_Command(uint16_t cmd_write); // Envoyer une commande au m
 void radioTransceiver_nIRQ_Service(void); // Interrupt on nIRQ RF module
 
 unsigned int radioTransceiver_ConfigFq(unsigned char freq_selected); // Selection de la frequence pour le module RF
+
+
+
+ /******************************************************************************/
+ /******************************************************************************/
+ /******************** PARAMETRE DE CAPTURE DE LA TRAME RECU *******************/
+ /***************************                ***********************************/
+ /*****************                                         ********************/
+
+int8_t getError_FFOV();
+void resetError_FFOV();
+int8_t getB_Read();
+void setB_Read(int8_t set);
+int8_t getB_Write();
+void setB_Write(int8_t set);
+int8_t * getBuf(int8_t indice);
+void resetBuf(int8_t indice);
+
 
 #endif	/* XC_HEADER_TEMPLATE_H */

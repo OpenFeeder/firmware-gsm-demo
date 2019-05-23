@@ -87,23 +87,10 @@ void __attribute__ ( ( interrupt, no_auto_psv ) ) _INT2Interrupt(void)
 {
     //***User Area Begin->code: INT2 - External Interrupt 2***
     if (nFFIT_GetValue()) {
-        EX_INT2_InterruptDisable(); // je desactive l'interuprion 
+        EX_INT2_InterruptDisable(); 
         WORD_VAL_T reg_in;
-        for (i = 0; i < 20; i++) {
-            if (0 == rdy(20)) {
-                return 0;
-            }
-            reg_in.word = ecrire_reg(0xB000);
-            buffer[i] = reg_in.byte.low;
-            if (reg_in.byte.low == 0)
-                LED_BLUE_SetHigh();
-            else
-                LED_BLUE_SetLow();
-        }
-        printf("recu %s \n", buffer);
-        radioAlphaTRX_Init();
-        radioAlphaTRX_Received_Init();
-        EX_INT2_InterruptEnable(); // j'active l'interuption 
+        radioAlphaTRX_capture_frame();
+        EX_INT2_InterruptEnable(); 
     }
     //***User Area End->code: INT2 - External Interrupt 2***
     EX_INT2_InterruptFlagClear();

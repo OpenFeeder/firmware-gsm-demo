@@ -3,7 +3,7 @@
  */
 
 #include "./test.h"
-
+#include "../alpha_trx_driver/radio_alpha_trx.h"
 /* vérifier que le state register se remet à 0x4000 après un reset
  * pendant le fonctionnement
  */
@@ -48,10 +48,11 @@ void test_rx() {
     
     radioAlphaTRX_Received_Init();
     while (1) {
-//        if(srv_receive_rf(paquet, 20, 20) > 0) {
-//            printf("recu : %s\n", paquet);
-//            LED_BLUE_SetLow();
-//        }
+        if (getB_Read() != getB_Write() || (getB_Read() != getB_Write() && getError_FFOV())) {
+            printf("recu %s \n", getBuf(getB_Read()));
+            setB_Read((getB_Read()+1)%4);
+            printf("B_Read %d vs B_Write %d\n", getB_Read(), getB_Write());
+        }
     }
     
 }

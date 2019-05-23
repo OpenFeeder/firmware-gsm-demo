@@ -37,6 +37,38 @@ FIFO_RST_MODE_CMD_VAL RF_FIFOandResetMode; // FIFO and Reset Mode Command
 STATUS_READ_VAL RF_StatusRead; // Status Read Command
 
 
+ /******************************************************************************/
+ /******************************************************************************/
+ /******************** PARAMETRE DE CAPTURE DE LA TRAME RECU *******************/
+ /***************************                ***********************************/
+ /*****************                                         ********************/
+
+#define FRAME_LENGTH        128 // Longueur total d'une trame en octet
+#define NB_BUF                4
+// 4 buffer remplie de circulairement 
+volatile uint8_t BUF[NB_BUF][FRAME_LENGTH];  
+volatile uint8_t B_Read = 0; 
+volatile uint8_t B_Write = 0;
+volatile uint8_t Error_FFOV = 0;
+
+int8_t getError_FFOV() { return Error_FFOV; }
+void resetError_FFOV() { Error_FFOV = 0;}
+int8_t getB_Read() { return B_Read; }
+void setB_Read(int8_t set) { B_Read = set; }
+int8_t getB_Write() { return B_Write; }
+void setB_Write(int8_t set) { B_Write = set; }
+int8_t * getBuf(int8_t indice) { 
+    if (indice < NB_BUF && indice >= 0) {
+        return BUF[indice];
+    }
+}
+
+void resetBuf(int8_t indice) { 
+    if (indice < NB_BUF && indice >= 0) {
+        memset(BUF[indice], 0, FRAME_LENGTH );
+    }
+}
+
 /**-------------------------->> D E F I N I T I O N <<-------------------------*/
 
 void radioAlphaTRX_Init(void) {
@@ -130,9 +162,9 @@ void radioAlphaTRX_Received_Init(void) {
     radioAlphaTRX_Command(0x82C9);
     RF_FIFOandResetMode.bits.b1_ff = 1; // FIFO fill will be enabled after synchronize pattern reception
     radioAlphaTRX_Command(RF_FIFOandResetMode.Val); // --> 0xCA83
-//#if defined(UART_DEBUG)
-//    printf( "registre : 0x%04X\r\n", RF_FIFOandResetMode.Val);
-//#endif
+#if defined(UART_DEBUG)
+    printf( "registre : 0x%04X\r\n", RF_FIFOandResetMode.Val);
+#endif
 }
 
 // Configuration en mode TX avant l'envoie de donnee
@@ -168,7 +200,7 @@ int8_t radioAlphaTRX_Send_Init(void) {
 //#if defined(UART_DEBUG)
 //    printf( "status: 0x%04X\r\n", RF_ConfigSet.Val);
 //#endif
-    return rdy(SEND_TIME_OUT); // arbitraire 
+    return radioAlphaTRX_wait_nIRQ(SEND_TIME_OUT); // arbitraire 
 }
 
 // Transmission d'une donnee par le module RF
@@ -177,7 +209,7 @@ int8_t radioAlphaTRX_Send_Byte(uint8_t data_send, int8_t timeout) {
     sendData.byte.high = 0xB8; // c'est le bit de poid fort d'abord 
     sendData.byte.low = data_send;
     radioAlphaTRX_Command(sendData.word);
-    return rdy(timeout);
+    return radioAlphaTRX_wait_nIRQ(timeout);
 } 
 
 
@@ -195,8 +227,6 @@ int8_t radioAlphaTRX_Send_data(uint8_t* bytes, int8_t size) {
     radioAlphaTRX_Send_Byte(0xD4, SEND_TIME_OUT);
     //transmission des octet 
     for (i = 0; i < size; i++) {
-         // cela veux dire que nous n'avons pas pu transmetre un octe 
-         // alors les données sont erronnée 
         if (radioAlphaTRX_Send_Byte(bytes[i], SEND_TIME_OUT) == 0) // 10*10 = 100ms
             break; 
     }
@@ -223,4 +253,51 @@ uint16_t radioAlphaTRX_Command(uint16_t cmd_write) {
     while (!RF_nSEL_GetValue()) { } // a eviter mais pour l'instant je le garde 
     
     return receiveData.word;
+}
+
+int8_t radioAlphaTRX_wait_nIRQ(int timeout) {
+    short i = 0;
+    TMR1_Counter16BitSet(0);
+    while (nIRQ_GetValue()) {
+        if (TMR1_Counter16BitGet() == TMR1_Period16BitGet()){ // conteur 
+            TMR1_Counter16BitSet(0);
+            i++;
+        }
+        if (i == timeout) {
+            return 0;
+        }
+    }
+    return 1;
+}
+
+
+int8_t radioAlphaTRX_receive(uint8_t buffer[FRAME_LENGTH]) {
+    WORD_VAL_T receiveData;
+    uint8_t i = 0;
+    for (i = 0; i < FRAME_LENGTH; i++) {
+        if (0 == rdy(1)) {
+            return 0;
+        }
+        receiveData.word = ecrire_reg(0xB000);
+        buffer[i] = receiveData.byte.low;
+        if (receiveData.byte.low == 0) {
+            LED_BLUE_Toggle();
+            break;
+        }
+    }
+    return i;
+}
+
+int8_t radioAlphaTRX_capture_frame() {
+    if (radioAlphaTRX_receive(BUF[B_Write])) { // seulement si je recupère quelque chose 
+        B_Write = (B_Write+1)%NB_BUF;
+        if(B_Write-1 == B_Read && Error_FFOV == 1) {
+            B_Read = (B_Read+1)%NB_BUF;  
+        }else if (B_Write == B_Read) {
+            Error_FFOV = 1; // on
+        }
+    }
+    //on se remet en ecoute 
+    radioAlphaTRX_Init();
+    radioAlphaTRX_Received_Init();
 }
