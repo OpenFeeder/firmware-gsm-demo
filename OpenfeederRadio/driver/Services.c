@@ -143,7 +143,7 @@ int8_t srv_send_rf(uint8_t* paquet, int size, int delais, int nbFois) {
 
 int8_t srv_receive_rf(uint8_t *paquet, int size, int delais) {
     //je me mets en mode reception 
-    configure_rx(); // configuration en mode reception 
+    //configure_rx(); // configuration en mode reception 
     return receive(paquet, size, delais);
 }
 

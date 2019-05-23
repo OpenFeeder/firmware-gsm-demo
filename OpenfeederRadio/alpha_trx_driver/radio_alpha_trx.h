@@ -142,7 +142,7 @@
 // live documentation
 
 /**------------------------>> D E B U G <<-------------------------------------*/
-#define UART_DEBUG (1)
+//#define UART_DEBUG (1)
 
 /*_____________________________________________________________________________*/
 
@@ -190,7 +190,7 @@
 #define STATUS_READ_CMD                 (0x0000)    // 0000 0000 0000 0000, Status Read Command
 //delay
 #define SLEEP_AFTER_INIT (850000)
-
+#define SEND_TIME_OUT (10)
 /** ------------------------>> CFG_SET_CMD_POR  <<----------------------------*/
 
 #define FQ_RESTRICTION_LOW              // Preprocessor macros definition --> 119 Fq possible
@@ -704,6 +704,7 @@ extern STATUS_READ_VAL RF_StatusRead; // Status Read Command
 
 /*------------------------> P R I V A T E   P R O T O T Y P E S <--------------*/
 // Global Function Prototypes:
+
 /**
  * \brief Initialise le module radio
  */
@@ -728,27 +729,33 @@ void radioAlphaTRX_Received_Init(void);
  * Initialiser les conditions d'envoie d'un nouveau message, le module passe en mode TX.
  * Avant d'appeler cette fonction, vous devez avoir initialiser la trame "Frame_RF_Send"
  * L'envoie des donnees de la trame se fait par la fonction RF12_nIRQ_Service()
+ * @return : 0 init ko 1 si ok 
  */
-void radioAlphaTRX_Send_Init(void); 
+int8_t radioAlphaTRX_Send_Init(void); 
 
 /**
  * transmet un octet seulement si le nIRQ est a l'etat bas 
  * @param data_send : l'octet a transmettre 
+ * @param timeout : delais apres quoi on gener une erreur de transmsission
+ * @return : 0 si timeout 1 si RGIT OK
  */
-void radioAlphaTRX_Send_Byte(uint8_t data_send);
+int8_t radioAlphaTRX_Send_Byte(uint8_t data_send, int8_t timeout);
 
 /**
  * transmission flot d'octets a la suite 
  * @param bytes : tableau d'octet
  * @param size : la taille du tableau 
- * @return : nombre d'octets effectivement transmise 
+ * @param timeout : delais apres quoi on gener une erreur de transmsission 
+ * @return : nombre d'octets effectivement transmis 
  */
 int8_t radioAlphaTRX_Send_data(uint8_t* bytes, int8_t size);
 
 
-void radioTransceiver_nIRQ_Service(void); // Interrupt on nIRQ RF module
+
 uint16_t radioAlphaTRX_Command(uint16_t cmd_write); // Envoyer une commande au module RF
 
+//
+void radioTransceiver_nIRQ_Service(void); // Interrupt on nIRQ RF module
 
 unsigned int radioTransceiver_ConfigFq(unsigned char freq_selected); // Selection de la frequence pour le module RF
 

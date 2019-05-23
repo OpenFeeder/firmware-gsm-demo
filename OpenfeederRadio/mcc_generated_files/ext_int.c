@@ -51,6 +51,7 @@
 #include <stdio.h>
 #include "ext_int.h"
 #include "pin_manager.h"
+#include "../alpha_trx_driver/radio_alpha_trx.h"
 //***User Area Begin->code: Add External Interrupt handler specific headers 
 volatile int Flag = 0;
 volatile int getFlag() { return Flag; }
@@ -58,6 +59,7 @@ void resetFlag() { Flag = 0; }
 
 volatile int8_t buffer[20];
 volatile int8_t flagFFIT = 0;
+STATUS_READ_VAL StatusRead;
 int8_t i = 0;
 int8_t * getBuffer() { return buffer; }
 int8_t getflagFFIT() { return flagFFIT; }
@@ -74,7 +76,7 @@ void __attribute__ ( ( interrupt, no_auto_psv ) ) _INT1Interrupt(void)
 {
     //***User Area Begin->code: INT1 - External Interrupt 1***
     Flag = 1;
-    //LED_BLUE_Toggle();
+    LED_BLUE_SetLow();
     //***User Area End->code: INT1 - External Interrupt 1***
     EX_INT1_InterruptFlagClear();
 }
@@ -84,14 +86,25 @@ void __attribute__ ( ( interrupt, no_auto_psv ) ) _INT1Interrupt(void)
 void __attribute__ ( ( interrupt, no_auto_psv ) ) _INT2Interrupt(void)
 {
     //***User Area Begin->code: INT2 - External Interrupt 2***
-//    i++;
-    LED_BLUE_Toggle();
-//    if (i > 100) {
-//        printf("%d\n", i );
-//        i = 0;
-//        LED_BLUE_Toggle();
-//    }else
-//        readData();
+    if (nFFIT_GetValue()) {
+        EX_INT2_InterruptDisable(); // je desactive l'interuprion 
+        WORD_VAL_T reg_in;
+        for (i = 0; i < 20; i++) {
+            if (0 == rdy(20)) {
+                return 0;
+            }
+            reg_in.word = ecrire_reg(0xB000);
+            buffer[i] = reg_in.byte.low;
+            if (reg_in.byte.low == 0)
+                LED_BLUE_SetHigh();
+            else
+                LED_BLUE_SetLow();
+        }
+        printf("recu %s \n", buffer);
+        radioAlphaTRX_Init();
+        radioAlphaTRX_Received_Init();
+        EX_INT2_InterruptEnable(); // j'active l'interuption 
+    }
     //***User Area End->code: INT2 - External Interrupt 2***
     EX_INT2_InterruptFlagClear();
 }

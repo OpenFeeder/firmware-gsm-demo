@@ -26,7 +26,7 @@ void close_tx() {
 int send(uint8_t* buffer, int size, int delais) {
     // a changé au cas ou 
     int ecr = 0;
-    if (open_tx(1000) != 0) {
+    if (open_tx(delais) != 0) {
         ecr = send_data(buffer, size, delais);
         close_tx();
     }

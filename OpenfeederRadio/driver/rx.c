@@ -27,7 +27,8 @@ void close_rx() {
 int receive(uint8_t* buffer, int size, int delais) {
     //printf("Attente ...\n");
     int lu = 0;
-    open_rx();
+//    open_rx();
+    radioAlphaTRX_Received_Init();
     lu = read_data(buffer, size, delais);
     close_rx();
     return lu;
