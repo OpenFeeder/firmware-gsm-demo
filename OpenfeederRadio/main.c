@@ -8,6 +8,7 @@
 #include "alpha_trx_driver/radio_alpha_trx.h"
 #include "driver/trx.h"
 #include "driver/rx.h"
+#include "test/test.h"
 
 
 int main(void) {
@@ -16,10 +17,9 @@ int main(void) {
     
     printf("Init ok\n");
     radioAlphaTRX_Init();
-//    init_trx();
     
     test_rx();
-    
+    //test_timer();
     //test_tx();
     while(1) {
 //        if (getSyncDate()) {

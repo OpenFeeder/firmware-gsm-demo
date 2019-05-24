@@ -46,30 +46,29 @@
 #define	XC_HEADER_TEMPLATE_H
 
 #include <xc.h> // include processor files - each processor file is guarded.
-#include "../alpha_trx_driver/radio_alpha_trx.h"
  /******************************************************************************/
  /******************************************************************************/
  /******************** PARAMETRE GESTIONNAIRE DE TIMER *************************/
  /***************************                ***********************************/
  /*****************                                         ********************/
 
-// *****************************************************************************
-// *****************************************************************************
-// Section: extern declarations
-// *****************************************************************************
-// *****************************************************************************
-
 // est active des qu'un msg est recu est non encore lu ==> c'est un compteur 
-extern volatile uint16_t tmr_msg_recu; 
 
-extern volatile uint16_t tmr_wait_rqst_timeout; //on s'en sert pour le poulling 
+uint16_t get_tmr_horloge_timeout(); 
+void set_tmr_horloge_timeout(uint16_t set); 
+
+
+uint16_t get_tmr_wait_rqst_timeout(); //on s'en sert pour le poulling 
+void set_tmr_wait_rqst_timeout(uint16_t set);
 
 //TODO : penser rendre ça generique
-extern volatile uint16_t tmr_horloge_timeout[4];  
+uint16_t get_tmr_msg_recu_timeout(int8_t i);  
+void set_tmr_msg_recu_timeout(int8_t i, uint16_t set);
 
-extern volatile uint16_t tmr_nIRQ_low_timeou;
+uint16_t get_tmr_nIRQ_low_timeout();
+void set_tmr_nIRQ_low_timeout(int16_t set);
 //
-void TMR_CallBack( void );
+void tmr_callBack( void );
 
  /****************                                         *********************/
  /*************************                     ********************************/

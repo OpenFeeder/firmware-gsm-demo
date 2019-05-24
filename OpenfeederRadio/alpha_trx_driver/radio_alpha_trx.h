@@ -757,6 +757,12 @@ int8_t radioAlphaTRX_Send_data(uint8_t* bytes, int8_t size);
  */
 int8_t radioAlphaTRX_wait_nIRQ(int timeout);
 
+/**
+ * 
+ * @return 
+ */
+int8_t radioAlphaTRX_capture_frame();
+
  /******************************************************************************/
  /******************************************************************************/
  /******************** PARAMETRE DE CAPTURE DE LA TRAME RECU *******************/

@@ -24,7 +24,7 @@
 #include <stdio.h>
 
 #include "radio_alpha_trx.h"
-
+#include "../driver/timer.h"
  /******************************************************************************/
 
 /**-------------------------->> V A R I A B L E S <<---------------------------*/
@@ -255,16 +255,13 @@ uint16_t radioAlphaTRX_Command(uint16_t cmd_write) {
 
 int8_t radioAlphaTRX_wait_nIRQ(int timeout) {
     short i = 0;
-    TMR1_Counter16BitSet(0);
+    set_tmr_nIRQ_low_timeout(timeout);
     while (nIRQ_GetValue()) {
-        if (TMR1_Counter16BitGet() == TMR1_Period16BitGet()){ // conteur 
-            TMR1_Counter16BitSet(0);
-            i++;
-        }
-        if (i == timeout) {
+        if(get_tmr_nIRQ_low_timeout() == 0) {
             return 0;
         }
     }
+    set_tmr_nIRQ_low_timeout(0);
     return 1;
 }
 
@@ -273,7 +270,7 @@ int8_t radioAlphaTRX_receive(uint8_t buffer[FRAME_LENGTH]) {
     WORD_VAL_T receiveData;
     uint8_t i = 0;
     for (i = 0; i < FRAME_LENGTH; i++) {
-        if (0 == rdy(1)) {
+        if (0 == rdy(2)) {
             return 0;
         }
         receiveData.word = ecrire_reg(0xB000);
@@ -287,7 +284,8 @@ int8_t radioAlphaTRX_receive(uint8_t buffer[FRAME_LENGTH]) {
 }
 
 int8_t radioAlphaTRX_capture_frame() {
-    if (radioAlphaTRX_receive(BUF[B_Write])) { // seulement si je recupère quelque chose 
+    if (radioAlphaTRX_receive(BUF[B_Write])) { // seulement si je recupère quelque chose
+        set_tmr_msg_recu_timeout(B_Write, 3000); // pour l'instant on fait 3 seconde 
         B_Write = (B_Write+1)%NB_BUF;
         if(B_Write-1 == B_Read && Error_FFOV == 1) {
             B_Read = (B_Read+1)%NB_BUF;  

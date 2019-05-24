@@ -4,6 +4,7 @@
 
 #include "./test.h"
 #include "../alpha_trx_driver/radio_alpha_trx.h"
+#include "../driver/timer.h"
 /* vérifier que le state register se remet à 0x4000 après un reset
  * pendant le fonctionnement
  */
@@ -48,10 +49,19 @@ void test_rx() {
     
     radioAlphaTRX_Received_Init();
     while (1) {
-        if (getB_Read() != getB_Write() || (getB_Read() != getB_Write() && getError_FFOV())) {
-            printf("recu %s \n", getBuf(getB_Read()));
-            setB_Read((getB_Read()+1)%4);
-            printf("B_Read %d vs B_Write %d\n", getB_Read(), getB_Write());
+        if (getFlag()==1){
+            resetFlag();
+            if (getB_Read() != getB_Write()) {
+                printf("tps %d \n", 3000-get_tmr_msg_recu_timeout(getB_Read()));
+                printf("recu %s \n", getBuf(getB_Read()));
+                setB_Read((getB_Read()+1)%4);
+                printf("B_Read %d vs B_Write %d\n", getB_Read(), getB_Write());
+            }else if (getError_FFOV()) {
+                printf("tps %d \n", 3000-get_tmr_msg_recu_timeout(getB_Read()));
+                resetError_FFOV();
+                printf("recu %s \n", getBuf(getB_Read()));
+                printf("B_Read %d vs B_Write %d\n", getB_Read(), getB_Write());
+            }
         }
     }
     
@@ -68,4 +78,18 @@ void test_tx() {
             }
         }
     }
+}
+
+void test_timer() {
+    set_tmr_nIRQ_low_timeout(100);
+    LED_GREEN_Toggle();
+    while (1) {
+        if(get_tmr_nIRQ_low_timeout() == 0) {
+            LED_BLUE_Toggle();
+            LED_GREEN_Toggle();
+            LED_RED_Toggle();
+            set_tmr_nIRQ_low_timeout(1000);
+        }
+    }
+
 }
