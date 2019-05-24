@@ -43,8 +43,6 @@ STATUS_READ_VAL RF_StatusRead; // Status Read Command
  /***************************                ***********************************/
  /*****************                                         ********************/
 
-#define FRAME_LENGTH        128 // Longueur total d'une trame en octet
-#define NB_BUF                4
 // 4 buffer remplie de circulairement 
 volatile uint8_t BUF[NB_BUF][FRAME_LENGTH];  
 volatile uint8_t B_Read = 0; 

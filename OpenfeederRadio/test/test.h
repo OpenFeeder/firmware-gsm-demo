@@ -17,6 +17,7 @@ void test_clock_seal();
 
 uint8_t test_serial_datetime(uint8_t* datetime);
 
+void test_timer();
 
 #endif	/* TEST_H */
 

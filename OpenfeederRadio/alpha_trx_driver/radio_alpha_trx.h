@@ -763,6 +763,9 @@ int8_t radioAlphaTRX_wait_nIRQ(int timeout);
  /***************************                ***********************************/
  /*****************                                         ********************/
 
+#define FRAME_LENGTH        128 // Longueur total d'une trame en octet
+#define NB_BUF                4
+
 /**
  * verification si on depasse la capacite de stockage des paquets 
  * @return 1 si overflow : 0 si non 

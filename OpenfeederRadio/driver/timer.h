@@ -45,8 +45,8 @@
 #ifndef XC_HEADER_TEMPLATE_H
 #define	XC_HEADER_TEMPLATE_H
 
-#include <xc.h> // include processor files - each processor file is guarded.  
-
+#include <xc.h> // include processor files - each processor file is guarded.
+#include "../alpha_trx_driver/radio_alpha_trx.h"
  /******************************************************************************/
  /******************************************************************************/
  /******************** PARAMETRE GESTIONNAIRE DE TIMER *************************/
@@ -64,10 +64,11 @@ extern volatile uint16_t tmr_msg_recu;
 
 extern volatile uint16_t tmr_wait_rqst_timeout; //on s'en sert pour le poulling 
 
-extern volatile uint16_t tmr_horloge_timeout;
+//TODO : penser rendre ça generique
+extern volatile uint16_t tmr_horloge_timeout[4];  
 
-
-
+extern volatile uint16_t tmr_nIRQ_low_timeou;
+//
 void TMR_CallBack( void );
 
  /****************                                         *********************/
