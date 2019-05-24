@@ -270,7 +270,7 @@ int8_t radioAlphaTRX_receive(uint8_t buffer[FRAME_LENGTH]) {
     WORD_VAL_T receiveData;
     uint8_t i = 0;
     for (i = 0; i < FRAME_LENGTH; i++) {
-        if (0 == rdy(2)) {
+        if (0 == rdy(TIME_OUT_nIRQ)) {
             return 0;
         }
         receiveData.word = ecrire_reg(0xB000);
@@ -283,9 +283,9 @@ int8_t radioAlphaTRX_receive(uint8_t buffer[FRAME_LENGTH]) {
     return i;
 }
 
-int8_t radioAlphaTRX_capture_frame() {
+void radioAlphaTRX_capture_frame() {
     if (radioAlphaTRX_receive(BUF[B_Write])) { // seulement si je recupère quelque chose
-        set_tmr_msg_recu_timeout(B_Write, 3000); // pour l'instant on fait 3 seconde 
+        set_tmr_msg_recu_timeout(B_Write, TIME_OUT_GET_FRAME); // pour l'instant on fait 3 seconde 
         B_Write = (B_Write+1)%NB_BUF;
         if(B_Write-1 == B_Read && Error_FFOV == 1) {
             B_Read = (B_Read+1)%NB_BUF;  

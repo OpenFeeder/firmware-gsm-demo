@@ -93,3 +93,6 @@ void test_timer() {
     }
 
 }
+
+
+// verifie une idée

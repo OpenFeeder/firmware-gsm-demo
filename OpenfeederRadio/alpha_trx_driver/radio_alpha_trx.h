@@ -759,9 +759,9 @@ int8_t radioAlphaTRX_wait_nIRQ(int timeout);
 
 /**
  * 
- * @return 
+ * 
  */
-int8_t radioAlphaTRX_capture_frame();
+void radioAlphaTRX_capture_frame();
 
  /******************************************************************************/
  /******************************************************************************/
@@ -769,8 +769,10 @@ int8_t radioAlphaTRX_capture_frame();
  /***************************                ***********************************/
  /*****************                                         ********************/
 
-#define FRAME_LENGTH        128 // Longueur total d'une trame en octet
-#define NB_BUF                4
+#define FRAME_LENGTH          128 // Longueur total d'une trame en octet
+#define TIME_OUT_nIRQ           2 // 2ms 
+#define TIME_OUT_GET_FRAME   3000
+#define NB_BUF                  4
 
 /**
  * verification si on depasse la capacite de stockage des paquets 
