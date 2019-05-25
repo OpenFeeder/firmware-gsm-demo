@@ -65,10 +65,14 @@
  
 #include <xc.h> // include processor files - each processor file is guarded. 
 
-#define FRAME_LENGTH_RF        128 // Longueur total d'une trame en octet
-#define NB_BUF_RF                4
+//#define FRAME_LENGTH_RF        128 // Longueur total d'une trame en octet
+//#define NB_BUF_RF                4
+
+//id OF slave and id OF master
 
 
+//Debug Definition 
+#define _DEBUG (1)
 
 #endif	/* XC_HEADER_TEMPLATE_H */
 

@@ -54,20 +54,74 @@
 
 // est active des qu'un msg est recu est non encore lu ==> c'est un compteur 
 
+/**
+ * 
+ * @return : 0 if faut envoyer l'horloge, si non c'est pas encore time out 
+ */
 uint16_t get_tmr_horloge_timeout(); 
+/**
+ * determine combirne de minute il faut attendre avant de transmettre la date
+ * @param set : timeout 
+ */
 void set_tmr_horloge_timeout(uint16_t set); 
 
-
-uint16_t get_tmr_wait_rqst_timeout(); //on s'en sert pour le poulling 
+/**
+ * ateste de l'arriver ou pas d'un msg 
+ * @return : 
+ *      0 : timeout 
+ *      si non > 0
+ */
+uint16_t get_tmr_wait_rqst_timeout(); //on s'en sert pour le poulling
+/**
+ * le temps d'attente d'une reponse suite à une demande 
+ * @param set
+ */
 void set_tmr_wait_rqst_timeout(uint16_t set);
 
-//TODO : penser rendre ça generique
+/**
+ * permet de savoir combient de temps (en ms) le buffer i est remplie 
+ * @param i : indice du buffer en question 
+ * @return : le temps ecoule en (ms) depuis le dernier remplissage
+ */
 uint16_t get_tmr_msg_recu_timeout(int8_t i);  
+/**
+ * determine le temps maxe pour prendre en compte un msg de type horloge,
+ * au dela le paquet n'est pas utilisable 
+ * @param i : l'indice du buffeur 
+ * @param set : le temps en question 
+ */
 void set_tmr_msg_recu_timeout(int8_t i, uint16_t set);
 
+/**
+ * nombre de temps en (ms) que l'on s'autorise à attendre un octet en reception 
+ * apres une interuption (evite l'attente active) 
+ * @return : 
+ *      0 : timeout
+ *      1 : si non 
+ */
 uint16_t get_tmr_nIRQ_low_timeout();
+/**
+ * choisir le timout 
+ * @param set
+ */
 void set_tmr_nIRQ_low_timeout(int16_t set);
-//
+
+/**
+ * a utiliser librement 
+ * @param timeout 
+ */
+void set_tmr_timeout(uint16_t timeout);
+/**
+ * 
+ * @return :
+ *      0 : timeout
+ *      1 : si non  
+ */
+uint16_t get_tmr_timeout();
+
+/**
+ * fonction principale de gestion des timer 
+ */
 void tmr_callBack( void );
 
  /****************                                         *********************/

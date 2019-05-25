@@ -4,7 +4,10 @@
 
 #include "./test.h"
 #include "../alpha_trx_driver/radio_alpha_trx.h"
+#include "../driver/radio_alpha_trx_slave_api.h"
 #include "../driver/timer.h"
+#include "../driver/config_system_com.h"
+
 /* vérifier que le state register se remet à 0x4000 après un reset
  * pendant le fonctionnement
  */
@@ -42,6 +45,7 @@ uint8_t test_serial_datetime(uint8_t* datetime) {
     */
 }
 
+#define _DEBUG (1)
 
 //test 
 void test_rx() {
@@ -69,12 +73,15 @@ void test_rx() {
 
 void test_tx() {
     uint8_t *paquet = "PAQUET ENVOIE TEST";
+    uint8_t date_send[50];
+    int8_t size_h = srv_create_paket_rf(date_send, paquet, srv_getBroadcast(), srv_getIDM(), 
+                    srv_horloge(), '0');
     while (1) {
         if (getFlag()==1) {
             printf("envoie\n");
             resetFlag(); // on remet le flag a 0 pour eviter d'envoyer indefiniment 
             if (radioAlphaTRX_Send_Init()){
-                radioAlphaTRX_Send_data(paquet, 18);
+                radioAlphaTRX_Send_data(paquet, size_h);
             }
         }
     }
@@ -94,5 +101,51 @@ void test_timer() {
 
 }
 
+void test_update_date_send() {
+    uint8_t date_send[50];
+    struct tm t;
+    struct heure_format hf;
+    uint8_t date[14]; // cas particulier
+    //set_tmr_horloge_timeout(10000); // 10s
+    while (1) {
+        if (getFlag()) {
+            resetFlag();
+#if defined(_DEBUG)
+            RTCC_TimeGet(&t); 
+            printf("Fin ==> %d h:%d min:%d s\n", t.tm_hour, t.tm_min, t.tm_sec);
+#endif
+        }else if (!get_tmr_horloge_timeout()) {
+#if defined(_DEBUG)
+            printf("Master : date envoye...\n");
+#endif
+            get_time(&hf);
+            //creation de du format pour l'envoie  ensEsclave[0].logRecup = 0;
+            serial_buffer(date, hf);
+            int8_t size_h = srv_create_paket_rf(date_send, date, srv_getBroadcast(), srv_getIDM(), 
+                srv_horloge(), '0');
+            if (radioAlphaTRX_Send_Init()) {
+                radioAlphaTRX_Send_data(date_send, size_h);
+            }
+            set_tmr_horloge_timeout(10000);
+        }
+    }
+
+}
+void test_update_date_receive() {
+    struct tm t;
+    radioAlphaTRX_Received_Init();
+    while (1) {
+        if (getFlag()) {
+            resetFlag();
+            // simule une activité
+#if defined(_DEBUG)
+            RTCC_TimeGet(&t); 
+            printf("Fin ==> %d h:%d min:%d s\n", t.tm_hour, t.tm_min, t.tm_sec);
+#endif
+        }else if (radioAlphaTRX_msg_receive()) {
+            radioAlphaTRX_slave_behaviour_of_daytime();
+        }
+    }
+}
 
 // verifie une idée

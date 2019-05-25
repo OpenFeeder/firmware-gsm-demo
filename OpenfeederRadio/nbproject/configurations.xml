@@ -29,11 +29,9 @@
       <itemPath>driver/ComporteementSlave.h</itemPath>
       <itemPath>driver/Services.h</itemPath>
       <itemPath>driver/Master.h</itemPath>
-      <itemPath>driver/Slave.h</itemPath>
       <itemPath>alpha_trx_driver/radio_alpha_trx.h</itemPath>
       <itemPath>driver/timer.h</itemPath>
       <itemPath>driver/radio_alpha_trx_slave_api.h</itemPath>
-      <itemPath>driver/config_system_com.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LinkerScript"
                    displayName="Linker Files"
@@ -65,7 +63,6 @@
       <itemPath>temps/temps.c</itemPath>
       <itemPath>main.c</itemPath>
       <itemPath>driver/Services.c</itemPath>
-      <itemPath>driver/Slave.c</itemPath>
       <itemPath>driver/Master.c</itemPath>
       <itemPath>alpha_trx_driver/radio_alpha_trx.c</itemPath>
       <itemPath>driver/timer.c</itemPath>

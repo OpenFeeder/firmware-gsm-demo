@@ -111,6 +111,7 @@
 
 #include <xc.h> // include processor files - each processor file is guarded.  
 #include "../mcc_generated_files/pin_manager.h"
+#include "../driver/Services.h"
 // TODO Insert appropriate #include <>
 
 // TODO Insert C++ class definitions if appropriate
@@ -140,21 +141,6 @@
  */
 // TODO Insert declarations or function prototypes (right here) to leverage 
 // live documentation
-
-/**------------------------>> D E B U G <<-------------------------------------*/
-//#define UART_DEBUG (1)
-
-/*_____________________________________________________________________________*/
-
-
-
-/**------------------------>> M A C R O S <<-----------------------------------*/
-//CS => chip select
-#define RF_nSEL_SetLow( ) CS_SetLow()
-#define RF_nSEL_SetHigh( ) CS_SetHigh()
-#define RF_nSEL_Toggle( ) CS_Toggle()
-#define RF_nSEL_GetValue() CS_GetValue()
-
 
 /**------------------------>> D E F I N I T I O N S <<-------------------------*/
 
@@ -763,6 +749,14 @@ int8_t radioAlphaTRX_wait_nIRQ(int timeout);
  */
 void radioAlphaTRX_capture_frame();
 
+/**
+ * 
+ * @return : 
+ *      0 si aucun msg n'est present  
+ *      1 si non 
+ */
+int8_t radioAlphaTRX_msg_receive();
+
  /******************************************************************************/
  /******************************************************************************/
  /******************** PARAMETRE DE CAPTURE DE LA TRAME RECU *******************/
@@ -808,6 +802,20 @@ int8_t getB_Write();
  * @param set : l'increment 
  */
 void setB_Write(int8_t set);
+
+/**
+ * incremente le pointeur de lecture et enleve le flag overflow
+ * !!Attention : cette fonction ne fait aucune verification c'est
+ * a l'utilisateur de savoir comment l'utiliser 
+ */
+void incB_Read();
+
+/**
+ * 
+ * @param indice : le buffer demander 
+ * @return : la taille du buffer indice
+ */
+int8_t getSizeBuf(int8_t indice);
 
 /**
  * 

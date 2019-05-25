@@ -6,6 +6,8 @@
  */
 
 
+#include <time.h>
+
 #include "xc.h"
 #include "timer.h"
 
@@ -22,6 +24,8 @@ volatile uint16_t tmr_wait_rqst_timeout; //on s'en sert pour le poulling
 volatile uint16_t tmr_msg_recu_timeout[4];  
 
 volatile uint16_t tmr_nIRQ_low_timeout;
+
+volatile uint16_t tmr_timeout;
 
 
 uint16_t get_tmr_horloge_timeout() { return tmr_horloge_timeout; } 
@@ -44,6 +48,10 @@ void set_tmr_msg_recu_timeout(int8_t i, uint16_t set) {
 uint16_t get_tmr_nIRQ_low_timeout() { return tmr_nIRQ_low_timeout; }
 void set_tmr_nIRQ_low_timeout(int16_t set) { tmr_nIRQ_low_timeout = set; }
 
+void set_tmr_timeout(uint16_t timeout) { tmr_timeout = timeout; }
+uint16_t get_tmr_timeout() { return tmr_timeout; }
+
+
 void tmr_callBack( void ) {
     
     //nIRQ timeout
@@ -52,11 +60,11 @@ void tmr_callBack( void ) {
     //dis si une reponse est recu ou pas 
     if (tmr_wait_rqst_timeout) --tmr_wait_rqst_timeout;
     
+    if (tmr_horloge_timeout) --tmr_horloge_timeout;
+    
+    //timer du buffer 
     if (tmr_msg_recu_timeout[0]) --tmr_msg_recu_timeout[0];
-    
     if (tmr_msg_recu_timeout[1]) --tmr_msg_recu_timeout[1];
-    
     if (tmr_msg_recu_timeout[2]) --tmr_msg_recu_timeout[3];
-    
     if (tmr_msg_recu_timeout[3]) --tmr_msg_recu_timeout[3];
 }

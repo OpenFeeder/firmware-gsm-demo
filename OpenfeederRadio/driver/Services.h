@@ -19,12 +19,28 @@
  * TERMS. 
  */
 
-/* 
- * File:   
- * Author: 
- * Comments:
- * Revision history: 
- */
+/* *****************************************************************************
+ * 
+ * _____________________________________________________________________________
+ *
+ *           ENSEMBLE DES SERVICES RENDU AU SYSTEME DE COM RADIO  (.h)
+ * _____________________________________________________________________________
+ *
+ * Titre            : Mise en oeuvre d'un ensemble de fonctionnalitee et de variable commune  
+ * Version          : v00
+ * Date de creation : 26/05/2019
+ * Auteur           : MMADI Anzilane 
+ * Contact          : anzilan@hotmail.fr
+ * Web page         : 
+ * Collaborateur    : ...
+ * Processor        : PIC24
+ * Tools used       : MPLAB X IDE v5.15 and MPLAB Code Configurator (MCC) Version: 3.36
+ * Compiler         : Microchip XC16 v1.35
+ * Programmateur    : PICkit 3
+ *******************************************************************************
+ *******************************************************************************/
+
+
 
 // This is a guard condition so that contents of this file are not included
 // more than once.  
@@ -35,10 +51,51 @@
 #include <stdlib.h>
 #include "rx.h"
 #include "tx.h"
+
+
+/**------------------------>> D E F I N I T I O N S - G L O B A L <<-----------*/
+
+/*******************************************************************************/
+//______________________________D E B U G______________________________________*/
+#define UART_DEBUG (1)
+/*_____________________________________________________________________________*/
+
+
 //taille max d'un taquet 
 #define TAILE_MAX_PAQUET 150 // ? voir avec les collegue
 #define SIZE_DATE 100
 
+
+
+/**------------------------>> M A C R O S <<-----------------------------------*/
+//CS => chip select
+#define RF_nSEL_SetLow( ) CS_SetLow()
+#define RF_nSEL_SetHigh( ) CS_SetHigh()
+#define RF_nSEL_Toggle( ) CS_Toggle()
+#define RF_nSEL_GetValue() CS_GetValue()
+
+
+
+
+/* Structure d'une trame d'un message RF:
+ *      +--------+--------+------------+----------+--------------+----------+
+ *      |ID_DEST | ID_SRC | ID_Message | Typr_MSG | Data_Message | Checksum |
+ *      +--------+--------+------------+----------+--------------+----------+
+ * BYTE =   1    +    1   +     1      +    1     +      ?       +    1 
+ * 
+ * TAILLE EN TETE = 1+1+1+1+1 = 5
+ *
+ * ID_DEST / ID_SRC / ID_Message / Typr_MSG / Checksum:
+ *  . valeur min: 0x0001 (Hexa)
+ *  . valeur max: 0xFFFF (Hexa)
+ * Data_Message:
+ *  . champ contenant les donnees a transmettre
+ *    ex: "ALARM", "SYNCH"
+ * Checksum:
+ *  . champ de controle de la coherence de ID_Carte+ID_Message+Data_Message
+ *    --> detection d'erreur par checksum
+ *
+ */
 //sauvdarde des info
 typedef struct sPaquet {
     uint8_t numPaquet;

@@ -47,6 +47,8 @@
 
 #include <xc.h> // include processor files - each processor file is guarded.  
 #include "../alpha_trx_driver/radio_alpha_trx.h"
+#include "Services.h"
+#include "timer.h"
 
 // TODO Insert appropriate #include <>
 
@@ -78,33 +80,25 @@
 // TODO Insert declarations or function prototypes (right here) to leverage 
 // live documentation
 
-/* Structure d'une trame d'un message RF:
- *      +--------+--------+------------+----------+--------------+----------+
- *      |ID_DEST | ID_SRC | ID_Message | Typr_MSG | Data_Message | Checksum |
- *      +--------+--------+------------+----------+--------------+----------+
- * BYTE =   1    +    1   +     1      +    1     +      ?       +    1 
- * 
- * TAILLE EN TETE = 1+1+1+1+1 = 5
- *
- * ID_DEST / ID_SRC / ID_Message / Typr_MSG / Checksum:
- *  . valeur min: 0x0001 (Hexa)
- *  . valeur max: 0xFFFF (Hexa)
- * Data_Message:
- *  . champ contenant les donnees a transmettre
- *    ex: "ALARM", "SYNCH"
- * Checksum:
- *  . champ de controle de la coherence de ID_Carte+ID_Message+Data_Message
- *    --> detection d'erreur par checksum
- *
- */
-
  /******************************************************************************/
  /******************************************************************************/
  /********************* COUCHE APPLICATION DU SLAVE  ***************************/
  /***************************                ***********************************/
  /*****************                                         ********************/
 
+/**
+ * met a jour l'horloge avec la date recu en prenant en compte le temps de 
+ * latence avant le traitement du msg 
+ *  
+ * @param date : la date recu
+ * @param derive : le temps ecouler avant le traitement du msg 
+ */
+void radioAlphaTRX_slave_update_date(uint8_t* date, int16_t derive);
 
+/**
+ * machine a etat du systeme de communicatio du slave pendant la journee 
+ */
+void radioAlphaTRX_slave_behaviour_of_daytime();
 
 
  /****************                                         *********************/

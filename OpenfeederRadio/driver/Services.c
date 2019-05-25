@@ -99,7 +99,6 @@ int8_t srv_cpy(uint8_t *dest, uint8_t *src, int size) {
     if (size < t)
         return 0;
     while (i < t) {
-//        printf("i = %d %c\n", src[i]);
         dest[i] = src[i];
         i++;
     }
@@ -203,7 +202,6 @@ int8_t srv_decode_packet_rf(uint8_t* paquet, Paquet *pPaquetRecu, int size,
     //la premi?re chose qu'on recup?re c'est le crc
     uint8_t sum_ctl = paquet[size-1];
     if (srv_test_cheksum(paquet, size-1, sum_ctl) == 0){ 
-        printf("%s\n",paquet);
         return 0; // on retourn 0 dans ce cas precis 
     }
     

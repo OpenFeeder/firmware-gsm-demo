@@ -18,15 +18,10 @@ int main(void) {
     printf("Init ok\n");
     radioAlphaTRX_Init();
     
-    test_rx();
+    //test_rx();
     //test_timer();
     //test_tx();
-    while(1) {
-//        if (getSyncDate()) {
-//            LED_Toggle();
-//            reset_sync_date();
-//        }
-//
-    } // on attend la 
+    test_update_date_receive(); 
+    //test_update_date_send();
     return -1;
 }
