@@ -46,7 +46,7 @@
 // more than once.  
 #ifndef SERVICE_H
 #define	SERVICE_H
-
+/**------------------------>> I N C L U D E <<---------------------------------*/
 #include <xc.h> // include processor files - each processor file is guarded.  
 #include <stdlib.h>
 #include "rx.h"
