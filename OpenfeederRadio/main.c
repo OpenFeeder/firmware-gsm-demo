@@ -21,6 +21,7 @@ int main(void) {
     //test_rx();
     //test_timer();
     //test_tx();
+    
     test_update_date_receive(); 
     //test_update_date_send();
     return -1;

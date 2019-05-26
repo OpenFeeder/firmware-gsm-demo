@@ -23,7 +23,7 @@
  * 
  * _____________________________________________________________________________
  *
- *                    GESTIONNAIRE TIMER 
+ *                    GESTIONNAIRE TIMER (.h)
  * _____________________________________________________________________________
  *
  * Titre            : Mise en oeuvre d'un TIMER local 
@@ -45,7 +45,11 @@
 #ifndef XC_HEADER_TEMPLATE_H
 #define	XC_HEADER_TEMPLATE_H
 
+/**------------------------>> I N C L U D E <<---------------------------------*/
 #include <xc.h> // include processor files - each processor file is guarded.
+#include "../mcc_generated_files/pin_manager.h"
+/**------------------------>> I N C L U D E <<---------------------------------*/
+
  /******************************************************************************/
  /******************************************************************************/
  /******************** PARAMETRE GESTIONNAIRE DE TIMER *************************/
@@ -61,9 +65,9 @@
 uint16_t get_tmr_horloge_timeout(); 
 /**
  * determine combirne de minute il faut attendre avant de transmettre la date
- * @param set : timeout 
+ * @param timeout_x1000_ms : ex 10 = 10x1000 == 10000 ms = 10s
  */
-void set_tmr_horloge_timeout(uint16_t set); 
+void set_tmr_horloge_timeout_x1000_ms(uint16_t timeout_x1000_ms); 
 
 /**
  * ateste de l'arriver ou pas d'un msg 

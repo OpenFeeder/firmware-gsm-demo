@@ -8,6 +8,7 @@
 #include "../driver/timer.h"
 #include "../driver/config_system_com.h"
 
+
 /* vérifier que le state register se remet à 0x4000 après un reset
  * pendant le fonctionnement
  */
@@ -44,8 +45,6 @@ uint8_t test_serial_datetime(uint8_t* datetime) {
     return hf_serial == hf_deserial;
     */
 }
-
-#define _DEBUG (1)
 
 //test 
 void test_rx() {
@@ -106,27 +105,34 @@ void test_update_date_send() {
     struct tm t;
     struct heure_format hf;
     uint8_t date[14]; // cas particulier
-    //set_tmr_horloge_timeout(10000); // 10s
+//#if defined(UART_DEBUG)
+//        RTCC_TimeGet(&t); 
+//        printf("HEURE ==> %dh:%dmin:%ds\n", t.tm_hour, t.tm_min, t.tm_sec);
+//#endif
     while (1) {
         if (getFlag()) {
             resetFlag();
-#if defined(_DEBUG)
+#if defined(UART_DEBUG)
             RTCC_TimeGet(&t); 
-            printf("Fin ==> %d h:%d min:%d s\n", t.tm_hour, t.tm_min, t.tm_sec);
+            printf("Fin ==> %dh:%dmin:%ds\n", t.tm_hour, t.tm_min, t.tm_sec);
 #endif
         }else if (!get_tmr_horloge_timeout()) {
-#if defined(_DEBUG)
-            printf("Master : date envoye...\n");
-#endif
+//#if defined(UART_DEBUG)
+//            printf("Master : date envoye...\n");
+//#endif
             get_time(&hf);
             //creation de du format pour l'envoie  ensEsclave[0].logRecup = 0;
             serial_buffer(date, hf);
             int8_t size_h = srv_create_paket_rf(date_send, date, srv_getBroadcast(), srv_getIDM(), 
                 srv_horloge(), '0');
+//#if defined(UART_DEBUG)
+//         RTCC_TimeGet(&t); 
+//         printf("trans : %dh:%dm:%ds\n", t.tm_hour, t.tm_min, t.tm_sec);
+//#endif
             if (radioAlphaTRX_Send_Init()) {
                 radioAlphaTRX_Send_data(date_send, size_h);
             }
-            set_tmr_horloge_timeout(10000);
+            set_tmr_horloge_timeout_x1000_ms(SEND_HORLOG_TIMEOUT);
         }
     }
 
@@ -134,13 +140,17 @@ void test_update_date_send() {
 void test_update_date_receive() {
     struct tm t;
     radioAlphaTRX_Received_Init();
+#if defined(UART_DEBUG)
+    RTCC_TimeGet(&t); 
+    printf("HEURE ==> %dh:%dmin:%ds\n", t.tm_hour, t.tm_min, t.tm_sec);
+#endif
     while (1) {
         if (getFlag()) {
             resetFlag();
             // simule une activité
-#if defined(_DEBUG)
+#if defined(UART_DEBUG)
             RTCC_TimeGet(&t); 
-            printf("Fin ==> %d h:%d min:%d s\n", t.tm_hour, t.tm_min, t.tm_sec);
+            printf("heur slave ==> %dh:%dmin:%ds\n", t.tm_hour, t.tm_min, t.tm_sec);
 #endif
         }else if (radioAlphaTRX_msg_receive()) {
             radioAlphaTRX_slave_behaviour_of_daytime();

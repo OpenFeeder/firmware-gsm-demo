@@ -30,6 +30,12 @@ uint16_t  srv_getIDM() { return 34;}
 uint16_t  service_getSRC() { return 37;}
 uint16_t  srv_getBroadcast() { return 1023; }
 
+
+ /******************************************************************************/
+ /******************************************************************************/
+ /****************** FONCTIONNALITEES COMMUNES AU ALPHA TRX ********************/
+ /***************************                ***********************************/
+ /*****************                                 ****************************/
 srv_get_moment() { 
     srv_update_moment(); // met à jour le momet
     return moment;
@@ -187,15 +193,15 @@ void extractInfos(uint8_t* paquet, int *j, uint8_t* out, int count) {
     out[i] = '\0';
 }
 
-int8_t srv_decode_packet_rf(uint8_t* paquet, Paquet *pPaquetRecu, int size, 
+int8_t srv_decode_packet_rf(uint8_t* paquet, Frame *pPaquetRecu, int size, 
         uint16_t idOF) {
     uint8_t s = 10; // permet de concatener les adresses 
     int j = 0;
     //on recup?re id dest pour verifier si c'est egale au notre==> c'est le slave 1
-    pPaquetRecu->pDest = paquet[j]*s+paquet[j+1];
+    pPaquetRecu->ID_Dest = paquet[j]*s+paquet[j+1];
     j+=2;
     //teste si le paquet m'est destin?
-    if (pPaquetRecu->pDest != idOF && pPaquetRecu->pDest != srv_getBroadcast()) // ?a veut dire pas les meme 
+    if (pPaquetRecu->ID_Dest != idOF && pPaquetRecu->ID_Dest != srv_getBroadcast()) // ?a veut dire pas les meme 
         return 0; // le paquet n'est pas ? moi
     
     
@@ -206,12 +212,12 @@ int8_t srv_decode_packet_rf(uint8_t* paquet, Paquet *pPaquetRecu, int size,
     }
     
     //on recup?re le type de paquet
-    pPaquetRecu->typeDePaquet = paquet[j++];
+    pPaquetRecu->Type_Msg = paquet[j++];
     
-    pPaquetRecu->numPaquet = paquet[j++]; // on recup?re le numero de paquet
+    pPaquetRecu->ID_Msg = paquet[j++]; // on recup?re le numero de paquet
     
     //on recup?re le src
-    pPaquetRecu->pSrc = paquet[j]*s+paquet[j+1];
+    pPaquetRecu->ID_Src = paquet[j]*s+paquet[j+1];
     j+=2;
     //on traitera ce cas plustard
     extractInfos(paquet, &j, pPaquetRecu->nonUtiliser, 2);
@@ -222,11 +228,11 @@ int8_t srv_decode_packet_rf(uint8_t* paquet, Paquet *pPaquetRecu, int size,
     return j;
 }
 
-int8_t srv_listen_rf(int delais, Paquet *paquetRecu, uint16_t idOf) {
-    uint8_t recu[TAILE_MAX_PAQUET];
+int8_t srv_listen_rf(int delais, Frame *paquetRecu, uint16_t idOf) {
+    uint8_t recu[FRAME_LENGTH];
     //ecoute d'un paquet // on attend une commende du Master
     int size;
-    if ((size = srv_receive_rf(recu, TAILE_MAX_PAQUET, delais)) > 0) {
+    if ((size = srv_receive_rf(recu, FRAME_LENGTH, delais)) > 0) {
         //un paquet est re?u on le debale 
         return srv_decode_packet_rf(recu, paquetRecu, size, idOf);
     }
@@ -262,15 +268,15 @@ int8_t srv_goBackN(const uint8_t** data, int * offset, int curseur,
         uint16_t idOfSrc, uint16_t idOfDest, int8_t *w) {
     int nbTransmission = 0;
     int delais = 300; // => x10ms
-    Paquet paquetRecu;
+    Frame paquetRecu;
     int8_t retrasmission = 0;
-    uint8_t paquetEnvoi[TAILE_MAX_PAQUET];
+    uint8_t paquetEnvoi[FRAME_LENGTH];
     while (*offset != curseur && nbTransmission < 10) { // 10 c'est provisoire
         if (srv_listen_rf(delais, &paquetRecu, idOfSrc) > 0) { // > 0 ==> un paquet est re?u 
-            if (paquetRecu.typeDePaquet == srv_ack()){ // c'est un ack qui vient d'arriver
+            if (paquetRecu.Type_Msg == srv_ack()){ // c'est un ack qui vient d'arriver
                 //faire un test si l'ack est dans la fenetre ici important
-                if (paquetRecu.numPaquet-1 >= *offset && paquetRecu.numPaquet-1 < 256) {
-                    *offset = paquetRecu.numPaquet-1;
+                if (paquetRecu.ID_Msg-1 >= *offset && paquetRecu.ID_Msg-1 < 256) {
+                    *offset = paquetRecu.ID_Msg-1;
                     printf("[%d] : ack dans la fenetre %d %s\n", idOfSrc, *offset, paquetRecu.data); 
                     retrasmission = 1;
                     printf("[%d] offset %d vs %d cursseur\n", idOfSrc, *offset, curseur);
@@ -283,12 +289,12 @@ int8_t srv_goBackN(const uint8_t** data, int * offset, int curseur,
                     }
                 }else {
                     retrasmission = 1;
-                    printf("[%d] ack en dehors de la fenetre   %d \n", idOfSrc, paquetRecu.numPaquet);
+                    printf("[%d] ack en dehors de la fenetre   %d \n", idOfSrc, paquetRecu.ID_Msg);
                 }
             }else {
                 srv_inc_delais(&delais, 5);
                 retrasmission = 1; // pour l'instant on fais ca ici
-                printf("[%d] : ce n'est pas un ack %d\n", idOfSrc, paquetRecu.numPaquet);
+                printf("[%d] : ce n'est pas un ack %d\n", idOfSrc, paquetRecu.ID_Msg);
             }
         }else {
             printf("[%d] timeOut \n", idOfSrc);
@@ -322,3 +328,9 @@ uint8_t **service_recup_data_sur_disque(int *nbligne) {
     *nbligne = 40; 
     return NULL;
 }
+
+
+ /****************                                         *********************/
+ /*************************                     ********************************/
+ /******************************************************************************/
+ /******************************************************************************/

@@ -58,13 +58,19 @@
 /*******************************************************************************/
 //______________________________D E B U G______________________________________*/
 #define UART_DEBUG (1)
+#define MASTER     (1) // permet de differencier le code propre au master 
+#define SLAVE      (1) // le code propre au Slave 
 /*_____________________________________________________________________________*/
 
-
-//taille max d'un taquet 
-#define TAILE_MAX_PAQUET 150 // ? voir avec les collegue
-#define SIZE_DATE 100
-
+/*******************************************************************************/
+//_________________________Radio Alpha TRX Infos_______________________________*/
+#define FRAME_LENGTH                128 // Longueur total d'une trame en octet
+#define SIZE_DATE                    40
+#define TIME_OUT_nIRQ                 2 // 2ms 
+#define TIME_OUT_GET_FRAME         3000
+#define NB_BUF                        4
+#define SEND_HORLOG_TIMEOUT        3000
+/*_____________________________________________________________________________*/
 
 
 /**------------------------>> M A C R O S <<-----------------------------------*/
@@ -74,39 +80,44 @@
 #define RF_nSEL_Toggle( ) CS_Toggle()
 #define RF_nSEL_GetValue() CS_GetValue()
 
+/*_____________________________________________________________________________*/
 
 
-
+/**------------------------>> S T R U C T U R E - P A Q U E T <<---------------*/
 /* Structure d'une trame d'un message RF:
  *      +--------+--------+------------+----------+--------------+----------+
  *      |ID_DEST | ID_SRC | ID_Message | Typr_MSG | Data_Message | Checksum |
  *      +--------+--------+------------+----------+--------------+----------+
- * BYTE =   1    +    1   +     1      +    1     +      ?       +    1 
+ * BYTE =   2    +    2   +     1      +    1     +     MAX = 40 +    1     
  * 
- * TAILLE EN TETE = 1+1+1+1+1 = 5
+ * TAILLE EN TETE = 2+2+1+1+1 = 7
  *
- * ID_DEST / ID_SRC / ID_Message / Typr_MSG / Checksum:
+ * ID_DEST / ID_SRC :
  *  . valeur min: 0x0001 (Hexa)
  *  . valeur max: 0xFFFF (Hexa)
+ * ID_Message / Type_MSG / Checksum:
+ *  . ex : msg num 1, num 2 .. ect 
  * Data_Message:
- *  . champ contenant les donnees a transmettre
- *    ex: "ALARM", "SYNCH"
+ *  . champ contenant les donnees a transmettre / ou recu 
+ *    ex: la data : 200319172620 ==> 20/03/19 | 17h:26m:20s
  * Checksum:
- *  . champ de controle de la coherence de ID_Carte+ID_Message+Data_Message
- *    --> detection d'erreur par checksum
+ *  . champ de controle de la coherence : un XOR avec ID_XX^ID_MSG^Type_MSG^Data_Message
+ *    --> detection d'erreur par checksum (somme controle) 
  *
  */
 //sauvdarde des info
-typedef struct sPaquet {
-    uint8_t numPaquet;
-    uint16_t pDest;
-    uint16_t pSrc;
-    int8_t typeDePaquet;
+typedef struct sFrame {
+    uint16_t ID_Dest;
+    uint16_t ID_Src;
+    uint8_t ID_Msg;
+    int8_t Type_Msg;
     uint8_t nonUtiliser [3];
     uint8_t data[SIZE_DATE];
-}Paquet;
+}Frame;
+/*_____________________________________________________________________________*/
 
 
+/**------------------------>> T Y P E--M S G <<--------------------------------*/
 // type de paquet
 uint8_t srv_err();
 uint8_t srv_data();
@@ -116,17 +127,22 @@ uint8_t srv_cmd();
 uint8_t srv_fin_trans();
 uint8_t srv_fin_block();
 uint8_t srv_config();
+/*_____________________________________________________________________________*/
 
-/**
- * les identifiants de of 
- * @return 
- */
+/**------------------------>> I D-- O F <<-------------------------------------*/
 uint16_t  srv_getIDS1();
 uint16_t  srv_getIDS2();
 uint16_t  srv_getIDS3();
 uint16_t  srv_getBroadcast();
 uint16_t  srv_getIDM();
+/*_____________________________________________________________________________*/
 
+
+ /******************************************************************************/
+ /******************************************************************************/
+ /****************** FONCTIONNALITEES COMMUNES AU ALPHA TRX ********************/
+ /***************************                ***********************************/
+ /*****************                                 ****************************/
 /**
  * determine a quel moment de la journee on est 
  * 
@@ -232,7 +248,7 @@ int8_t srv_create_paket_rf(uint8_t paquet[], uint8_t data[],
  * @param idOF : l'identifiant de l'of qui vient de recevoir le paquet
  * @return la taille du paquet c'est un bon paquet, 0 si non 
  */
-int8_t srv_decode_packet_rf(uint8_t* paquet, Paquet *pPaquetRecu, int size, 
+int8_t srv_decode_packet_rf(uint8_t* paquet, Frame *pPaquetRecu, int size, 
         uint16_t idOF);
 
 /**
@@ -243,7 +259,7 @@ int8_t srv_decode_packet_rf(uint8_t* paquet, Paquet *pPaquetRecu, int size,
  * @param idOF : l'identifiant de l'of qui vient de recevoir le paquet
  * @return 1 si paquet recu 0 sinon 
  */
-int8_t srv_listen_rf(int delais, Paquet *paquetRecu, uint16_t idOf);
+int8_t srv_listen_rf(int delais, Frame *paquetRecu, uint16_t idOf);
 
 /**
  * permet d'attends un temps donnee
@@ -288,5 +304,10 @@ void srv_inc_delais(int *delais, int ms);
  * @return : les log recup�rer depuis le fichier de sauvgarder 
  */
 uint8_t **service_recup_data_sur_disque(int *nbligne);
+
+ /****************                                         *********************/
+ /*************************                     ********************************/
+ /******************************************************************************/
+ /******************************************************************************/
 #endif	/* SERVICE_H */
 

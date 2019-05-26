@@ -103,7 +103,7 @@ int8_t mster_state_machine_day();
  * @param cmdRecu : contendra l'erreur reçu
  * @return 0 si timeout 1 si erreur recu 
  */
-int8_t mster_lesten_slave(int delais, Paquet *errRecu);
+int8_t mster_lesten_slave(int delais, Frame *errRecu);
 
 /**
  * transmet l'ack a l'esclave et envoie l'erreur au server 
@@ -121,7 +121,7 @@ void mster_send_error_ack(int delais, int8_t nbFois, int16_t slave);
  * @param errRecu : les information de l'erreur recu 
  * @return 1 si traitement ok 0 sinon 
  */
-int8_t mster_trait_error(Paquet *errRecu);
+int8_t mster_trait_error(Frame *errRecu);
 
 #endif	/* MASTER_H */
 

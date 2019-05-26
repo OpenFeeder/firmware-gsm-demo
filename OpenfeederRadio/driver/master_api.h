@@ -23,12 +23,12 @@
  * 
  * _____________________________________________________________________________
  *
- *                    COURCHE APPLICATION (OF) SLAVE  (.h)
+ *           ENSEMBLE DES SERVICES RENDU AU SYSTEME DE COM RADIO  (.h)
  * _____________________________________________________________________________
  *
- * Titre            : Mise en oeuvre de la couche application du slave 
+ * Titre            : Mise en oeuvre de l'api et la machie a etat du master   
  * Version          : v00
- * Date de creation : 24/05/2019
+ * Date de creation : 26/05/2019
  * Auteur           : MMADI Anzilane 
  * Contact          : anzilan@hotmail.fr
  * Web page         : 
@@ -45,38 +45,48 @@
 #ifndef XC_HEADER_TEMPLATE_H
 #define	XC_HEADER_TEMPLATE_H
 
-/**------------------------>> I N C L U D E <<---------------------------------*/
 #include <xc.h> // include processor files - each processor file is guarded.  
-#include "../alpha_trx_driver/radio_alpha_trx.h"
-#include "Services.h"
-#include "timer.h"
 
+// TODO Insert appropriate #include <>
 
- /******************************************************************************/
- /******************************************************************************/
- /********************* COUCHE APPLICATION DU SLAVE  ***************************/
- /***************************                ***********************************/
- /*****************                                         ********************/
+// TODO Insert C++ class definitions if appropriate
 
+// TODO Insert declarations
+
+// Comment a function and leverage automatic documentation with slash star star
 /**
- * met a jour l'horloge avec la date recu en prenant en compte le temps de 
- * latence avant le traitement du msg 
- *  
- * @param date : la date recu
- * @param derive : le temps ecouler avant le traitement du msg 
+    <p><b>Function prototype:</b></p>
+  
+    <p><b>Summary:</b></p>
+
+    <p><b>Description:</b></p>
+
+    <p><b>Precondition:</b></p>
+
+    <p><b>Parameters:</b></p>
+
+    <p><b>Returns:</b></p>
+
+    <p><b>Example:</b></p>
+    <code>
+ 
+    </code>
+
+    <p><b>Remarks:</b></p>
  */
-void radioAlphaTRX_slave_update_date(uint8_t* date, int16_t derive);
+// TODO Insert declarations or function prototypes (right here) to leverage 
+// live documentation
 
-/**
- * machine a etat du systeme de communicatio du slave pendant la journee 
- */
-void radioAlphaTRX_slave_behaviour_of_daytime();
+#ifdef	__cplusplus
+extern "C" {
+#endif /* __cplusplus */
 
+    // TODO If C++ is being used, regular C code needs function names to have C 
+    // linkage so the functions can be used by the c code. 
 
- /****************                                         *********************/
- /*************************                     ********************************/
- /******************************************************************************/
- /******************************************************************************/
+#ifdef	__cplusplus
+}
+#endif /* __cplusplus */
 
 #endif	/* XC_HEADER_TEMPLATE_H */
 

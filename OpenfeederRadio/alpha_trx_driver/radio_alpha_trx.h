@@ -109,38 +109,11 @@
 #ifndef XC_HEADER_TEMPLATE_H
 #define	XC_HEADER_TEMPLATE_H
 
+/**------------------------>> I N C L U D E <<---------------------------------*/
 #include <xc.h> // include processor files - each processor file is guarded.  
 #include "../mcc_generated_files/pin_manager.h"
 #include "../driver/Services.h"
-// TODO Insert appropriate #include <>
-
-// TODO Insert C++ class definitions if appropriate
-
-// TODO Insert declarations
-
-// Comment a function and leverage automatic documentation with slash star star
-/**
-    <p><b>Function prototype:</b></p>
-  
-    <p><b>Summary:</b></p>
-
-    <p><b>Description:</b></p>
-
-    <p><b>Precondition:</b></p>
-
-    <p><b>Parameters:</b></p>
-
-    <p><b>Returns:</b></p>
-
-    <p><b>Example:</b></p>
-    <code>
- 
-    </code>
-
-    <p><b>Remarks:</b></p>
- */
-// TODO Insert declarations or function prototypes (right here) to leverage 
-// live documentation
+#include "../driver/timer.h"
 
 /**------------------------>> D E F I N I T I O N S <<-------------------------*/
 
@@ -622,49 +595,8 @@ typedef union {
     } REGbits;
 } STATUS_READ_VAL;
 
-/** Valeur des differents etats de l'automate StateMachine_RF_Service */
-typedef enum {
-    SM_RX_FRAME_IDLE, // en attente de reception
-    SM_RX_FRAME_IN_PROCESS, // en cours  de reception
-    SM_TX_FRAME_INIT, // en cours d'initialisation
-    SM_TX_FRAME_PREAMBLE, // en cours d'envoie du preambule a la trame
-    SM_TX_FRAME_SYNCHRON_PATTERN, // en cours d'envoie du motif synchrone pour la detection de trame par le module recepteur
-    SM_TX_FRAME_DATA_IN_PROGRESS, // en cours d'envoie des donnees a transmettre
-    SM_TX_FRAME_DUMMY_BYTE, // transmit ending data
-    SM_TX_FRAME_CLOSE_TRANSMITTER // transmit ending data
-} SM_RF_SERVICE_VAL;
-
-#define NB_PREAMBLE_TO_SEND         (3)     // nombre d'octet de synchronisation a envoyer
-#define NB_SYNCH_PATTERN_TO_SEND    (2)     // nombre d'octet de synchronisation a envoyer
-
-#define BUFFER1_USED                (0)     // memoire tampon 1 utilise
-#define BUFFER2_USED                (1)     // memoire tampon 2 utilise
-
-typedef enum {
-    NO_ERR, // 00: pas d'erreur en cours
-    FFOV, // 01: debordement de la FIFO (mode RX)
-    BUFFER_USED_OVERFLOW, // 10: debordement du nombre de buffer utilise
-    BUFFER_FRAME_OVERFLOW // 11: debordement du nombre de caractere a ecrire dans le buffer
-} RX_ERROR_VAL;
-
 /** ------------------------>> FIFO_RST_MODE_CMD_POR <<------------------------*/
 //FIXME: Correction des testes de 2 bits vers 1 bits
-
-/** Status d'etat du fonctionnement du module RF */
-typedef union {
-    uint8_t Val;
-
-    struct {
-        unsigned RX_Buffer_In_Use : 1; // flag permettant d'identifier la memoire tampon en cours d'utilisation (0 pour Buffer1 et 1 pour Buffer2)
-        unsigned RX_Buffer1_Read : 1; // flag de reception d'une nouvelle trame dans le buffer 1
-        unsigned RX_Buffer2_Read : 1; // flag de reception d'une nouvelle trame dans le buffer 2
-        unsigned TX_Mode_Start : 1; // flag
-        unsigned Error_FFOV : 1; // code d'erreur
-        unsigned Error_BUFFER_USED_OVERFLOW : 1; // code d'erreur
-        unsigned Error_BUFFER_FRAME_OVERFLOW : 1; // code d'erreur
-        unsigned Error : 1; // code d'erreur
-    } bits;
-} RF_STATUS_VAL;
 
 typedef union {
     uint16_t word;
@@ -762,11 +694,6 @@ int8_t radioAlphaTRX_msg_receive();
  /******************** PARAMETRE DE CAPTURE DE LA TRAME RECU *******************/
  /***************************                ***********************************/
  /*****************                                         ********************/
-
-#define FRAME_LENGTH          128 // Longueur total d'une trame en octet
-#define TIME_OUT_nIRQ           2 // 2ms 
-#define TIME_OUT_GET_FRAME   3000
-#define NB_BUF                  4
 
 /**
  * verification si on depasse la capacite de stockage des paquets 

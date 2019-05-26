@@ -22,9 +22,7 @@
 
  /**------------------------->> I N C L U D E S <<-----------------------------*/
 #include <stdio.h>
-
 #include "radio_alpha_trx.h"
-#include "../driver/timer.h"
  /******************************************************************************/
 
 /**-------------------------->> V A R I A B L E S <<---------------------------*/
@@ -91,9 +89,6 @@ void radioAlphaTRX_Init(void) {
     RF_StatusRead.Val = 0;
 //    do {
         RF_StatusRead.Val = radioAlphaTRX_Command( STATUS_READ_CMD ); // intitial SPI transfer added to avoid power-up problem
-#if defined(UART_DEBUG)
-    printf( "status: 0x%04X\r\n", RF_StatusRead.Val);
-#endif
 //    }while ( RF_StatusRead.bits.b14_POR );
     
     /**-------------> Frequency Setting Command @ 433 MHz <--------------------*/
@@ -101,9 +96,6 @@ void radioAlphaTRX_Init(void) {
     //    ALPHA_TRX433S_Control(0xA640); // Set operation frequency: Fc= 430+F*0.0025 , soit 430+1600*0.0025= 434 MHz avec 0x640 --> 110 0100 0000
     RF_FrequencySet.Val = FQ_SET_CMD_POR;
     RF_StatusRead.Val = radioAlphaTRX_Command(RF_FrequencySet.Val); // Set operation frequency: Fc= 430+F*0.0025 , soit 430+1600*0.0025= 434 MHz avec 0x640 --> 110 0100 0000 
-#if defined(UART_DEBUG)
-    printf( "status: 0x%04X\r\n", RF_StatusRead.Val);
-#endif
     
     /**-------------> FReceiver Control Command <------------------------------*/
     // Interrupt,FAST,200kHz,20dBm,-103dBm
@@ -177,9 +169,6 @@ void radioAlphaTRX_Received_Init(void) {
     radioAlphaTRX_Command(0x82C9);
     RF_FIFOandResetMode.bits.b1_ff = 1; // FIFO fill will be enabled after synchronize pattern reception
     radioAlphaTRX_Command(RF_FIFOandResetMode.Val); // --> 0xCA83
-#if defined(UART_DEBUG)
-    printf( "registre : 0x%04X\r\n", RF_FIFOandResetMode.Val);
-#endif
 }
 
 // Configuration en mode TX avant l'envoie de donnee
@@ -303,8 +292,8 @@ int8_t radioAlphaTRX_receive(uint8_t buffer[FRAME_LENGTH]) {
 }
 
 void radioAlphaTRX_capture_frame() {
-    if ((size_buf[B_Write] = radioAlphaTRX_receive(BUF[B_Write]))) { // seulement si je recupère quelque chose
-        set_tmr_msg_recu_timeout(B_Write, TIME_OUT_GET_FRAME); // pour l'instant on fait 3 seconde 
+    set_tmr_msg_recu_timeout(B_Write, TIME_OUT_GET_FRAME); 
+    if ((size_buf[B_Write] = radioAlphaTRX_receive(BUF[B_Write]))) { // seulement si je recupère quelque chose 
         B_Write = (B_Write+1)%NB_BUF;
         if(B_Write-1 == B_Read && Error_FFOV == 1) {
             B_Read = (B_Read+1)%NB_BUF;  

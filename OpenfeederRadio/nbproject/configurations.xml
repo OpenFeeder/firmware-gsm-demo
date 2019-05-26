@@ -32,6 +32,7 @@
       <itemPath>alpha_trx_driver/radio_alpha_trx.h</itemPath>
       <itemPath>driver/timer.h</itemPath>
       <itemPath>driver/radio_alpha_trx_slave_api.h</itemPath>
+      <itemPath>driver/master_api.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LinkerScript"
                    displayName="Linker Files"
@@ -67,6 +68,7 @@
       <itemPath>alpha_trx_driver/radio_alpha_trx.c</itemPath>
       <itemPath>driver/timer.c</itemPath>
       <itemPath>driver/radio_alpha_trx_slave_api.c</itemPath>
+      <itemPath>driver/master_api.c</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"

@@ -50,7 +50,7 @@ void maitre_init_context(int16_t s0, int16_t s1, int16_t s2) {
 
 
 int8_t mster_send_cmd_rf(uint8_t* cmd, int8_t tpCMD, uint16_t dest, int delais, int8_t nbFois) {
-    uint8_t paquetCmd[TAILE_MAX_PAQUET];
+    uint8_t paquetCmd[FRAME_LENGTH];
     int8_t size_cmd = srv_create_paket_rf(paquetCmd, cmd, dest, srv_getIDM(), tpCMD, '0'); // pour l'instant 
     return srv_send_rf(paquetCmd, size_cmd, delais, nbFois);
 }
@@ -66,7 +66,7 @@ int8_t mster_send_date(int delais, int8_t nbFois) {
         get_time(&hf);
         //creation de du format pour l'envoie  ensEsclave[0].logRecup = 0;
         serial_buffer(date, hf);
-        uint8_t paquetDate[TAILE_MAX_PAQUET];
+        uint8_t paquetDate[FRAME_LENGTH];
         int8_t size_h = srv_create_paket_rf(paquetDate, date, srv_getBroadcast(), srv_getIDM(), 
                 srv_horloge(), '0');  
         ret = srv_send_rf(paquetDate, size_h, delais, 1);
@@ -76,7 +76,7 @@ int8_t mster_send_date(int delais, int8_t nbFois) {
 
 
 int8_t mster_send_config_rf(uint8_t *config[], int *ptrConfig, int nbLines, uint16_t escalve) {
-    uint8_t paquetEnvoi[TAILE_MAX_PAQUET];
+    uint8_t paquetEnvoi[FRAME_LENGTH];
     int8_t size = 0; int16_t curseur = 0;
     //on envoie 2 par 2;
     int8_t w = 1;
@@ -115,7 +115,7 @@ int8_t mster_send_config_rf(uint8_t *config[], int *ptrConfig, int nbLines, uint
 }
 
 void maitre_envoie_ack(int8_t s, int8_t paquetAttendu) {
-    uint8_t paquetEnvoi[TAILE_MAX_PAQUET];
+    uint8_t paquetEnvoi[FRAME_LENGTH];
     int size = srv_create_paket_rf(paquetEnvoi, "NACK", ensEsclave[s].idEsclave, srv_getIDM(), 
                             srv_ack(), paquetAttendu);
     srv_send_rf(paquetEnvoi, size, 20, 2);
@@ -125,35 +125,35 @@ int8_t mster_get_log_rf(int8_t esclave) {
     int MAX_TIME_OUT = 10;
     int8_t MAX_ATTENTE = 5; // x fois le paquet de debut
     
-    uint8_t SAVE_LOG[20][TAILE_MAX_PAQUET];
+    uint8_t SAVE_LOG[20][FRAME_LENGTH];
     
-    Paquet paquetRecu;
+    Frame paquetRecu;
     uint8_t paquetAttendu = ensEsclave[esclave].ptrLog;
     int8_t fin = 0; int8_t stopErr = 0;
     int8_t nbTimeOut = 0; int8_t atendConnect = 0;
     int delais = 20; // ==> x10ms
     while (!fin && !stopErr) {
         if (srv_listen_rf(delais, &paquetRecu, srv_getIDM()) > 0) {
-            if (paquetRecu.typeDePaquet == srv_data()) {
+            if (paquetRecu.Type_Msg == srv_data()) {
                 //data recu 
                 atendConnect = 0;
-                if (paquetRecu.numPaquet == paquetAttendu) {
+                if (paquetRecu.ID_Msg == paquetAttendu) {
                     nbTimeOut /= 2;
                     printf("Master : paquet attendu recu %d : %s\n", paquetAttendu, paquetRecu.data);
-                    srv_cpy(SAVE_LOG[paquetAttendu-1], paquetRecu.data, TAILE_MAX_PAQUET);
+                    srv_cpy(SAVE_LOG[paquetAttendu-1], paquetRecu.data, FRAME_LENGTH);
                     paquetAttendu++;
                 }else {
                     printf("Master : ce n'est pas le paquet attendu %d vs %d\n", paquetAttendu,
-                            paquetRecu.numPaquet);
+                            paquetRecu.ID_Msg);
                     //traansmission de l'ack 
                     maitre_envoie_ack(esclave, paquetAttendu);
                 }
-            }else if (paquetRecu.typeDePaquet == srv_fin_trans()) {
-                printf("Master : fin de reception de donnée %d\n", paquetRecu.numPaquet);
+            }else if (paquetRecu.Type_Msg == srv_fin_trans()) {
+                printf("Master : fin de reception de donnée %d\n", paquetRecu.ID_Msg);
                 fin = 1;
             }else {
                 // ce n'est pas le type de paquet que j'attens 
-                printf("Master : ce n'est pas le type de paquet que j'attends %d\n", paquetRecu.typeDePaquet);
+                printf("Master : ce n'est pas le type de paquet que j'attends %d\n", paquetRecu.Type_Msg);
                 maitre_envoie_ack(esclave, paquetAttendu);
             }
             srv_dec_delais(&delais, 50, 5); //diminue de 50 ms et le seul de 500 ms
@@ -221,18 +221,18 @@ int8_t mster_get_log_for_all() {
 
 
 
-int8_t mster_lesten_slave(int delais, Paquet *errRecu) {
+int8_t mster_lesten_slave(int delais, Frame *errRecu) {
     return srv_listen_rf(delais, errRecu, srv_getIDM());
 }
 
 void mster_send_error_ack(int delais, int8_t nbFois, int16_t slave) {
-    uint8_t ack[TAILE_MAX_PAQUET];
+    uint8_t ack[FRAME_LENGTH];
     int8_t size = srv_create_paket_rf(ack, "ACK", slave, srv_getIDM(), srv_ack(), '0');
     srv_send_rf(ack, size, delais, nbFois);
 }
 
-int8_t mster_trait_error(Paquet *errRecu) {
-    mster_send_error_ack(5, 5, errRecu->pSrc); // on reviendra changer si c'est trop rapide 
+int8_t mster_trait_error(Frame *errRecu) {
+    mster_send_error_ack(5, 5, errRecu->ID_Src); // on reviendra changer si c'est trop rapide 
     //transmission de l'erreur aux serveur 
     printf("Master : transmettre l'erreur au serveur\n");
     //TODO

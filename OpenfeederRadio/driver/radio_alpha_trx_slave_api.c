@@ -24,12 +24,22 @@
 void radioAlphaTRX_slave_update_date(uint8_t* date, int16_t derive) {
     struct heure_format hf;
     deserial_buffer(date, &hf);
+    hf.s += 1;
+    //TOASK : A voir si c'est nécessaire 
+    if (hf.s == 60){ 
+        hf.s = 0;
+        hf.m += 1;
+        if (hf.m == 60) {
+            hf.m = 0;
+            hf.h += 1; 
+        }
+    }
     set_time(hf);
 }
 
 
 void radioAlphaTRX_slave_behaviour_of_daytime() {
-    Paquet msg_receive;
+    Frame msg_receive;
     
     //TOASK : est ce que on traite un msg et on rend la main ou on traite toutes les msg presente ?
     //TOASK : Pour l'instant je traite tout car pas d'importance 
@@ -40,7 +50,7 @@ void radioAlphaTRX_slave_behaviour_of_daytime() {
         incB_Read();
         
         if(srv_decode_packet_rf(getBuf(i), &msg_receive, getSizeBuf(i), 37) > 0) { // poo test 37
-            if (msg_receive.typeDePaquet == srv_horloge()) {
+            if (msg_receive.Type_Msg == srv_horloge()) {
                 radioAlphaTRX_slave_update_date(msg_receive.data, get_tmr_msg_recu_timeout(i));
             }// il y'aura d'autes type de paquet ici 
         }
