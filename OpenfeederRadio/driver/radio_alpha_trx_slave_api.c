@@ -44,6 +44,6 @@ void radioAlphaTRX_slave_behaviour_of_daytime() {
     if(srv_decode_packet_rf(radioAlphaTRX_read_buf(), &msg_receive, radioAlphaTrx_get_size_buf(), 37) > 0) { // poo test 37
         if (msg_receive.Type_Msg == srv_horloge()) {
             radioAlphaTRX_slave_update_date(msg_receive.data, get_tmr_msg_recu_timeout());
-        }// il y'aura d'autes type de paquet ici 
+        }else if ()
     }
 }
