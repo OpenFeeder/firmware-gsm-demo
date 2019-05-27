@@ -21,6 +21,7 @@ uint8_t srv_ack() { return 3; }
 uint8_t srv_horloge() { return 4; }
 uint8_t srv_cmd() { return 5; }
 uint8_t srv_fin_trans() { return 6; }
+uint8_t srv_fin_block() { return 7; }
 uint8_t srv_config() { return 8; }
 //notre identifiant @ 
 uint16_t  srv_getIDS1() { return 37;}

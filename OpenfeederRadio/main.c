@@ -9,6 +9,7 @@
 #include "driver/trx.h"
 #include "driver/rx.h"
 #include "test/test.h"
+#include "driver/master_api.h"
 
 
 int main(void) {
@@ -22,7 +23,7 @@ int main(void) {
     //test_timer();
     //test_tx();
     
-    test_update_date_receive(); 
-    //test_update_date_send();
+    //test_update_date_receive(); 
+    master_state_machine();
     return -1;
 }

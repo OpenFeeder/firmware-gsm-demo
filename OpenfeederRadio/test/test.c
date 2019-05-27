@@ -54,16 +54,9 @@ void test_rx() {
     while (1) {
         if (getFlag()==1){
             resetFlag();
-            if (getB_Read() != getB_Write()) {
-                printf("tps %d \n", 3000-get_tmr_msg_recu_timeout(getB_Read()));
-                printf("recu %s \n", getBuf(getB_Read()));
-                setB_Read((getB_Read()+1)%4);
-                printf("B_Read %d vs B_Write %d\n", getB_Read(), getB_Write());
-            }else if (getError_FFOV()) {
-                printf("tps %d \n", 3000-get_tmr_msg_recu_timeout(getB_Read()));
-                resetError_FFOV();
-                printf("recu %s \n", getBuf(getB_Read()));
-                printf("B_Read %d vs B_Write %d\n", getB_Read(), getB_Write());
+            if (radioAlphaTRX_is_receive_msg()) {
+                printf("tps %d \n", TIME_OUT_GET_FRAME-get_tmr_msg_recu_timeout());
+                printf("recu %s \n", radioAlphaTRX_read_buf());
             }
         }
     }
@@ -152,7 +145,7 @@ void test_update_date_receive() {
             RTCC_TimeGet(&t); 
             printf("heur slave ==> %dh:%dmin:%ds\n", t.tm_hour, t.tm_min, t.tm_sec);
 #endif
-        }else if (radioAlphaTRX_msg_receive()) {
+        }else if (radioAlphaTRX_is_receive_msg()) {
             radioAlphaTRX_slave_behaviour_of_daytime();
         }
     }

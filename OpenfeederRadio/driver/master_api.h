@@ -23,7 +23,7 @@
  * 
  * _____________________________________________________________________________
  *
- *           ENSEMBLE DES SERVICES RENDU AU SYSTEME DE COM RADIO  (.h)
+ *                         MASTER API (.h)
  * _____________________________________________________________________________
  *
  * Titre            : Mise en oeuvre de l'api et la machie a etat du master   
@@ -55,7 +55,15 @@
  /***************************                ***********************************/
  /*****************                                 ****************************/
 
+/**
+ * envoie la date a tout les slaves present 
+ * @return 
+ *      0 : si non envoye
+ *      1 : si oui 
+ */
+int8_t master_send_date_rf();
 
+void master_state_machine();
 
 /****************                                         *********************/
  /*************************                     ********************************/

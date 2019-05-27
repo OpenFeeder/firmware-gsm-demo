@@ -84,17 +84,15 @@ void set_tmr_wait_rqst_timeout(uint16_t set);
 
 /**
  * permet de savoir combient de temps (en ms) le buffer i est remplie 
- * @param i : indice du buffer en question 
- * @return : le temps ecoule en (ms) depuis le dernier remplissage
+ * @return : le temps ecoule en (ms) depuis le dernier remplissage du buffer 
  */
-uint16_t get_tmr_msg_recu_timeout(int8_t i);  
+uint16_t get_tmr_msg_recu_timeout();  
 /**
  * determine le temps maxe pour prendre en compte un msg de type horloge,
  * au dela le paquet n'est pas utilisable 
- * @param i : l'indice du buffeur 
  * @param set : le temps en question 
  */
-void set_tmr_msg_recu_timeout(int8_t i, uint16_t set);
+void set_tmr_msg_recu_timeout(uint16_t set);
 
 /**
  * nombre de temps en (ms) que l'on s'autorise à attendre un octet en reception 

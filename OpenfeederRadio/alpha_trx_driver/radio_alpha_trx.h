@@ -681,14 +681,6 @@ int8_t radioAlphaTRX_wait_nIRQ(int timeout);
  */
 void radioAlphaTRX_capture_frame();
 
-/**
- * 
- * @return : 
- *      0 si aucun msg n'est present  
- *      1 si non 
- */
-int8_t radioAlphaTRX_msg_receive();
-
  /******************************************************************************/
  /******************************************************************************/
  /******************** PARAMETRE DE CAPTURE DE LA TRAME RECU *******************/
@@ -696,66 +688,27 @@ int8_t radioAlphaTRX_msg_receive();
  /*****************                                         ********************/
 
 /**
- * verification si on depasse la capacite de stockage des paquets 
- * @return 1 si overflow : 0 si non 
+ * <pres condition : receive_msg == 1 > avant l'apelle de cette fonction 
+ * @return : le contenue du buffer
  */
-
-int8_t getError_FFOV();
-/**
- * remet a 0 la condition d'overflow 
- */
-void resetError_FFOV();
+int8_t * radioAlphaTRX_read_buf();
 
 /**
  * 
- * @return : le pointeur sur le prochain buffeur a lire 
- */
-int8_t getB_Read();
-
-/**
- * incremente le pointeur de lecture des paquet 
- * @param set : l'increment 
- */
-void setB_Read(int8_t set);
-
-/**
- * 
- * @return : le pointeur d'ecriture 
- */
-int8_t getB_Write();
-
-/**
- * incremente le pointeur d'ecriture 
- * @param set : l'increment 
- */
-void setB_Write(int8_t set);
-
-/**
- * incremente le pointeur de lecture et enleve le flag overflow
- * !!Attention : cette fonction ne fait aucune verification c'est
- * a l'utilisateur de savoir comment l'utiliser 
- */
-void incB_Read();
-
-/**
- * 
- * @param indice : le buffer demander 
  * @return : la taille du buffer indice
  */
-int8_t getSizeBuf(int8_t indice);
+int8_t radioAlphaTrx_get_size_buf();
 
 /**
- * 
- * @param indice : < NB_BUF et >= 0
- * @return 
+ * des qu'un msg est recu on declence un timer qui corespond au temps que master
+ * va ecouter avant de decider qu'il y a timeout 
+ *  
+ * @return :
+ *      0 : pas de msg ou n'est plus d'actalite 
+ *      1 : un msg est presnt et il est toujours d'actualité 
  */
-int8_t * getBuf(int8_t indice);
+int8_t radioAlphaTRX_is_receive_msg();
 
-/**
- * eface un buffeur 
- * @param indice
- */
-void resetBuf(int8_t indice);
  /****************                                         *********************/
  /*************************                     ********************************/
  /******************************************************************************/

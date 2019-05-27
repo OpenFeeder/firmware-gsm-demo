@@ -34,54 +34,6 @@ RX_FIFO_READ_CMD_VAL RF_FIFO_Read; // Receiver FIFO Read
 FIFO_RST_MODE_CMD_VAL RF_FIFOandResetMode; // FIFO and Reset Mode Command
 STATUS_READ_VAL RF_StatusRead; // Status Read Command
 
-
- /******************************************************************************/
- /******************************************************************************/
- /******************** PARAMETRE DE CAPTURE DE LA TRAME RECU *******************/
- /***************************                ***********************************/
- /*****************                                         ********************/
-
-// 4 buffer remplie de circulairement 
-volatile uint8_t BUF[NB_BUF][FRAME_LENGTH];
-volatile uint8_t size_buf[NB_BUF];
-volatile uint8_t B_Read = 0; 
-volatile uint8_t B_Write = 0;
-volatile uint8_t Error_FFOV = 0;
-
-int8_t getError_FFOV() { return Error_FFOV; }
-void resetError_FFOV() { Error_FFOV = 0;}
-
-int8_t getB_Read() { return B_Read; }
-void setB_Read(int8_t set) { B_Read = set; }
-
-int8_t getB_Write() { return B_Write; }
-void setB_Write(int8_t set) { B_Write = set; }
-
-void incB_Read() {
-    setB_Read((getB_Read()+1)%NB_BUF); 
-    if (getB_Read() == getB_Write())
-        resetError_FFOV(); // on est plus en overflow
-}
-
-
-int8_t getSizeBuf(int8_t indice) {
-    if (indice < NB_BUF && indice >= 0)
-        return size_buf[indice];
-    return 0;
-}
-int8_t * getBuf(int8_t indice) { 
-    if (indice < NB_BUF && indice >= 0) {
-        return BUF[indice];
-    }
-    return NULL;
-}
-
-void resetBuf(int8_t indice) { 
-    if (indice < NB_BUF && indice >= 0) {
-        memset(BUF[indice], 0, FRAME_LENGTH );
-    }
-}
-
 /**-------------------------->> D E F I N I T I O N <<-------------------------*/
 
 void radioAlphaTRX_Init(void) {
@@ -271,8 +223,24 @@ int8_t radioAlphaTRX_wait_nIRQ(int timeout) {
     return 1;
 }
 
+ /******************************************************************************/
+ /******************************************************************************/
+ /******************** PARAMETRE DE CAPTURE DE LA TRAME RECU *******************/
+ /******************************************************************************/
+ /******************************************************************************/
+// 4 buffer remplie de circulairement 
+volatile uint8_t BUF[FRAME_LENGTH];
+volatile uint8_t size_buf = 0;
+volatile uint8_t receive_msg = 0; // 0 non 1 oui
 
-int8_t radioAlphaTRX_msg_receive() { return B_Read != B_Write || Error_FFOV; }
+int8_t radioAlphaTrx_get_size_buf() { return size_buf; }
+
+int8_t radioAlphaTRX_is_receive_msg() { return receive_msg; }
+
+int8_t * radioAlphaTRX_read_buf() {
+    receive_msg = 0;
+    return BUF;
+}
 
 int8_t radioAlphaTRX_receive(uint8_t buffer[FRAME_LENGTH]) {
     WORD_VAL_T receiveData;
@@ -281,7 +249,7 @@ int8_t radioAlphaTRX_receive(uint8_t buffer[FRAME_LENGTH]) {
         if (0 == rdy(TIME_OUT_nIRQ)) {
             return 0;
         }
-        receiveData.word = ecrire_reg(0xB000);
+        receiveData.word = radioAlphaTRX_Command(0xB000);
         buffer[i] = receiveData.byte.low;
         if (receiveData.byte.low == 0) {
             LED_BLUE_Toggle();
@@ -292,16 +260,11 @@ int8_t radioAlphaTRX_receive(uint8_t buffer[FRAME_LENGTH]) {
 }
 
 void radioAlphaTRX_capture_frame() {
-    set_tmr_msg_recu_timeout(B_Write, TIME_OUT_GET_FRAME); 
-    if ((size_buf[B_Write] = radioAlphaTRX_receive(BUF[B_Write]))) { // seulement si je recupère quelque chose 
-        B_Write = (B_Write+1)%NB_BUF;
-        if(B_Write-1 == B_Read && Error_FFOV == 1) {
-            B_Read = (B_Read+1)%NB_BUF;  
-        }else if (B_Write == B_Read) {
-            Error_FFOV = 1; // on
-        }
-    }
+    set_tmr_msg_recu_timeout(TIME_OUT_GET_FRAME); // on demare le timer, car le bufer est probablement remplie 
+    if ((size_buf = radioAlphaTRX_receive(BUF)))
+        receive_msg = 1;
     //on se remet en ecoute 
     radioAlphaTRX_Init();
     radioAlphaTRX_Received_Init();
 }
+

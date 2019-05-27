@@ -40,19 +40,10 @@ void radioAlphaTRX_slave_update_date(uint8_t* date, int16_t derive) {
 
 void radioAlphaTRX_slave_behaviour_of_daytime() {
     Frame msg_receive;
-    
-    //TOASK : est ce que on traite un msg et on rend la main ou on traite toutes les msg presente ?
-    //TOASK : Pour l'instant je traite tout car pas d'importance 
-
-    while (radioAlphaTRX_msg_receive()) { // tant qu'un msg est présent 
-        //recuperer le msg | le decapsuler | verifier s'il est mien
-        int i = getB_Read();
-        incB_Read();
-        
-        if(srv_decode_packet_rf(getBuf(i), &msg_receive, getSizeBuf(i), 37) > 0) { // poo test 37
-            if (msg_receive.Type_Msg == srv_horloge()) {
-                radioAlphaTRX_slave_update_date(msg_receive.data, get_tmr_msg_recu_timeout(i));
-            }// il y'aura d'autes type de paquet ici 
-        }
+    //recuperer le msg | le decapsuler | verifier s'il est mien   
+    if(srv_decode_packet_rf(radioAlphaTRX_read_buf(), &msg_receive, radioAlphaTrx_get_size_buf(), 37) > 0) { // poo test 37
+        if (msg_receive.Type_Msg == srv_horloge()) {
+            radioAlphaTRX_slave_update_date(msg_receive.data, get_tmr_msg_recu_timeout());
+        }// il y'aura d'autes type de paquet ici 
     }
 }
