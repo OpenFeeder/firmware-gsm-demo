@@ -42,20 +42,20 @@
     SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
     (INCLUDING BUT NOT LIMITED TO ANY DEFENSE THEREOF), OR OTHER SIMILAR COSTS.
 
-*/
+ */
 
 
 /**
     Section: Includes
-*/
+ */
 #include <xc.h>
 #include "pin_manager.h"
+#include "../alpha_trx_driver/radio_alpha_trx.h"
 
 /**
     void PIN_MANAGER_Initialize(void)
-*/
-void PIN_MANAGER_Initialize(void)
-{
+ */
+void PIN_MANAGER_Initialize(void) {
     /****************************************************************************
      * Setting the Output Latch SFR(s)
      ***************************************************************************/
@@ -100,15 +100,37 @@ void PIN_MANAGER_Initialize(void)
      ***************************************************************************/
     __builtin_write_OSCCONL(OSCCON & 0xbf); // unlock PPS
 
-    RPINR0bits.INT1R = 0x0018;   //RC8->EXT_INT:INT1;
-    RPINR18bits.U1RXR = 0x0005;   //RB5->UART1:U1RX;
-    RPINR1bits.INT2R = 0x000A;   //RB10->EXT_INT:INT2;
-    RPOR4bits.RP9R = 0x0007;   //RB9->SPI1:SDO1;
-    RPINR20bits.SDI1R = 0x0008;   //RB8->SPI1:SDI1;
-    RPOR3bits.RP6R = 0x0003;   //RB6->UART1:U1TX;
-    RPOR10bits.RP20R = 0x0008;   //RC4->SPI1:SCK1OUT;
+    RPINR0bits.INT1R = 0x0018; //RC8->EXT_INT:INT1;
+    RPINR18bits.U1RXR = 0x0005; //RB5->UART1:U1RX;
+    RPOR4bits.RP9R = 0x0007; //RB9->SPI1:SDO1;
+    RPINR20bits.SDI1R = 0x0008; //RB8->SPI1:SDI1;
+    RPOR3bits.RP6R = 0x0003; //RB6->UART1:U1TX;
+    RPOR10bits.RP20R = 0x0008; //RC4->SPI1:SCK1OUT;
 
     __builtin_write_OSCCONL(OSCCON | 0x40); // lock   PPS
 
+    /****************************************************************************
+     * Interrupt On Change for group CNEN2 - any
+     ***************************************************************************/
+    CNEN2bits.CN16IE = 1; // Pin : RB10
+
+    IEC1bits.CNIE = 1; // Enable CNI interrupt 
 }
 
+/* Interrupt service routine for the CNI interrupt. */
+void __attribute__((interrupt, no_auto_psv)) _CNInterrupt(void) {
+    if (IFS1bits.CNIF == 1) {
+        // Clear the flag
+        IFS1bits.CNIF = 0;
+        
+        if (nIRQ_GetValue() == 0) {
+            STATUS_READ_VAL RF_StatusRead;
+            RF_StatusRead.Val = radioAlphaTRX_Command(STATUS_READ_CMD); //lecture du registre status 
+            if (RF_StatusRead.bits.b15_RGIT_FFIT) { // on verifie si la fifo est remplie 
+                IEC1bits.CNIE = 0; // on desactive les interuption IOC le temps de la recuperation de la trame 
+                radioAlphaTRX_capture_frame();
+                IEC1bits.CNIE = 1; //on reactive une fois la trame recupere
+            }
+        }
+    }
+}

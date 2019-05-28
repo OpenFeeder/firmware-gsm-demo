@@ -86,11 +86,7 @@ void __attribute__ ( ( interrupt, no_auto_psv ) ) _INT1Interrupt(void)
 void __attribute__ ( ( interrupt, no_auto_psv ) ) _INT2Interrupt(void)
 {
     //***User Area Begin->code: INT2 - External Interrupt 2***
-    if (nFFIT_GetValue()) {
-        EX_INT2_InterruptDisable(); 
-        radioAlphaTRX_capture_frame();
-        EX_INT2_InterruptEnable(); 
-    }
+
     //***User Area End->code: INT2 - External Interrupt 2***
     EX_INT2_InterruptFlagClear();
 }
@@ -123,5 +119,4 @@ void EXT_INT_Initialize(void)
      ********/
     EX_INT2_InterruptFlagClear();   
     EX_INT2_NegativeEdgeSet();
-    EX_INT2_InterruptEnable();
 }
