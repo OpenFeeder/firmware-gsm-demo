@@ -69,6 +69,7 @@
 #define SIZE_DATE                    40
 #define TIME_OUT_nIRQ                 2 // 2ms 
 #define TIME_OUT_GET_FRAME         3000
+#define TIME_OUT_WAIT_RQST        30000
 #define NB_BUF                        4
 #define NB_ERR_BUF                   10 // nombre d'errerur possible 
 #define SEND_HORLOG_TIMEOUT       10000

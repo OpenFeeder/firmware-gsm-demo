@@ -687,6 +687,18 @@ void radioAlphaTRX_capture_frame();
  /***************************                ***********************************/
  /*****************                                         ********************/
 
+
+/**
+ * 
+ * @param mode_rf
+ */
+void radioAlphaTRX_set_send_mode(int8_t mode_rf);
+/**
+ * 
+ * @return 
+ */
+int8_t radioAlphaTRX_is_send_mode();
+
 /**
  * <pres condition : receive_msg == 1 > avant l'apelle de cette fonction 
  * @return : le contenue du buffer
@@ -697,7 +709,7 @@ int8_t * radioAlphaTRX_read_buf();
  * 
  * @return : la taille du buffer indice
  */
-int8_t radioAlphaTrx_get_size_buf();
+int8_t radioAlphaTRX_get_size_buf();
 
 /**
  * des qu'un msg est recu on declence un timer qui corespond au temps que master

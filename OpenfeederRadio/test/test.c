@@ -103,25 +103,12 @@ void test_update_date_send() {
 //        printf("HEURE ==> %dh:%dmin:%ds\n", t.tm_hour, t.tm_min, t.tm_sec);
 //#endif
     while (1) {
-        if (getFlag()) {
-            resetFlag();
-#if defined(UART_DEBUG)
-            RTCC_TimeGet(&t); 
-            printf("Fin ==> %dh:%dmin:%ds\n", t.tm_hour, t.tm_min, t.tm_sec);
-#endif
-        }else if (!get_tmr_horloge_timeout()) {
-//#if defined(UART_DEBUG)
-//            printf("Master : date envoye...\n");
-//#endif
+       if (!get_tmr_horloge_timeout()) {
             get_time(&hf);
             //creation de du format pour l'envoie  ensEsclave[0].logRecup = 0;
             serial_buffer(date, hf);
             int8_t size_h = srv_create_paket_rf(date_send, date, srv_getBroadcast(), srv_getIDM(), 
                 srv_horloge(), '0');
-//#if defined(UART_DEBUG)
-//         RTCC_TimeGet(&t); 
-//         printf("trans : %dh:%dm:%ds\n", t.tm_hour, t.tm_min, t.tm_sec);
-//#endif
             if (radioAlphaTRX_Send_Init()) {
                 radioAlphaTRX_Send_data(date_send, size_h);
             }

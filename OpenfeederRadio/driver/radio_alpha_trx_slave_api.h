@@ -75,7 +75,7 @@ int8_t radioAlphaTRX_slave_get_error();
 /**
  * 
  */
-void radioAlphaTRX_slave_update_buf_ptr();
+void radioAlphaTRX_slave_update_buf_err_ptr();
 
 
 /**

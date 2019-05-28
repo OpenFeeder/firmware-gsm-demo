@@ -48,8 +48,8 @@ void set_tmr_horloge_timeout_x1000_ms(uint16_t timeout) {
 } 
 
 
-uint16_t get_tmr_wait_rqst_timeout(); //on s'en sert pour le poulling 
-void set_tmr_wait_rqst_timeout(uint16_t set);
+uint16_t get_tmr_wait_rqst_timeout() { return tmr_wait_rqst_timeout; } //on s'en sert pour le poulling 
+void set_tmr_wait_rqst_timeout(uint16_t set) { tmr_wait_rqst_timeout = set; }
 
 uint16_t get_tmr_msg_recu_timeout() { 
     int16_t temp = tmr_msg_recu_timeout;

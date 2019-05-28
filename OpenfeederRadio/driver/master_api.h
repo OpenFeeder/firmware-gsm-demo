@@ -63,7 +63,7 @@
  */
 int8_t master_send_date_rf();
 
-void master_state_machine();
+void master_state_machine_of_daytime();
 
 /****************                                         *********************/
  /*************************                     ********************************/

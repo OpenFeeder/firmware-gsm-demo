@@ -232,8 +232,13 @@ int8_t radioAlphaTRX_wait_nIRQ(int timeout) {
 volatile uint8_t BUF[FRAME_LENGTH];
 volatile uint8_t size_buf = 0;
 volatile uint8_t receive_msg = 0; // 0 non 1 oui
+volatile uint8_t send_mode; // O non 1 oui 
 
-int8_t radioAlphaTrx_get_size_buf() { return size_buf; }
+
+int8_t radioAlphaTRX_is_send_mode() { return send_mode; }
+void radioAlphaTRX_set_send_mode(int8_t mode_rf) { send_mode = mode_rf; }
+
+int8_t radioAlphaTRX_get_size_buf() { return size_buf; }
 
 int8_t radioAlphaTRX_is_receive_msg() { return receive_msg; }
 
@@ -251,7 +256,6 @@ int8_t radioAlphaTRX_receive(uint8_t buffer[FRAME_LENGTH]) {
         receiveData.word = radioAlphaTRX_Command(0xB000);
         buffer[i] = receiveData.byte.low;
         if (receiveData.byte.low == 0) {
-            LED_BLUE_Toggle();
             break;
         }
     }
@@ -260,8 +264,9 @@ int8_t radioAlphaTRX_receive(uint8_t buffer[FRAME_LENGTH]) {
 
 void radioAlphaTRX_capture_frame() {
     set_tmr_msg_recu_timeout(TIME_OUT_GET_FRAME); // on demare le timer, car le bufer est probablement remplie 
-    if ((size_buf = radioAlphaTRX_receive(BUF)))
+    if ((size_buf = radioAlphaTRX_receive(BUF))) {
         receive_msg = 1;
+    }
     //on se remet en ecoute 
     radioAlphaTRX_Init();
     radioAlphaTRX_Received_Init();

@@ -30,9 +30,15 @@ uint8_t err_evo = 0;
 uint8_t last_send; // 0 si erreur | 1 si infos   
 //______________________________________________________________________________
 
-/**-------------------------->> I M P L E M E N T <<---------------------------*/
+/******************************************************************************/
+/******************************************************************************/
+/********************* COUCHE APPLICATION DU SLAVE  ***************************/
+/***************************                ***********************************/
+
+/*****************                                         ********************/
 
 void radioAlphaTRX_save_error(int8_t num_error) { // vraiment a voir 
+    LED_GREEN_Toggle();
     BUF_ERR[p_write_err_buf] = num_error;
     p_write_err_buf = (p_write_err_buf + 1) % NB_ERR_BUF;
     if (p_read_err_buf == p_write_err_buf) {
@@ -41,9 +47,7 @@ void radioAlphaTRX_save_error(int8_t num_error) { // vraiment a voir
         p_read_err_buf = (p_read_err_buf + 1) % NB_ERR_BUF;
     }
 }
-
-//ret 0 alors pas d'erreur  
-
+//ret 0 alors pas d'erreur 
 int8_t radioAlphaTRX_slave_get_error() {
     int8_t i = 0;
     if (p_read_err_buf != p_write_err_buf || err_evo) { // il y' a une err
@@ -52,39 +56,46 @@ int8_t radioAlphaTRX_slave_get_error() {
     return i;
 }
 
-void radioAlphaTRX_slave_update_buf_ptr() {
+int8_t radioAlphaTRX_slave_send_msg_rf(uint8_t type_msg, uint8_t * data, uint8_t id_msg) {
+    radioAlphaTRX_set_send_mode(1);
+    uint8_t data_send[FRAME_LENGTH];
+    int8_t ret = 0;
+    int8_t size_h = srv_create_paket_rf(data_send, data, srv_getIDM(), srv_getIDS1(), type_msg, id_msg);
+    if (radioAlphaTRX_Send_Init()) {
+        radioAlphaTRX_Send_data(data_send, size_h);
+        set_tmr_horloge_timeout_x1000_ms(SEND_HORLOG_TIMEOUT); // on attend a vouveau
+        ret = 1;
+    }
+
+    radioAlphaTRX_set_send_mode(0);
+    // pour l'instant on fait ça on verra si on trouve une solution propre plus tard 
+    //on se remet en ecoute 
+    radioAlphaTRX_Init();
+    radioAlphaTRX_Received_Init();
+    return ret;
+}
+
+void radioAlphaTRX_slave_update_buf_err_ptr() {
     p_read_err_buf = (p_read_err_buf + 1) % NB_ERR_BUF;
     if (p_read_err_buf == p_write_err_buf && err_evo)
         err_evo = 0;
 }
 
 void radioAlphaTRX_slave_send_err(int8_t *err_to_send) {
-    uint8_t date_send[ERROR_LENGTH];
-    int8_t size_err = srv_create_paket_rf(date_send, err_to_send, srv_getIDM(),
-                                          srv_getIDS1(), srv_err(), '0');
-    if (radioAlphaTRX_Send_Init()) {
-        radioAlphaTRX_Send_data(date_send, size_err);
-    }
-    radioAlphaTRX_Init();
-    radioAlphaTRX_Received_Init();
+    radioAlphaTRX_slave_send_msg_rf (srv_err(), err_to_send, 1);
 }
 
 void radioAlphaTRX_slave_send_nothing() {
-    uint8_t date_send[ERROR_LENGTH];
-    int8_t size_err = srv_create_paket_rf(date_send, "n", srv_getIDM(),
-                                          srv_getIDS1(), srv_nothing(), '0');
-    if (radioAlphaTRX_Send_Init()) {
-        radioAlphaTRX_Send_data(date_send, size_err);
-    }
-    radioAlphaTRX_Init();
-    radioAlphaTRX_Received_Init();
+    radioAlphaTRX_slave_send_msg_rf (srv_nothing(), "NOTHING", 1);
 }
 
 void radioAlphaTRX_slave_update_date(uint8_t* date, int16_t derive) {
     struct heure_format hf;
     deserial_buffer(date, &hf);
+
+    //TOASK : etant donner qu'on est a la seconde pres, selon mecalcule 
+    //TOASK : je dois ajouter 1 pour etre à peut pres synchrone 
     hf.s += 1;
-    //TOASK : A voir si c'est nécessaire 
     if (hf.s == 60) {
         hf.s = 0;
         hf.m += 1;
@@ -101,11 +112,13 @@ void radioAlphaTRX_slave_behaviour_of_daytime() {
     uint16_t timeout = get_tmr_msg_recu_timeout();
     int8_t nothing = 1;
     //recuperer le msg | le decapsuler | verifier s'il est mien 
-    if (srv_decode_packet_rf(radioAlphaTRX_read_buf(), &msg_receive, radioAlphaTrx_get_size_buf(), srv_getIDS1()) > 0) { // 
+    if (srv_decode_packet_rf(radioAlphaTRX_read_buf(), &msg_receive, radioAlphaTRX_get_size_buf(), srv_getIDS1()) > 0) { // est il à moi
+        printf("type de msg %d \n ", msg_receive.Type_Msg);
         if (msg_receive.Type_Msg == srv_horloge()) {
             radioAlphaTRX_slave_update_date(msg_receive.data, get_tmr_msg_recu_timeout());
-        } else if (msg_receive.Type_Msg == srv_infos() && get_tmr_msg_recu_timeout()) { // demande de transmission de d'erreur ou de paquet
+        } else if (msg_receive.Type_Msg == srv_infos() ) { // demande de transmission de d'erreur ou de paquet
             int8_t err = radioAlphaTRX_slave_get_error();
+            printf("%d\n", err);
             if (err) { //l'error a transmettre 
                 radioAlphaTRX_slave_send_err(&err); // source probalble d'err
                 last_send = 0;
@@ -114,7 +127,7 @@ void radioAlphaTRX_slave_behaviour_of_daytime() {
             }
         } else if (msg_receive.Type_Msg == srv_ack()) { // un ack confirmant le dernier paquet envoyer 
             if (!last_send) {
-                radioAlphaTRX_slave_update_buf_ptr();
+                radioAlphaTRX_slave_update_buf_err_ptr();
             } else { // pour l'instant on fait ca 
                 nothing = 0;
             }
@@ -122,10 +135,13 @@ void radioAlphaTRX_slave_behaviour_of_daytime() {
             nothing = 0;
         }
     }
-    if (!nothing) {
-        last_send = 1;
-        radioAlphaTRX_slave_send_nothing();
-    }
+//    if (!nothing) {
+//        //LED_GREEN_SetLow();
+//        //LED_RED_Toggle();
+//        last_send = 1;
+//        nothing = 1;
+//        radioAlphaTRX_slave_send_nothing();
+//    }
 
 }
 

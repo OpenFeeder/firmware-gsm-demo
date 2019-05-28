@@ -3,15 +3,14 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/home/mmadi/Documents/stageM1/firmware-gsm-demo/OpenfeederRadio/test/test.c</file>
             <file>file:/home/mmadi/Documents/stageM1/firmware-gsm-demo/OpenfeederRadio/main.c</file>
             <file>file:/home/mmadi/Documents/stageM1/firmware-gsm-demo/OpenfeederRadio/driver/master_api.c</file>
-            <file>file:/home/mmadi/Documents/stageM1/firmware-gsm-demo/OpenfeederRadio/driver/Master.c</file>
-            <file>file:/home/mmadi/Documents/stageM1/firmware-gsm-demo/OpenfeederRadio/driver/master_api.h</file>
-            <file>file:/home/mmadi/Documents/stageM1/firmware-gsm-demo/OpenfeederRadio/driver/Services.h</file>
-            <file>file:/home/mmadi/Documents/stageM1/firmware-gsm-demo/OpenfeederRadio/alpha_trx_driver/radio_alpha_trx.c</file>
+            <file>file:/home/mmadi/Documents/stageM1/firmware-gsm-demo/OpenfeederRadio/driver/radio_alpha_trx_slave_api.c</file>
+            <file>file:/home/mmadi/Documents/stageM1/firmware-gsm-demo/OpenfeederRadio/driver/radio_alpha_trx_slave_api.h</file>
             <file>file:/home/mmadi/Documents/stageM1/firmware-gsm-demo/OpenfeederRadio/driver/timer.c</file>
-            <file>file:/home/mmadi/Documents/stageM1/firmware-gsm-demo/OpenfeederRadio/driver/timer.h</file>
+            <file>file:/home/mmadi/Documents/stageM1/firmware-gsm-demo/OpenfeederRadio/alpha_trx_driver/radio_alpha_trx.h</file>
+            <file>file:/home/mmadi/Documents/stageM1/firmware-gsm-demo/OpenfeederRadio/driver/Services.h</file>
+            <file>file:/home/mmadi/Documents/stageM1/firmware-gsm-demo/OpenfeederRadio/mcc_generated_files/pin_manager.c</file>
         </group>
     </open-files>
 </project-private>
