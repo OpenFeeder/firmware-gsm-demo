@@ -59,6 +59,39 @@
  /*****************                                         ********************/
 
 /**
+ * 
+ * @param num_error
+ */
+void radioAlphaTRX_save_error(int8_t num_error);
+
+
+/**
+ * 
+ * @return 
+ */
+int8_t radioAlphaTRX_slave_get_error();
+
+
+/**
+ * 
+ */
+void radioAlphaTRX_slave_update_buf_ptr();
+
+
+/**
+ * 
+ * @param err_to_send
+ */
+void radioAlphaTRX_slave_send_err(int8_t *err_to_send);
+
+
+/**
+ * 
+ */
+void radioAlphaTRX_slave_send_nothing();
+
+
+/**
  * met a jour l'horloge avec la date recu en prenant en compte le temps de 
  * latence avant le traitement du msg 
  *  

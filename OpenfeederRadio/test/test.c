@@ -138,6 +138,13 @@ void test_update_date_receive() {
     printf("HEURE ==> %dh:%dmin:%ds\n", t.tm_hour, t.tm_min, t.tm_sec);
 #endif
     while (1) {
+#if defined(UART_DEBUG)
+        RTCC_TimeGet(&t);
+        if (!get_tmr_timeout()) {
+            printf("heur slave ==> %dh:%dmin:%ds\n", t.tm_hour, t.tm_min, t.tm_sec);
+            set_tmr_timeout(1000); // 1s
+        }
+#endif
         if (getFlag()) {
             resetFlag();
             // simule une activité

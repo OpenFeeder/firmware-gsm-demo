@@ -26,23 +26,23 @@
 
 
 /******************************************************************************/
- /******************************************************************************/
- /****************** FONCTIONNALITEES COMMUNES AU ALPHA TRX ********************/
- /***************************                ***********************************/
- /*****************                                 ****************************/
+/******************************************************************************/
+/****************** FONCTIONNALITEES COMMUNES AU ALPHA TRX ********************/
+/***************************                ***********************************/
+
+/*****************                                 ****************************/
 
 
 int8_t master_send_date_rf() {
     uint8_t date_send[FRAME_LENGTH];
-    struct tm t;
     int8_t ret = 0;
     struct heure_format hf;
     uint8_t date[14]; // cas particulier
     get_time(&hf);
     //creation de du format pour l'envoie  ensEsclave[0].logRecup = 0;
     serial_buffer(date, hf);
-    int8_t size_h = srv_create_paket_rf(date_send, date, srv_getBroadcast(), 
-            srv_getIDM(), srv_horloge(), '0');
+    int8_t size_h = srv_create_paket_rf(date_send, date, srv_getBroadcast(),
+                                        srv_getIDM(), srv_horloge(), '0');
     if (radioAlphaTRX_Send_Init()) {
         radioAlphaTRX_Send_data(date_send, size_h);
         set_tmr_horloge_timeout_x1000_ms(SEND_HORLOG_TIMEOUT); // on attend a vouveau
@@ -56,16 +56,30 @@ int8_t master_send_date_rf() {
 }
 
 void master_state_machine() {
-    while(1) {
+    while (1) {
+#if defined(UART_DEBUG)
+        struct tm t;
+        RTCC_TimeGet(&t);
+        if (!get_tmr_timeout()) {
+            printf("heur master ==> %dh:%dmin:%ds\n", t.tm_hour, t.tm_min, t.tm_sec);
+            set_tmr_timeout(1000); // 1s
+        }
+#endif
         if (!get_tmr_horloge_timeout()) { // on doit envoyer l'horloge en mode broadcast
             LED_GREEN_Toggle();
             master_send_date_rf();
-        }// il y'aura d'autres cas ici 
+            set_tmr_horloge_timeout_x1000_ms(SEND_HORLOG_TIMEOUT);
+        }
+        //        else if () {
+        //            
+        //        }else if () {
+        //            
+        //        }
     }
 }
 
 
 /****************                                         *********************/
- /*************************                     ********************************/
- /******************************************************************************/
- /******************************************************************************/
+/*************************                     ********************************/
+/******************************************************************************/
+/******************************************************************************/

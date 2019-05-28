@@ -105,7 +105,7 @@ int8_t mster_send_config_rf(uint8_t *config[], int *ptrConfig, int nbLines, uint
         }
         
         size = srv_create_paket_rf(paquetEnvoi, "FIN", 
-                    srv_getIDM(), srv_getIDS1(), srv_fin_trans(), curseur);
+                    srv_getIDM(), srv_getIDS1(), srv_end_trans(), curseur);
         //attente 
         srv_wait(20);
         printf("Slave : envoie du paquet de fin de transmission \n");
@@ -148,7 +148,7 @@ int8_t mster_get_log_rf(int8_t esclave) {
                     //traansmission de l'ack 
                     maitre_envoie_ack(esclave, paquetAttendu);
                 }
-            }else if (paquetRecu.Type_Msg == srv_fin_trans()) {
+            }else if (paquetRecu.Type_Msg == srv_end_trans()) {
                 printf("Master : fin de reception de donnée %d\n", paquetRecu.ID_Msg);
                 fin = 1;
             }else {

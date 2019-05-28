@@ -19,10 +19,11 @@ uint8_t srv_err( ) { return 1; }
 uint8_t srv_data() { return 2; }
 uint8_t srv_ack() { return 3; }
 uint8_t srv_horloge() { return 4; }
-uint8_t srv_cmd() { return 5; }
-uint8_t srv_fin_trans() { return 6; }
-uint8_t srv_fin_block() { return 7; }
+uint8_t srv_infos() { return 5; }
+uint8_t srv_end_trans() { return 6; }
+uint8_t srv_end_block() { return 7; }
 uint8_t srv_config() { return 8; }
+uint8_t srv_nothing() { return 9; } 
 //notre identifiant @ 
 uint16_t  srv_getIDS1() { return 37;}
 uint16_t  srv_getIDS2() { return 36;}

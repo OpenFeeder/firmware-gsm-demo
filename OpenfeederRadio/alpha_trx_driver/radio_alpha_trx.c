@@ -238,15 +238,14 @@ int8_t radioAlphaTrx_get_size_buf() { return size_buf; }
 int8_t radioAlphaTRX_is_receive_msg() { return receive_msg; }
 
 int8_t * radioAlphaTRX_read_buf() {
-    receive_msg = 0;
-    return BUF;
+    receive_msg = 0; return BUF;
 }
 
 int8_t radioAlphaTRX_receive(uint8_t buffer[FRAME_LENGTH]) {
     WORD_VAL_T receiveData;
     uint8_t i = 0;
     for (i = 0; i < FRAME_LENGTH; i++) {
-        if (0 == rdy(TIME_OUT_nIRQ)) {
+        if (0 == radioAlphaTRX_wait_nIRQ(TIME_OUT_nIRQ)) {
             return 0;
         }
         receiveData.word = radioAlphaTRX_Command(0xB000);

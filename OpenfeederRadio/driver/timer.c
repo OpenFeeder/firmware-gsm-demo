@@ -43,8 +43,8 @@ volatile uint16_t tmr_timeout;
 /**-------------------------->> D E F I N I T I O N <<-------------------------*/
 
 uint16_t get_tmr_horloge_timeout() { return tmr_horloge_timeout; } 
-void set_tmr_horloge_timeout_x1000_ms(uint16_t timeout_x1000_ms) { 
-    tmr_horloge_timeout = timeout_x1000_ms; 
+void set_tmr_horloge_timeout_x1000_ms(uint16_t timeout) { 
+    tmr_horloge_timeout = timeout; 
 } 
 
 
@@ -67,15 +67,17 @@ uint16_t get_tmr_timeout() { return tmr_timeout; }
 
 void tmr_callBack( void ) {
     
+    if (tmr_timeout) --tmr_timeout;
+    
     //nIRQ timeout
     if (tmr_nIRQ_low_timeout) --tmr_nIRQ_low_timeout;
 
-#if defined(MASTER)
+//#if defined(MASTER)
     //dis si une reponse est recu ou pas 
     if (tmr_wait_rqst_timeout) --tmr_wait_rqst_timeout;
-#endif
-    if (tmr_horloge_timeout) --tmr_horloge_timeout; // on ferra autrement 
     
+    if (tmr_horloge_timeout) --tmr_horloge_timeout; // on ferra autrement 
+//#endif
     //timer du buffer 
     if (tmr_msg_recu_timeout) --tmr_msg_recu_timeout;
 }

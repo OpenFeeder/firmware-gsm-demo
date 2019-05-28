@@ -23,7 +23,7 @@ int main(void) {
     //test_timer();
     //test_tx();
     
-    //test_update_date_receive(); 
-    master_state_machine();
+    test_update_date_receive(); 
+    //master_state_machine();
     return -1;
 }

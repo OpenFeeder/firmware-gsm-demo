@@ -65,11 +65,13 @@
 /*******************************************************************************/
 //_________________________Radio Alpha TRX Infos_______________________________*/
 #define FRAME_LENGTH                128 // Longueur total d'une trame en octet
+#define ERROR_LENGTH                  8
 #define SIZE_DATE                    40
 #define TIME_OUT_nIRQ                 2 // 2ms 
 #define TIME_OUT_GET_FRAME         3000
 #define NB_BUF                        4
-#define SEND_HORLOG_TIMEOUT        3000
+#define NB_ERR_BUF                   10 // nombre d'errerur possible 
+#define SEND_HORLOG_TIMEOUT       10000
 /*_____________________________________________________________________________*/
 
 
@@ -123,10 +125,11 @@ uint8_t srv_err();
 uint8_t srv_data();
 uint8_t srv_ack();
 uint8_t srv_horloge();
-uint8_t srv_cmd();
-uint8_t srv_fin_trans();
-uint8_t srv_fin_block();
+uint8_t srv_infos();
+uint8_t srv_end_trans();
+uint8_t srv_end_block();
 uint8_t srv_config();
+uint8_t srv_nothing();
 /*_____________________________________________________________________________*/
 
 /**------------------------>> I D-- O F <<-------------------------------------*/
