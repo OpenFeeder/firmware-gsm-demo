@@ -51,6 +51,8 @@
 #include <xc.h>
 #include <stdio.h>
 #include "pin_manager.h"
+#include "../led_status.h"
+#include "../radio_alpha_trx.h"
 
 /**
     void PIN_MANAGER_Initialize(void)
@@ -165,6 +167,8 @@ void __attribute__ (( interrupt, no_auto_psv )) _CNInterrupt ( void )
 {
     if(IFS1bits.CNIF == 1)
     {
+        
+        setLedsStatusColor( LED_ORANGE );
         // Clear the flag
         IFS1bits.CNIF = 0;
         // interrupt on change for group IOCFE

@@ -83,21 +83,6 @@ uint16_t srv_getBroadcast() {
 /***************************                ***********************************/
 
 /*****************                                 ****************************/
-srv_get_moment() {
-    srv_update_moment(); // met à jour le momet
-    return moment;
-}
-
-void srv_update_moment() {
-    struct heure_format hf;
-    get_time(hf);
-    if (hf.h >= 5 && hf.h < 6) // on est au demarage des OFs 
-        moment = 0;
-    else if (hf.h >= 6 && hf.h < 18) // on est dans la journee
-        moment = 1;
-    else // on est le soir
-        moment = 2;
-}
 
 //dans la fenetre 
 
@@ -159,36 +144,6 @@ int8_t srv_cpy(uint8_t *dest, uint8_t *src, int size) {
     }
     dest[i] = '\0';
     return 1;
-}
-
-void srv_wait(int delais) {
-    int i = 0;
-    TMR1_Counter16BitSet(0);
-    while (i < delais) {
-        if (TMR1_Counter16BitGet() == TMR1_Period16BitGet()) {
-            TMR1_Counter16BitSet(0);
-            i++;
-        }
-    }
-}
-
-int8_t srv_send_rf(uint8_t* paquet, int size, int delais, int nbFois) {
-    //clear_reg(); // on met tout par defaut d'abord ==> il faut voir si on a besoin de ?a 
-    configure_tx(); // a voir 
-    int j = 0;
-    int ecr = 0;
-    do {
-        ecr = send(paquet, size, delais);
-        srv_wait(delais);
-        j++;
-    } while (j < nbFois);
-    return ecr;
-}
-
-int8_t srv_receive_rf(uint8_t *paquet, int size, int delais) {
-    //je me mets en mode reception 
-    //configure_rx(); // configuration en mode reception 
-    return receive(paquet, size, delais);
 }
 
 int8_t srv_create_paket_rf(uint8_t paquet[], uint8_t data[],
@@ -264,107 +219,6 @@ int8_t srv_decode_packet_rf(uint8_t* paquet, Frame *pPaquetRecu, int size,
     extractInfos(paquet, &j, pPaquetRecu->data, size - j - 1); //le -1 c'est pour ne pas recup?rer le crc
 
     return j;
-}
-
-int8_t srv_listen_rf(int delais, Frame *paquetRecu, uint16_t idOf) {
-    uint8_t recu[FRAME_LENGTH];
-    //ecoute d'un paquet // on attend une commende du Master
-    int size;
-    if ((size = srv_receive_rf(recu, FRAME_LENGTH, delais)) > 0) {
-        //un paquet est re?u on le debale 
-        return srv_decode_packet_rf(recu, paquetRecu, size, idOf);
-    }
-    return 0;
-}
-
-void srv_inc_delais(int *delais, int ms) { //ms = x10 ms
-    if (*delais < MAX_T_OUT) {
-        *delais = *delais + ms; //on augmente de 100 ms au timeout
-        printf("j'augmente le delais %d\n", *delais);
-    }
-}
-
-void srv_dec_delais(int *delais, int seuil, int ms) { //ms = x10 ms
-    if (*delais > seuil) {
-        *delais = *delais - ms; //on augmente de 100 ms au timeout
-        printf("je diminue le delais %d\n", *delais);
-    }
-}
-
-void srv_increase(int *w) {
-    if (*w < W_MAX)
-        *w = *w + 1;
-}
-
-void srv_decrease(int *w) {
-    if (*w > 1) //on divise par 2 la fenêtre de retransmission 
-        *w = *w / 2;
-    printf("j'augmente le w %d\n", *w);
-}
-
-int8_t srv_goBackN(const uint8_t** data, int * offset, int curseur,
-                   uint16_t idOfSrc, uint16_t idOfDest, int8_t *w) {
-    int nbTransmission = 0;
-    int delais = 300; // => x10ms
-    Frame paquetRecu;
-    int8_t retrasmission = 0;
-    uint8_t paquetEnvoi[FRAME_LENGTH];
-    while (*offset != curseur && nbTransmission < 10) { // 10 c'est provisoire
-        if (srv_listen_rf(delais, &paquetRecu, idOfSrc) > 0) { // > 0 ==> un paquet est re?u 
-            if (paquetRecu.Type_Msg == srv_ack()) { // c'est un ack qui vient d'arriver
-                //faire un test si l'ack est dans la fenetre ici important
-                if (paquetRecu.ID_Msg - 1 >= *offset && paquetRecu.ID_Msg - 1 < 256) {
-                    *offset = paquetRecu.ID_Msg - 1;
-                    printf("[%d] : ack dans la fenetre %d %s\n", idOfSrc, *offset, paquetRecu.data);
-                    retrasmission = 1;
-                    printf("[%d] offset %d vs %d cursseur\n", idOfSrc, *offset, curseur);
-                    if (*offset == curseur) {
-                        retrasmission = 0;
-                        printf("[%d] tous les paquets attendus sont recuperes %d\n", idOfSrc, curseur);
-                        srv_increase(w);
-                    } else {
-                        srv_decrease(w);
-                    }
-                } else {
-                    retrasmission = 1;
-                    printf("[%d] ack en dehors de la fenetre   %d \n", idOfSrc, paquetRecu.ID_Msg);
-                }
-            } else {
-                srv_inc_delais(&delais, 5);
-                retrasmission = 1; // pour l'instant on fais ca ici
-                printf("[%d] : ce n'est pas un ack %d\n", idOfSrc, paquetRecu.ID_Msg);
-            }
-        } else {
-            printf("[%d] timeOut \n", idOfSrc);
-            srv_decrease(w);
-            retrasmission = 1; // timeout ou ce n'est pas un paquet qui m'est destin?
-            srv_inc_delais(&delais, 10);
-        }
-        if (retrasmission) {
-            int i = *offset;
-            int8_t pw = 0;
-            int size = 0;
-            printf("[%d] retransmission depuis inf %d %d %d\n", idOfSrc, i, *offset, *w);
-            while (i != curseur && pw < *w) {
-                printf("[%d] : retransmission num [%d]\n", idOfSrc, i);
-                size = srv_create_paket_rf(paquetEnvoi, data[i],
-                                           idOfDest, idOfSrc, srv_data(), i + 1);
-                srv_wait(20); //==> x10ms on attend un petit delais  
-                srv_send_rf(paquetEnvoi, size, 100, 1); // 0 veut dire 1 fois
-                i++;
-                pw++;
-            }
-            nbTransmission++;
-        }
-    }
-    if (nbTransmission < 10)
-        return 1;
-    return 0;
-}
-
-uint8_t **service_recup_data_sur_disque(int *nbligne) {
-    *nbligne = 40;
-    return NULL;
 }
 
 

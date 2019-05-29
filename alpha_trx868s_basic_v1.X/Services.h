@@ -49,10 +49,9 @@
 /**------------------------>> I N C L U D E <<---------------------------------*/
 #include <xc.h> // include processor files - each processor file is guarded.  
 #include <stdlib.h>
-#include "rx.h"
-#include "tx.h"
-
-
+#include "./mcc_generated_files/pin_manager.h"
+#include "timer.h"
+#include "temps.h"
 /**------------------------>> D E F I N I T I O N S - G L O B A L <<-----------*/
 
 /*******************************************************************************/
@@ -78,10 +77,10 @@
 
 /**------------------------>> M A C R O S <<-----------------------------------*/
 //CS => chip select
-#define RF_nSEL_SetLow( ) CS_SetLow()
-#define RF_nSEL_SetHigh( ) CS_SetHigh()
-#define RF_nSEL_Toggle( ) CS_Toggle()
-#define RF_nSEL_GetValue() CS_GetValue()
+//#define RF_nSEL_SetLow( ) CS_SetLow()
+//#define RF_nSEL_SetHigh( ) CS_SetHigh()
+//#define RF_nSEL_Toggle( ) CS_Toggle()
+//#define RF_nSEL_GetValue() CS_GetValue()
 
 /*_____________________________________________________________________________*/
 
@@ -131,7 +130,7 @@ uint8_t srv_end_trans();
 uint8_t srv_end_block();
 uint8_t srv_config();
 uint8_t srv_nothing();
-/*_____________________________________________________________________________*/
+/*____________________________________________________________________________*/
 
 /**------------------------>> I D-- O F <<-------------------------------------*/
 uint16_t  srv_getIDS1();

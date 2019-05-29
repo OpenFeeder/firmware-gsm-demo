@@ -21,7 +21,7 @@
 
 /**------------------------>> I N C L U D E <<---------------------------------*/
 #include "radio_alpha_trx_slave_api.h"
-
+#include "temps.h"
 /**-------------------------->> V A R I A B L E S <<---------------------------*/
 uint8_t BUF_ERR[NB_ERR_BUF]; // sauve les erreur en transmettre 
 uint8_t p_read_err_buf = 0;
@@ -38,7 +38,6 @@ uint8_t last_send = 2; // 0 si erreur | 1 si infos 2 ack
 /*****************                                         ********************/
 
 void radioAlphaTRX_save_error(int8_t num_error) { // vraiment a voir 
-    LED_GREEN_Toggle();
     err_evo = 1;
 //    BUF_ERR[p_write_err_buf] = num_error;
 //    p_write_err_buf = (p_write_err_buf + 1) % NB_ERR_BUF;
@@ -96,7 +95,6 @@ void radioAlphaTRX_slave_send_nothing() {
 void radioAlphaTRX_slave_update_date(uint8_t* date, int16_t derive) {
     struct heure_format hf;
     deserial_buffer(date, &hf);
-
     //TOASK : etant donner qu'on est a la seconde pres, selon mecalcule 
     //TOASK : je dois ajouter 1 pour etre à peut pres synchrone 
     hf.s += 1;
@@ -147,7 +145,6 @@ void radioAlphaTRX_slave_behaviour_of_daytime() {
 //        nothing = 1;
 //        radioAlphaTRX_slave_send_nothing();
 //    }
-
 }
 
 //end file

@@ -23,8 +23,7 @@
 /**------------------------->> I N C L U D E S <<-----------------------------*/
 #include <stdio.h>
 #include "radio_alpha_trx.h"
-#include "../driver/master_api.h"
-#include "../test/test.h"
+#include "app.h"
 /******************************************************************************/
 
 /**-------------------------->> V A R I A B L E S <<---------------------------*/
@@ -39,7 +38,8 @@ STATUS_READ_VAL RF_StatusRead; // Status Read Command
 /**-------------------------->> D E F I N I T I O N <<-------------------------*/
 
 void radioAlphaTRX_Init(void) {
-    nRES_SetHigh();
+    //nRES_SetHigh();
+    CMD_3v3_RF_SetHigh();
     RF_StatusRead.Val = 0;
     //    do {
     RF_StatusRead.Val = radioAlphaTRX_Command(STATUS_READ_CMD); // intitial SPI transfer added to avoid power-up problem
@@ -105,7 +105,8 @@ void radioAlphaTRX_Init(void) {
 // Initialiser la detection d'une nouvelle donnee
 
 void radioAlphaTRX_Received_Init(void) {
-    nRES_SetHigh();
+    //nRES_SetHigh();
+    CMD_3v3_RF_SetHigh(); // a voir ici 
     /**-------------> Configuration Setting Command <--------------------------*/
     //  bit  15  14  13  12  11  10   9   8   7   6   5   4   3   2   1   0   POR
     //  Val   1   0   0   0   0   0   0   0  el  ef  b1  b0  x3  x2  x1  x0   0x8008
@@ -221,7 +222,7 @@ uint16_t radioAlphaTRX_Command(uint16_t cmd_write) {
 
 int8_t radioAlphaTRX_wait_nIRQ(int timeout) {
     set_tmr_nIRQ_low_timeout(timeout);
-    while (nIRQ_GetValue()) {
+    while (RF_nIRQ_GetValue()) {
         if (get_tmr_nIRQ_low_timeout() == 0) {
             return 0;
         }
@@ -254,12 +255,12 @@ int8_t radioAlphaTRX_get_size_buf() {
 }
 
 int8_t * radioAlphaTRX_read_buf() {
-#if defined(MASTER)
-    master_set_msg_receive_rf(0);
-#endif
-#if defined(SLAVE)
-    test_set_msg_receive(0);
-#endif
+//#if defined(MASTER)
+//    master_set_msg_receive_rf(0);
+//#endif
+//#if defined(SLAVE)
+//    test_set_msg_receive(0);
+//#endif
     return BUF;
 }
 
@@ -282,15 +283,9 @@ int8_t radioAlphaTRX_receive(uint8_t buffer[FRAME_LENGTH]) {
 void radioAlphaTRX_capture_frame() {
     set_tmr_msg_recu_timeout(TIME_OUT_GET_FRAME); // on demare le timer, car le bufer est probablement remplie 
     if ((size_buf = radioAlphaTRX_receive(BUF)) > 0) {
-        LED_BLUE_Toggle();
-#if defined(MASTER)
-        master_set_msg_receive_rf(1);
-#endif
-#if defined(SLAVE)
-        test_set_msg_receive(1);
-#endif
+        setLedsStatusColor( LED_ORANGE );
+        appData.state = APP_STATE_RADIO_RECEIVED;
     }
-    //on se remet en ecoute 
     radioAlphaTRX_Init();
     radioAlphaTRX_Received_Init();
 }

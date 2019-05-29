@@ -96,41 +96,15 @@ uint8_t APP_SerialDebugTasks( void )
 
             case 'r':
             case 'R':
-                //                printf( "Reception from the RF module\n" );
-                if ( RF_nIRQ_GetValue( ) == true )
-                {
-                    printf( "nIRQ high.\n" );
-                }
-                else
-                {
-                    printf( "nIRQ low.\n" );
-                }
+                printf("Anzilane \n");
                 break;
                 /* -------------------------------------------------------------- */
 
             case 's':
             case 'S':
                 //case 'S':
-                display_STATUS_register_from_RF_module( );
-                //                    display_RF_Task( );
+                //radioAlphaTRX_display_STATUS_register( );
                 break;
-                /* -------------------------------------------------------------- */
-
-                //{
-                //                STATUS_READ_VAL StatusRead; // retour de la fonction write SPI
-
-                //                printf( "Send to RF Module\n" );
-                //printf( "Read status of RF module:\n" );
-                /** Lecture du registre STATUS */
-                //                StatusRead.Val = FSK_Transceiver_Command( 0x0000 );
-                //                printf( "StatusRead: %u, ", StatusRead.Val );
-                //                printf( "0x%04X\n", StatusRead.Val );
-                //                printf( "StatusRead: %u, 0x%04X\n", StatusRead.Val, StatusRead.Val );
-                //                return SC_READ_RF_STATUS;
-                //return 's';
-                //new_serial_command = 's';
-                break;
-                //}
                 /* -------------------------------------------------------------- */
 
             case 't':

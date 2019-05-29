@@ -47,10 +47,8 @@
 
 /**------------------------>> I N C L U D E <<---------------------------------*/
 #include <xc.h> // include processor files - each processor file is guarded.  
-#include "../alpha_trx_driver/radio_alpha_trx.h"
+#include "radio_alpha_trx.h"
 #include "Services.h"
-#include "timer.h"
-
 
  /******************************************************************************/
  /******************************************************************************/

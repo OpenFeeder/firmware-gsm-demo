@@ -113,7 +113,6 @@
 #include <xc.h> // include processor files - each processor file is guarded.  
 #include "mcc_generated_files/pin_manager.h"
 #include "Services.h"
-#include "timer.h"
 
 /**------------------------>> D E F I N I T I O N S <<-------------------------*/
 

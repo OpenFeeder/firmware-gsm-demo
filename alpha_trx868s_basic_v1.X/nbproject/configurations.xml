@@ -26,8 +26,8 @@
       <itemPath>radio_alpha_trx.h</itemPath>
       <itemPath>radio_alpha_trx_slave_api.h</itemPath>
       <itemPath>timer.h</itemPath>
-      <itemPath>types.h</itemPath>
       <itemPath>Services.h</itemPath>
+      <itemPath>temps.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LinkerScript"
                    displayName="Linker Files"
@@ -60,6 +60,7 @@
       <itemPath>Services.c</itemPath>
       <itemPath>radio_alpha_trx_slave_api.c</itemPath>
       <itemPath>timer.c</itemPath>
+      <itemPath>temps.c</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"
@@ -294,7 +295,6 @@
         <property key="UART 6" value="true"/>
         <property key="USB" value="true"/>
         <property key="debugoptions.useswbreakpoints" value="false"/>
-        <property key="firmware.download.all" value="false"/>
         <property key="hwtoolclock.frcindebug" value="false"/>
         <property key="memories.aux" value="false"/>
         <property key="memories.bootflash" value="true"/>
