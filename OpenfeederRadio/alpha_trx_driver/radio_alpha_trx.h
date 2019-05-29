@@ -711,15 +711,6 @@ int8_t * radioAlphaTRX_read_buf();
  */
 int8_t radioAlphaTRX_get_size_buf();
 
-/**
- * des qu'un msg est recu on declence un timer qui corespond au temps que master
- * va ecouter avant de decider qu'il y a timeout 
- *  
- * @return :
- *      0 : pas de msg ou n'est plus d'actalite 
- *      1 : un msg est presnt et il est toujours d'actualité 
- */
-int8_t radioAlphaTRX_is_receive_msg();
 
  /****************                                         *********************/
  /*************************                     ********************************/

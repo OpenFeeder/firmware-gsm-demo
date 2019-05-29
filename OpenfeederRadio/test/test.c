@@ -46,6 +46,12 @@ uint8_t test_serial_datetime(uint8_t* datetime) {
     */
 }
 
+
+
+volatile uint8_t msg_receive = 0; // juste pour les test
+void test_set_msg_receive(uint8_t set) { msg_receive = set; } // juste pour les test 
+
+
 //test 
 void test_rx() {
     uint8_t paquet[20];
@@ -54,7 +60,7 @@ void test_rx() {
     while (1) {
         if (getFlag()==1){
             resetFlag();
-            if (radioAlphaTRX_is_receive_msg()) {
+            if (msg_receive == 1) {
                 printf("tps %d \n", TIME_OUT_GET_FRAME-get_tmr_msg_recu_timeout());
                 printf("recu %s \n", radioAlphaTRX_read_buf());
             }
@@ -117,6 +123,7 @@ void test_update_date_send() {
     }
 
 }
+
 void test_update_date_receive() {
     printf("anzilane\n");
     struct tm t;
@@ -130,17 +137,10 @@ void test_update_date_receive() {
         RTCC_TimeGet(&t);
         if (!get_tmr_timeout()) {
             printf("heur slave ==> %dh:%dmin:%ds\n", t.tm_hour, t.tm_min, t.tm_sec);
-            set_tmr_timeout(1000); // 1s
+            set_tmr_timeout(5000); // 1s
         }
-#endif
-        if (getFlag()) {
-            resetFlag();
-            // simule une activité
-#if defined(UART_DEBUG)
-            RTCC_TimeGet(&t); 
-            printf("heur slave ==> %dh:%dmin:%ds\n", t.tm_hour, t.tm_min, t.tm_sec);
-#endif
-        }else if (radioAlphaTRX_is_receive_msg()) {
+#endif       
+        if (msg_receive == 1) {
             radioAlphaTRX_slave_behaviour_of_daytime();
         }
     }

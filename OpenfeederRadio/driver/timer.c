@@ -28,16 +28,16 @@
 
 /**-------------------------->> V A R I A B L E S <<---------------------------*/
 int8_t cpt_trick_horloge = 1000;
-volatile uint16_t tmr_horloge_timeout; 
+volatile uint16_t tmr_horloge_timeout = 0; 
 
-volatile uint16_t tmr_wait_rqst_timeout; //on s'en sert pour le poulling 
+volatile uint16_t tmr_wait_rqst_timeout = 0; //on s'en sert pour le poulling 
 
 //TODO : penser rendre ça generique
-volatile uint16_t tmr_msg_recu_timeout;  
+volatile uint16_t tmr_msg_recu_timeout = 0;  
 
-volatile uint16_t tmr_nIRQ_low_timeout;
+volatile uint16_t tmr_nIRQ_low_timeout = 0;
 
-volatile uint16_t tmr_timeout;
+volatile uint16_t tmr_timeout = 0;
 /*_____________________________________________________________________________*/
 
 /**-------------------------->> D E F I N I T I O N <<-------------------------*/

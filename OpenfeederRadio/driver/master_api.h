@@ -63,6 +63,16 @@
  */
 int8_t master_send_date_rf();
 
+/**
+ * des qu'un msg est recu on declence un timer qui corespond au temps que master
+ * va ecouter avant de decider qu'il y a timeout 
+ *  
+ * @return :
+ *      0 : pas de msg ou n'est plus d'actalite 
+ *      1 : un msg est presnt et il est toujours d'actualité 
+ */
+void master_set_msg_receive_rf(uint8_t set);
+
 void master_state_machine_of_daytime();
 
 /****************                                         *********************/

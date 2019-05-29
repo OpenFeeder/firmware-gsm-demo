@@ -29,7 +29,7 @@ typedef struct sSlave {
 
 
 /**-------------------------->> V A R I A B L E S <<---------------------------*/
-int8_t master_msg_receive = 0; // determine l'arrivé d'un msg (que ce soir radio ou gsm)
+int8_t msg_receive_rf = 0; // 
 
 
 //______________________________________________________________________________
@@ -41,6 +41,9 @@ int8_t master_msg_receive = 0; // determine l'arrivé d'un msg (que ce soir radio
 
 /*****************                                         ********************/
 
+void master_set_msg_receive_rf(uint8_t set) {
+    msg_receive_rf = set;
+}
 
 int8_t master_send_msg_rf(uint16_t idSlave, uint8_t type_msg, uint8_t * data, uint8_t id_msg) {
     radioAlphaTRX_set_send_mode(1);
@@ -61,11 +64,6 @@ int8_t master_send_msg_rf(uint16_t idSlave, uint8_t type_msg, uint8_t * data, ui
     return ret;
 }
 
-
-void master_set_msg_receive(int8_t set) {
-    master_msg_receive = set;
-}
-
 int8_t master_send_date_rf() {
     struct heure_format hf;
     uint8_t date[14]; // cas particulier
@@ -76,24 +74,25 @@ int8_t master_send_date_rf() {
 }
 
 void master_handle_msg_rf() {
-    LED_GREEN_Toggle();
-    Frame msg_receive;
-    if (srv_decode_packet_rf(radioAlphaTRX_read_buf(), &msg_receive, radioAlphaTRX_get_size_buf(), srv_getIDM()) > 0) {
-        if (msg_receive.Type_Msg = srv_err()) {
+    Frame data_receive;
+    if (srv_decode_packet_rf(radioAlphaTRX_read_buf(), &data_receive, radioAlphaTRX_get_size_buf(), srv_getIDM()) > 0) {
+        if (data_receive.Type_Msg == srv_err()) {
 #if defined(UART_DEBUG)
-            printf("erreur recu ==> transfère gsm :: %s\n", msg_receive.data);
+            LED_GREEN_Toggle();
+            printf("erreur recu ==> transfere gsm :: %d %d\n", data_receive.data, data_receive.Type_Msg);
+            master_send_msg_rf(data_receive.ID_Src, srv_ack(), "ACK", data_receive.Type_Msg); // pour l'instant
 #endif
-        } else if (msg_receive.Type_Msg == srv_infos()) {
+        } else if (data_receive.Type_Msg == srv_infos()) {
 #if defined(UART_DEBUG)
             printf("info recu transmission au autres \n");
 #endif
-        } else if (msg_receive.Type_Msg == srv_nothing()) {
+        } else if (data_receive.Type_Msg == srv_nothing()) {
 #if defined(UART_DEBUG)
-            printf("Le slave [%d] n'a rien a transmettre\n", msg_receive.ID_Src);
+            printf("Le slave [%d] n'a rien a transmettre\n", data_receive.ID_Src);
 #endif
         }
         //reponse de la bonne rection du msg 
-        master_send_msg_rf(msg_receive.ID_Src, srv_ack(), "ACK", 1); // pour l'instant 
+        //        master_send_msg_rf(msg_receive.ID_Src, srv_ack(), "ACK", 1); // pour l'instant 
     }
 }
 
@@ -101,7 +100,10 @@ void master_handle_msg_rf() {
 
 void master_select_slave() {
     //choix du slave 
-    int16_t idSlave = 37; // pour l'instant 
+    int16_t idSlave = 37; // pour l'instant
+#if defined(UART_DEBUG)
+    printf("demande d'infos au slave %d\n", idSlave);
+#endif
     master_send_msg_rf(idSlave, srv_infos(), "INFOS", 1);
 }
 
@@ -118,14 +120,11 @@ void master_state_machine_of_daytime() {
         if (!get_tmr_horloge_timeout()) { // on doit envoyer l'horloge en mode broadcast
             master_send_date_rf();
             set_tmr_horloge_timeout_x1000_ms(SEND_HORLOG_TIMEOUT);
-        } else if (radioAlphaTRX_is_receive_msg()) { // || ou module GSM
-            //if (radioAlphaTRX_is_receive_msg()) { // radio receve
-                //set_tmr_wait_rqst_timeout(0); // 0 == on arrete le temporisateur 
-                master_handle_msg_rf();
-            //}// ici on traitera le message venu du module GSM 
         } else if (!get_tmr_wait_rqst_timeout()) { //le temps d'attente d'une reponse a ecouler on choisi un autre slave
             master_select_slave();
             set_tmr_wait_rqst_timeout(TIME_OUT_WAIT_RQST);
+        } else if (msg_receive_rf == 1) { // || ou module GSM
+            master_handle_msg_rf();
         }
     }
 }
