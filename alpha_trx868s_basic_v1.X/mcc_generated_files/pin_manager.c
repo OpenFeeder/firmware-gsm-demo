@@ -165,6 +165,7 @@ void PIN_MANAGER_Initialize(void)
 /* Interrupt service routine for the CNI interrupt. */
 void __attribute__ (( interrupt, no_auto_psv )) _CNInterrupt ( void )
 {
+    setLedsStatusColor( LED_BLUE );
     if(IFS1bits.CNIF == 1)
     {
         
