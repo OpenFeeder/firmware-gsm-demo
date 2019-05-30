@@ -41,10 +41,10 @@ void radioAlphaTRX_Init(void) {
     //nRES_SetHigh();
     CMD_3v3_RF_SetHigh();
     RF_StatusRead.Val = 0;
-//        do {
+        //do {
             RF_StatusRead.Val = radioAlphaTRX_Command(STATUS_READ_CMD); // intitial SPI transfer added to avoid power-up problem
 #if defined(UART_DEBUG)
-        printf("status : %04X\n");
+        printf("status : 0x%04X\r\nb14- %d\n", RF_StatusRead.Val, RF_StatusRead.bits.b14_POR);
 #endif
 //        }while ( RF_StatusRead.bits.b14_POR );
 

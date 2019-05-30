@@ -81,15 +81,13 @@ void APP_Tasks( void )
 #if defined (USE_UART1_SERIAL_INTERFACE) && defined (DISPLAY_CURRENT_STATE)
                 displayBootMessage( );
                 printf( "> APP_STATE_INITIALIZE\n" );
-                powerRFEnable( );
-
+//                powerRFEnable( );
                 // Check the power statut of the RF module
                 if ( CMD_3v3_RF_GetValue( ) == false )
                 {
                     printf( "RF Module enable.\n" );
-                    //FSK_Transceiver_Init( );
                     radioAlphaTRX_Init();
-                    radioAlphaTRX_Received_Init();
+                    //radioAlphaTRX_Received_Init();
                 }
                 else
                 {
