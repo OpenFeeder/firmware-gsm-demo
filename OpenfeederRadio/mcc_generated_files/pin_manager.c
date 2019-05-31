@@ -122,7 +122,7 @@ void __attribute__((interrupt, no_auto_psv)) _CNInterrupt(void) {
     if (IFS1bits.CNIF == 1) {
         // Clear the flag
         IFS1bits.CNIF = 0;
-        
+        LED_RED_Toggle();
         if (nIRQ_GetValue() == 0) {
             STATUS_READ_VAL RF_StatusRead;
             RF_StatusRead.Val = radioAlphaTRX_Command(STATUS_READ_CMD); //lecture du registre status 
