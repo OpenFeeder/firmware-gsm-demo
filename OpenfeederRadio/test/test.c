@@ -125,7 +125,6 @@ void test_update_date_send() {
 }
 
 void test_update_date_receive() {
-    printf("anzilane\n");
     struct tm t;
     radioAlphaTRX_Received_Init();
 #if defined(UART_DEBUG)

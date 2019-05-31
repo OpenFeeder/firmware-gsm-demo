@@ -91,8 +91,6 @@ void master_handle_msg_rf() {
             printf("Le slave [%d] n'a rien a transmettre\n", data_receive.ID_Src);
 #endif
         }
-        //reponse de la bonne rection du msg 
-        //        master_send_msg_rf(msg_receive.ID_Src, srv_ack(), "ACK", 1); // pour l'instant 
     }
 }
 
@@ -114,17 +112,17 @@ void master_state_machine_of_daytime() {
         RTCC_TimeGet(&t);
         if (!get_tmr_timeout()) {
             printf("heur master ==> %dh:%dmin:%ds\n", t.tm_hour, t.tm_min, t.tm_sec);
-            set_tmr_timeout(5000); // 1s
+            set_tmr_timeout(5000); // 5s
         }
 #endif
         if (!get_tmr_horloge_timeout()) { // on doit envoyer l'horloge en mode broadcast
             master_send_date_rf();
             set_tmr_horloge_timeout_x1000_ms(SEND_HORLOG_TIMEOUT);
+        } else if (msg_receive_rf == 1) { // || ou module GSM
+            master_handle_msg_rf();
         } else if (!get_tmr_wait_rqst_timeout()) { //le temps d'attente d'une reponse a ecouler on choisi un autre slave
             master_select_slave();
             set_tmr_wait_rqst_timeout(TIME_OUT_WAIT_RQST);
-        } else if (msg_receive_rf == 1) { // || ou module GSM
-            master_handle_msg_rf();
         }
     }
 }

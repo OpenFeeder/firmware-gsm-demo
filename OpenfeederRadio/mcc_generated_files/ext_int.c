@@ -76,7 +76,7 @@ void __attribute__ ( ( interrupt, no_auto_psv ) ) _INT1Interrupt(void)
     //***User Area Begin->code: INT1 - External Interrupt 1***
     Flag = 1;
     LED_BLUE_SetLow();
-    i = (i+1)%8;
+    i = ((i+1)%NB_ERR_BUF);
     radioAlphaTRX_save_error(i);
     //***User Area End->code: INT1 - External Interrupt 1***
     EX_INT1_InterruptFlagClear();
