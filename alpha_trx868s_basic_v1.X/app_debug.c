@@ -82,13 +82,13 @@ void APP_SerialDebugTasks(void) {
 
             case 'b':
             case 'B':
-                while (1) {
+//                while (1) {
                     printf("Send byte to RF Module\n");
                     radioAlphaTRX_Send_Init();
                     radioAlphaTRX_set_send_mode(1);
                     radioAlphaTRX_Send_data("ANZILANE", 8);
-                    tmr_delay(500);
-                }
+//                    tmr_delay(500);
+//                }
                 break;
                 /* -------------------------------------------------------------- */
 
