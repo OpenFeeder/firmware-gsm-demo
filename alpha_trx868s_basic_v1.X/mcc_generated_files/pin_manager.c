@@ -168,7 +168,6 @@ void __attribute__((interrupt, no_auto_psv)) _CNInterrupt(void) {
         IFS1bits.CNIF = 0;
         // interrupt on change for group IOCFE
         if (IOCFEbits.IOCFE2 == 1) {
-            LED_STATUS_B_Toggle();
             IOCFEbits.IOCFE2 = 0;
             STATUS_READ_VAL RF_StatusRead;
             RF_StatusRead.Val = radioAlphaTRX_Command(STATUS_READ_CMD); //lecture du registre status 

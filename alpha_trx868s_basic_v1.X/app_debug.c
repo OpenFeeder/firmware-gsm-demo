@@ -82,11 +82,13 @@ void APP_SerialDebugTasks(void) {
 
             case 'b':
             case 'B':
-                printf("Send byte to RF Module\n");
-                //                FSK_Transceiver_Send_Byte( 0x42 ); // send 'B' for example
-                //while ( RF_nIRQ_GetValue( ) == 1 ); // wait for the end of transmission
-                //                return SC_SEND_RF_DATA;
-                //new_serial_command = 'B';
+                while (1) {
+                    printf("Send byte to RF Module\n");
+                    radioAlphaTRX_Send_Init();
+                    radioAlphaTRX_set_send_mode(1);
+                    radioAlphaTRX_Send_data("ANZILANE", 8);
+                    tmr_delay(500);
+                }
                 break;
                 /* -------------------------------------------------------------- */
 

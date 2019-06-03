@@ -87,7 +87,7 @@ void APP_Tasks( void )
                 {
                     printf( "RF Module enable.\n" );
                     radioAlphaTRX_Init();
-                    radioAlphaTRX_Received_Init(); // receive mode actived
+                    //radioAlphaTRX_Received_Init(); // receive mode actived
                 }
                 else
                 {

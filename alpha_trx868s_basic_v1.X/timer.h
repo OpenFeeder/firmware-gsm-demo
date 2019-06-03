@@ -121,6 +121,11 @@ void set_tmr_timeout(uint16_t timeout);
 uint16_t get_tmr_timeout();
 
 /**
+ * 
+ */
+void tmr_delay();
+
+/**
  * fonction principale de gestion des timer 
  */
 void tmr_callBack( void );

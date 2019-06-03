@@ -38,9 +38,6 @@ STATUS_READ_VAL RF_StatusRead; // Status Read Command
 /**-------------------------->> D E F I N I T I O N <<-------------------------*/
 
 void radioAlphaTRX_Init(void) {
-    //nRES_SetHigh();
-    //CMD_3v3_RF_SetHigh();
-    // voir powerRFEnable( );
     RF_StatusRead.Val = 0;
 //        do {
             RF_StatusRead.Val = radioAlphaTRX_Command(STATUS_READ_CMD); // intitial SPI transfer added to avoid power-up problem
@@ -54,7 +51,9 @@ void radioAlphaTRX_Init(void) {
     //    ALPHA_TRX433S_Control(0xA640); // Set operation frequency: Fc= 430+F*0.0025 , soit 430+1600*0.0025= 434 MHz avec 0x640 --> 110 0100 0000
     RF_FrequencySet.Val = FQ_SET_CMD_POR;
     RF_StatusRead.Val = radioAlphaTRX_Command(RF_FrequencySet.Val); // Set operation frequency: Fc= 430+F*0.0025 , soit 430+1600*0.0025= 434 MHz avec 0x640 --> 110 0100 0000 
-
+#if defined(UART_DEBUG)
+        printf("freqnece : 0x%04X\r\nb14- %d\n", RF_FrequencySet.Val);
+#endif
     /**-------------> FReceiver Control Command <------------------------------*/
     // Interrupt,FAST,200kHz,20dBm,-103dBm
     // p16 - Interrupt input (bit 10)
@@ -230,9 +229,11 @@ uint16_t radioAlphaTRX_Command(uint16_t cmd_write) {
 int8_t radioAlphaTRX_wait_nIRQ(int timeout) {
     set_tmr_nIRQ_low_timeout(timeout);
     while (RF_nIRQ_GetValue()) {
+        LED_STATUS_B_SetHigh();
         if (get_tmr_nIRQ_low_timeout() == 0) {
             return 0;
         }
+        LED_STATUS_B_SetLow();
     }
     set_tmr_nIRQ_low_timeout(0);
     return 1;
@@ -290,7 +291,6 @@ int8_t radioAlphaTRX_receive(uint8_t buffer[FRAME_LENGTH]) {
 void radioAlphaTRX_capture_frame() {
     set_tmr_msg_recu_timeout(TIME_OUT_GET_FRAME); // on demare le timer, car le bufer est probablement remplie 
     if ((size_buf = radioAlphaTRX_receive(BUF)) > 0) {
-        setLedsStatusColor( LED_BLUE );
         appData.state = APP_STATE_RADIO_RECEIVED;
     }
     radioAlphaTRX_Init();
