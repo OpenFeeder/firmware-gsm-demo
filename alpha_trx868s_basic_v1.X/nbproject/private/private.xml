@@ -8,7 +8,8 @@
             <file>file:/home/mmadi/Documents/stageM1/firmware-gsm-demo/alpha_trx868s_basic_v1.X/app.c</file>
             <file>file:/home/mmadi/Documents/stageM1/firmware-gsm-demo/alpha_trx868s_basic_v1.X/timer.c</file>
             <file>file:/home/mmadi/Documents/stageM1/firmware-gsm-demo/alpha_trx868s_basic_v1.X/timer.h</file>
-            <file>file:/home/mmadi/Documents/stageM1/firmware-gsm-demo/alpha_trx868s_basic_v1.X/led_status.c</file>
+            <file>file:/home/mmadi/Documents/stageM1/firmware-gsm-demo/alpha_trx868s_basic_v1.X/app_debug.c</file>
+            <file>file:/home/mmadi/Documents/stageM1/firmware-gsm-demo/alpha_trx868s_basic_v1.X/mcc_generated_files/pin_manager.c</file>
         </group>
     </open-files>
 </project-private>
