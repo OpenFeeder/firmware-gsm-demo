@@ -94,8 +94,9 @@ void APP_SerialDebugTasks(void) {
 
             case 'r':
             case 'R':
-                printf("nIRQ STATE: ");
-                
+#if defined(UART_DEBUG)
+                printf("ERROR GENERATED\n");
+#endif
                 if (RF_nIRQ_GetValue()) {
                     printf("high\n");
                 } else {

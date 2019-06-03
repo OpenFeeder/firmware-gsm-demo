@@ -152,9 +152,8 @@ void APP_Tasks( void )
 #endif
                 appData.previous_state = appData.state;
             }
-#if defined (USE_UART1_SERIAL_INTERFACE) && defined(DISPLAY_CURRENT_STATE)
-            printf( "> msg Recu %s\n", radioAlphaTRX_read_buf());
-#endif
+            radioAlphaTRX_slave_behaviour_of_daytime();
+            appData.state = APP_STATE_IDLE;
             break;
             /* -------------------------------------------------------------- */
         default:

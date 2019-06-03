@@ -166,22 +166,16 @@ void __attribute__((interrupt, no_auto_psv)) _CNInterrupt(void) {
     if (IFS1bits.CNIF == 1) {
         // Clear the flag
         IFS1bits.CNIF = 0;
-        LED_STATUS_B_Toggle();
         // interrupt on change for group IOCFE
         if (IOCFEbits.IOCFE2 == 1) {
             IOCFEbits.IOCFE2 = 0;
             STATUS_READ_VAL RF_StatusRead;
             RF_StatusRead.Val = radioAlphaTRX_Command(STATUS_READ_CMD); //lecture du registre status 
-#if defined(UART_DEBUG)
-            printf("IOCFE2, status : 0x%04X\r\n", RF_StatusRead.Val);
-#endif
             if (RF_StatusRead.bits.b15_RGIT_FFIT && !radioAlphaTRX_is_send_mode()) { // on verifie si la fifo est remplie 
                 IEC1bits.CNIE = 0; // on desactive les interuption IOC le temps de la recuperation de la trame 
                 radioAlphaTRX_capture_frame();
                 IEC1bits.CNIE = 1; //on reactive une fois la trame recupere
             }
-            putchar('-');
         }
-        putchar('.');
     }
 }
