@@ -42,12 +42,12 @@
     SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
     (INCLUDING BUT NOT LIMITED TO ANY DEFENSE THEREOF), OR OTHER SIMILAR COSTS.
 
-*/
+ */
 
 
 /**
     Section: Includes
-*/
+ */
 #include <xc.h>
 #include <stdio.h>
 #include "pin_manager.h"
@@ -56,9 +56,8 @@
 
 /**
     void PIN_MANAGER_Initialize(void)
-*/
-void PIN_MANAGER_Initialize(void)
-{
+ */
+void PIN_MANAGER_Initialize(void) {
     /****************************************************************************
      * Setting the Output Latch SFR(s)
      ***************************************************************************/
@@ -131,54 +130,58 @@ void PIN_MANAGER_Initialize(void)
      ***************************************************************************/
     __builtin_write_OSCCONL(OSCCON & 0xbf); // unlock PPS
 
-    RPOR9bits.RP19R = 0x0008;   //RG8->SPI1:SCK1OUT;
-    RPOR14bits.RP29R = 0x0003;   //RB15->UART1:U1TX;
-    RPOR13bits.RP26R = 0x0007;   //RG7->SPI1:SDO1;
-    RPINR18bits.U1RXR = 0x000E;   //RB14->UART1:U1RX;
-    RPINR20bits.SDI1R = 0x0015;   //RG6->SPI1:SDI1;
+    RPOR9bits.RP19R = 0x0008; //RG8->SPI1:SCK1OUT;
+    RPOR14bits.RP29R = 0x0003; //RB15->UART1:U1TX;
+    RPOR13bits.RP26R = 0x0007; //RG7->SPI1:SDO1;
+    RPINR18bits.U1RXR = 0x000E; //RB14->UART1:U1RX;
+    RPINR20bits.SDI1R = 0x0015; //RG6->SPI1:SDI1;
 
     __builtin_write_OSCCONL(OSCCON | 0x40); // lock   PPS
 
     /****************************************************************************
      * Interrupt On Change for group IOCFE - flag
      ***************************************************************************/
-	IOCFEbits.IOCFE2 = 0; // Pin : RE2
+    IOCFEbits.IOCFE2 = 0; // Pin : RE2
 
     /****************************************************************************
      * Interrupt On Change for group IOCNE - negative
      ***************************************************************************/
-	IOCNEbits.IOCNE2 = 1; // Pin : RE2
+    IOCNEbits.IOCNE2 = 1; // Pin : RE2
 
     /****************************************************************************
      * Interrupt On Change for group IOCPE - positive
      ***************************************************************************/
-	IOCPEbits.IOCPE2 = 0; // Pin : RE2
+    IOCPEbits.IOCPE2 = 0; // Pin : RE2
 
     /****************************************************************************
      * Interrupt On Change for group PADCON - config
      ***************************************************************************/
-	PADCONbits.IOCON = 1; 
+    PADCONbits.IOCON = 1;
 
     IEC1bits.CNIE = 1; // Enable CNI interrupt 
 }
 
 /* Interrupt service routine for the CNI interrupt. */
-void __attribute__ (( interrupt, no_auto_psv )) _CNInterrupt ( void )
-{
-    setLedsStatusColor( LED_BLUE );
-    if(IFS1bits.CNIF == 1)
-    {
-        
-        setLedsStatusColor( LED_ORANGE );
+void __attribute__((interrupt, no_auto_psv)) _CNInterrupt(void) {
+    if (IFS1bits.CNIF == 1) {
         // Clear the flag
         IFS1bits.CNIF = 0;
         // interrupt on change for group IOCFE
-        if(IOCFEbits.IOCFE2 == 1)
-        {
+        if (IOCFEbits.IOCFE2 == 1) {
+            LED_STATUS_B_Toggle();
             IOCFEbits.IOCFE2 = 0;
-            // Add handler code here for Pin - RE2
-//            printf( "nIRQ pin low\n" );
-            
+            STATUS_READ_VAL RF_StatusRead;
+            RF_StatusRead.Val = radioAlphaTRX_Command(STATUS_READ_CMD); //lecture du registre status 
+#if defined(UART_DEBUG)
+            printf("IOCFE2, status : 0x%04X\r\n", RF_StatusRead.Val);
+#endif
+            if (RF_StatusRead.bits.b15_RGIT_FFIT && !radioAlphaTRX_is_send_mode()) { // on verifie si la fifo est remplie 
+                //                IEC1bits.CNIE = 0; // on desactive les interuption IOC le temps de la recuperation de la trame 
+                //                radioAlphaTRX_capture_frame();
+                //                IEC1bits.CNIE = 1; //on reactive une fois la trame recupere
+            }
+            putchar('-');
         }
+        putchar('.');
     }
 }

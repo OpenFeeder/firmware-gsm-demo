@@ -232,10 +232,15 @@ int8_t radioAlphaTRX_wait_nIRQ(int timeout) {
 volatile uint8_t BUF[FRAME_LENGTH];
 volatile uint8_t size_buf = 0;
 volatile uint8_t receive_msg = 0; // 0 non 1 oui
+volatile uint8_t alpha_trx_mode = 0; //0 receive mode  1 send mode  
 
 int8_t radioAlphaTrx_get_size_buf() { return size_buf; }
 
 int8_t radioAlphaTRX_is_receive_msg() { return receive_msg; }
+
+int8_t radioAlphaTRX_is_send_mode() { return alpha_trx_mode; }
+
+void radioAlphaTRX_set_send_mode(int8_t mode_rf) { alpha_trx_mode = mode_rf; }
 
 int8_t * radioAlphaTRX_read_buf() {
     receive_msg = 0;

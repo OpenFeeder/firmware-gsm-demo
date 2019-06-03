@@ -81,13 +81,13 @@ void APP_Tasks( void )
 #if defined (USE_UART1_SERIAL_INTERFACE) && defined (DISPLAY_CURRENT_STATE)
                 displayBootMessage( );
                 printf( "> APP_STATE_INITIALIZE\n" );
-//                powerRFEnable( );
+                powerRFEnable( );
                 // Check the power statut of the RF module
                 if ( CMD_3v3_RF_GetValue( ) == false )
                 {
                     printf( "RF Module enable.\n" );
                     radioAlphaTRX_Init();
-                    //radioAlphaTRX_Received_Init();
+                    radioAlphaTRX_Received_Init(); // receive mode actived
                 }
                 else
                 {
@@ -96,6 +96,7 @@ void APP_Tasks( void )
                 }
 #endif
             }
+            printf( "Go to APP_STATE_IDLE...\n" );
             appData.state = APP_STATE_IDLE;
             break;
         }
@@ -121,31 +122,34 @@ void APP_Tasks( void )
             LedsStatusBlink( LED_GREEN, 20, 1980 );
 
 
-
 #if defined (USE_UART1_SERIAL_INTERFACE)
             /* Get interaction with the serial terminal. */
-            received_order = APP_SerialDebugTasks( );
-            STATUS_READ_VAL StatusRead;
-            uint16_t i; // incrément de la boucle for
-            switch ( received_order ) // for serial commande (SC)
-            {
-                    
-                case 'B':
-                    
-                    break;
-
-                    //                case SC_NONE:
-                default:
-                    // if nothing else matches, do the default
-                    // default is optional
-                    break;
-            }
+            APP_SerialDebugTasks( );
+//            received_order = APP_SerialDebugTasks( );
+//            STATUS_READ_VAL StatusRead;
+//            uint16_t i; // incrément de la boucle for
+//            switch ( received_order ) // for serial commande (SC)
+//            {
+//                    
+//                case 'B':
+//                    
+//                    break;
+//
+//                    //                case SC_NONE:
+//                default:
+//                    // if nothing else matches, do the default
+//                    // default is optional
+//                    break;
+//            }
 #endif
             break;
             /* -------------------------------------------------------------- */
         
         case APP_STATE_RADIO_RECEIVED : 
             if ( appData.state != appData.previous_state ) {
+#if defined (USE_UART1_SERIAL_INTERFACE) && defined (DISPLAY_CURRENT_STATE)
+                printf( "> APP_STATE_RADIO_RECEIVED\n" );
+#endif
                 appData.previous_state = appData.state;
             }
 #if defined (USE_UART1_SERIAL_INTERFACE) && defined(DISPLAY_CURRENT_STATE)

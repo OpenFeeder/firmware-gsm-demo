@@ -75,7 +75,7 @@ int8_t master_send_date_rf() {
 
 void master_handle_msg_rf() {
     Frame data_receive;
-    if (srv_decode_packet_rf(radioAlphaTRX_read_buf(), &data_receive, radioAlphaTRX_get_size_buf(), srv_getIDM()) > 0) {
+    if (srv_decode_packet_rf(radioAlphaTRX_read_buf(), &data_receive, radioAlphaTrx_get_size_buf(), srv_getIDM()) > 0) {
         if (data_receive.Type_Msg == srv_err()) {
 #if defined(UART_DEBUG)
             LED_GREEN_Toggle();

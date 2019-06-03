@@ -39,9 +39,10 @@ STATUS_READ_VAL RF_StatusRead; // Status Read Command
 
 void radioAlphaTRX_Init(void) {
     //nRES_SetHigh();
-    CMD_3v3_RF_SetHigh();
+    //CMD_3v3_RF_SetHigh();
+    // voir powerRFEnable( );
     RF_StatusRead.Val = 0;
-        //do {
+//        do {
             RF_StatusRead.Val = radioAlphaTRX_Command(STATUS_READ_CMD); // intitial SPI transfer added to avoid power-up problem
 #if defined(UART_DEBUG)
         printf("status : 0x%04X\r\nb14- %d\n", RF_StatusRead.Val, RF_StatusRead.bits.b14_POR);
@@ -62,7 +63,8 @@ void radioAlphaTRX_Init(void) {
     // g.  - Gain relative to maximum               :  20 dBm
     // r.  - RSSI detector threshold                : -103 dBm
     RF_ReceiverControl.Val = RX_CTRL_CMD_POR;
-    RF_ReceiverControl.REGbits.RSSIsetth = RSSIsetth_n103;
+   // RF_ReceiverControl.REGbits.RSSIsetth = RSSIsetth_n103;
+    RF_ReceiverControl.REGbits.RSSIsetth = RSSIsetth_n73;
     RF_ReceiverControl.REGbits.GLNA = GAIN_n20_dB;
     RF_ReceiverControl.REGbits.RX_BW_Select = BW_200_KHz;
     RF_ReceiverControl.REGbits.VDI_RespSetting = FAST;
@@ -108,8 +110,10 @@ void radioAlphaTRX_Init(void) {
 // Initialiser la detection d'une nouvelle donnee
 
 void radioAlphaTRX_Received_Init(void) {
-    //nRES_SetHigh();
-    CMD_3v3_RF_SetHigh(); // a voir ici 
+//    nRES_SetHigh();
+    //CMD_3v3_RF_SetHigh(); // a voir ici 
+        // voir powerRFEnable( );
+
     /**-------------> Configuration Setting Command <--------------------------*/
     //  bit  15  14  13  12  11  10   9   8   7   6   5   4   3   2   1   0   POR
     //  Val   1   0   0   0   0   0   0   0  el  ef  b1  b0  x3  x2  x1  x0   0x8008
@@ -286,7 +290,7 @@ int8_t radioAlphaTRX_receive(uint8_t buffer[FRAME_LENGTH]) {
 void radioAlphaTRX_capture_frame() {
     set_tmr_msg_recu_timeout(TIME_OUT_GET_FRAME); // on demare le timer, car le bufer est probablement remplie 
     if ((size_buf = radioAlphaTRX_receive(BUF)) > 0) {
-        setLedsStatusColor( LED_ORANGE );
+        setLedsStatusColor( LED_BLUE );
         appData.state = APP_STATE_RADIO_RECEIVED;
     }
     radioAlphaTRX_Init();

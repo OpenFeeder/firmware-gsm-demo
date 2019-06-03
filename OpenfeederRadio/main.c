@@ -21,9 +21,9 @@ int main(void) {
     
     //test_rx();
     //test_timer();
-    //test_tx();
+    test_tx();
     
-    test_update_date_receive(); 
+//    test_update_date_receive(); 
     //master_state_machine_of_daytime();
     return -1;
 }

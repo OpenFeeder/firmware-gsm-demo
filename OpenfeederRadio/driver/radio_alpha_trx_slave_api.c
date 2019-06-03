@@ -116,7 +116,7 @@ void radioAlphaTRX_slave_behaviour_of_daytime() {
     uint16_t timeout = get_tmr_msg_recu_timeout();
     int8_t nothing = 1;
     //recuperer le msg | le decapsuler | verifier s'il est mien 
-    if (srv_decode_packet_rf(radioAlphaTRX_read_buf(), &msg_receive, radioAlphaTRX_get_size_buf(), srv_getIDS1()) > 0) { // est il à moi
+    if (srv_decode_packet_rf(radioAlphaTRX_read_buf(), &msg_receive, radioAlphaTrx_get_size_buf(), srv_getIDS1()) > 0) { // est il à moi
         if (msg_receive.Type_Msg == srv_horloge()) {
 #if defined(_DEBUG)
             printf("Msg synch recu \n");
