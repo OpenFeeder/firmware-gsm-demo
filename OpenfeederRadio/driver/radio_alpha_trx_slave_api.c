@@ -71,11 +71,7 @@ int8_t radioAlphaTRX_slave_send_msg_rf(uint8_t type_msg, uint8_t * data, uint8_t
         radioAlphaTRX_Send_data(data_send, size);
         ret = 1;
     }
-
     radioAlphaTRX_set_send_mode(0);
-    // pour l'instant on fait ça on verra si on trouve une solution propre plus tard 
-    //on se remet en ecoute 
-    radioAlphaTRX_Init();
     radioAlphaTRX_Received_Init();
     return ret;
 }
