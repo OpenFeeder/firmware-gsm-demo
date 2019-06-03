@@ -229,11 +229,9 @@ uint16_t radioAlphaTRX_Command(uint16_t cmd_write) {
 int8_t radioAlphaTRX_wait_nIRQ(int timeout) {
     set_tmr_nIRQ_low_timeout(timeout);
     while (RF_nIRQ_GetValue()) {
-        LED_STATUS_B_SetHigh();
         if (get_tmr_nIRQ_low_timeout() == 0) {
             return 0;
         }
-        LED_STATUS_B_SetLow();
     }
     set_tmr_nIRQ_low_timeout(0);
     return 1;
