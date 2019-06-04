@@ -46,10 +46,10 @@
 #include "clock.h"
 #include "system.h"
 #include "uart2.h"
+#include "tmr1.h"
+#include "uart1.h"
 #include "interrupt_manager.h"
 #include "traps.h"
-#include "uart1.h"
-#include "tmr1.h"
 
 void SYSTEM_Initialize(void)
 {
@@ -57,8 +57,8 @@ void SYSTEM_Initialize(void)
     CLOCK_Initialize();
     INTERRUPT_Initialize();
     UART2_Initialize();
-    UART1_Initialize();
     TMR1_Initialize();
+    UART1_Initialize();
 }
 
 /**

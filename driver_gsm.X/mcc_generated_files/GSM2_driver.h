@@ -30,9 +30,6 @@
 
 void GSM2_SetHardwareReset(bool);
 bool GSM2_GetStatus(void);
-bool GSM2_GetRingIndication(void);
-bool GSM2_GetRTS(void);
-void GSM2_SetCTS(bool);
 void GSM2_SendString(const char*);
 
 #endif	/* GSM2_DRIVER_H */

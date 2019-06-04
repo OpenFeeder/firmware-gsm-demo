@@ -55,6 +55,9 @@ int main(void)
 {
     // initialize the device
     SYSTEM_Initialize();
+//#if defined(_DEBUG)
+    printf("Init\n");
+//#endif
     EXAMPLE_useGSM2();
     while (1)
     {

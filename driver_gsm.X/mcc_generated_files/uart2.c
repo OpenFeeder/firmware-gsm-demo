@@ -47,6 +47,7 @@
 */
 
 #include "uart2.h"
+#include "pin_manager.h"
 
 /**
   Section: Data Type Definitions
@@ -128,8 +129,8 @@ void (*UART2_RxDefaultInterruptHandler)(void);
 
 void UART2_Initialize (void)
 {
-   // STSEL 1; IREN disabled; PDSEL 8N; UARTEN enabled; RTSMD disabled; USIDL disabled; WAKE disabled; ABAUD disabled; LPBACK disabled; BRGH enabled; URXINV disabled; UEN TX_RX; 
-   U2MODE = (0x8008 & ~(1<<15));  // disabling UARTEN bit   
+   // STSEL 1; IREN disabled; PDSEL 8N; UARTEN enabled; RTSMD enabled; USIDL disabled; WAKE disabled; ABAUD disabled; LPBACK disabled; BRGH enabled; URXINV disabled; UEN TX_RX; 
+   U2MODE = (0x8808 & ~(1<<15));  // disabling UARTEN bit   
    // UTXISEL0 TX_ONE_CHAR; UTXINV disabled; URXEN disabled; OERR NO_ERROR_cleared; URXISEL RX_ONE_CHAR; UTXBRK COMPLETED; UTXEN disabled; ADDEN disabled; 
    U2STA = 0x0000;
    // BaudRate = 9600; Frequency = 2000000 Hz; U2BRG 51; 
@@ -219,8 +220,9 @@ void UART2_SetRxInterruptHandler(void* handler){
 }
 
 void __attribute__ ( ( interrupt, no_auto_psv ) ) _U2RXInterrupt( void )
-{
+{    
     (*UART2_RxDefaultInterruptHandler)();
+    EXAMPLE_CaptureReceivedMessage();
 }
 
 void UART2_Receive_ISR(void)
@@ -249,7 +251,6 @@ void UART2_Receive_ISR(void)
         }
         
     }
-
     IFS1bits.U2RXIF = false;
    
 }

@@ -71,34 +71,36 @@ void EXAMPLE_useGSM2 (void)
     EXAMPLE_blockingWait(400);                      // Wait
     exampleRead = EXAMPLE_GetResponse();            // Read 'OK' String from Buffer
 #if defined(_DEBUG)
-    printf("GSM : %s\n", responseBufferSize);
+    printf("AT ? :  %s\n", exampleRead);
 #endif
-    strcpy(exampleReadStorage, exampleRead);        // Store for use/reference
+//    strcpy(exampleReadStorage, exampleRead); 
     EXAMPLE_ReadyReceiveBuffer();                   // Prepare for next message
-#if defined(_DEBUG)
-    printf("GSM : %s\n", responseBufferSize);
-#endif
     GSM2_SendString("ATE0");                        // Send "ATEO" to disable command ECHOs 
     EXAMPLE_blockingWait(400);                      // Wait
     exampleRead = EXAMPLE_GetResponse();            // Read 'Ok' String from Buffer
-    strcpy(exampleReadStorage, exampleRead);        // Store for use/reference
 #if defined(_DEBUG)
-    printf("GSM : %s\n", responseBufferSize);
+    printf("echo off ? :  %s\n", exampleRead);
 #endif
+//    strcpy(exampleReadStorage, exampleRead);        // Store for use/reference
     EXAMPLE_ReadyReceiveBuffer();                   // Prepare for next message
     GSM2_SendString("AT+GMI");                      // Send "AT+GMI" to request Module Info 
     EXAMPLE_blockingWait(400);                      // Wait
     exampleRead = EXAMPLE_GetResponse();            // Read "Info" response String from Buffer
+    LED_RED_SetHigh();
 #if defined(_DEBUG)
-    printf("GSM : %s\n", exampleRead);
+    printf("infos gsm  %s\n", exampleRead);
 #endif
-    strcpy(exampleReadStorage, exampleRead);        // Store for use/reference
+//    strcpy(exampleReadStorage, exampleRead);        // Store for use/reference
+    LED_RED_SetLow();
 }
 void EXAMPLE_CaptureReceivedMessage(void)       // Processed from ISR
 {
     uint8_t readByte = uart[GSM2].Read();
-    if ( (readByte != '\0') && (gsm2ResponseIndex < responseBufferSize) )
+    if ( (readByte != '\0') && (gsm2ResponseIndex < responseBufferSize-1) )
         gsm2ResponseBuffer[gsm2ResponseIndex++] = readByte;
+    else {
+        gsm2ResponseBuffer[responseBufferSize] = '\0';
+    }
 }
 //*********************************************************
 //          Local Used Example Functions

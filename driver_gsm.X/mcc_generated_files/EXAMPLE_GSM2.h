@@ -26,6 +26,8 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <xc.h>
+
+#define _DEBUG (1)
 void EXAMPLE_useGSM2 (void);
 void EXAMPLE_CaptureReceivedMessage(void);
 

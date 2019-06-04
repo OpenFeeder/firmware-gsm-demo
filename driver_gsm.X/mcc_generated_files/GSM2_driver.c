@@ -34,18 +34,6 @@ bool GSM2_GetStatus(void)
 {
     return PORTAbits.RA0;
 }
-bool GSM2_GetRingIndication(void)
-{
-    return PORTBbits.RB10;
-}
-bool GSM2_GetRTS(void)
-{
-    return PORTCbits.RC3;
-}
-void GSM2_SetCTS(bool state)
-{
-    LATBbits.LATB7 = state;
-}
 void GSM2_SendString(const char* command)
 {
     while (*command != '\0')
