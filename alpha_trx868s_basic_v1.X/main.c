@@ -69,7 +69,6 @@ int main(void)
     
     /* Initialize the application. */
     APP_Initialize( );
-    
     while (1)
     {
         /* Maintain the application's state machine. */

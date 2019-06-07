@@ -1,4 +1,4 @@
-
+#include <stdio.h>
 #include "./temps.h"
 
 inline uint8_t conv_dec(uint8_t g, uint8_t d) {

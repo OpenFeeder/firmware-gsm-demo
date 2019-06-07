@@ -39,7 +39,8 @@ extern uint8_t received_order;
 
 void displayBootMessage( void );
 //SERIAL_CONTROL APP_SerialDebugTasks( void );
-uint8_t APP_SerialDebugTasks( void );
+//uint8_t APP_SerialDebugTasks( void );
+void APP_SerialDebugTasks( void );
 void printUSBHostDeviceStatus( void );
 uint16_t readIntFromUart1( void );
 

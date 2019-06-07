@@ -10,6 +10,12 @@
             <file>file:/home/mmadi/Documents/stageM1/firmware-gsm-demo/alpha_trx868s_basic_v1.X/timer.h</file>
             <file>file:/home/mmadi/Documents/stageM1/firmware-gsm-demo/alpha_trx868s_basic_v1.X/mcc_generated_files/tmr1.c</file>
             <file>file:/home/mmadi/Documents/stageM1/firmware-gsm-demo/alpha_trx868s_basic_v1.X/app_debug.c</file>
+<<<<<<< HEAD
+=======
+            <file>file:/home/mmadi/Documents/stageM1/firmware-gsm-demo/alpha_trx868s_basic_v1.X/mcc_generated_files/pin_manager.c</file>
+            <file>file:/home/mmadi/Documents/stageM1/firmware-gsm-demo/alpha_trx868s_basic_v1.X/radio_alpha_trx.h</file>
+            <file>file:/home/mmadi/Documents/stageM1/firmware-gsm-demo/alpha_trx868s_basic_v1.X/radio_alpha_trx_slave_api.c</file>
+>>>>>>> integration
         </group>
     </open-files>
 </project-private>

@@ -2,9 +2,13 @@
 <project-private xmlns="http://www.netbeans.org/ns/project-private/1">
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
+<<<<<<< HEAD
         <group>
             <file>file:/home/mmadi/Documents/stageM1/firmware-gsm-demo/driver_gsm.X/main.c</file>
             <file>file:/home/mmadi/Documents/stageM1/firmware-gsm-demo/driver_gsm.X/mcc_generated_files/EXAMPLE_GSM2.c</file>
         </group>
+=======
+        <group/>
+>>>>>>> integration
     </open-files>
 </project-private>

@@ -38,6 +38,8 @@ volatile uint16_t tmr_msg_recu_timeout = 0;
 volatile uint16_t tmr_nIRQ_low_timeout = 0;
 
 volatile uint16_t tmr_timeout = 0;
+
+volatile uint16_t tmr_delay_ms = 0;
 /*_____________________________________________________________________________*/
 
 /**-------------------------->> D E F I N I T I O N <<-------------------------*/
@@ -64,8 +66,13 @@ void set_tmr_nIRQ_low_timeout(int16_t set) { tmr_nIRQ_low_timeout = set; }
 void set_tmr_timeout(uint16_t timeout) { tmr_timeout = timeout; }
 uint16_t get_tmr_timeout() { return tmr_timeout; }
 
-
+void tmr_delay(uint16_t delay_ms) {
+    tmr_delay_ms = delay_ms;
+    while (tmr_delay_ms > 0) { }
+}
 void tmr_callBack( void ) {
+    
+    if (tmr_delay_ms) --tmr_delay_ms;
     
     if (tmr_timeout) --tmr_timeout;
     

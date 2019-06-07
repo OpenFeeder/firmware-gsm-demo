@@ -709,7 +709,7 @@ int8_t * radioAlphaTRX_read_buf();
  * 
  * @return : la taille du buffer indice
  */
-int8_t radioAlphaTRX_get_size_buf();
+int8_t radioAlphaTrx_get_size_buf();
 
 
  /****************                                         *********************/

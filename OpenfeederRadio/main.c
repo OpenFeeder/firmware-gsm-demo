@@ -21,9 +21,14 @@ int main(void) {
     
     //test_rx();
     //test_timer();
-    //test_tx();
+    test_tx();
     
+<<<<<<< HEAD
     //test_update_date_receive(); 
     master_state_machine_of_daytime();
+=======
+//    test_update_date_receive(); 
+    //master_state_machine_of_daytime();
+>>>>>>> integration
     return -1;
 }
