@@ -10,6 +10,7 @@
 #include <stdio.h>
 #include "app.h"
 #include "app_debug.h"
+#include "radio_alpha_trx_slave_api.h"
 
 #if defined (USE_UART1_SERIAL_INTERFACE)
 
@@ -42,7 +43,7 @@ void displayBootMessage(void) {
 }
 
 bool rf_power_status = false;
-
+int8_t i = 0;
 
 //SERIAL_CONTROL APP_SerialDebugTasks( void )
 
@@ -56,7 +57,7 @@ void APP_SerialDebugTasks(void) {
     if (UART1_TRANSFER_STATUS_RX_DATA_PRESENT & UART1_TransferStatusGet()) {
         /* If there is at least one byte of data has been received. */
         uint8_t data_from_uart1 = UART1_Read();
-
+        
         switch (data_from_uart1) {
             case ',':
             case '?':
@@ -82,13 +83,6 @@ void APP_SerialDebugTasks(void) {
 
             case 'b':
             case 'B':
-//                while (1) {
-                    printf("Send byte to RF Module\n");
-                    radioAlphaTRX_Send_Init();
-                    radioAlphaTRX_set_send_mode(1);
-                    radioAlphaTRX_Send_data("ANZILANE", 8);
-//                    tmr_delay(500);
-//                }
                 break;
                 /* -------------------------------------------------------------- */
 
@@ -96,14 +90,8 @@ void APP_SerialDebugTasks(void) {
             case 'R':
 #if defined(UART_DEBUG)
                 printf("ERROR GENERATED\n");
-#endif
-                if (RF_nIRQ_GetValue()) {
-                    printf("high\n");
-                } else {
-                    printf("low\n");
-                }
-//                IOCFEbits.IOCFE2 = 1;
-//                IFS1bits.CNIF = 1;
+#endif          i = (i + 1)%8;
+                radioAlphaTRX_slave_get_error(i);
                 break;
                 /* -------------------------------------------------------------- */
 

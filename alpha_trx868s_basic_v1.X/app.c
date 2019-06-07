@@ -65,6 +65,7 @@ APP_DATA appData; /* Global application data. */
  */
 void APP_Tasks( void )
 {
+    struct tm t;
     /* Check the Application State. */
     switch ( appData.state )
     {
@@ -120,7 +121,13 @@ void APP_Tasks( void )
 
             /* Green status LED blinks in idle mode. */
             LedsStatusBlink( LED_GREEN, 20, 1980 );
-
+#if defined(UART_DEBUG)
+        RTCC_TimeGet(&t);
+        if (!get_tmr_timeout()) {
+            printf("heur slave ==> %dh:%dmin:%ds\n", t.tm_hour, t.tm_min, t.tm_sec);
+            set_tmr_timeout(5000); // 1s
+        }
+#endif      
 
 #if defined (USE_UART1_SERIAL_INTERFACE)
             /* Get interaction with the serial terminal. */
