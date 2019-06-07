@@ -91,6 +91,7 @@ void APP_SerialDebugTasks(void) {
 #if defined(UART_DEBUG)
                 printf("ERROR GENERATED\n");
 #endif          i = (i + 1)%8;
+                
                 radioAlphaTRX_slave_get_error(i);
                 break;
                 /* -------------------------------------------------------------- */
