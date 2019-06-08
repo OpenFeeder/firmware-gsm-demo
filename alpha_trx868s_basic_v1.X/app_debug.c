@@ -90,9 +90,9 @@ void APP_SerialDebugTasks(void) {
             case 'R':
 #if defined(UART_DEBUG)
                 printf("ERROR GENERATED\n");
-#endif          i = (i + 1)%8;
-                
-                radioAlphaTRX_slave_get_error(i);
+#endif          
+                i = i%8+1;
+                radioAlphaTRX_Slave_save_error(i);
                 break;
                 /* -------------------------------------------------------------- */
 
@@ -109,6 +109,8 @@ void APP_SerialDebugTasks(void) {
                 if (rf_power_status == true) {
                     CMD_3v3_RF_SetLow();
                     printf("RF Module enable\n");
+                    radioAlphaTRX_Init();
+                    radioAlphaTRX_Received_Init(); // receive mode actived
                 } else {
                     CMD_3v3_RF_SetHigh();
                     printf("RF Module disable\n");

@@ -38,7 +38,7 @@ uint8_t last_send = 2; // 0 si erreur | 1 si infos 2 ack
 
 /*****************                                         ********************/
 
-void radioAlphaTRX_save_error(int8_t num_error) { // vraiment a voir 
+void radioAlphaTRX_Slave_save_error(int8_t num_error) { // vraiment a voir 
     LED_STATUS_R_Toggle();
     BUF_ERR[p_write_err_buf] = num_error;
     p_write_err_buf = (p_write_err_buf + 1) % NB_ERR_BUF;
@@ -63,7 +63,7 @@ void radioAlphaTRX_slave_update_buf_err_ptr() {
 }
 
 int8_t radioAlphaTRX_slave_send_msg_rf(uint8_t type_msg, uint8_t * data, uint8_t id_msg) {
-    radioAlphaTRX_set_send_mode(1);
+    radioAlphaTRX_set_send_mode(1); // j'annonce que je suis en mode transmission 
     
     uint8_t data_send[FRAME_LENGTH];
     int8_t ret = 0;
@@ -72,28 +72,23 @@ int8_t radioAlphaTRX_slave_send_msg_rf(uint8_t type_msg, uint8_t * data, uint8_t
         radioAlphaTRX_Send_data(data_send, size);
         ret = 1;
     }
-    radioAlphaTRX_set_send_mode(0);
-    radioAlphaTRX_Received_Init();
+    
+    radioAlphaTRX_set_send_mode(0); // je ne suis en mode transmission 
+    radioAlphaTRX_Received_Init();  // je me remet en attente d'un msg
     return ret;
 }
 
-void radioAlphaTRX_slave_send_err(int8_t *err_to_send) {
-    radioAlphaTRX_slave_send_msg_rf (srv_err(), err_to_send, 1);
+void radioAlphaTRX_slave_send_err(int8_t err_to_send) {
+    radioAlphaTRX_slave_send_msg_rf (srv_err(), "ERROR", err_to_send); // plus tard on evitera
 }
 
 void radioAlphaTRX_slave_send_nothing() {
-#if defined(UART_DEBUG)
-    printf("J'ai rien a transmettre ==> nothing\n");
-#endif
     radioAlphaTRX_slave_send_msg_rf (srv_nothing(), "NOTHING", 1);
 }
 
 void radioAlphaTRX_slave_update_date(uint8_t* date, int16_t derive) {
     struct heure_format hf;
     deserial_buffer(date, &hf);
-
-    //TOASK : etant donner qu'on est a la seconde pres, selon mecalcule 
-    //TOASK : je dois ajouter 1 pour etre ? peut pres synchrone 
     hf.s += 1;
     if (hf.s == 60) {
         hf.s = 0;

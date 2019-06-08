@@ -57,34 +57,39 @@
  /*****************                                         ********************/
 
 /**
- * 
- * @param num_error
+ * ajoute l'erreur dans le buffer des erreurs et met à jour les pointeurs des erreur 
+ * @param num_error : numero de l'erreur 
  */
-void radioAlphaTRX_save_error(int8_t num_error);
+void radioAlphaTRX_Slave_save_error(int8_t num_error);
 
 
 /**
  * 
- * @return 
+ * @return :
+ *          0 : si aucune erreur n'est present 
+ *          numero de l'erreur  
  */
 int8_t radioAlphaTRX_slave_get_error();
 
 
 /**
- * 
+ * apres la reception d'un ack, si on avait transmsi une erreur on met a jour 
+ * les pointeurs du buffer des erreurs 
  */
 void radioAlphaTRX_slave_update_buf_err_ptr();
 
 
 /**
- * 
- * @param err_to_send
+ * lorsque l'on transmet une erreur, le num paquet devient le numero de l'erreur 
+ * @param err_to_send : l'erreur à transmettre 
  */
-void radioAlphaTRX_slave_send_err(int8_t *err_to_send);
+void radioAlphaTRX_slave_send_err(int8_t err_to_send);
 
 
 /**
- * 
+ * si l'on recois une demande d'infos que l'on a rien a transmettre 
+ * on notifie quand meme, au master de notre existance, pour lui eviter de nous 
+ * considerer infonctionnel 
  */
 void radioAlphaTRX_slave_send_nothing();
 
