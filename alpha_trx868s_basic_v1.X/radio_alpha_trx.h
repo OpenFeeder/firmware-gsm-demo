@@ -114,6 +114,12 @@
 #include "mcc_generated_files/pin_manager.h"
 #include "Services.h"
 
+/******************************************************************************/
+/******************************************************************************/
+/****************** Driver ALPHA TRX433S - Interface SPI **********************/
+/***************************                ***********************************/
+/*****************                                       **********************/
+
 /**------------------------>> D E F I N I T I O N S <<-------------------------*/
 
 /** Detection du signal nIRQ du module RF */
@@ -123,7 +129,7 @@
 
 
 /** ------------------------>> ALPHA TRX433S Register <<-----------------------*/
-  
+
 // Control Register Default Values after Power-On Reset (POR):
 // ---- Control Register -------------- Power-On Reset Value -------------- Control Command -------------------- Related control bits
 #define CFG_SET_CMD_POR                 (0x8008)    // 1000 0000 0000 1000, Configuration Setting Command ...... el, ef, b1 to b0, x3 to x0
@@ -222,6 +228,7 @@ typedef enum {
 } SELECT_FQ_VAL;
 
 /** ------------------------>> CFG_SET_CMD_POR  <<----------------------------*/
+
 /**
  * Configuration Setting Command
  * recommended : 
@@ -257,7 +264,6 @@ typedef union {
         unsigned cmd_code : 8; // Command code
     } REGbits;
 } CFG_SET_CMD_VAL;
-
 
 /**
  * x3..x0: select crystal load capacitor
@@ -298,6 +304,7 @@ typedef enum _SELECT_BAND_T {
 
 
 /** ------------------------>> PWR_MGMT_CMD_POR <<----------------------------*/
+
 /**
  * Power Management Command
  * recommended : 
@@ -327,6 +334,7 @@ typedef union {
 } PWR_MGMT_CMD_VAL;
 
 /** ------------------------>> FQ_SET_CMD_POR <<------------------------------*/
+
 /**
  * Frequency Setting Command
  * recommended : (0xA640)
@@ -385,6 +393,7 @@ typedef union {
  */
 
 /** ------------------------>> RX_CTRL_CMD_POR <<------------------------------*/
+
 /**
  * Receiver Control Command
  * recommended : 
@@ -485,6 +494,7 @@ typedef enum _SELECT_VDI_RESPONSE_TIMING_T {
 #define ANALOG_RC_FILTER    (1)     // Analog RC filter
 
 /** ------------------------>> FIFO_RST_MODE_CMD_POR <<------------------------*/
+
 /** 
  * FIFO and Reset Mode Command 
  * recommended : 
@@ -634,13 +644,13 @@ void radioAlphaTRX_Init(void);
  * @param cmd_write : commande a transmettre 
  * @return : l'etat du registre
  */
-uint16_t radioAlphaTRX_Command(uint16_t cmd_write); 
+uint16_t radioAlphaTRX_Command(uint16_t cmd_write);
 
 /**
  * Initialiser les conditions d'attente d'un nouveau message
  * Le module doit etre en mode RX.
  */
-void radioAlphaTRX_Received_Init(void); 
+void radioAlphaTRX_Received_Init(void);
 
 /**
  * Initialiser les conditions d'envoie d'un nouveau message, le module passe en mode TX.
@@ -648,7 +658,7 @@ void radioAlphaTRX_Received_Init(void);
  * L'envoie des donnees de la trame se fait par la fonction RF12_nIRQ_Service()
  * @return : 0 init ko 1 si ok 
  */
-int8_t radioAlphaTRX_Send_Init(void); 
+int8_t radioAlphaTRX_Send_Init(void);
 
 /**
  * transmet un octet seulement si le nIRQ est a l'etat bas 
@@ -680,12 +690,6 @@ int8_t radioAlphaTRX_wait_nIRQ(int timeout);
  */
 void radioAlphaTRX_capture_frame();
 
- /******************************************************************************/
- /******************************************************************************/
- /******************** PARAMETRE DE CAPTURE DE LA TRAME RECU *******************/
- /***************************                ***********************************/
- /*****************                                         ********************/
-
 
 /**
  * 
@@ -711,9 +715,9 @@ int8_t * radioAlphaTRX_read_buf();
 int8_t radioAlphaTRX_get_size_buf();
 
 
- /****************                                         *********************/
- /*************************                     ********************************/
- /******************************************************************************/
- /******************************************************************************/
+/****************                                         *********************/
+/*************************                     ********************************/
+/******************************************************************************/
+/******************************************************************************/
 
 #endif	/* XC_HEADER_TEMPLATE_H */

@@ -15,74 +15,40 @@ const int8_t W_MAX = 20;
 // pour les teste je le change manuellement mais apres ce sera automatique
 int8_t moment; // 0 avant le reveille des oiseaux, 1 la journee, 2 le soir
 
-uint8_t srv_err() {
-    return 1;
-}
-
-uint8_t srv_data() {
-    return 2;
-}
-
-uint8_t srv_ack() {
-    return 3;
-}
-
-uint8_t srv_horloge() {
-    return 4;
-}
-
-uint8_t srv_infos() {
-    return 5;
-}
-
-uint8_t srv_end_trans() {
-    return 6;
-}
-
-uint8_t srv_end_block() {
-    return 7;
-}
-
-uint8_t srv_config() {
-    return 8;
-}
-
-uint8_t srv_nothing() {
-    return 9;
-}
-//notre identifiant @ 
-
-uint16_t srv_getIDS1() {
-    return 37;
-}
-
-uint16_t srv_getIDS2() {
-    return 36;
-}
-
-uint16_t srv_getIDS3() {
-    return 35;
-}
-
-uint16_t srv_getIDM() {
-    return 34;
-}
-
-uint16_t service_getSRC() {
-    return 37;
-}
-
-uint16_t srv_getBroadcast() {
-    return 1023;
-}
-
-
 /******************************************************************************/
 /******************************************************************************/
 /****************** FONCTIONNALITEES COMMUNES AU ALPHA TRX ********************/
 /***************************                ***********************************/
 
 /*****************                                 ****************************/
+
+uint8_t srv_err() { return 1; }
+
+uint8_t srv_data() { return 2; }
+
+uint8_t srv_ack() { return 3; }
+
+uint8_t srv_horloge() { return 4; }
+
+uint8_t srv_infos() { return 5; }
+
+uint8_t srv_end_trans() { return 6; }
+
+uint8_t srv_end_block() { return 7; }
+
+uint8_t srv_config() { return 8; }
+
+uint8_t srv_nothing() { return 9; }
+//notre identifiant @ 
+
+uint16_t srv_getID_Slave() { return 37; } // a modifier en fonction du master 
+
+uint16_t srv_getID_Master() { return 34; }
+
+uint16_t service_getSRC() { return 37; }
+
+uint16_t srv_getBroadcast() { return 1023; }
+
 
 //dans la fenetre 
 
@@ -193,11 +159,11 @@ int8_t srv_decode_packet_rf(uint8_t* paquet, Frame *pPaquetRecu, int size,
     //on recup?re id dest pour verifier si c'est egale au notre==> c'est le slave 1
     pPaquetRecu->ID_Dest = paquet[j] * s + paquet[j + 1];
     j += 2;
-//    printf("%d\n", pPaquetRecu->ID_Dest);
+    //    printf("%d\n", pPaquetRecu->ID_Dest);
     //teste si le paquet m'est destin?
     if (pPaquetRecu->ID_Dest != idOF && pPaquetRecu->ID_Dest != srv_getBroadcast()) // ?a veut dire pas les meme 
         return 0; // le paquet n'est pas ? moi
-        
+
     //la premi?re chose qu'on recup?re c'est le crc
     uint8_t sum_ctl = paquet[size - 1];
     if (srv_test_cheksum(paquet, size - 1, sum_ctl) == 0) {

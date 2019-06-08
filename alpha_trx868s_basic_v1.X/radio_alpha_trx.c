@@ -35,6 +35,12 @@ RX_FIFO_READ_CMD_VAL RF_FIFO_Read; // Receiver FIFO Read
 FIFO_RST_MODE_CMD_VAL RF_FIFOandResetMode; // FIFO and Reset Mode Command
 STATUS_READ_VAL RF_StatusRead; // Status Read Command
 
+/******************************************************************************/
+/******************************************************************************/
+/****************** Driver ALPHA TRX433S - Interface SPI **********************/
+/***************************                ***********************************/
+/*****************                                       **********************/
+
 /**-------------------------->> D E F I N I T I O N <<-------------------------*/
 
 void radioAlphaTRX_Init(void) {
@@ -101,7 +107,7 @@ void radioAlphaTRX_Init(void) {
 // Initialiser la detection d'une nouvelle donnee
 
 void radioAlphaTRX_Received_Init(void) {
-//    nRES_SetHigh();
+    //    nRES_SetHigh();
     //close TX mode 
     radioAlphaTRX_Command(0x8209);
 
@@ -131,7 +137,7 @@ void radioAlphaTRX_Received_Init(void) {
 int8_t radioAlphaTRX_Send_Init(void) {
     //close Rx mode 
     radioAlphaTRX_Command(0x8209);
-    
+
     /**-------------> Configuration Setting Command <--------------------------*/
     //  bit  15  14  13  12  11  10   9   8   7   6   5   4   3   2   1   0   POR
     //  Val   1   0   0   0   0   0   0   0  el  ef  b1  b0  x3  x2  x1  x0   0x8008
@@ -197,8 +203,8 @@ int8_t radioAlphaTRX_Send_data(uint8_t* bytes, int8_t size) {
     radioAlphaTRX_Send_Byte(0x00, SEND_TIME_OUT);
     radioAlphaTRX_Send_Byte(0x00, SEND_TIME_OUT);
     // clear TX
-//    RF_PowerManagement.Val = 0x8209;
-//    radioAlphaTRX_Command(RF_PowerManagement.Val);
+    //    RF_PowerManagement.Val = 0x8209;
+    //    radioAlphaTRX_Command(RF_PowerManagement.Val);
     return i;
 }
 
@@ -240,7 +246,6 @@ int8_t radioAlphaTRX_wait_nIRQ(int timeout) {
 // 4 buffer remplie de circulairement 
 volatile uint8_t BUF[FRAME_LENGTH];
 volatile uint8_t size_buf = 0;
-volatile uint8_t msg = 0;
 volatile uint8_t send_mode = 0; // O non 1 oui 
 
 int8_t radioAlphaTRX_is_send_mode() {
@@ -276,13 +281,18 @@ int8_t radioAlphaTRX_receive(uint8_t buffer[FRAME_LENGTH]) {
 }
 
 void radioAlphaTRX_capture_frame() {
-    set_tmr_msg_recu_timeout(TIME_OUT_GET_FRAME); // on demare le timer, car le bufer est probablement remplie 
     if ((size_buf = radioAlphaTRX_receive(BUF)) > 0) {
-        LED_STATUS_B_Toggle(); //
+        setLedsStatusColor(LED_BLUE);
         appData.state = APP_STATE_RADIO_RECEIVED;
+        set_tmr_msg_recu_timeout(TIME_OUT_GET_FRAME); // on demare le timer, car le bufer est probablement remplie 
     }
     //on se remet en ecoute 
-    //radioAlphaTRX_Init();
     radioAlphaTRX_Received_Init();
 }
 
+/****************                                         *********************/
+/*************************                     ********************************/
+/******************************************************************************/
+/******************************************************************************/
+
+//End file

@@ -56,6 +56,20 @@
  /***************************                ***********************************/
  /*****************                                         ********************/
 
+
+/**
+ * envoie d'un msg en liaison radio. Attention !! l'envoie du msg est bloquant 
+ * mais pour un certain nombre de milliesecondes (2ms par caractère au pire dans notre cas)  
+ * (vous remarquez qu'on ne precise pas a qui car on ne peut que discuter avec le master)
+ * 
+ * @param type_msg : (une erreur , une donnee, pour l'instant il n'y a que ces types possible)
+ * @param data : la donnee a transmetter 
+ * @param id_msg : (a differencier avec le type de msg, ici c'est le numero du sequence si l'on veut)
+ * @return : le nombre d'octets effectivement envoye.
+ */
+int8_t radioAlphaTRX_slave_send_msg_rf(uint8_t type_msg, uint8_t * data, uint8_t id_msg); 
+                                                                                          
+
 /**
  * ajoute l'erreur dans le buffer des erreurs et met à jour les pointeurs des erreur 
  * @param num_error : numero de l'erreur 
@@ -67,7 +81,7 @@ void radioAlphaTRX_Slave_save_error(int8_t num_error);
  * 
  * @return :
  *          0 : si aucune erreur n'est present 
- *          numero de l'erreur  
+ *          n : si non numero de l'erreur  
  */
 int8_t radioAlphaTRX_slave_get_error();
 
@@ -102,6 +116,7 @@ void radioAlphaTRX_slave_send_nothing();
  * @param derive : le temps ecouler avant le traitement du msg 
  */
 void radioAlphaTRX_slave_update_date(uint8_t* date, int16_t derive);
+
 
 /**
  * machine a etat du systeme de communicatio du slave pendant la journee 

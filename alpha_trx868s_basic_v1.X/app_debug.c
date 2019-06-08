@@ -67,7 +67,7 @@ void APP_SerialDebugTasks(void) {
 
                 printf(" b or B: Send byte to radio module\n");
                 //                printf( " r or R: display received data from radio module\n" );
-                printf(" r or R: read the nIRQ value from the radio module\n");
+                printf(" r or R: Genere ERROR\n");
                 //                printf( " s or S: send data to other radio module\n" );
                 printf(" t or T: change power state of radio module\n");
                 //printf( " t or T: display date and time from RTCC module\n" );
@@ -106,13 +106,13 @@ void APP_SerialDebugTasks(void) {
             case 't':
             case 'T':
                 rf_power_status = !rf_power_status;
-                if (rf_power_status == true) {
-                    CMD_3v3_RF_SetLow();
+                if (rf_power_status == false) {
+                    powerRFEnable( );
                     printf("RF Module enable\n");
                     radioAlphaTRX_Init();
                     radioAlphaTRX_Received_Init(); // receive mode actived
                 } else {
-                    CMD_3v3_RF_SetHigh();
+                    powerRFDisable( );
                     printf("RF Module disable\n");
                 }
                 /* Display date and time from RTCC module. */
