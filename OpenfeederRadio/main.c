@@ -18,7 +18,7 @@ int main(void) {
     
     printf("Init ok\n");
     radioAlphaTRX_Init();
-    
+    radioAlphaTRX_Received_Init();
     //test_rx();
     //test_timer();
     //test_tx();

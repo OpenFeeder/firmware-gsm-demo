@@ -125,7 +125,7 @@ void APP_Tasks( void )
         RTCC_TimeGet(&t);
         if (!get_tmr_timeout()) {
             printf("heur slave ==> %dh:%dmin:%ds\n", t.tm_hour, t.tm_min, t.tm_sec);
-            set_tmr_timeout(1000); // 1s
+            set_tmr_timeout(10000); // 1s
         }
 #endif      
 

@@ -75,7 +75,7 @@ void master_handle_msg_rf() {
         if (data_receive.Type_Msg == srv_err()) {
 #if defined(UART_DEBUG)
             LED_GREEN_Toggle();
-            printf("erreur recu ==> transfere gsm :: %d %d\n", data_receive.data, data_receive.Type_Msg);
+            printf("erreur recu ==> transfere gsm :: %s %d\n", data_receive.data, data_receive.ID_Msg);
             master_send_msg_rf(data_receive.ID_Src, srv_ack(), "ACK", data_receive.Type_Msg); // pour l'instant
 #endif
         } else if (data_receive.Type_Msg == srv_infos()) {
@@ -108,7 +108,7 @@ void master_state_machine_of_daytime() {
         RTCC_TimeGet(&t);
         if (!get_tmr_timeout()) {
             printf("heur master ==> %dh:%dmin:%ds\n", t.tm_hour, t.tm_min, t.tm_sec);
-            set_tmr_timeout(5000); // 5s
+            set_tmr_timeout(10000); // 5s
         }
 #endif
         if (!get_tmr_horloge_timeout()) { // on doit envoyer l'horloge en mode broadcast
