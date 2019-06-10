@@ -67,14 +67,14 @@
  * @param id_msg : (a differencier avec le type de msg, ici c'est le numero du sequence si l'on veut)
  * @return : le nombre d'octets effectivement envoye.
  */
-int8_t radioAlphaTRX_slave_send_msg_rf(uint8_t type_msg, uint8_t * data, uint8_t id_msg); 
+int8_t radioAlphaTRX_SlaveSendMsgRF(uint8_t typeMsg, uint8_t * data, uint8_t idMsg); 
                                                                                           
 
 /**
  * ajoute l'erreur dans le buffer des erreurs et met à jour les pointeurs des erreur 
- * @param num_error : numero de l'erreur 
+ * @param num_error : identifiant de l'erreur 
  */
-void radioAlphaTRX_Slave_save_error(int8_t num_error);
+void radioAlphaTRX_SlaveSaveError(int8_t numError);
 
 
 /**
@@ -83,21 +83,21 @@ void radioAlphaTRX_Slave_save_error(int8_t num_error);
  *          0 : si aucune erreur n'est present 
  *          n : si non numero de l'erreur  
  */
-int8_t radioAlphaTRX_slave_get_error();
+int8_t radioAlphaTRX_SlaveGetError();
 
 
 /**
  * apres la reception d'un ack, si on avait transmsi une erreur on met a jour 
  * les pointeurs du buffer des erreurs 
  */
-void radioAlphaTRX_slave_update_buf_err_ptr();
+void radioAlphaTRX_SlaveUpdatePtrErrBuf();
 
 
 /**
  * lorsque l'on transmet une erreur, le num paquet devient le numero de l'erreur 
  * @param err_to_send : l'erreur à transmettre 
  */
-void radioAlphaTRX_slave_send_err(int8_t err_to_send);
+void radioAlphaTRX_SlaveSendErr(int8_t errToSend);
 
 
 /**
@@ -105,7 +105,7 @@ void radioAlphaTRX_slave_send_err(int8_t err_to_send);
  * on notifie quand meme, au master de notre existance, pour lui eviter de nous 
  * considerer infonctionnel 
  */
-void radioAlphaTRX_slave_send_nothing();
+void radioAlphaTRX_SlaveSendNothing();
 
 
 /**
@@ -113,15 +113,15 @@ void radioAlphaTRX_slave_send_nothing();
  * latence avant le traitement du msg 
  *  
  * @param date : la date recu
- * @param derive : le temps ecouler avant le traitement du msg 
+ * @param derive : le temps ecoule avant le traitement du msg 
  */
-void radioAlphaTRX_slave_update_date(uint8_t* date, int16_t derive);
+void radioAlphaTRX_SlaveUpdateDate(uint8_t* date, int16_t derive);
 
 
 /**
- * machine a etat du systeme de communicatio du slave pendant la journee 
+ * machine a etat du systeme de communicatio du slave 
  */
-void radioAlphaTRX_slave_behaviour_of_daytime();
+void radioAlphaTRX_SlaveBehaviour();
 
 
  /****************                                         *********************/

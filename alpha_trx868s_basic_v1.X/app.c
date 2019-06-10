@@ -63,12 +63,10 @@ APP_DATA appData; /* Global application data. */
   Remarks:
     See prototype in app.h.
  */
-void APP_Tasks( void )
-{
+void APP_Tasks(void) {
     struct tm t;
     /* Check the Application State. */
-    switch ( appData.state )
-    {
+    switch (appData.state) {
         case APP_STATE_INITIALIZE:
         {
             /**
@@ -76,28 +74,24 @@ void APP_Tasks( void )
              * (en) Application initialization when starting the main power.
              * (fr) Initialisation de l'application lors du démarrage de l'alimentation principale.
              */
-            if ( appData.state != appData.previous_state )
-            {
+            if (appData.state != appData.previous_state) {
                 appData.previous_state = appData.state;
 #if defined (USE_UART1_SERIAL_INTERFACE) && defined (DISPLAY_CURRENT_STATE)
-                displayBootMessage( );
-                printf( "> APP_STATE_INITIALIZE\n" );
-                powerRFEnable( );
+                displayBootMessage();
+                printf("> APP_STATE_INITIALIZE\n");
+                powerRFEnable();
                 // Check the power statut of the RF module
-                if ( CMD_3v3_RF_GetValue( ) == false )
-                {
-                    printf( "RF Module enable.\n" );
+                if (CMD_3v3_RF_GetValue() == false) {
+                    printf("RF Module enable.\n");
                     radioAlphaTRX_Init();
-                    radioAlphaTRX_Received_Init(); // receive mode actived
-                }
-                else
-                {
-                    printf( "RF Module disable.\n" );
-                    printf( "Send 'T' to change power state of radio module.\n" );
+                    radioAlphaTRX_ReceivedMode(); // receive mode actived
+                } else {
+                    printf("RF Module disable.\n");
+                    printf("Send 'T' to change power state of radio module.\n");
                 }
 #endif
             }
-            printf( "Go to APP_STATE_IDLE...\n" );
+            printf("Go to APP_STATE_IDLE...\n");
             appData.state = APP_STATE_IDLE;
             break;
         }
@@ -111,70 +105,52 @@ void APP_Tasks( void )
              *  - event PIR sensor, detecting movement near the system
              *  - after the timeout period go into sleep mode
              */
-            if ( appData.state != appData.previous_state )
-            {
+            if (appData.state != appData.previous_state) {
                 appData.previous_state = appData.state;
 #if defined (USE_UART1_SERIAL_INTERFACE) && defined (DISPLAY_CURRENT_STATE)
-                printf( "> APP_STATE_IDLE\n" );
+                printf("> APP_STATE_IDLE\n");
 #endif
             }
 
             /* Green status LED blinks in idle mode. */
-            LedsStatusBlink( LED_GREEN, 20, 1980 );
+            LedsStatusBlink(LED_GREEN, 20, 1980);
 #if defined(UART_DEBUG)
-        RTCC_TimeGet(&t);
-        if (!get_tmr_timeout()) {
-            printf("heur slave ==> %dh:%dmin:%ds\n", t.tm_hour, t.tm_min, t.tm_sec);
-            set_tmr_timeout(10000); // 1s
-        }
+            RTCC_TimeGet(&t);
+            if (!TMR_GetTimeout()) {
+                printf("heur slave ==> %dh:%dmin:%ds\n", t.tm_hour, t.tm_min, t.tm_sec);
+                TMR_SetTimeout(10000); // 10s
+            }
 #endif      
 
 #if defined (USE_UART1_SERIAL_INTERFACE)
             /* Get interaction with the serial terminal. */
-            APP_SerialDebugTasks( );
-//            received_order = APP_SerialDebugTasks( );
-//            STATUS_READ_VAL StatusRead;
-//            uint16_t i; // incrément de la boucle for
-//            switch ( received_order ) // for serial commande (SC)
-//            {
-//                    
-//                case 'B':
-//                    
-//                    break;
-//
-//                    //                case SC_NONE:
-//                default:
-//                    // if nothing else matches, do the default
-//                    // default is optional
-//                    break;
-//            }
+            APP_SerialDebugTasks();
 #endif
             break;
             /* -------------------------------------------------------------- */
-        
-        case APP_STATE_RADIO_RECEIVED : 
-            if ( appData.state != appData.previous_state ) {
+
+        case APP_STATE_RADIO_RECEIVED:
+            if (appData.state != appData.previous_state) {
 #if defined (USE_UART1_SERIAL_INTERFACE) && defined (DISPLAY_CURRENT_STATE)
-                printf( "> APP_STATE_RADIO_RECEIVED\n" );
+                printf("> APP_STATE_RADIO_RECEIVED\n");
 #endif
                 appData.previous_state = appData.state;
             }
-            radioAlphaTRX_slave_behaviour_of_daytime();
+            radioAlphaTRX_SlaveBehaviour();
             appData.state = APP_STATE_IDLE;
             break;
             /* -------------------------------------------------------------- */
         default:
             //            Nop( );
 #if defined (USE_UART1_SERIAL_INTERFACE) && defined(DISPLAY_CURRENT_STATE)
-            printf( "> APP_STATE_DEFAULT\n" );
+            printf("> APP_STATE_DEFAULT\n");
 #endif
-            setLedsStatusColor( LED_RED );
+            setLedsStatusColor(LED_RED);
             break;
     }
 }
 
-void APP_Initialize( void )
-{
+void APP_Initialize(void) {
     /* APP state task initialize */
     appData.state = APP_STATE_INITIALIZE;
     appData.previous_state = APP_STATE_ERROR;

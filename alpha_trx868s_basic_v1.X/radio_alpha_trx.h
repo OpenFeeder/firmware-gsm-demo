@@ -154,7 +154,7 @@
 #define STATUS_READ_CMD                 (0x0000)    // 0000 0000 0000 0000, Status Read Command
 //delay
 #define SLEEP_AFTER_INIT (850000)
-#define SEND_TIME_OUT (10)
+#define SEND_TIME_OUT (10) // pour l'instant on es a 10ms
 /** ------------------------>> CFG_SET_CMD_POR  <<----------------------------*/
 
 #define FQ_RESTRICTION_LOW              // Preprocessor macros definition --> 119 Fq possible
@@ -644,75 +644,82 @@ void radioAlphaTRX_Init(void);
  * @param cmd_write : commande a transmettre 
  * @return : l'etat du registre
  */
-uint16_t radioAlphaTRX_Command(uint16_t cmd_write);
+uint16_t radioAlphaTRX_Command(uint16_t cmdWrite);
 
 /**
  * Initialiser les conditions d'attente d'un nouveau message
  * Le module doit etre en mode RX.
  */
-void radioAlphaTRX_Received_Init(void);
+void radioAlphaTRX_ReceivedMode(void);
 
 /**
  * Initialiser les conditions d'envoie d'un nouveau message, le module passe en mode TX.
  * Avant d'appeler cette fonction, vous devez avoir initialiser la trame "Frame_RF_Send"
  * L'envoie des donnees de la trame se fait par la fonction RF12_nIRQ_Service()
+ * 
  * @return : 0 init ko 1 si ok 
  */
-int8_t radioAlphaTRX_Send_Init(void);
+int8_t radioAlphaTRX_SendMode(void);
 
 /**
  * transmet un octet seulement si le nIRQ est a l'etat bas 
+ * 
  * @param data_send : l'octet a transmettre 
  * @param timeout : delais apres quoi on gener une erreur de transmsission
  * @return : 0 si timeout 1 si RGIT OK
  */
-int8_t radioAlphaTRX_Send_Byte(uint8_t data_send, int8_t timeout);
+int8_t radioAlphaTRX_SendByte(uint8_t dataToSend, int8_t timeout);
 
 /**
  * transmission flot d'octets a la suite 
+ * 
  * @param bytes : tableau d'octet
  * @param size : la taille du tableau 
  * @param timeout : delais apres quoi on gener une erreur de transmsission 
  * @return : nombre d'octets effectivement transmis 
  */
-int8_t radioAlphaTRX_Send_data(uint8_t* bytes, int8_t size);
+int8_t radioAlphaTRX_SendData(uint8_t* bytes, int8_t size);
 
 /**
  * 
  * @param timeout : le nombre de fois qu'il faut attendre le nIRQ en cas de non reponse
- * @return : 1 on a pas depassé le delais : 0 sinon  
+ * @return : 
+ *         1 : on n a pas depasse le delais imposer pour l'attente
+ *         0 : sinon  
  */
-int8_t radioAlphaTRX_wait_nIRQ(int timeout);
+int8_t radioAlphaTRX_WaitLownIRQ(int timeout);
 
 /**
- * 
+ * cette procedure est appele par le hundler d'interuption, 
+ * a savoir lorsque le nIRQ est a l'etat bas et le bit 15 du regstre status est 
+ * egale a 1, et qu'on ne se trouve pas en mode emission 
  * 
  */
-void radioAlphaTRX_capture_frame();
+void radioAlphaTRX_CaptureFrame();
 
 
 /**
  * 
  * @param mode_rf
  */
-void radioAlphaTRX_set_send_mode(int8_t mode_rf);
+void radioAlphaTRX_SetSendMode(int8_t modeRF);
 /**
  * 
  * @return 
  */
-int8_t radioAlphaTRX_is_send_mode();
+int8_t radioAlphaTRX_IsSendMode();
 
 /**
  * <pres condition : receive_msg == 1 > avant l'apelle de cette fonction 
  * @return : le contenue du buffer
  */
-int8_t * radioAlphaTRX_read_buf();
+int8_t * radioAlphaTRX_ReadBuf();
 
 /**
  * 
  * @return : la taille du buffer indice
  */
-int8_t radioAlphaTRX_get_size_buf();
+int8_t radioAlphaTRX_GetSizeBuf();
 
 
 /****************                                         *********************/
