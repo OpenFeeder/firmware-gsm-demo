@@ -49,91 +49,101 @@
 #include <xc.h> // include processor files - each processor file is guarded.
 #include "mcc_generated_files/pin_manager.h"
 #include "Services.h"
- /******************************************************************************/
- /******************************************************************************/
- /******************** PARAMETRE GESTIONNAIRE DE TIMER *************************/
- /***************************                ***********************************/
- /*****************                                         ********************/
+
+/******************************************************************************/
+/******************************************************************************/
+/******************** PARAMETRE GESTIONNAIRE DE TIMER *************************/
+/***************************                ***********************************/
+/*****************                                         ********************/
 
 // est active des qu'un msg est recu est non encore lu ==> c'est un compteur 
 
 /**
  * 
- * @return : 0 if faut envoyer l'horloge, si non c'est pas encore time out 
+ * @return : 
+ *         0 : transmettre l'horloge
+ *         !0 : on fait rien   
  */
-uint16_t get_tmr_horloge_timeout(); 
-/**
- * determine combirne de minute il faut attendre avant de transmettre la date
- * @param timeout_x1000_ms : ex 10 = 10x1000 == 10000 ms = 10s
- */
-void set_tmr_horloge_timeout_x1000_ms(uint16_t timeout_x1000_ms); 
+uint16_t TMR_GetHorlogeTimeout();
 
 /**
- * ateste de l'arriver ou pas d'un msg 
- * @return : 
- *      0 : timeout 
- *      si non > 0
+ * determine combirne de minute il faut attendre avant de transmettre la date
+ * @param timeout : le temps qu'il faut attendre avant de transmettre l'horloge 
  */
-uint16_t get_tmr_wait_rqst_timeout(); //on s'en sert pour le poulling
+void TMR_SetHorlogeTimeout(uint16_t timeout);
+
 /**
- * le temps d'attente d'une reponse suite à une demande 
- * @param set
+ * tant que cette fonction me retourne une valeure differente de 0 
+ * le master est toujour en ecoute du slave questionne, 
+ * 
+ * @return : 
+ *      0 : timeout : le slave n'a pas eu le temps de me repondre 
+ *      si non > 0 
  */
-void set_tmr_wait_rqst_timeout(uint16_t set);
+uint16_t TMR_GetWaitRqstTimeout(); //on s'en sert pour le poulling
+/**
+ * le temps d'attente d'une reponse suite à une demande d'information
+ * il est declanche a chaque fois que je demande une information a un slave 
+ * 
+ * @param timeout : le temps que le master s'autorise a attendre une reonse 
+ */
+void TMR_SetWaitRqstTimeout(uint16_t timeout);
 
 /**
  * permet de savoir combient de temps (en ms) le buffer i est remplie 
  * @return : le temps ecoule en (ms) depuis le dernier remplissage du buffer 
  */
-uint16_t get_tmr_msg_recu_timeout();  
+uint16_t TMR_GetMsgRecuTimeout();
 /**
- * determine le temps maxe pour prendre en compte un msg de type horloge,
+ * determine le temps max pour prendre en compte un msg de type horloge,
  * au dela le paquet n'est pas utilisable 
- * @param set : le temps en question 
+ * 
+ * @param timeout : 
  */
-void set_tmr_msg_recu_timeout(uint16_t set);
+void TMR_SetMsgRecuTimeout(uint16_t timeout);
 
 /**
- * nombre de temps en (ms) que l'on s'autorise à attendre un octet en reception 
- * apres une interuption (evite l'attente active) 
+ * 
  * @return : 
- *      0 : timeout
+ *      0 : timeout ==> Le Nirq n'est pas passe a l'etat bas et le temps est fini
  *      1 : si non 
  */
-uint16_t get_tmr_nIRQ_low_timeout();
+uint16_t TMR_GetnIRQLowTimeout();
+
 /**
- * choisir le timout 
- * @param set
+ * 
+ * @param timout
  */
-void set_tmr_nIRQ_low_timeout(int16_t set);
+void TMR_SetnIRQLowTimeout(int16_t timeout);
 
 /**
  * a utiliser librement 
+ * 
  * @param timeout 
  */
-void set_tmr_timeout(uint16_t timeout);
+void TMR_SetTimeout(uint16_t timeout);
 /**
  * 
  * @return :
  *      0 : timeout
  *      1 : si non  
  */
-uint16_t get_tmr_timeout();
+uint16_t TMR_GetTimeout();
 
 /**
  * 
  */
-void tmr_delay();
+void TMR_Delay();
 
 /**
  * fonction principale de gestion des timer 
  */
-void tmr_callBack( void );
+void TMR_CallBack(void);
 
- /****************                                         *********************/
- /*************************                     ********************************/
- /******************************************************************************/
- /******************************************************************************/
+/****************                                         *********************/
+/*************************                     ********************************/
+/******************************************************************************/
+/******************************************************************************/
 
 #endif	/* XC_HEADER_TEMPLATE_H */
 

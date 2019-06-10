@@ -63,11 +63,14 @@
 //_________________________Radio Alpha TRX Infos_______________________________*/
 #define FRAME_LENGTH                128 // Longueur total d'une trame en octet
 #define ERROR_LENGTH                  8
-#define SIZE_DATE                    40
-#define TIME_OUT_nIRQ                 2 // 2ms 
+#define SIZE_DATA                    40
+#define TIME_OUT_nIRQ                 2 // 2ms
+#define LAPS                          5 // on attend X ms avant de transmettre un nouveau msg 
 #define TIME_OUT_GET_FRAME         1500 // temps max, pour que le msg recu soit encore exploitable
                                         // au dela le mster ne m'ecoute pas donc cela ne sert à rien 
 #define NB_ERR_BUF                   10 // nombre d'errerur possible 
+#define NB_DATA_BUF                  20 // pour l'instat on dit qye c'est 20 ==>
+#define MAX_W                        10 // nombre MAX de paquet a transmettre avant d'attendre un ack 
 /*_____________________________________________________________________________*/
 
 
@@ -110,7 +113,7 @@ typedef struct sFrame {
     uint8_t ID_Msg;
     int8_t Type_Msg;
     uint8_t nonUtiliser [3];
-    uint8_t data[SIZE_DATE];
+    uint8_t data[SIZE_DATA];
 }Frame;
 /*_____________________________________________________________________________*/
 

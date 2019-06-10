@@ -92,7 +92,7 @@ void APP_SerialDebugTasks(void) {
                 printf("ERROR GENERATED\n");
 #endif          
                 i = i%8+1;
-                radioAlphaTRX_Slave_save_error(i);
+                radioAlphaTRX_SlaveSaveError(i);
                 break;
                 /* -------------------------------------------------------------- */
 
@@ -110,7 +110,7 @@ void APP_SerialDebugTasks(void) {
                     powerRFEnable( );
                     printf("RF Module enable\n");
                     radioAlphaTRX_Init();
-                    radioAlphaTRX_Received_Init(); // receive mode actived
+                    radioAlphaTRX_ReceivedMode(); // receive mode actived
                 } else {
                     powerRFDisable( );
                     printf("RF Module disable\n");

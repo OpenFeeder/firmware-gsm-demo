@@ -5,8 +5,11 @@
         <group>
             <file>file:/home/mmadi/Documents/stageM1/firmware-gsm-demo/OpenfeederRadio/main.c</file>
             <file>file:/home/mmadi/Documents/stageM1/firmware-gsm-demo/OpenfeederRadio/driver/master_api.c</file>
+<<<<<<< HEAD
             <file>file:/home/mmadi/Documents/stageM1/firmware-gsm-demo/OpenfeederRadio/alpha_trx_driver/radio_alpha_trx.h</file>
             <file>file:/home/mmadi/Documents/stageM1/firmware-gsm-demo/OpenfeederRadio/alpha_trx_driver/radio_alpha_trx.c</file>
+=======
+>>>>>>> slaveModif
             <file>file:/home/mmadi/Documents/stageM1/firmware-gsm-demo/OpenfeederRadio/driver/Services.h</file>
         </group>
     </open-files>
