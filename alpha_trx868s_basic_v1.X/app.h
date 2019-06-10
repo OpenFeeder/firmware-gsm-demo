@@ -107,6 +107,8 @@ typedef enum
     APP_STATE_IDLE,
 
     APP_STATE_RADIO_SEND_DATA,
+    APP_STATE_RADIO_SEND_END_BLOCK,
+    APP_STATE_RADIO_SEND_END,
     APP_STATE_RADIO_RECEIVED,
 
     /* Application error state */

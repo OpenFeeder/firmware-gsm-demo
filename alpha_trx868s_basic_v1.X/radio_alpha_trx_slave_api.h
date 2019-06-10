@@ -50,12 +50,21 @@
 #include "radio_alpha_trx.h"
 #include "Services.h"
 
- /******************************************************************************/
- /******************************************************************************/
- /********************* COUCHE APPLICATION DU SLAVE  ***************************/
- /***************************                ***********************************/
- /*****************                                         ********************/
+/******************************************************************************/
+/******************************************************************************/
+/********************* COUCHE APPLICATION DU SLAVE  ***************************/
+/***************************                ***********************************/
+/*****************                                         ********************/
 
+/**------------------------>> E N U M - A C K <<-------------------------------*/
+typedef enum
+{
+    ACK_STATES_ERROR,       //attend l'ack d'une erreur 
+    ACK_STATES_END_BLOCK,   //attent l'ack d'un d'une fin de blok
+    ACK_STATES_NOTHING,     //attend l'ack de l'envoie de nothing
+    ACK_STATES_DATA         //attend l'ack de l'envoie de donnee
+         
+} ACK_STATES;
 
 /**
  * envoie d'un msg en liaison radio. Attention !! l'envoie du msg est bloquant 
@@ -67,8 +76,8 @@
  * @param id_msg : (a differencier avec le type de msg, ici c'est le numero du sequence si l'on veut)
  * @return : le nombre d'octets effectivement envoye.
  */
-int8_t radioAlphaTRX_SlaveSendMsgRF(uint8_t typeMsg, uint8_t * data, uint8_t idMsg); 
-                                                                                          
+int8_t radioAlphaTRX_SlaveSendMsgRF(uint8_t typeMsg, uint8_t * data, uint8_t idMsg);
+
 
 /**
  * ajoute l'erreur dans le buffer des erreurs et met à jour les pointeurs des erreur 
@@ -117,17 +126,32 @@ void radioAlphaTRX_SlaveSendNothing();
  */
 void radioAlphaTRX_SlaveUpdateDate(uint8_t* date, int16_t derive);
 
+/**
+ * 
+ */
+void radioAlphaTRX_SlaveSendLog();
 
 /**
- * machine a etat du systeme de communicatio du slave 
+ * met a jour les parametre qui gere l'envoie des donnees 
+ * @param numSeq : le numero d'ack recu 
  */
-void radioAlphaTRX_SlaveBehaviour();
+void radioAlphaTRX_SlaveUpdateSendLogParam(uint8_t numSeq);
+
+/**
+ * 
+ */
+void radioAlphaTRX_SlaveSendEndBlok();
+
+/**
+ * determine l'action a effectue quand un msg est recu 
+ */
+void radioAlphaTRX_SlaveBehaviourWhenMsgReceived();
 
 
- /****************                                         *********************/
- /*************************                     ********************************/
- /******************************************************************************/
- /******************************************************************************/
+/****************                                         *********************/
+/*************************                     ********************************/
+/******************************************************************************/
+/******************************************************************************/
 
 #endif	/* XC_HEADER_TEMPLATE_H */
 

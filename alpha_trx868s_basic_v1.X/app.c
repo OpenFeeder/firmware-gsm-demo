@@ -136,8 +136,28 @@ void APP_Tasks(void) {
 #endif
                 appData.previous_state = appData.state;
             }
-            radioAlphaTRX_SlaveBehaviour();
+            radioAlphaTRX_SlaveBehaviourWhenMsgReceived();
             appData.state = APP_STATE_IDLE;
+            break;
+            /* -------------------------------------------------------------- */
+        case APP_STATE_RADIO_SEND_DATA:
+            if (appData.state != appData.previous_state) {
+#if defined (USE_UART1_SERIAL_INTERFACE) && defined (DISPLAY_CURRENT_STATE)
+                printf("> APP_STATE_RADIO_SEND_DATA\n");
+#endif
+                appData.previous_state = appData.state;
+            }
+            //apelle la fonction qui s'occupe de transmettre les donnees 
+            break;
+            /* -------------------------------------------------------------- */
+        case APP_STATE_RADIO_SEND_END_BLOCK:
+            if (appData.state != appData.previous_state) {
+#if defined (USE_UART1_SERIAL_INTERFACE) && defined (DISPLAY_CURRENT_STATE)
+                printf("> APP_STATE_RADIO_SEND_END_BLOCK\n");
+#endif
+                appData.previous_state = appData.state;
+            }
+            //apelle la fonction qui s'occupe de transmettre les donnees 
             break;
             /* -------------------------------------------------------------- */
         default:
