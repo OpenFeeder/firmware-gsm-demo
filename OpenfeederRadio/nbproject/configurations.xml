@@ -19,19 +19,13 @@
         <itemPath>mcc_generated_files/tmr1.h</itemPath>
         <itemPath>mcc_generated_files/ext_int.h</itemPath>
       </logicalFolder>
-      <itemPath>driver/rx.h</itemPath>
-      <itemPath>driver/trx.h</itemPath>
-      <itemPath>driver/tx.h</itemPath>
       <itemPath>driver/types.h</itemPath>
-      <itemPath>debug/debug.h</itemPath>
       <itemPath>test/test.h</itemPath>
       <itemPath>temps/temps.h</itemPath>
       <itemPath>driver/ComporteementSlave.h</itemPath>
       <itemPath>driver/Services.h</itemPath>
-      <itemPath>driver/Master.h</itemPath>
       <itemPath>alpha_trx_driver/radio_alpha_trx.h</itemPath>
       <itemPath>driver/timer.h</itemPath>
-      <itemPath>driver/radio_alpha_trx_slave_api.h</itemPath>
       <itemPath>driver/master_api.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LinkerScript"
@@ -56,18 +50,12 @@
         <itemPath>mcc_generated_files/tmr1.c</itemPath>
         <itemPath>mcc_generated_files/ext_int.c</itemPath>
       </logicalFolder>
-      <itemPath>driver/rx.c</itemPath>
-      <itemPath>driver/trx.c</itemPath>
-      <itemPath>driver/tx.c</itemPath>
-      <itemPath>debug/debug.c</itemPath>
       <itemPath>test/test.c</itemPath>
       <itemPath>temps/temps.c</itemPath>
       <itemPath>main.c</itemPath>
       <itemPath>driver/Services.c</itemPath>
-      <itemPath>driver/Master.c</itemPath>
       <itemPath>alpha_trx_driver/radio_alpha_trx.c</itemPath>
       <itemPath>driver/timer.c</itemPath>
-      <itemPath>driver/radio_alpha_trx_slave_api.c</itemPath>
       <itemPath>driver/master_api.c</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"

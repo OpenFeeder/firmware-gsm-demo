@@ -8,8 +8,6 @@
 
 #include "xc.h"
 #include "Master.h"
-#include "tx.h"
-#include "rx.h"
 
 //permet de savoir quelle esclave doit nous transmettre les donnee et 
 //quelle est notre situation precedente 

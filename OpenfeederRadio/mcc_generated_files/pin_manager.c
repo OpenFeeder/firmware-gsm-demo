@@ -125,9 +125,9 @@ void __attribute__((interrupt, no_auto_psv)) _CNInterrupt(void) {
         if (nIRQ_GetValue() == 0) {
             STATUS_READ_VAL RF_StatusRead;
             RF_StatusRead.Val = radioAlphaTRX_Command(STATUS_READ_CMD); //lecture du registre status 
-            if (RF_StatusRead.bits.b15_RGIT_FFIT && !radioAlphaTRX_is_send_mode()) { // on verifie si la fifo est remplie 
+            if (RF_StatusRead.bits.b15_RGIT_FFIT && !radioAlphaTRX_IsSendMode()) { // on verifie si la fifo est remplie 
                 IEC1bits.CNIE = 0; // on desactive les interuption IOC le temps de la recuperation de la trame 
-                radioAlphaTRX_capture_frame();
+                radioAlphaTRX_CaptureFrame();
                 IEC1bits.CNIE = 1; //on reactive une fois la trame recupere
             }
         }

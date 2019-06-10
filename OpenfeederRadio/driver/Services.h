@@ -49,31 +49,32 @@
 /**------------------------>> I N C L U D E <<---------------------------------*/
 #include <xc.h> // include processor files - each processor file is guarded.  
 #include <stdlib.h>
-#include "rx.h"
-#include "tx.h"
-
-
+#include "../mcc_generated_files/pin_manager.h"
+#include "timer.h"
+#include "../temps/temps.h"
 /**------------------------>> D E F I N I T I O N S - G L O B A L <<-----------*/
 
 /*******************************************************************************/
 //______________________________D E B U G______________________________________*/
 #define UART_DEBUG (1)
-#define MASTER     (1) // permet de differencier le code propre au master 
-#define SLAVE      (1) // le code propre au Slave 
 /*_____________________________________________________________________________*/
 
 /*******************************************************************************/
 //_________________________Radio Alpha TRX Infos_______________________________*/
+#define TIME_OUT_WAIT_RQST         3000
 #define FRAME_LENGTH                128 // Longueur total d'une trame en octet
 #define ERROR_LENGTH                  8
-#define SIZE_DATE                    40
-#define TIME_OUT_nIRQ                 2 // 2ms 
-#define TIME_OUT_GET_FRAME         1500
-#define TIME_OUT_WAIT_RQST         3000
-#define NB_BUF                        4
-#define NB_ERR_BUF                   10 // nombre d'errerur possible 
+#define SIZE_DATA                    40
+#define TIME_OUT_nIRQ                 2 // 2ms
+#define LAPS                          5 // on attend X ms avant de transmettre un nouveau msg 
 #define SEND_HORLOG_TIMEOUT       20000
+#define TIME_OUT_GET_FRAME         1500 // temps max, pour que le msg recu soit encore exploitable
+                                        // au dela le mster ne m'ecoute pas donc cela ne sert ? rien 
+#define NB_ERR_BUF                   10 // nombre d'errerur possible 
+#define NB_DATA_BUF                  20 // pour l'instat on dit qye c'est 20 ==>
+#define MAX_W                        10 // nombre MAX de paquet a transmettre avant d'attendre un ack 
 /*_____________________________________________________________________________*/
+
 
 
 /**------------------------>> M A C R O S <<-----------------------------------*/
@@ -82,6 +83,11 @@
 #define RF_nSEL_SetHigh( ) CS_SetHigh()
 #define RF_nSEL_Toggle( ) CS_Toggle()
 #define RF_nSEL_GetValue() CS_GetValue()
+
+#define RF_nIRQ_SetLow( ) nIRQ_SetLow()
+#define RF_nIRQ_SetHigh( ) nIRQ_SetHigh()
+#define RF_nIRQ_Toggle( ) nIRQ_Toggle()
+#define RF_nIRQ_GetValue() nIRQ_GetValue()
 
 /*_____________________________________________________________________________*/
 
@@ -115,7 +121,7 @@ typedef struct sFrame {
     uint8_t ID_Msg;
     int8_t Type_Msg;
     uint8_t nonUtiliser [3];
-    uint8_t data[SIZE_DATE];
+    uint8_t data[SIZE_DATA];
 }Frame;
 /*_____________________________________________________________________________*/
 
@@ -131,35 +137,23 @@ uint8_t srv_end_trans();
 uint8_t srv_end_block();
 uint8_t srv_config();
 uint8_t srv_nothing();
-/*_____________________________________________________________________________*/
+/*____________________________________________________________________________*/
 
 /**------------------------>> I D-- O F <<-------------------------------------*/
-uint16_t  srv_getIDS1();
-uint16_t  srv_getIDS2();
-uint16_t  srv_getIDS3();
+uint16_t  srv_getID_Slave();
 uint16_t  srv_getBroadcast();
-uint16_t  srv_getIDM();
+uint16_t  srv_getID_Master();
 /*_____________________________________________________________________________*/
 
 
- /******************************************************************************/
- /******************************************************************************/
- /****************** FONCTIONNALITEES COMMUNES AU ALPHA TRX ********************/
- /***************************                ***********************************/
- /*****************                                 ****************************/
-/**
- * determine a quel moment de la journee on est 
- * 
- */
-void srv_update_moment();
+/******************************************************************************/
+/******************************************************************************/
+/****************** FONCTIONNALITEES COMMUNES AU ALPHA TRX ********************/
+/***************************                ***********************************/
+/*****************                                 ****************************/
 
 /**
- * @return le momeent de la journee 
- */
-srv_get_moment();
-
-/**
- * dis si l'ack re?u est dans la fenetre 
+ * dis si l'ack recu est dans la fenetre 
  * @param inf
  * @param pointeur
  * @param size 
@@ -168,25 +162,31 @@ srv_get_moment();
 int8_t srv_in_windows(unsigned int inf, unsigned int pointeur, int size);
 
 /**
+ * genere une somme controle 
  * 
- * @param paquet
- * @param size
- * @return 
+ * @param paquet : le paquet a calculer le checksum
+ * @param size : la taille du paquet 
+ * @return : somme controle 
  */
 uint8_t srv_checksum(uint8_t* paquet, int size);
 
 /**
+ * verifie le paquet recu en calculant la somme controle et en le comparant
+ * la somme controle recu 
  * 
- * @param paquet
- * @param size
- * @param somme_ctrl
- * @return 
+ * @param paquet : le paquet a verifier 
+ * @param size : sa taille 
+ * @param somme_ctrl : la valeure du somme controle recu 
+ * @return : 
+ *         1 : test positif 
+ *         0 : test negatif 
  */
 int8_t srv_test_cheksum(uint8_t* paquet, int size, uint8_t somme_ctrl);
 
 /**
+ * donne la taille d'une chaine de caractere 
  * 
- * @param chaine
+ * @param chaine 
  * @return : la taille de la chaine paissee en parametre 
  */
 int srv_len(const uint8_t *chaine);
@@ -208,26 +208,6 @@ int8_t srv_cmp(const uint8_t *ch1, const uint8_t *ch2);
  * @return : 1 ok : 0 ko
  */
 int8_t srv_cpy(uint8_t *dest, uint8_t *src, int size);
-
-/**
- * permet l'envoie d'un paquet donnee : cmd, ack, ligne log, err, ...
- * 
- * @param paquet : le paquet a transmettre 
- * @param size : la taille 
- * @param delais : l'intervalle de temps qu'il faut avant de renvoyer le paquet ==> x10ms
- * @param nbFois : le nombre de paquet identique a envoyer : 0=1x, 1=2x, 2=3x ... etc
- * @return : la taille reelement ecris sinon 0 sinon
- */
-int8_t srv_send_rf(uint8_t* paquet, int size, int delais, int nbFois);
-
-/**
- * petmet la reception d'un paquet : cmd, err, ligne log, ack, ...
- * @param paquet : contiendera le paquet recu si valide 
- * @param size : la taille maximal d'un bloc
- * @param delais : le temps d'attente avant de declarer un timeout 
- * @return 0 si rien n'est recu, > 0 si quelque chose est recu
- */
-int8_t srv_receive_rf(uint8_t* paquet, int size, int delais);
 
 /**
  * genere un paquet a partir des infos fournis
@@ -256,16 +236,6 @@ int8_t srv_decode_packet_rf(uint8_t* paquet, Frame *pPaquetRecu, int size,
         uint16_t idOF);
 
 /**
- * attend l'arriver d'un evenement, paquet recu ou timeout 
- * 
- * @param delais : delais d'coute en seconde (pour l'instant l'instant 1 periode dure 1 seconde)
- * @param paquetRecu : la ou on sauvgarde le paquet recu si tel est le cas 
- * @param idOF : l'identifiant de l'of qui vient de recevoir le paquet
- * @return 1 si paquet recu 0 sinon 
- */
-int8_t srv_listen_rf(int delais, Frame *paquetRecu, uint16_t idOf);
-
-/**
  * permet d'attends un temps donnee
  * 
  * @param delais : le temps d'attente en x10ms
@@ -275,7 +245,7 @@ void srv_wait(int delais);
 /**
  * permet d'implementer la methode du goBackN
  * 
- * @param data : la data qu'il faut envoyer les acks ne sont pas re�u 
+ * @param data : la data qu'il faut envoyer les acks ne sont pas re?u 
  * @param offset : a partir du quel on doit debuter la retransmission 
  * @param curseur : cursseur la borne superieure 
  * @param idOfSrc : l'of qui recois le paquet 
@@ -304,14 +274,14 @@ void srv_inc_delais(int *delais, int ms);
 
 /**
  * 
- * @param nbligne : le nombre de ligne qu'on recup�re sur le fichier 
- * @return : les log recup�rer depuis le fichier de sauvgarder 
+ * @param nbligne : le nombre de ligne qu'on recup?re sur le fichier 
+ * @return : les log recup?rer depuis le fichier de sauvgarder 
  */
 uint8_t **service_recup_data_sur_disque(int *nbligne);
 
- /****************                                         *********************/
- /*************************                     ********************************/
- /******************************************************************************/
- /******************************************************************************/
+/****************                                         *********************/
+/*************************                     ********************************/
+/******************************************************************************/
+/******************************************************************************/
 #endif	/* SERVICE_H */
 

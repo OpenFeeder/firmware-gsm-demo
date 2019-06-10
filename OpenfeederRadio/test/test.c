@@ -4,27 +4,8 @@
 
 #include "./test.h"
 #include "../alpha_trx_driver/radio_alpha_trx.h"
-#include "../driver/radio_alpha_trx_slave_api.h"
 #include "../driver/timer.h"
 #include "../driver/config_system_com.h"
-
-
-/* vérifier que le state register se remet à 0x4000 après un reset
- * pendant le fonctionnement
- */
-void test_state_register() {
-    uint16_t state_reg = ecrire_reg(0x0000);
-    __delay32(PITCH_TRANS);
-
-    state_reg = ecrire_reg(0x0000);
-    __delay32(PITCH_TRANS);
-    nRES_SetLow();
-    __delay32(PITCH_TRANS);
-    nRES_SetHigh();
-    __delay32(PITCH_TRANS);
-
-    state_reg = ecrire_reg(0x0000);
-}
 
 //simulation d'une horloge
 
@@ -43,57 +24,63 @@ uint8_t test_serial_datetime(uint8_t* datetime) {
     serial_buffer(data_serial, hf_serial);
     deserial_buffer(data_serial, &hf_deserial);
     return hf_serial == hf_deserial;
-    */
+     */
 }
 
 
 
 volatile uint8_t msg_receive = 0; // juste pour les test
-void test_set_msg_receive(uint8_t set) { msg_receive = set; } // juste pour les test 
+
+void test_set_msg_receive(uint8_t set) {
+    msg_receive = set;
+} // juste pour les test 
 
 
 //test 
+
 void test_rx() {
     uint8_t paquet[20];
-    
-    radioAlphaTRX_Received_Init();
+
+    radioAlphaTRX_ReceivedMode();
     while (1) {
-        if (getFlag()==1){
+        if (getFlag() == 1) {
             resetFlag();
             if (msg_receive == 1) {
-                printf("tps %d \n", TIME_OUT_GET_FRAME-get_tmr_msg_recu_timeout());
-                printf("recu %s \n", radioAlphaTRX_read_buf());
+                printf("tps %d \n", TIME_OUT_GET_FRAME - TMR_GetMsgRecuTimeout());
+                printf("recu %s \n", radioAlphaTRX_ReadBuf());
             }
         }
     }
-    
+
 }
 
 void test_tx() {
     uint8_t *paquet = "PAQUET ENVOIE TEST";
     uint8_t date_send[50];
-    int8_t size_h = srv_create_paket_rf(date_send, paquet, srv_getBroadcast(), srv_getIDM(), 
-                    srv_horloge(), '0');
+    int8_t size_h = srv_create_paket_rf(date_send, paquet,
+                                        srv_getBroadcast(), 
+                                        srv_getID_Master(), 
+                                        srv_horloge(), '0');
     while (1) {
-        if (getFlag()==1) {
+        if (getFlag() == 1) {
             printf("envoie\n");
             resetFlag(); // on remet le flag a 0 pour eviter d'envoyer indefiniment 
-            if (radioAlphaTRX_Send_Init()){
-                radioAlphaTRX_Send_data(paquet, size_h);
+            if (radioAlphaTRX_SendMode()) {
+                radioAlphaTRX_SendData(paquet, size_h);
             }
         }
     }
 }
 
 void test_timer() {
-    set_tmr_nIRQ_low_timeout(100);
+    TMR_SetnIRQLowTimeout(100);
     LED_GREEN_Toggle();
     while (1) {
-        if(get_tmr_nIRQ_low_timeout() == 0) {
+        if (TMR_GetnIRQLowTimeout(100) == 0) {
             LED_BLUE_Toggle();
             LED_GREEN_Toggle();
             LED_RED_Toggle();
-            set_tmr_nIRQ_low_timeout(1000);
+            TMR_SetnIRQLowTimeout(1000);
         }
     }
 
@@ -104,21 +91,23 @@ void test_update_date_send() {
     struct tm t;
     struct heure_format hf;
     uint8_t date[14]; // cas particulier
-//#if defined(UART_DEBUG)
-//        RTCC_TimeGet(&t); 
-//        printf("HEURE ==> %dh:%dmin:%ds\n", t.tm_hour, t.tm_min, t.tm_sec);
-//#endif
+    //#if defined(UART_DEBUG)
+    //        RTCC_TimeGet(&t); 
+    //        printf("HEURE ==> %dh:%dmin:%ds\n", t.tm_hour, t.tm_min, t.tm_sec);
+    //#endif
     while (1) {
-       if (!get_tmr_horloge_timeout()) {
+        if (!TMR_GetHorlogeTimeout()) {
             get_time(&hf);
             //creation de du format pour l'envoie  ensEsclave[0].logRecup = 0;
             serial_buffer(date, hf);
-            int8_t size_h = srv_create_paket_rf(date_send, date, srv_getBroadcast(), srv_getIDM(), 
-                srv_horloge(), '0');
-            if (radioAlphaTRX_Send_Init()) {
-                radioAlphaTRX_Send_data(date_send, size_h);
+            int8_t size_h = srv_create_paket_rf(date_send,
+                                                date, srv_getBroadcast(), 
+                                                srv_getID_Master(), 
+                                                srv_horloge(), '0');
+            if (radioAlphaTRX_SendMode()) {
+                radioAlphaTRX_SendData(date_send, size_h);
             }
-            set_tmr_horloge_timeout_x1000_ms(SEND_HORLOG_TIMEOUT);
+            TMR_GetHorlogeTimeout(SEND_HORLOG_TIMEOUT);
         }
     }
 
@@ -126,22 +115,19 @@ void test_update_date_send() {
 
 void test_update_date_receive() {
     struct tm t;
-    radioAlphaTRX_Received_Init();
+    radioAlphaTRX_ReceivedMode();
 #if defined(UART_DEBUG)
-    RTCC_TimeGet(&t); 
+    RTCC_TimeGet(&t);
     printf("HEURE ==> %dh:%dmin:%ds\n", t.tm_hour, t.tm_min, t.tm_sec);
 #endif
     while (1) {
 #if defined(UART_DEBUG)
         RTCC_TimeGet(&t);
-        if (!get_tmr_timeout()) {
+        if (!TMR_GetTimeout()) {
             printf("heur slave ==> %dh:%dmin:%ds\n", t.tm_hour, t.tm_min, t.tm_sec);
-            set_tmr_timeout(5000); // 1s
+            TMR_SetTimeout(5000); // 1s
         }
 #endif       
-        if (msg_receive == 1) {
-            radioAlphaTRX_slave_behaviour_of_daytime();
-        }
     }
 }
 

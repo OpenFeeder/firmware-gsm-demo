@@ -57,17 +57,17 @@ OBJECTDIR=build/${CND_CONF}/${IMAGE_TYPE}
 DISTDIR=dist/${CND_CONF}/${IMAGE_TYPE}
 
 # Source Files Quoted if spaced
-SOURCEFILES_QUOTED_IF_SPACED=mcc_generated_files/spi1.c mcc_generated_files/system.c mcc_generated_files/rtcc.c mcc_generated_files/traps.c mcc_generated_files/clock.c mcc_generated_files/interrupt_manager.c mcc_generated_files/uart1.c mcc_generated_files/mcc.c mcc_generated_files/pin_manager.c mcc_generated_files/tmr1.c mcc_generated_files/ext_int.c driver/rx.c driver/trx.c driver/tx.c debug/debug.c test/test.c temps/temps.c main.c driver/Services.c driver/Master.c alpha_trx_driver/radio_alpha_trx.c driver/timer.c driver/radio_alpha_trx_slave_api.c driver/master_api.c
+SOURCEFILES_QUOTED_IF_SPACED=mcc_generated_files/spi1.c mcc_generated_files/system.c mcc_generated_files/rtcc.c mcc_generated_files/traps.c mcc_generated_files/clock.c mcc_generated_files/interrupt_manager.c mcc_generated_files/uart1.c mcc_generated_files/mcc.c mcc_generated_files/pin_manager.c mcc_generated_files/tmr1.c mcc_generated_files/ext_int.c test/test.c temps/temps.c main.c driver/Services.c alpha_trx_driver/radio_alpha_trx.c driver/timer.c driver/master_api.c
 
 # Object Files Quoted if spaced
-OBJECTFILES_QUOTED_IF_SPACED=${OBJECTDIR}/mcc_generated_files/spi1.o ${OBJECTDIR}/mcc_generated_files/system.o ${OBJECTDIR}/mcc_generated_files/rtcc.o ${OBJECTDIR}/mcc_generated_files/traps.o ${OBJECTDIR}/mcc_generated_files/clock.o ${OBJECTDIR}/mcc_generated_files/interrupt_manager.o ${OBJECTDIR}/mcc_generated_files/uart1.o ${OBJECTDIR}/mcc_generated_files/mcc.o ${OBJECTDIR}/mcc_generated_files/pin_manager.o ${OBJECTDIR}/mcc_generated_files/tmr1.o ${OBJECTDIR}/mcc_generated_files/ext_int.o ${OBJECTDIR}/driver/rx.o ${OBJECTDIR}/driver/trx.o ${OBJECTDIR}/driver/tx.o ${OBJECTDIR}/debug/debug.o ${OBJECTDIR}/test/test.o ${OBJECTDIR}/temps/temps.o ${OBJECTDIR}/main.o ${OBJECTDIR}/driver/Services.o ${OBJECTDIR}/driver/Master.o ${OBJECTDIR}/alpha_trx_driver/radio_alpha_trx.o ${OBJECTDIR}/driver/timer.o ${OBJECTDIR}/driver/radio_alpha_trx_slave_api.o ${OBJECTDIR}/driver/master_api.o
-POSSIBLE_DEPFILES=${OBJECTDIR}/mcc_generated_files/spi1.o.d ${OBJECTDIR}/mcc_generated_files/system.o.d ${OBJECTDIR}/mcc_generated_files/rtcc.o.d ${OBJECTDIR}/mcc_generated_files/traps.o.d ${OBJECTDIR}/mcc_generated_files/clock.o.d ${OBJECTDIR}/mcc_generated_files/interrupt_manager.o.d ${OBJECTDIR}/mcc_generated_files/uart1.o.d ${OBJECTDIR}/mcc_generated_files/mcc.o.d ${OBJECTDIR}/mcc_generated_files/pin_manager.o.d ${OBJECTDIR}/mcc_generated_files/tmr1.o.d ${OBJECTDIR}/mcc_generated_files/ext_int.o.d ${OBJECTDIR}/driver/rx.o.d ${OBJECTDIR}/driver/trx.o.d ${OBJECTDIR}/driver/tx.o.d ${OBJECTDIR}/debug/debug.o.d ${OBJECTDIR}/test/test.o.d ${OBJECTDIR}/temps/temps.o.d ${OBJECTDIR}/main.o.d ${OBJECTDIR}/driver/Services.o.d ${OBJECTDIR}/driver/Master.o.d ${OBJECTDIR}/alpha_trx_driver/radio_alpha_trx.o.d ${OBJECTDIR}/driver/timer.o.d ${OBJECTDIR}/driver/radio_alpha_trx_slave_api.o.d ${OBJECTDIR}/driver/master_api.o.d
+OBJECTFILES_QUOTED_IF_SPACED=${OBJECTDIR}/mcc_generated_files/spi1.o ${OBJECTDIR}/mcc_generated_files/system.o ${OBJECTDIR}/mcc_generated_files/rtcc.o ${OBJECTDIR}/mcc_generated_files/traps.o ${OBJECTDIR}/mcc_generated_files/clock.o ${OBJECTDIR}/mcc_generated_files/interrupt_manager.o ${OBJECTDIR}/mcc_generated_files/uart1.o ${OBJECTDIR}/mcc_generated_files/mcc.o ${OBJECTDIR}/mcc_generated_files/pin_manager.o ${OBJECTDIR}/mcc_generated_files/tmr1.o ${OBJECTDIR}/mcc_generated_files/ext_int.o ${OBJECTDIR}/test/test.o ${OBJECTDIR}/temps/temps.o ${OBJECTDIR}/main.o ${OBJECTDIR}/driver/Services.o ${OBJECTDIR}/alpha_trx_driver/radio_alpha_trx.o ${OBJECTDIR}/driver/timer.o ${OBJECTDIR}/driver/master_api.o
+POSSIBLE_DEPFILES=${OBJECTDIR}/mcc_generated_files/spi1.o.d ${OBJECTDIR}/mcc_generated_files/system.o.d ${OBJECTDIR}/mcc_generated_files/rtcc.o.d ${OBJECTDIR}/mcc_generated_files/traps.o.d ${OBJECTDIR}/mcc_generated_files/clock.o.d ${OBJECTDIR}/mcc_generated_files/interrupt_manager.o.d ${OBJECTDIR}/mcc_generated_files/uart1.o.d ${OBJECTDIR}/mcc_generated_files/mcc.o.d ${OBJECTDIR}/mcc_generated_files/pin_manager.o.d ${OBJECTDIR}/mcc_generated_files/tmr1.o.d ${OBJECTDIR}/mcc_generated_files/ext_int.o.d ${OBJECTDIR}/test/test.o.d ${OBJECTDIR}/temps/temps.o.d ${OBJECTDIR}/main.o.d ${OBJECTDIR}/driver/Services.o.d ${OBJECTDIR}/alpha_trx_driver/radio_alpha_trx.o.d ${OBJECTDIR}/driver/timer.o.d ${OBJECTDIR}/driver/master_api.o.d
 
 # Object Files
-OBJECTFILES=${OBJECTDIR}/mcc_generated_files/spi1.o ${OBJECTDIR}/mcc_generated_files/system.o ${OBJECTDIR}/mcc_generated_files/rtcc.o ${OBJECTDIR}/mcc_generated_files/traps.o ${OBJECTDIR}/mcc_generated_files/clock.o ${OBJECTDIR}/mcc_generated_files/interrupt_manager.o ${OBJECTDIR}/mcc_generated_files/uart1.o ${OBJECTDIR}/mcc_generated_files/mcc.o ${OBJECTDIR}/mcc_generated_files/pin_manager.o ${OBJECTDIR}/mcc_generated_files/tmr1.o ${OBJECTDIR}/mcc_generated_files/ext_int.o ${OBJECTDIR}/driver/rx.o ${OBJECTDIR}/driver/trx.o ${OBJECTDIR}/driver/tx.o ${OBJECTDIR}/debug/debug.o ${OBJECTDIR}/test/test.o ${OBJECTDIR}/temps/temps.o ${OBJECTDIR}/main.o ${OBJECTDIR}/driver/Services.o ${OBJECTDIR}/driver/Master.o ${OBJECTDIR}/alpha_trx_driver/radio_alpha_trx.o ${OBJECTDIR}/driver/timer.o ${OBJECTDIR}/driver/radio_alpha_trx_slave_api.o ${OBJECTDIR}/driver/master_api.o
+OBJECTFILES=${OBJECTDIR}/mcc_generated_files/spi1.o ${OBJECTDIR}/mcc_generated_files/system.o ${OBJECTDIR}/mcc_generated_files/rtcc.o ${OBJECTDIR}/mcc_generated_files/traps.o ${OBJECTDIR}/mcc_generated_files/clock.o ${OBJECTDIR}/mcc_generated_files/interrupt_manager.o ${OBJECTDIR}/mcc_generated_files/uart1.o ${OBJECTDIR}/mcc_generated_files/mcc.o ${OBJECTDIR}/mcc_generated_files/pin_manager.o ${OBJECTDIR}/mcc_generated_files/tmr1.o ${OBJECTDIR}/mcc_generated_files/ext_int.o ${OBJECTDIR}/test/test.o ${OBJECTDIR}/temps/temps.o ${OBJECTDIR}/main.o ${OBJECTDIR}/driver/Services.o ${OBJECTDIR}/alpha_trx_driver/radio_alpha_trx.o ${OBJECTDIR}/driver/timer.o ${OBJECTDIR}/driver/master_api.o
 
 # Source Files
-SOURCEFILES=mcc_generated_files/spi1.c mcc_generated_files/system.c mcc_generated_files/rtcc.c mcc_generated_files/traps.c mcc_generated_files/clock.c mcc_generated_files/interrupt_manager.c mcc_generated_files/uart1.c mcc_generated_files/mcc.c mcc_generated_files/pin_manager.c mcc_generated_files/tmr1.c mcc_generated_files/ext_int.c driver/rx.c driver/trx.c driver/tx.c debug/debug.c test/test.c temps/temps.c main.c driver/Services.c driver/Master.c alpha_trx_driver/radio_alpha_trx.c driver/timer.c driver/radio_alpha_trx_slave_api.c driver/master_api.c
+SOURCEFILES=mcc_generated_files/spi1.c mcc_generated_files/system.c mcc_generated_files/rtcc.c mcc_generated_files/traps.c mcc_generated_files/clock.c mcc_generated_files/interrupt_manager.c mcc_generated_files/uart1.c mcc_generated_files/mcc.c mcc_generated_files/pin_manager.c mcc_generated_files/tmr1.c mcc_generated_files/ext_int.c test/test.c temps/temps.c main.c driver/Services.c alpha_trx_driver/radio_alpha_trx.c driver/timer.c driver/master_api.c
 
 
 CFLAGS=
@@ -171,34 +171,6 @@ ${OBJECTDIR}/mcc_generated_files/ext_int.o: mcc_generated_files/ext_int.c  nbpro
 	${MP_CC} $(MP_EXTRA_CC_PRE)  mcc_generated_files/ext_int.c  -o ${OBJECTDIR}/mcc_generated_files/ext_int.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/mcc_generated_files/ext_int.o.d"      -g -D__DEBUG -D__MPLAB_DEBUGGER_PK3=1  -mno-eds-warn  -omf=elf -DXPRJ_default=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O0 -msmart-io=1 -Wall -msfr-warn=off  
 	@${FIXDEPS} "${OBJECTDIR}/mcc_generated_files/ext_int.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
 	
-${OBJECTDIR}/driver/rx.o: driver/rx.c  nbproject/Makefile-${CND_CONF}.mk
-	@${MKDIR} "${OBJECTDIR}/driver" 
-	@${RM} ${OBJECTDIR}/driver/rx.o.d 
-	@${RM} ${OBJECTDIR}/driver/rx.o 
-	${MP_CC} $(MP_EXTRA_CC_PRE)  driver/rx.c  -o ${OBJECTDIR}/driver/rx.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/driver/rx.o.d"      -g -D__DEBUG -D__MPLAB_DEBUGGER_PK3=1  -mno-eds-warn  -omf=elf -DXPRJ_default=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O0 -msmart-io=1 -Wall -msfr-warn=off  
-	@${FIXDEPS} "${OBJECTDIR}/driver/rx.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
-	
-${OBJECTDIR}/driver/trx.o: driver/trx.c  nbproject/Makefile-${CND_CONF}.mk
-	@${MKDIR} "${OBJECTDIR}/driver" 
-	@${RM} ${OBJECTDIR}/driver/trx.o.d 
-	@${RM} ${OBJECTDIR}/driver/trx.o 
-	${MP_CC} $(MP_EXTRA_CC_PRE)  driver/trx.c  -o ${OBJECTDIR}/driver/trx.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/driver/trx.o.d"      -g -D__DEBUG -D__MPLAB_DEBUGGER_PK3=1  -mno-eds-warn  -omf=elf -DXPRJ_default=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O0 -msmart-io=1 -Wall -msfr-warn=off  
-	@${FIXDEPS} "${OBJECTDIR}/driver/trx.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
-	
-${OBJECTDIR}/driver/tx.o: driver/tx.c  nbproject/Makefile-${CND_CONF}.mk
-	@${MKDIR} "${OBJECTDIR}/driver" 
-	@${RM} ${OBJECTDIR}/driver/tx.o.d 
-	@${RM} ${OBJECTDIR}/driver/tx.o 
-	${MP_CC} $(MP_EXTRA_CC_PRE)  driver/tx.c  -o ${OBJECTDIR}/driver/tx.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/driver/tx.o.d"      -g -D__DEBUG -D__MPLAB_DEBUGGER_PK3=1  -mno-eds-warn  -omf=elf -DXPRJ_default=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O0 -msmart-io=1 -Wall -msfr-warn=off  
-	@${FIXDEPS} "${OBJECTDIR}/driver/tx.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
-	
-${OBJECTDIR}/debug/debug.o: debug/debug.c  nbproject/Makefile-${CND_CONF}.mk
-	@${MKDIR} "${OBJECTDIR}/debug" 
-	@${RM} ${OBJECTDIR}/debug/debug.o.d 
-	@${RM} ${OBJECTDIR}/debug/debug.o 
-	${MP_CC} $(MP_EXTRA_CC_PRE)  debug/debug.c  -o ${OBJECTDIR}/debug/debug.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/debug/debug.o.d"      -g -D__DEBUG -D__MPLAB_DEBUGGER_PK3=1  -mno-eds-warn  -omf=elf -DXPRJ_default=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O0 -msmart-io=1 -Wall -msfr-warn=off  
-	@${FIXDEPS} "${OBJECTDIR}/debug/debug.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
-	
 ${OBJECTDIR}/test/test.o: test/test.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} "${OBJECTDIR}/test" 
 	@${RM} ${OBJECTDIR}/test/test.o.d 
@@ -227,13 +199,6 @@ ${OBJECTDIR}/driver/Services.o: driver/Services.c  nbproject/Makefile-${CND_CONF
 	${MP_CC} $(MP_EXTRA_CC_PRE)  driver/Services.c  -o ${OBJECTDIR}/driver/Services.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/driver/Services.o.d"      -g -D__DEBUG -D__MPLAB_DEBUGGER_PK3=1  -mno-eds-warn  -omf=elf -DXPRJ_default=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O0 -msmart-io=1 -Wall -msfr-warn=off  
 	@${FIXDEPS} "${OBJECTDIR}/driver/Services.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
 	
-${OBJECTDIR}/driver/Master.o: driver/Master.c  nbproject/Makefile-${CND_CONF}.mk
-	@${MKDIR} "${OBJECTDIR}/driver" 
-	@${RM} ${OBJECTDIR}/driver/Master.o.d 
-	@${RM} ${OBJECTDIR}/driver/Master.o 
-	${MP_CC} $(MP_EXTRA_CC_PRE)  driver/Master.c  -o ${OBJECTDIR}/driver/Master.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/driver/Master.o.d"      -g -D__DEBUG -D__MPLAB_DEBUGGER_PK3=1  -mno-eds-warn  -omf=elf -DXPRJ_default=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O0 -msmart-io=1 -Wall -msfr-warn=off  
-	@${FIXDEPS} "${OBJECTDIR}/driver/Master.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
-	
 ${OBJECTDIR}/alpha_trx_driver/radio_alpha_trx.o: alpha_trx_driver/radio_alpha_trx.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} "${OBJECTDIR}/alpha_trx_driver" 
 	@${RM} ${OBJECTDIR}/alpha_trx_driver/radio_alpha_trx.o.d 
@@ -247,13 +212,6 @@ ${OBJECTDIR}/driver/timer.o: driver/timer.c  nbproject/Makefile-${CND_CONF}.mk
 	@${RM} ${OBJECTDIR}/driver/timer.o 
 	${MP_CC} $(MP_EXTRA_CC_PRE)  driver/timer.c  -o ${OBJECTDIR}/driver/timer.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/driver/timer.o.d"      -g -D__DEBUG -D__MPLAB_DEBUGGER_PK3=1  -mno-eds-warn  -omf=elf -DXPRJ_default=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O0 -msmart-io=1 -Wall -msfr-warn=off  
 	@${FIXDEPS} "${OBJECTDIR}/driver/timer.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
-	
-${OBJECTDIR}/driver/radio_alpha_trx_slave_api.o: driver/radio_alpha_trx_slave_api.c  nbproject/Makefile-${CND_CONF}.mk
-	@${MKDIR} "${OBJECTDIR}/driver" 
-	@${RM} ${OBJECTDIR}/driver/radio_alpha_trx_slave_api.o.d 
-	@${RM} ${OBJECTDIR}/driver/radio_alpha_trx_slave_api.o 
-	${MP_CC} $(MP_EXTRA_CC_PRE)  driver/radio_alpha_trx_slave_api.c  -o ${OBJECTDIR}/driver/radio_alpha_trx_slave_api.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/driver/radio_alpha_trx_slave_api.o.d"      -g -D__DEBUG -D__MPLAB_DEBUGGER_PK3=1  -mno-eds-warn  -omf=elf -DXPRJ_default=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O0 -msmart-io=1 -Wall -msfr-warn=off  
-	@${FIXDEPS} "${OBJECTDIR}/driver/radio_alpha_trx_slave_api.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
 	
 ${OBJECTDIR}/driver/master_api.o: driver/master_api.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} "${OBJECTDIR}/driver" 
@@ -340,34 +298,6 @@ ${OBJECTDIR}/mcc_generated_files/ext_int.o: mcc_generated_files/ext_int.c  nbpro
 	${MP_CC} $(MP_EXTRA_CC_PRE)  mcc_generated_files/ext_int.c  -o ${OBJECTDIR}/mcc_generated_files/ext_int.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/mcc_generated_files/ext_int.o.d"      -mno-eds-warn  -g -omf=elf -DXPRJ_default=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O0 -msmart-io=1 -Wall -msfr-warn=off  
 	@${FIXDEPS} "${OBJECTDIR}/mcc_generated_files/ext_int.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
 	
-${OBJECTDIR}/driver/rx.o: driver/rx.c  nbproject/Makefile-${CND_CONF}.mk
-	@${MKDIR} "${OBJECTDIR}/driver" 
-	@${RM} ${OBJECTDIR}/driver/rx.o.d 
-	@${RM} ${OBJECTDIR}/driver/rx.o 
-	${MP_CC} $(MP_EXTRA_CC_PRE)  driver/rx.c  -o ${OBJECTDIR}/driver/rx.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/driver/rx.o.d"      -mno-eds-warn  -g -omf=elf -DXPRJ_default=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O0 -msmart-io=1 -Wall -msfr-warn=off  
-	@${FIXDEPS} "${OBJECTDIR}/driver/rx.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
-	
-${OBJECTDIR}/driver/trx.o: driver/trx.c  nbproject/Makefile-${CND_CONF}.mk
-	@${MKDIR} "${OBJECTDIR}/driver" 
-	@${RM} ${OBJECTDIR}/driver/trx.o.d 
-	@${RM} ${OBJECTDIR}/driver/trx.o 
-	${MP_CC} $(MP_EXTRA_CC_PRE)  driver/trx.c  -o ${OBJECTDIR}/driver/trx.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/driver/trx.o.d"      -mno-eds-warn  -g -omf=elf -DXPRJ_default=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O0 -msmart-io=1 -Wall -msfr-warn=off  
-	@${FIXDEPS} "${OBJECTDIR}/driver/trx.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
-	
-${OBJECTDIR}/driver/tx.o: driver/tx.c  nbproject/Makefile-${CND_CONF}.mk
-	@${MKDIR} "${OBJECTDIR}/driver" 
-	@${RM} ${OBJECTDIR}/driver/tx.o.d 
-	@${RM} ${OBJECTDIR}/driver/tx.o 
-	${MP_CC} $(MP_EXTRA_CC_PRE)  driver/tx.c  -o ${OBJECTDIR}/driver/tx.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/driver/tx.o.d"      -mno-eds-warn  -g -omf=elf -DXPRJ_default=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O0 -msmart-io=1 -Wall -msfr-warn=off  
-	@${FIXDEPS} "${OBJECTDIR}/driver/tx.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
-	
-${OBJECTDIR}/debug/debug.o: debug/debug.c  nbproject/Makefile-${CND_CONF}.mk
-	@${MKDIR} "${OBJECTDIR}/debug" 
-	@${RM} ${OBJECTDIR}/debug/debug.o.d 
-	@${RM} ${OBJECTDIR}/debug/debug.o 
-	${MP_CC} $(MP_EXTRA_CC_PRE)  debug/debug.c  -o ${OBJECTDIR}/debug/debug.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/debug/debug.o.d"      -mno-eds-warn  -g -omf=elf -DXPRJ_default=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O0 -msmart-io=1 -Wall -msfr-warn=off  
-	@${FIXDEPS} "${OBJECTDIR}/debug/debug.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
-	
 ${OBJECTDIR}/test/test.o: test/test.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} "${OBJECTDIR}/test" 
 	@${RM} ${OBJECTDIR}/test/test.o.d 
@@ -396,13 +326,6 @@ ${OBJECTDIR}/driver/Services.o: driver/Services.c  nbproject/Makefile-${CND_CONF
 	${MP_CC} $(MP_EXTRA_CC_PRE)  driver/Services.c  -o ${OBJECTDIR}/driver/Services.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/driver/Services.o.d"      -mno-eds-warn  -g -omf=elf -DXPRJ_default=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O0 -msmart-io=1 -Wall -msfr-warn=off  
 	@${FIXDEPS} "${OBJECTDIR}/driver/Services.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
 	
-${OBJECTDIR}/driver/Master.o: driver/Master.c  nbproject/Makefile-${CND_CONF}.mk
-	@${MKDIR} "${OBJECTDIR}/driver" 
-	@${RM} ${OBJECTDIR}/driver/Master.o.d 
-	@${RM} ${OBJECTDIR}/driver/Master.o 
-	${MP_CC} $(MP_EXTRA_CC_PRE)  driver/Master.c  -o ${OBJECTDIR}/driver/Master.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/driver/Master.o.d"      -mno-eds-warn  -g -omf=elf -DXPRJ_default=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O0 -msmart-io=1 -Wall -msfr-warn=off  
-	@${FIXDEPS} "${OBJECTDIR}/driver/Master.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
-	
 ${OBJECTDIR}/alpha_trx_driver/radio_alpha_trx.o: alpha_trx_driver/radio_alpha_trx.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} "${OBJECTDIR}/alpha_trx_driver" 
 	@${RM} ${OBJECTDIR}/alpha_trx_driver/radio_alpha_trx.o.d 
@@ -416,13 +339,6 @@ ${OBJECTDIR}/driver/timer.o: driver/timer.c  nbproject/Makefile-${CND_CONF}.mk
 	@${RM} ${OBJECTDIR}/driver/timer.o 
 	${MP_CC} $(MP_EXTRA_CC_PRE)  driver/timer.c  -o ${OBJECTDIR}/driver/timer.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/driver/timer.o.d"      -mno-eds-warn  -g -omf=elf -DXPRJ_default=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O0 -msmart-io=1 -Wall -msfr-warn=off  
 	@${FIXDEPS} "${OBJECTDIR}/driver/timer.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
-	
-${OBJECTDIR}/driver/radio_alpha_trx_slave_api.o: driver/radio_alpha_trx_slave_api.c  nbproject/Makefile-${CND_CONF}.mk
-	@${MKDIR} "${OBJECTDIR}/driver" 
-	@${RM} ${OBJECTDIR}/driver/radio_alpha_trx_slave_api.o.d 
-	@${RM} ${OBJECTDIR}/driver/radio_alpha_trx_slave_api.o 
-	${MP_CC} $(MP_EXTRA_CC_PRE)  driver/radio_alpha_trx_slave_api.c  -o ${OBJECTDIR}/driver/radio_alpha_trx_slave_api.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/driver/radio_alpha_trx_slave_api.o.d"      -mno-eds-warn  -g -omf=elf -DXPRJ_default=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O0 -msmart-io=1 -Wall -msfr-warn=off  
-	@${FIXDEPS} "${OBJECTDIR}/driver/radio_alpha_trx_slave_api.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
 	
 ${OBJECTDIR}/driver/master_api.o: driver/master_api.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} "${OBJECTDIR}/driver" 

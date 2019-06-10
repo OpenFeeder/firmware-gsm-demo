@@ -8,9 +8,7 @@
 #ifndef TEST_H
 #define	TEST_H
 
-
-#include "../driver/trx.h"
-
+#include "../driver/Services.h"
 void test_state_register();
 
 void test_clock_seal();

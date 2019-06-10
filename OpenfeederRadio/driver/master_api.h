@@ -49,11 +49,25 @@
 #include <xc.h> // include processor files - each processor file is guarded.  
 #include "Services.h"
 
- /******************************************************************************/
- /******************************************************************************/
- /****************** FONCTIONNALITEES COMMUNES AU ALPHA TRX ********************/
- /***************************                ***********************************/
- /*****************                                 ****************************/
+/******************************************************************************/
+/******************************************************************************/
+/******************     MASTER APPLICATION CONTROL         ********************/
+/***************************                ***********************************/
+/*****************                                 ****************************/
+
+/**------------------------>> E N U M - S T A T E - G E N E R A L E <<---------*/
+typedef enum {
+    MSTR_STATE_GENERAL_BEFOR_DAYTIME,
+    MSTR_STATE_GENERAL_DAYTIME,
+    MSTR_STATE_GENERAL_AFTER_DAYTIME
+}MSTR_STATE_GENERAL;
+
+// *****************************************************************************
+// *****************************************************************************
+// Section: extern declarations
+// *****************************************************************************
+// *****************************************************************************
+extern MSTR_STATE_GENERAL mstrStat;
 
 /**
  * envoie la date a tout les slaves present 
@@ -61,7 +75,17 @@
  *      0 : si non envoye
  *      1 : si oui 
  */
-int8_t master_send_date_rf();
+int8_t MASTER_SendDateRF();
+
+/**
+ * 
+ */
+void MASTER_HandlerMsgRF();
+
+/**
+ * 
+ */
+void MASTER_SelectSlave();
 
 /**
  * des qu'un msg est recu on declence un timer qui corespond au temps que master
@@ -71,14 +95,20 @@ int8_t master_send_date_rf();
  *      0 : pas de msg ou n'est plus d'actalite 
  *      1 : un msg est presnt et il est toujours d'actualité 
  */
-void master_set_msg_receive_rf(uint8_t set);
+void MASTER_SetMsgReceiveRF(uint8_t set);
 
-void master_state_machine_of_daytime();
+
+int8_t Master_SendMsgRF(uint16_t idSlave, uint8_t typeMsg, uint8_t * data, uint8_t idMsg);
+
+/**
+ * 
+ */
+void MASTER_StateMachineOfDaytime();
 
 /****************                                         *********************/
- /*************************                     ********************************/
- /******************************************************************************/
- /******************************************************************************/
+/*************************                     ********************************/
+/******************************************************************************/
+/******************************************************************************/
 
 #endif	/* XC_HEADER_TEMPLATE_H */
 

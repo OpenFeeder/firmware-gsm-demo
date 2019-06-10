@@ -23,72 +23,74 @@
 #include <time.h>
 #include "xc.h"
 #include "timer.h"
-/*_____________________________________________________________________________*/
 
+
+ /******************************************************************************/
+ /******************************************************************************/
+ /******************** PARAMETRE GESTIONNAIRE DE TIMER *************************/
+ /***************************                ***********************************/
+ /*****************                                         ********************/
 
 /**-------------------------->> V A R I A B L E S <<---------------------------*/
-int8_t cpt_trick_horloge = 1000;
-volatile uint16_t tmr_horloge_timeout = 0; 
+int8_t TMR_CptTrickHorloge = 1000;
+volatile uint16_t TMR_HorlogeTimeout = 0; 
 
-volatile uint16_t tmr_wait_rqst_timeout = 0; //on s'en sert pour le poulling 
+volatile uint16_t TMR_WaitRqstTimeout = 0; //on s'en sert pour le poulling 
 
-//TODO : penser rendre ça generique
-volatile uint16_t tmr_msg_recu_timeout = 0;  
+//TODO : penser rendre ?a generique
+volatile uint16_t TMR_MsgRecuTimeout = 0;  
 
-volatile uint16_t tmr_nIRQ_low_timeout = 0;
+volatile uint16_t TMR_nIRQLowTimeout = 0;
 
-volatile uint16_t tmr_timeout = 0;
+volatile uint16_t TMR_Timeout = 0;
 
-volatile uint16_t tmr_delay = 0;
+volatile uint16_t TMR_DelayMs = 0;
 /*_____________________________________________________________________________*/
 
 /**-------------------------->> D E F I N I T I O N <<-------------------------*/
 
-uint16_t get_tmr_horloge_timeout() { return tmr_horloge_timeout; } 
-void set_tmr_horloge_timeout_x1000_ms(uint16_t timeout) { 
-    tmr_horloge_timeout = timeout; 
+uint16_t TMR_GetHorlogeTimeout() { return TMR_HorlogeTimeout; } 
+void TMR_SetHorlogeTimeout(uint16_t timeout) { 
+    TMR_HorlogeTimeout = timeout; 
 } 
 
 
-uint16_t get_tmr_wait_rqst_timeout() { return tmr_wait_rqst_timeout; } //on s'en sert pour le poulling 
-void set_tmr_wait_rqst_timeout(uint16_t set) { tmr_wait_rqst_timeout = set; }
+uint16_t TMR_GetWaitRqstTimeout() { return TMR_WaitRqstTimeout; } //on s'en sert pour le poulling 
+void TMR_SetWaitRqstTimeout(uint16_t set) { TMR_WaitRqstTimeout = set; }
 
-uint16_t get_tmr_msg_recu_timeout() { 
-    int16_t temp = tmr_msg_recu_timeout;
-    tmr_msg_recu_timeout = 0;
+uint16_t TMR_GetMsgRecuTimeout() { 
+    int16_t temp = TMR_MsgRecuTimeout;
+    TMR_MsgRecuTimeout = 0;
     return temp; 
 } 
-void set_tmr_msg_recu_timeout(uint16_t set) { tmr_msg_recu_timeout = set; }
+void TMR_SetMsgRecuTimeout(uint16_t timeout) { TMR_MsgRecuTimeout = timeout; }
 
-uint16_t get_tmr_nIRQ_low_timeout() { return tmr_nIRQ_low_timeout; }
-void set_tmr_nIRQ_low_timeout(int16_t set) { tmr_nIRQ_low_timeout = set; }
+uint16_t TMR_GetnIRQLowTimeout() { return TMR_nIRQLowTimeout; }
+void TMR_SetnIRQLowTimeout(int16_t timeout) { TMR_nIRQLowTimeout = timeout; }
 
-void set_tmr_timeout(uint16_t timeout) { tmr_timeout = timeout; }
-uint16_t get_tmr_timeout() { return tmr_timeout; }
+void TMR_SetTimeout(uint16_t timeout) { TMR_Timeout = timeout; }
+uint16_t TMR_GetTimeout() { return TMR_Timeout; }
 
-void tmr_start_delay(uint16_t delay_ms) {
-    tmr_delay = delay_ms;
-    while (!tmr_delay) { }
+void TMR_Delay(uint16_t delayMs) {
+    TMR_DelayMs = delayMs;
+    while (TMR_DelayMs > 0) { }
 }
-
-
-void tmr_callBack( void ) {
+void TMR_CallBack( void ) {
     
-    if (tmr_delay) --tmr_delay;
+    if (TMR_DelayMs) --TMR_DelayMs;
     
-    if (tmr_timeout) --tmr_timeout;
+    if (TMR_Timeout) --TMR_Timeout;
     
     //nIRQ timeout
-    if (tmr_nIRQ_low_timeout) --tmr_nIRQ_low_timeout;
+    if (TMR_nIRQLowTimeout) --TMR_nIRQLowTimeout;
 
-//#if defined(MASTER)
     //dis si une reponse est recu ou pas 
-    if (tmr_wait_rqst_timeout) --tmr_wait_rqst_timeout;
+    if (TMR_WaitRqstTimeout) --TMR_WaitRqstTimeout;
     
-    if (tmr_horloge_timeout) --tmr_horloge_timeout; // on ferra autrement 
-//#endif
+    if (TMR_HorlogeTimeout) --TMR_HorlogeTimeout; // on ferra autrement 
+
     //timer du buffer 
-    if (tmr_msg_recu_timeout) --tmr_msg_recu_timeout;
+    if (TMR_MsgRecuTimeout) --TMR_MsgRecuTimeout;
 }
 
 /*_____________________________________________________________________________*/

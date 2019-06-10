@@ -6,10 +6,9 @@
 #include "mcc_generated_files/tmr1.h"
 #include <xc.h>
 #include "alpha_trx_driver/radio_alpha_trx.h"
-#include "driver/trx.h"
-#include "driver/rx.h"
 #include "test/test.h"
 #include "driver/master_api.h"
+#include "driver/Services.h"
 
 
 int main(void) {
@@ -18,12 +17,10 @@ int main(void) {
     
     printf("Init ok\n");
     radioAlphaTRX_Init();
-    radioAlphaTRX_Received_Init();
-    //test_rx();
-    //test_timer();
-    //test_tx();
+    radioAlphaTRX_ReceivedMode();
     
-    //test_update_date_receive(); 
-    master_state_machine_of_daytime();
+    while (1) {
+        MASTER_Task();
+    }
     return -1;
 }
