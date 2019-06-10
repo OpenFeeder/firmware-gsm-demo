@@ -124,8 +124,8 @@ void radioAlphaTRX_SlaveSendLog() {
     }
     ack_attedue = i + curseur;
     lastSend = ACK_STATES_DATA;
+    appData.state = APP_STATE_IDLE; // on rend la main et on attends un ack 
     radioAlphaTRX_ReceivedMode(); // on se met en mode reception 
-    APP_DATA.state = APP_STATE_IDLE; // on rend la main 
 }
 
 void radioAlphaTRX_SlaveUpdateSendLogParam(uint8_t numSeq) {
@@ -133,23 +133,47 @@ void radioAlphaTRX_SlaveUpdateSendLogParam(uint8_t numSeq) {
     if (numSeq == ack_attedue) { // tous les msg envoyees ont ete aquitte
         if (windows < MAX_W) windows += 1;
     } else {
-        windows/2; // on diminue la fenetre d'emission 
+        windows / 2; // on diminue la fenetre d'emission 
         // il serait interressent de faire des statistique du nombre d'echec constate
     }
-    if (curseur-1 == NB_DATA_BUF) {
-        APP_DATA.state = APP_STATE_RADIO_SEND_END_BLOCK; // on demande l'envoie d'un msg de fin de block
-    }else {
-        APP_DATA.state = APP_STATE_RADIO_SEND_DATA; // on se remet en transmission de donnee 
+    if (curseur - 1 == NB_DATA_BUF) {
+        appData.state = APP_STATE_RADIO_SEND_END_BLOCK; // on demande l'envoie d'un msg de fin de block
+        nbBlock++;
+    } else {
+        appData.state = APP_STATE_RADIO_SEND_DATA; // on se remet en transmission de donnee 
     }
 }
 
 void radioAlphaTRX_SlaveSendEndBlok() {
     radioAlphaTRX_SlaveSendMsgRF(srv_end_block(), "END BLOCK", nbBlock);
-    lastSend = ACK_STATES_END_BLOCK;
-    appData.state = APP_STATE_IDLE; 
+    // reset les infos de transmission des log pour la prochaine tranimission
+    // d'un autre block
+    curseur = 1;
+    windows = 1;
+    lastSend = ACK_STATES_END_BLOCK; // pour l'intant on fait ça 
+    appData.state = APP_STATE_IDLE;
+    radioAlphaTRX_ReceivedMode(); // je me remets en attente d'un msg
 }
 
 /**-------------------------->>                   <<---------------------------*/
+
+void radioAlphaTRX_SlaveAckHundler(Frame msgReceive) {
+    switch (lastSend) {
+        case ACK_STATES_ERROR:
+            radioAlphaTRX_SlaveUpdatePtrErrBuf();
+            appData.state = APP_STATE_IDLE; // on rend la main
+            radioAlphaTRX_ReceivedMode(); // on se met en mode reception 
+            break;
+        case ACK_STATES_DATA:
+            radioAlphaTRX_SlaveUpdateSendLogParam(msgReceive.ID_Msg);
+            break;
+        case ACK_STATES_END_BLOCK:
+            appData.state = APP_STATE_RADIO_SEND_END_BLOCK;
+            break;
+        default:
+            break;
+    }
+}
 
 void radioAlphaTRX_SlaveBehaviourWhenMsgReceived() {
     Frame msgReceive;
@@ -161,6 +185,7 @@ void radioAlphaTRX_SlaveBehaviourWhenMsgReceived() {
             printf("Msg synch recu \n");
 #endif
             radioAlphaTRX_SlaveUpdateDate(msgReceive.data, timeout);
+            appData.state = APP_STATE_IDLE;
         } else if (msgReceive.Type_Msg == srv_infos() && timeout) { // on est dans la journee
             int8_t err = radioAlphaTRX_SlaveGetError();
 #if defined(UART_DEBUG)
@@ -174,16 +199,10 @@ void radioAlphaTRX_SlaveBehaviourWhenMsgReceived() {
                 lastSend = ACK_STATES_NOTHING;
             }
             radioAlphaTRX_ReceivedMode(); // je me remets en attente d'un msg
+            appData.state = APP_STATE_IDLE; // etat endormie 
+
         } else if (msgReceive.Type_Msg == srv_ack()) { // un ack confirmant le dernier paquet envoyer 
-            switch (lastSend) {
-                case ACK_STATES_ERROR:
-                    radioAlphaTRX_SlaveUpdatePtrErrBuf();
-                    break;
-                case ACK_STATES_DATA:
-                    break;
-                default:
-                    break;
-            }
+            radioAlphaTRX_SlaveAckHundler(msgReceive);
         } else if (msgReceive.Type_Msg == srv_data()) { // on me demande transmettre des données 
             //on est donc le soir et je bascule dans la recuperation des données
             appData.state = APP_STATE_RADIO_SEND_DATA; // je lui demande transmettre 

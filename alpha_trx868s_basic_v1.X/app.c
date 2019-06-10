@@ -137,7 +137,6 @@ void APP_Tasks(void) {
                 appData.previous_state = appData.state;
             }
             radioAlphaTRX_SlaveBehaviourWhenMsgReceived();
-            appData.state = APP_STATE_IDLE;
             break;
             /* -------------------------------------------------------------- */
         case APP_STATE_RADIO_SEND_DATA:
@@ -147,6 +146,7 @@ void APP_Tasks(void) {
 #endif
                 appData.previous_state = appData.state;
             }
+            radioAlphaTRX_SlaveSendLog();
             //apelle la fonction qui s'occupe de transmettre les donnees 
             break;
             /* -------------------------------------------------------------- */
@@ -157,6 +157,7 @@ void APP_Tasks(void) {
 #endif
                 appData.previous_state = appData.state;
             }
+            radioAlphaTRX_SlaveSendEndBlok();
             //apelle la fonction qui s'occupe de transmettre les donnees 
             break;
             /* -------------------------------------------------------------- */

@@ -143,6 +143,12 @@ void radioAlphaTRX_SlaveUpdateSendLogParam(uint8_t numSeq);
 void radioAlphaTRX_SlaveSendEndBlok();
 
 /**
+ * traitement de l'aquitement recu
+ * @param msgReceive
+ */
+void radioAlphaTRX_SlaveAckHundler(Frame msgReceive);
+
+/**
  * determine l'action a effectue quand un msg est recu 
  */
 void radioAlphaTRX_SlaveBehaviourWhenMsgReceived();
