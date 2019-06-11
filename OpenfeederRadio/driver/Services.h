@@ -65,9 +65,10 @@
 #define FRAME_LENGTH                128 // Longueur total d'une trame en octet
 #define ERROR_LENGTH                  8
 #define SIZE_DATA                    40
-#define TIME_OUT_nIRQ                 2 // 2ms
+#define TIME_OUT_nIRQ                 2 // 2 ms
 #define LAPS                          5 // on attend X ms avant de transmettre un nouveau msg 
-#define SEND_HORLOG_TIMEOUT       20000
+#define SEND_HORLOG_TIMEOUT           1 // 1 min
+#define AFTER_SEND_HORLOGE           20 // 20 ms
 #define TIME_OUT_GET_FRAME         1500 // temps max, pour que le msg recu soit encore exploitable
                                         // au dela le mster ne m'ecoute pas donc cela ne sert ? rien 
 #define NB_ERR_BUF                   10 // nombre d'errerur possible 

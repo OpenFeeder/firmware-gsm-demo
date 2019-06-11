@@ -219,7 +219,6 @@ void RTCC_BCDTimeSet(bcdTime_t *initialTime);
 */
 void RTCC_TimeReset(bool reset);
 
-bool RTCC_Task(void);
 
 #ifdef __cplusplus  // Provide C++ Compatibility
 

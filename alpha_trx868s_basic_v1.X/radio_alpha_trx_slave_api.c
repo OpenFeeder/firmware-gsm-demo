@@ -72,7 +72,7 @@ void radioAlphaTRX_SlaveUpdatePtrErrBuf() {
 }
 
 int8_t radioAlphaTRX_SlaveSendMsgRF(uint8_t typeMsg, uint8_t * data, uint8_t idMsg) {
-    //    radioAlphaTRX_SetSendMode(1); // j'annonce que je suis en mode transmission 
+//    radioAlphaTRX_SetSendMode(1); // j'annonce que je suis en mode transmission 
 
     uint8_t dataToSend[FRAME_LENGTH];
     int8_t ret = 0;
@@ -82,7 +82,8 @@ int8_t radioAlphaTRX_SlaveSendMsgRF(uint8_t typeMsg, uint8_t * data, uint8_t idM
         ret = 1;
     }
 
-    //    radioAlphaTRX_SetSendMode(0); // je suis en mode transmission 
+//    radioAlphaTRX_SetSendMode(0); // je suis en mode transmission 
+//    radioAlphaTRX_Init();
     radioAlphaTRX_ReceivedMode(); // je me remets en attente d'un msg
     return ret;
 }

@@ -43,13 +43,6 @@ void test_rx() {
 
     radioAlphaTRX_ReceivedMode();
     while (1) {
-        if (getFlag() == 1) {
-            resetFlag();
-            if (msg_receive == 1) {
-                printf("tps %d \n", TIME_OUT_GET_FRAME - TMR_GetMsgRecuTimeout());
-                printf("recu %s \n", radioAlphaTRX_ReadBuf());
-            }
-        }
     }
 
 }
@@ -62,13 +55,6 @@ void test_tx() {
                                         srv_getID_Master(), 
                                         srv_horloge(), '0');
     while (1) {
-        if (getFlag() == 1) {
-            printf("envoie\n");
-            resetFlag(); // on remet le flag a 0 pour eviter d'envoyer indefiniment 
-            if (radioAlphaTRX_SendMode()) {
-                radioAlphaTRX_SendData(paquet, size_h);
-            }
-        }
     }
 }
 

@@ -42,27 +42,16 @@
 
     MICROCHIP PROVIDES THIS SOFTWARE CONDITIONALLY UPON YOUR ACCEPTANCE OF THESE
     TERMS.
-*/ 
+*/
 
 /**
    Section: Includes
  */
 #include <xc.h>
-#include <stdio.h>
 #include "ext_int.h"
-#include "pin_manager.h"
 #include "../driver/master_api.h"
 //***User Area Begin->code: Add External Interrupt handler specific headers 
-volatile int Flag = 0;
-volatile int getFlag() { return Flag; }
-void resetFlag() { Flag = 0; }
 
-volatile int8_t buffer[20];
-volatile int8_t flagFFIT = 0;
-volatile int8_t i = 0;
-int8_t * getBuffer() { return buffer; }
-int8_t getflagFFIT() { return flagFFIT; }
-void restFladFFIT () { flagFFIT = 0; buffer[0] = '\0';}
 //***User Area End->code: Add External Interrupt handler specific headers
 
 /**
@@ -74,11 +63,10 @@ void restFladFFIT () { flagFFIT = 0; buffer[0] = '\0';}
 void __attribute__ ( ( interrupt, no_auto_psv ) ) _INT1Interrupt(void)
 {
     //***User Area Begin->code: INT1 - External Interrupt 1***
-    Flag = 1;
-    LED_BLUE_SetLow();
-    mstrStat = MSTR_STATE_GENERAL_DAYTIME; // simule le changement
-//    i = ((i+1)%NB_ERR_BUF);
-//    radioAlphaTRX_save_error(i);
+    if (mstrState == MSTR_STATE_GENERAL_DAYTIME)
+        mstrState = MSTR_STATE_GENERAL_AFTER_DAYTIME;
+    else
+        mstrState = MSTR_STATE_GENERAL_DAYTIME;
     //***User Area End->code: INT1 - External Interrupt 1***
     EX_INT1_InterruptFlagClear();
 }
@@ -88,9 +76,8 @@ void __attribute__ ( ( interrupt, no_auto_psv ) ) _INT1Interrupt(void)
 void __attribute__ ( ( interrupt, no_auto_psv ) ) _INT2Interrupt(void)
 {
     //***User Area Begin->code: INT2 - External Interrupt 2***
-    mstrStat = MSTR_STATE_GENERAL_AFTER_DAYTIME; // simule le changement
-//    i = (i+1)%8;
-//    radioAlphaTRX_save_error(i); // juste pour similer une err 
+    LED_GREEN_Toggle();
+    mstrState = MSTR_STATE_GENERAL_AFTER_DAYTIME;
     //***User Area End->code: INT2 - External Interrupt 2***
     EX_INT2_InterruptFlagClear();
 }
@@ -122,5 +109,6 @@ void EXT_INT_Initialize(void)
      * Enable the interrupt, if enabled in the UI. 
      ********/
     EX_INT2_InterruptFlagClear();   
-    EX_INT2_NegativeEdgeSet();
+    EX_INT2_PositiveEdgeSet();
+    EX_INT2_InterruptEnable();
 }

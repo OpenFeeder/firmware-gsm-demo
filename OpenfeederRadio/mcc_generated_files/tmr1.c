@@ -150,7 +150,7 @@ uint16_t TMR1_Counter16BitGet( void )
 void __attribute__ ((weak)) TMR1_CallBack(void)
 {
     // Add your custom callback code here
-    TMR_CallBack();
+    TMR_CallBackTMR();
 }
 
 void TMR1_Start( void )

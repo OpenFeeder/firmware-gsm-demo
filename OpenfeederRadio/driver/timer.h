@@ -69,7 +69,7 @@ uint16_t TMR_GetHorlogeTimeout();
  * determine combirne de minute il faut attendre avant de transmettre la date
  * @param timeout : le temps qu'il faut attendre avant de transmettre l'horloge 
  */
-void TMR_SetHorlogeTimeout(uint16_t timeout);
+void TMR_SetHorlogeTimeout(uint16_t timeout_min);
 
 /**
  * tant que cette fonction me retourne une valeure differente de 0 
@@ -137,7 +137,10 @@ void TMR_Delay();
 /**
  * fonction principale de gestion des timer 
  */
-void TMR_CallBack(void);
+void __attribute__ ((weak)) TMR_CallBackTMR(void);
+
+void __attribute__ ((weak)) TMR_CollBackRTC(void);
+
 
 /****************                                         *********************/
 /*************************                     ********************************/

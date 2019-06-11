@@ -32,13 +32,19 @@
 
 /**-------------------------->> S T R U C T U R E -- S L A V E <<--------------*/
 typedef struct sSlave {
+    int16_t idSlave;
+    SLAVE_STATE state;
+    int8_t curseur; // le paquet attendu 
 } Slave;
 
 
 /**-------------------------->> V A R I A B L E S <<---------------------------*/
 int8_t msgReceiveRF = 0; // 
 
-MSTR_STATE_GENERAL mstrStat; //modifier par rtc
+MSTR_STATE_GENERAL mstrState = MSTR_STATE_GENERAL_BEFOR_DAYTIME; //modifier par rtc plus tard 
+MSTR_STATE_GENERAL mstrPrevState = MSTR_STATE_GENERAL_ERROR;     //pour les besoin des teste on simule cela avec des interuption 
+
+MSTR_STATE_GET_LOG mstrStateGetLog = MSTR_STATE_GET_LOG_SYNC; // init state synchro
 //______________________________________________________________________________
 
 void MASTER_SetMsgReceiveRF(uint8_t set) {
@@ -97,8 +103,8 @@ void MASTER_HandlerMsgRF() {
 //chisit un autre slave a qestionner
 
 void MASTER_SelectSlave() {
-    //choix du slave 
-    int16_t idSlave = 37; // pour l'instant
+    //TODO : choix du slave 
+    int16_t idSlave = 37; // pour l'instant on teste 
 #if defined(UART_DEBUG)
     printf("demande d'infos au slave %d\n", idSlave);
 #endif
@@ -114,40 +120,59 @@ void MASTER_StateMachineOfDaytime() {
         TMR_SetTimeout(5000); // 5s
     }
 #endif
+    // ici il est important de respecter la hierarchie des test pour le bon 
+    // fonctionnement l'appli 
     if (!TMR_GetHorlogeTimeout()) { // on doit envoyer l'horloge en mode broadcast
         MASTER_SendDateRF();
         TMR_SetHorlogeTimeout(SEND_HORLOG_TIMEOUT);
+        TMR_Delay(AFTER_SEND_HORLOGE); //on attends 
     } else if (msgReceiveRF == 1) {
         MASTER_HandlerMsgRF();
-    } else if (!TMR_GetWaitRqstTimeout()) { //le temps d'attente d'une reponse
+        // a decommenter lorsqu'il y'a plusieurs of connecte
+        // TMR_SetWaitRqstTimeout(0); // a pour effet d'arreter le temporisateur 
+    } else if (!TMR_GetWaitRqstTimeout()) { 
         MASTER_SelectSlave();
-        TMR_SetWaitRqstTimeout(TIME_OUT_WAIT_RQST);
+        TMR_SetWaitRqstTimeout(TIME_OUT_WAIT_RQST); //demarre le temporisateur
     }
+}
+
+void MASTER_GetLog() {
+    
 }
 
 void MASTER_Task() {
 
-    switch (mstrStat) {
+    switch (mstrState) {
 
         case MSTR_STATE_GENERAL_BEFOR_DAYTIME:
+            if (mstrState != mstrPrevState) {
+                mstrPrevState = mstrState;
 #if defined(UART_DEBUG)
-            printf("Master on est 2h avant le debut de la journée \n");
+            printf("Master on est 2h avant le debut de la journee\n");
 #endif
+            }
             //TODO : ce que je dois faire avant le debut des hostilite 
             break;
             /* -------------------------------------------------------------- */
         case MSTR_STATE_GENERAL_DAYTIME:
+            if (mstrState != mstrPrevState) {
+                mstrPrevState = mstrState;
 #if defined(UART_DEBUG)
-            printf("Master on est le debut de la journée \n");
+            printf("Master on est le debut de la journee \n");
 #endif
+            }
             MASTER_StateMachineOfDaytime();
             break;
             /* -------------------------------------------------------------- */
         case MSTR_STATE_GENERAL_AFTER_DAYTIME:
             //TODO : ce que je dois faire avant le debut des hostilite 
+            if (mstrState != mstrPrevState) {
+                mstrPrevState = mstrState;
 #if defined(UART_DEBUG)
-            printf("Master on est a la fin de la journée \n");
-#endif
+            printf("Master on est a la fin de la journee \n");
+#endif  
+            }
+            MASTER_GetLog();
             break;
             /* -------------------------------------------------------------- */
         default:

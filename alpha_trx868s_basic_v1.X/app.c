@@ -118,7 +118,7 @@ void APP_Tasks(void) {
             RTCC_TimeGet(&t);
             if (!TMR_GetTimeout()) {
                 printf("heur slave ==> %dh:%dmin:%ds\n", t.tm_hour, t.tm_min, t.tm_sec);
-                TMR_SetTimeout(10000); // 10s
+                TMR_SetTimeout(30000); // 10s
             }
 #endif      
 
@@ -126,6 +126,7 @@ void APP_Tasks(void) {
             /* Get interaction with the serial terminal. */
             APP_SerialDebugTasks();
 #endif
+            
             break;
             /* -------------------------------------------------------------- */
 

@@ -50,8 +50,8 @@ volatile uint16_t TMR_DelayMs = 0;
 /**-------------------------->> D E F I N I T I O N <<-------------------------*/
 
 uint16_t TMR_GetHorlogeTimeout() { return TMR_HorlogeTimeout; } 
-void TMR_SetHorlogeTimeout(uint16_t timeout) { 
-    TMR_HorlogeTimeout = timeout; 
+void TMR_SetHorlogeTimeout(uint16_t timeout_min) { 
+    TMR_HorlogeTimeout = timeout_min; 
 } 
 
 
@@ -75,7 +75,12 @@ void TMR_Delay(uint16_t delayMs) {
     TMR_DelayMs = delayMs;
     while (TMR_DelayMs > 0) { }
 }
-void TMR_CallBack( void ) {
+
+void __attribute__ ((weak)) TMR_CollBackRTC() {
+    if (TMR_HorlogeTimeout) --TMR_HorlogeTimeout; // on ferra autrement 
+}
+
+void __attribute__ ((weak)) TMR_CallBackTMR( void ) {
     
     if (TMR_DelayMs) --TMR_DelayMs;
     
@@ -87,8 +92,6 @@ void TMR_CallBack( void ) {
     //dis si une reponse est recu ou pas 
     if (TMR_WaitRqstTimeout) --TMR_WaitRqstTimeout;
     
-    if (TMR_HorlogeTimeout) --TMR_HorlogeTimeout; // on ferra autrement 
-
     //timer du buffer 
     if (TMR_MsgRecuTimeout) --TMR_MsgRecuTimeout;
 }

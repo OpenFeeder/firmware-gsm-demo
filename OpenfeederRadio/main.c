@@ -18,7 +18,6 @@ int main(void) {
     printf("Init ok\n");
     radioAlphaTRX_Init();
     radioAlphaTRX_ReceivedMode();
-    
     while (1) {
         MASTER_Task();
     }

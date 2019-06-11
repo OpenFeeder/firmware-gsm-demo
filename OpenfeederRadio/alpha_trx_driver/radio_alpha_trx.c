@@ -43,7 +43,7 @@ STATUS_READ_VAL RF_StatusRead; // Status Read Command
 /**-------------------------->> D E F I N I T I O N <<-------------------------*/
 
 void radioAlphaTRX_Init(void) {
-
+    nRES_SetHigh();
     RF_StatusRead.Val = 0;
     RF_StatusRead.Val = radioAlphaTRX_Command(STATUS_READ_CMD); // intitial SPI transfer added to avoid power-up problem
     /**-------------> Frequency Setting Command @ 433 MHz <--------------------*/
@@ -262,6 +262,7 @@ int8_t radioAlphaTRX_GetSizeBuf() {
 }
 
 int8_t * radioAlphaTRX_ReadBuf() {
+    MASTER_SetMsgReceiveRF(0);
     return BUF;
 }
 
@@ -284,6 +285,7 @@ int8_t radioAlphaTRX_receive(uint8_t buffer[FRAME_LENGTH]) {
 void radioAlphaTRX_CaptureFrame() {
     if ((sizeBuf = radioAlphaTRX_receive(BUF)) > 0) {
         LED_BLUE_Toggle();
+        MASTER_SetMsgReceiveRF(1);
         TMR_SetMsgRecuTimeout(TIME_OUT_GET_FRAME); // on demare le timer, car le bufer est probablement remplie 
     }
     //on se remet en ecoute 

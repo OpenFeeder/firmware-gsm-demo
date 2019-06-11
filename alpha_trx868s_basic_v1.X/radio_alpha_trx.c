@@ -137,8 +137,8 @@ void radioAlphaTRX_ReceivedMode(void) {
 
 int8_t radioAlphaTRX_SendMode(void) {
     //close Rx mode 
-    radioAlphaTRX_Command(0x8209);
-
+     radioAlphaTRX_Command(0x8209);
+    
     /**-------------> Configuration Setting Command <--------------------------*/
     //  bit  15  14  13  12  11  10   9   8   7   6   5   4   3   2   1   0   POR
     //  Val   1   0   0   0   0   0   0   0  el  ef  b1  b0  x3  x2  x1  x0   0x8008

@@ -50,6 +50,7 @@
 
 #include <xc.h>
 #include "rtcc.h"
+#include "pin_manager.h"
 
 /**
 * Section: Function Prototype
@@ -71,16 +72,25 @@ void RTCC_Initialize(void)
 
    RCFGCALbits.RTCEN = 0;
    
-   if(!RTCCTimeInitialized())
-   {
-       // set RTCC time 2019-02-04 10-43-44
-       RCFGCALbits.RTCPTR = 3;        // start the sequence
-       RTCVAL = 0x19;    // YEAR
-       RTCVAL = 0x204;    // MONTH-1/DAY-1
-       RTCVAL = 0x110;    // WEEKDAY/HOURS
-       RTCVAL = 0x4344;    // MINUTES/SECONDS
-   }
+//   if(!RTCCTimeInitialized())
+//   {
+//       // set RTCC time 2019-02-04 10-43-44
+//       RCFGCALbits.RTCPTR = 3;        // start the sequence
+//       RTCVAL = 0x19;    // YEAR
+//       RTCVAL = 0x204;    // MONTH-1/DAY-1
+//       RTCVAL = 0x110;    // WEEKDAY/HOURS
+//       RTCVAL = 0x4344;    // MINUTES/SECONDS
+//   }
 
+   // set Alarm time 2019-02-02 22-58-44
+   ALCFGRPTbits.ALRMEN = 0;
+   ALCFGRPTbits.ALRMPTR = 2;
+   ALRMVAL = 0x202;
+   ALRMVAL = 0x622;
+   ALRMVAL = 0x5844;
+
+   // ALRMPTR MIN_SEC; AMASK Every Minute; ARPT 0; CHIME enabled; ALRMEN enabled; 
+   ALCFGRPT = 0xCC00;
    // RTCOUT RTCC Clock; PWSPRE disabled; RTCLK SOSC; PWCPRE disabled; PWCEN disabled; PWCPOL disabled; 
    RTCPWC = 0x0200;
 
@@ -89,6 +99,8 @@ void RTCC_Initialize(void)
    RCFGCALbits.RTCEN = 1;
    RCFGCALbits.RTCWREN = 0;
 
+   //Enable RTCC interrupt
+   IEC3bits.RTCIE = 1;
 }
 
 
@@ -146,6 +158,8 @@ void RTCC_TimeSet(struct tm *initialTime)
 
    RCFGCALbits.RTCEN = 0;
    
+   IFS3bits.RTCIF = false;
+   IEC3bits.RTCIE = 0;
 
    // set RTCC initial time
    RCFGCALbits.RTCPTR = 3;                               // start the sequence
@@ -158,6 +172,7 @@ void RTCC_TimeSet(struct tm *initialTime)
    RCFGCALbits.RTCEN = 1;  
    RCFGCALbits.RTCWREN = 0;
    
+   IEC3bits.RTCIE = 1;
 
 }
 
@@ -196,6 +211,8 @@ void RTCC_BCDTimeSet(bcdTime_t *initialTime)
 
    RCFGCALbits.RTCEN = 0;
 
+   IFS3bits.RTCIF = false;
+   IEC3bits.RTCIE = 0;
 
    // set RTCC initial time
    RCFGCALbits.RTCPTR = 3;                               // start the sequence
@@ -208,6 +225,7 @@ void RTCC_BCDTimeSet(bcdTime_t *initialTime)
    RCFGCALbits.RTCEN = 1;
    RCFGCALbits.RTCWREN = 0;
 
+   IEC3bits.RTCIE = 1;
 }
 
 static uint8_t ConvertHexToBCD(uint8_t hexvalue)
@@ -227,23 +245,20 @@ static uint8_t ConvertBCDToHex(uint8_t bcdvalue)
 
 
 /* Function:
-    bool RTCC_Task(void)
+  void __attribute__ ( ( interrupt, no_auto_psv ) ) _ISR _RTCCInterrupt( void )
 
   Summary:
-    Status function which returns the RTCC interrupt flag status
+    Interrupt Service Routine for the RTCC Peripheral
 
   Description:
-    This is the status function for the RTCC peripheral. 
+    This is the interrupt service routine for the RTCC peripheral. Add in code if 
+    required in the ISR. 
 */
-bool RTCC_Task(void)
+void __attribute__ ( ( interrupt, no_auto_psv ) ) _ISR _RTCCInterrupt( void )
 {
-    bool status;
-    status = IFS3bits.RTCIF;
-    if( IFS3bits.RTCIF)
-    {
-       IFS3bits.RTCIF = false;
-    }
-    return status;
+    /* TODO : Add interrupt handling code */
+    TMR_CollBackRTC();
+    IFS3bits.RTCIF = false;
 }
 
 

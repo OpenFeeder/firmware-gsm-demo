@@ -59,16 +59,30 @@
 typedef enum {
     MSTR_STATE_GENERAL_BEFOR_DAYTIME,
     MSTR_STATE_GENERAL_DAYTIME,
-    MSTR_STATE_GENERAL_AFTER_DAYTIME
+    MSTR_STATE_GENERAL_AFTER_DAYTIME,
+    MSTR_STATE_GENERAL_ERROR
 }MSTR_STATE_GENERAL;
+
+typedef enum {
+    MSTR_STATE_GET_LOG_SYNC,
+    MSTR_STATE_GET_LOG_COLLECT,
+    MSTR_STATE_GET_LOG_DESYNC,
+    MSTR_STATE_GET_LOG8ERROR
+}MSTR_STATE_GET_LOG;
+
+typedef enum {
+    SLAVE_STATE_SELECTED,   // en cours d'interrogation 
+    SLAVE_STATE_DESELCTED,  // n'est pas encours selectionne
+    SLAVE_STATE_ERROR       // si le slave est en error 
+}SLAVE_STATE;
 
 // *****************************************************************************
 // *****************************************************************************
 // Section: extern declarations
 // *****************************************************************************
 // *****************************************************************************
-extern MSTR_STATE_GENERAL mstrStat;
-
+extern MSTR_STATE_GENERAL mstrState;
+extern MSTR_STATE_GET_LOG mstrStateGetLog;
 /**
  * envoie la date a tout les slaves present 
  * @return 
