@@ -55,7 +55,7 @@
 /***************************                ***********************************/
 /*****************                                 ****************************/
 
-/**------------------------>> E N U M - S T A T E - G E N E R A L E <<---------*/
+/**------------------------>> E N U M - S T A T E  <<--------------------------*/
 typedef enum {
     MSTR_STATE_GENERAL_BEFOR_DAYTIME,
     MSTR_STATE_GENERAL_DAYTIME,
@@ -64,15 +64,18 @@ typedef enum {
 }MSTR_STATE_GENERAL;
 
 typedef enum {
-    MSTR_STATE_GET_LOG_SYNC,
-    MSTR_STATE_GET_LOG_COLLECT,
-    MSTR_STATE_GET_LOG_DESYNC,
-    MSTR_STATE_GET_LOG8ERROR
+    MSTR_STATE_GET_LOG_IDLE,            // on attend une reponse de notre demande 
+    MSTR_STATE_GET_LOG_SYNC,            // on demande un slave selectionner de transmettre des donnees
+    MSTR_STATE_GET_LOG_COLLECT,         // on est en recuperation de donner 
+    MSTR_STATE_GET_LOG_DESYNC,          // on est en fin de recuperation pour ce slave selectionne
+    MSTR_STATE_GET_LOG_SEND_FROM_GSM,   // on transfere les donnees par gsm au srver       
+    MSTR_STATE_GET_LOG_ERROR            // une erreur est survenue 
 }MSTR_STATE_GET_LOG;
 
 typedef enum {
     SLAVE_STATE_SELECTED,   // en cours d'interrogation 
     SLAVE_STATE_DESELCTED,  // n'est pas encours selectionne
+    SLAVE_STATE_COLLECT_END,// si on a deja collecte ses donnees 
     SLAVE_STATE_ERROR       // si le slave est en error 
 }SLAVE_STATE;
 
@@ -99,7 +102,7 @@ void MASTER_HandlerMsgRF();
 /**
  * 
  */
-void MASTER_SelectSlave();
+int8_t MASTER_SelectSlave();
 
 /**
  * des qu'un msg est recu on declence un timer qui corespond au temps que master

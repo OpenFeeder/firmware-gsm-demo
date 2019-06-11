@@ -35,7 +35,7 @@ typedef struct sSlave {
     int16_t idSlave;
     SLAVE_STATE state;
     int8_t curseur; // le paquet attendu, tanq que je ne suis pas en fin de bloc
-    
+
 } Slave;
 
 
@@ -43,15 +43,17 @@ typedef struct sSlave {
 int8_t msgReceiveRF = 0; // 
 
 MSTR_STATE_GENERAL mstrState = MSTR_STATE_GENERAL_BEFOR_DAYTIME; //modifier par rtc plus tard 
-MSTR_STATE_GENERAL mstrPrevState = MSTR_STATE_GENERAL_ERROR;     //pour les besoin des teste on simule cela avec des interuption 
+MSTR_STATE_GENERAL mstrPrevState = MSTR_STATE_GENERAL_ERROR; //pour les besoin des teste on simule cela avec des interuption 
 
-MSTR_STATE_GET_LOG mstrStateGetLog = MSTR_STATE_GET_LOG_SYNC; // init state synchro
+MSTR_STATE_GET_LOG mstrStateGetLog = MSTR_STATE_GET_LOG_IDLE; // init state synchro
 
 //TOASK : je pense utiliser Deux buffeurs pour pouvoir faire du pseudo
 //TOASK : paralleliseme, pendant que je recupère en RF je transmettrais en GSM
 uint8_t BUF1_DATA[NB_DATA_BUF][SIZE_DATA] = {{0}};
-uint8_t BUF2 _DATA[NB_DATA_BUF][SIZE_DATA] = {{0}};
-Slave ensSlave[NB_SLAVE];
+uint8_t BUF2_DATA[NB_DATA_BUF][SIZE_DATA] = {{0}};
+
+Slave ensSlave[NB_SLAVE]; //ensemble des openfeeder sur le site 
+Slave slaveSlected; // l'of en cours d'interogation 
 //______________________________________________________________________________
 
 void MASTER_SetMsgReceiveRF(uint8_t set) {
@@ -86,14 +88,21 @@ int8_t MASTER_SendDateRF() {
 
 void MASTER_HandlerMsgRF() {
     Frame data_receive;
-    if (srv_decode_packet_rf(radioAlphaTRX_ReadBuf(), 
-                             &data_receive, radioAlphaTRX_GetSizeBuf(), srv_getID_Master()) > 0) {
+    int8_t sizeData;
+    if ((sizeData = srv_decode_packet_rf(radioAlphaTRX_ReadBuf(),
+                                         &data_receive, 
+                                         radioAlphaTRX_GetSizeBuf(), 
+                                         srv_getID_Master())) > 0) {
         if (data_receive.Type_Msg == srv_err()) {
 #if defined(UART_DEBUG)
             LED_GREEN_Toggle();
-            printf("erreur recu ==> transfere gsm :: %s %d\n", data_receive.data, data_receive.ID_Msg);
+            printf("erreur recu ==> transfere gsm :: %s %d\n", 
+                   data_receive.data, 
+                   data_receive.ID_Msg);
 #endif
-            Master_SendMsgRF(data_receive.ID_Src, srv_ack(), "ACK", data_receive.Type_Msg); // pour l'instant
+            Master_SendMsgRF(data_receive.ID_Src,
+                             srv_ack(), "ACK", 
+                             data_receive.Type_Msg); // pour l'instant
             //TODO Transmettre Par GSM 
         } else if (data_receive.Type_Msg == srv_infos()) { // pour l'instant on traite pas ce cas 
 #if defined(UART_DEBUG)
@@ -103,13 +112,17 @@ void MASTER_HandlerMsgRF() {
 #if defined(UART_DEBUG)
             printf("Le slave [%d] n'a rien a transmettre\n", data_receive.ID_Src);
 #endif
+        }else if (data_receive.Type_Msg = srv_data()) {
+            if (data_receive.ID_Msg = slaveSlected.curseur) { // si c'est la donnee attendu 
+                srv_cpy(BUF1_DATA[slaveSlected.curseur++], data_receive.data); // on recupere la donnee
+            }
         }
     }
 }
 
 //chisit un autre slave a qestionner
 
-void MASTER_SelectSlave() {
+int8_t MASTER_SelectSlave() {
     //TODO : choix du slave 
     int16_t idSlave = 37; // pour l'instant on teste 
 #if defined(UART_DEBUG)
@@ -137,14 +150,45 @@ void MASTER_StateMachineOfDaytime() {
         MASTER_HandlerMsgRF();
         // a decommenter lorsqu'il y'a plusieurs of connecte
         // TMR_SetWaitRqstTimeout(0); // a pour effet d'arreter le temporisateur 
-    } else if (!TMR_GetWaitRqstTimeout()) { 
+    } else if (!TMR_GetWaitRqstTimeout()) {
         MASTER_SelectSlave();
         TMR_SetWaitRqstTimeout(TIME_OUT_WAIT_RQST); //demarre le temporisateur
     }
 }
 
-void MASTER_GetLog() {
-    
+void MASTER_GetLog() {   // ces etats sont consideres comme des phases
+    switch (mstrStateGetLog) {
+        case MSTR_STATE_GET_LOG_IDLE:
+            //TODO : select the slave to collect log 
+            if (msgReceiveRF) {
+                
+            }
+            break;
+            /*-----------------------------------------------------------------*/
+        case MSTR_STATE_GET_LOG_SYNC: // dans cet etat, on s'occupe de la demande 
+            Master_SendMsgRF(slaveSlected.idSlave, srv_data(), "DATA", 1);
+            
+            break;
+            /*-----------------------------------------------------------------*/
+        case MSTR_STATE_GET_LOG_COLLECT:
+            
+            break;
+            /*-----------------------------------------------------------------*/
+        case MSTR_STATE_GET_LOG_SEND_FROM_GSM:
+
+            break;
+            /*-----------------------------------------------------------------*/
+        case MSTR_STATE_GET_LOG_DESYNC:
+
+            break;
+            /*-----------------------------------------------------------------*/
+        case MSTR_STATE_GET_LOG_ERROR:
+
+            break;
+            /*-----------------------------------------------------------------*/
+        default:
+            break;
+    }
 }
 
 void MASTER_Task() {
@@ -155,7 +199,7 @@ void MASTER_Task() {
             if (mstrState != mstrPrevState) {
                 mstrPrevState = mstrState;
 #if defined(UART_DEBUG)
-            printf("Master on est 2h avant le debut de la journee\n");
+                printf("Master on est 2h avant le debut de la journee\n");
 #endif
             }
             //TODO : ce que je dois faire avant le debut des hostilite 
@@ -165,7 +209,7 @@ void MASTER_Task() {
             if (mstrState != mstrPrevState) {
                 mstrPrevState = mstrState;
 #if defined(UART_DEBUG)
-            printf("Master on est le debut de la journee \n");
+                printf("Master on est le debut de la journee \n");
 #endif
             }
             MASTER_StateMachineOfDaytime();
@@ -176,9 +220,10 @@ void MASTER_Task() {
             if (mstrState != mstrPrevState) {
                 mstrPrevState = mstrState;
 #if defined(UART_DEBUG)
-            printf("Master on est a la fin de la journee \n");
+                printf("Master on est a la fin de la journee \n");
 #endif  
             }
+            
             MASTER_GetLog();
             break;
             /* -------------------------------------------------------------- */
