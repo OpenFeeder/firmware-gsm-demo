@@ -74,6 +74,8 @@
 #define NB_ERR_BUF                   10 // nombre d'errerur possible 
 #define NB_DATA_BUF                  20 // pour l'instat on dit qye c'est 20 ==>
 #define MAX_W                        10 // nombre MAX de paquet a transmettre avant d'attendre un ack 
+#define NB_SLAVE                      2
+
 /*_____________________________________________________________________________*/
 
 

@@ -34,7 +34,8 @@
 typedef struct sSlave {
     int16_t idSlave;
     SLAVE_STATE state;
-    int8_t curseur; // le paquet attendu 
+    int8_t curseur; // le paquet attendu, tanq que je ne suis pas en fin de bloc
+    
 } Slave;
 
 
@@ -45,6 +46,12 @@ MSTR_STATE_GENERAL mstrState = MSTR_STATE_GENERAL_BEFOR_DAYTIME; //modifier par 
 MSTR_STATE_GENERAL mstrPrevState = MSTR_STATE_GENERAL_ERROR;     //pour les besoin des teste on simule cela avec des interuption 
 
 MSTR_STATE_GET_LOG mstrStateGetLog = MSTR_STATE_GET_LOG_SYNC; // init state synchro
+
+//TOASK : je pense utiliser Deux buffeurs pour pouvoir faire du pseudo
+//TOASK : paralleliseme, pendant que je recupère en RF je transmettrais en GSM
+uint8_t BUF1_DATA[NB_DATA_BUF][SIZE_DATA] = {{0}};
+uint8_t BUF2 _DATA[NB_DATA_BUF][SIZE_DATA] = {{0}};
+Slave ensSlave[NB_SLAVE];
 //______________________________________________________________________________
 
 void MASTER_SetMsgReceiveRF(uint8_t set) {
