@@ -69,7 +69,7 @@ typedef enum {
     MSTR_STATE_GET_LOG_COLLECT,         // on est en recuperation de donner 
     MSTR_STATE_GET_LOG_DESYNC,          // on est en fin de recuperation pour ce slave selectionne
     MSTR_STATE_GET_LOG_SEND_FROM_GSM,   // on transfere les donnees par gsm au srver       
-    MSTR_STATE_GET_LOG_ERROR            // une erreur est survenue 
+    MSTR_STATE_GET_LOG_ERROR            // une erreur est survenue/ timeout  
 }MSTR_STATE_GET_LOG;
 
 typedef enum {

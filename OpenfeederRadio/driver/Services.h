@@ -75,7 +75,8 @@
 #define NB_DATA_BUF                  20 // pour l'instat on dit qye c'est 20 ==>
 #define MAX_W                        10 // nombre MAX de paquet a transmettre avant d'attendre un ack 
 #define NB_SLAVE                      2
-
+#define MAX_TIMEOUT                  10 // nombre de timeout avant de decider que la liaison avec le slave est couper 
+#define MAX_TRY_TO_SYNC               5 // le nombre d'essaie avant de decider qu'on est pas connecte
 /*_____________________________________________________________________________*/
 
 
