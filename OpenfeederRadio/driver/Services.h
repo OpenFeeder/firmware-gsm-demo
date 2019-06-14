@@ -74,9 +74,19 @@
 #define NB_ERR_BUF                   10 // nombre d'errerur possible 
 #define NB_DATA_BUF                  20 // pour l'instat on dit qye c'est 20 ==>
 #define MAX_W                        10 // nombre MAX de paquet a transmettre avant d'attendre un ack 
-#define NB_SLAVE                      2
+#define NB_SLAVE                      1
 #define MAX_TIMEOUT                  10 // nombre de timeout avant de decider que la liaison avec le slave est couper 
 #define MAX_TRY_TO_SYNC               5 // le nombre d'essaie avant de decider qu'on est pas connecte
+
+// id and station 
+#define SLAVE1_ID 37
+#define SLAVE2_ID 36
+#define SLAVE3_ID 35
+#define SLAVE4_ID 33
+#define BROADCAST 1023
+
+#define MASTER_ID 34
+#define STATION 1
 /*_____________________________________________________________________________*/
 
 

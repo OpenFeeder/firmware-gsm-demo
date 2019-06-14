@@ -52,7 +52,7 @@ void test_tx() {
     uint8_t date_send[50];
     int8_t size_h = srv_create_paket_rf(date_send, paquet,
                                         srv_getBroadcast(), 
-                                        srv_getID_Master(), 
+                                        MASTER_ID, 
                                         srv_horloge(), '0');
     while (1) {
     }
@@ -88,7 +88,7 @@ void test_update_date_send() {
             serial_buffer(date, hf);
             int8_t size_h = srv_create_paket_rf(date_send,
                                                 date, srv_getBroadcast(), 
-                                                srv_getID_Master(), 
+                                                MASTER_ID, 
                                                 srv_horloge(), '0');
             if (radioAlphaTRX_SendMode()) {
                 radioAlphaTRX_SendData(date_send, size_h);

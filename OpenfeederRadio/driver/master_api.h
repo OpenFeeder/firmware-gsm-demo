@@ -55,27 +55,29 @@
 /***************************                ***********************************/
 /*****************                                 ****************************/
 
-/**------------------------>> E N U M - S T A T E  <<--------------------------*/
+/**------------------------>> E N U M & S T R U C T- S T A T E  <<-------------*/
 typedef enum {
     MSTR_STATE_GENERAL_BEFOR_DAYTIME,
     MSTR_STATE_GENERAL_DAYTIME,
     MSTR_STATE_GENERAL_AFTER_DAYTIME,
+    MSTR_STATE_GENERAL_END,
     MSTR_STATE_GENERAL_ERROR
 }MSTR_STATE_GENERAL;
 
 typedef enum {
-    MSTR_STATE_GET_LOG_IDLE,            // on attend une reponse de notre demande 
-    MSTR_STATE_GET_LOG_SYNC,            // on demande un slave selectionner de transmettre des donnees
-    MSTR_STATE_GET_LOG_COLLECT,         // on est en recuperation de donner 
-    MSTR_STATE_GET_LOG_DESYNC,          // on est en fin de recuperation pour ce slave selectionne
-    MSTR_STATE_GET_LOG_SEND_FROM_GSM,   // on transfere les donnees par gsm au srver       
-    MSTR_STATE_GET_LOG_ERROR            // une erreur est survenue/ timeout  
+    MSTR_STATE_GET_LOG_WAIT_EVENT,      // on attend une reponse de notre demande 
+    MSTR_STATE_GET_LOG_MSG_RECEIVE,     // on demande un slave selectionner de transmettre des donneesr 
+    MSTR_STATE_GET_LOG_SEND_FROM_GSM,   // on transmet les donne le buffer au srver
+    MSTR_STATE_GET_LOG_SELECT_SLAVE,    // on selectionne un slave pour communiquer avec 
+    MSTR_STATE_GET_LOG_ERROR            // une erreur est survenue/ timeout 
 }MSTR_STATE_GET_LOG;
 
 typedef enum {
     SLAVE_STATE_SELECTED,   // en cours d'interrogation 
     SLAVE_STATE_DESELCTED,  // n'est pas encours selectionne
     SLAVE_STATE_COLLECT_END,// si on a deja collecte ses donnees 
+    SLAVE_STATE_SYNC,       // si on est en phase de syncronisation 
+    SLAVE_STATE_COLLECT,    // si on est en phase de collecte
     SLAVE_STATE_ERROR       // si le slave est en error 
 }SLAVE_STATE;
 
@@ -86,6 +88,9 @@ typedef enum {
 // *****************************************************************************
 extern MSTR_STATE_GENERAL mstrState;
 extern MSTR_STATE_GET_LOG mstrStateGetLog;
+//extern volatile int8_t msgReceiveRF = 0;  // informe de l'arriver d'un msg rf 
+//extern volatile int8_t msgReceiveGSM = 0; // informe de l'arriver d'un msg GSM
+
 /**
  * envoie la date a tout les slaves present 
  * @return 
@@ -101,6 +106,9 @@ void MASTER_HandlerMsgRF();
 
 /**
  * 
+ * @return :
+ *         0 : pas de slave selctionne
+ *         1 : si un slave est selectionne
  */
 int8_t MASTER_SelectSlave();
 

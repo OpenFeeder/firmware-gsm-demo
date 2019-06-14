@@ -35,7 +35,8 @@
 int8_t TMR_CptTrickHorloge = 1000;
 volatile uint16_t TMR_HorlogeTimeout = 0; 
 
-volatile uint16_t TMR_WaitRqstTimeout = 0; //on s'en sert pour le poulling 
+// il a besoin d'etre activer 
+volatile uint16_t TMR_WaitRqstTimeout = -1; //on s'en sert pour le poulling 
 
 //TODO : penser rendre ?a generique
 volatile uint16_t TMR_MsgRecuTimeout = 0;  
