@@ -66,6 +66,11 @@ typedef enum
          
 } ACK_STATES;
 
+
+/*_____________________________________________________________________________*/
+
+void radioAlphaTRX_GetLogFromDisk();
+
 /**
  * envoie d'un msg en liaison radio. Attention !! l'envoie du msg est bloquant 
  * mais pour un certain nombre de milliesecondes (2ms par caractère au pire dans notre cas)  

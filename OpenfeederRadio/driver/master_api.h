@@ -91,6 +91,9 @@ extern MSTR_STATE_GET_LOG mstrStateGetLog;
 //extern volatile int8_t msgReceiveRF = 0;  // informe de l'arriver d'un msg rf 
 //extern volatile int8_t msgReceiveGSM = 0; // informe de l'arriver d'un msg GSM
 
+
+void MASTER_Init();
+
 /**
  * envoie la date a tout les slaves present 
  * @return 

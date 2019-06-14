@@ -46,6 +46,20 @@ int8_t nbBlock = 1;
 ACK_STATES lastSend = ACK_STATES_NOTHING;
 //______________________________________________________________________________
 
+
+void radioAlphaTRX_GetLogFromDisk() {
+    int8_t i;
+    for (i = 0; i < NB_DATA_BUF; i++) {
+        srv_cpy(BUF_DATA[i], "200119#132402#0700EE39BD0000100000#", SIZE_DATA);
+        BUF_DATA[i][36] = i;
+    }
+    printf("j'affiche le buffer\n");
+    for (i = 0; i < NB_DATA_BUF; i++) {
+        printf("%s\n", BUF_DATA[i]);
+    }
+
+}
+
 void radioAlphaTRX_SlaveSaveError(int8_t numError) { // vraiment a voir 
     LED_STATUS_R_Toggle();
     BUF_ERR[pWriteErrBuf] = numError;
@@ -122,11 +136,13 @@ void radioAlphaTRX_SlaveSendLog() {
         TMR_DelayMs(LAPS); // on attends avant de retransmettre un autre msg 
         radioAlphaTRX_SlaveSendMsgRF(srv_data(), BUF_DATA[i + curseur - 1], i + curseur);
         i++;
+        LED_STATUS_R_Toggle();
     }
     ack_attedue = i + curseur;
     lastSend = ACK_STATES_DATA;
     appData.state = APP_STATE_IDLE; // on rend la main et on attends un ack 
     radioAlphaTRX_ReceivedMode(); // on se met en mode reception 
+    
 }
 
 void radioAlphaTRX_SlaveUpdateSendLogParam(uint8_t numSeq) {
@@ -138,6 +154,9 @@ void radioAlphaTRX_SlaveUpdateSendLogParam(uint8_t numSeq) {
         // il serait interressent de faire des statistique du nombre d'echec constate
     }
     if (curseur - 1 == NB_DATA_BUF) {
+#if defined(UART_DEBUG)
+        printf("SEND END BLOCK\n");
+#endif
         appData.state = APP_STATE_RADIO_SEND_END_BLOCK; // on demande l'envoie d'un msg de fin de block
         nbBlock++;
     } else {

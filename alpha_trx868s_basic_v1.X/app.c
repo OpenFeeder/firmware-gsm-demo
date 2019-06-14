@@ -56,6 +56,16 @@
 
 APP_DATA appData; /* Global application data. */
 
+volatile int8_t msgReceive = 0;
+
+int8_t APP_isMsgReceive() {
+    return msgReceive;
+}
+
+void APP_setMsgReceive(int8_t set) {
+    msgReceive = 1;
+}
+
 /******************************************************************************
   Function:
     void APP_Tasks( void )
@@ -85,6 +95,7 @@ void APP_Tasks(void) {
                     printf("RF Module enable.\n");
                     radioAlphaTRX_Init();
                     radioAlphaTRX_ReceivedMode(); // receive mode actived
+                    radioAlphaTRX_GetLogFromDisk();
                 } else {
                     printf("RF Module disable.\n");
                     printf("Send 'T' to change power state of radio module.\n");
@@ -121,12 +132,15 @@ void APP_Tasks(void) {
                 TMR_SetTimeout(30000); // 10s
             }
 #endif      
-
+            if (APP_isMsgReceive() == 1) {
+                APP_setMsgReceive(0);
+                appData.state = APP_STATE_RADIO_RECEIVED;
+            } else {
 #if defined (USE_UART1_SERIAL_INTERFACE)
-            /* Get interaction with the serial terminal. */
-            APP_SerialDebugTasks();
+                /* Get interaction with the serial terminal. */
+                APP_SerialDebugTasks();
 #endif
-            
+            }
             break;
             /* -------------------------------------------------------------- */
 

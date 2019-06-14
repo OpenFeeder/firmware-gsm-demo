@@ -258,6 +258,8 @@ void APP_Initialize( void );
 void APP_Tasks( void );
 
 
+// juste fo the test 
+void APP_setMsgReceive(int8_t set); 
 #endif /* _APP_H */
 
 /*******************************************************************************
