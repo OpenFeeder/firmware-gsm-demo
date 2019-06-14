@@ -63,7 +63,7 @@ int8_t APP_isMsgReceive() {
 }
 
 void APP_setMsgReceive(int8_t set) {
-    msgReceive = 1;
+    msgReceive = set;
 }
 
 /******************************************************************************
