@@ -63,13 +63,13 @@
  *         0 : transmettre l'horloge
  *         !0 : on fait rien   
  */
-uint16_t TMR_GetHorlogeTimeout();
+int16_t TMR_GetHorlogeTimeout();
 
 /**
  * determine combirne de minute il faut attendre avant de transmettre la date
  * @param timeout : le temps qu'il faut attendre avant de transmettre l'horloge 
  */
-void TMR_SetHorlogeTimeout(uint16_t timeout_min);
+void TMR_SetHorlogeTimeout(int16_t timeout_min);
 
 /**
  * tant que cette fonction me retourne une valeure differente de 0 
@@ -79,27 +79,28 @@ void TMR_SetHorlogeTimeout(uint16_t timeout_min);
  *      0 : timeout : le slave n'a pas eu le temps de me repondre 
  *      si non > 0 
  */
-uint16_t TMR_GetWaitRqstTimeout(); //on s'en sert pour le poulling
+int16_t TMR_GetWaitRqstTimeout(); //on s'en sert pour le poulling
 /**
  * le temps d'attente d'une reponse suite ? une demande d'information
  * il est declanche a chaque fois que je demande une information a un slave 
  * 
  * @param timeout : le temps que le master s'autorise a attendre une reonse 
  */
-void TMR_SetWaitRqstTimeout(uint16_t timeout);
+void TMR_SetWaitRqstTimeout(int16_t timeout);
 
 /**
  * permet de savoir combient de temps (en ms) le buffer i est remplie 
  * @return : le temps ecoule en (ms) depuis le dernier remplissage du buffer 
  */
-uint16_t TMR_GetMsgRecuTimeout();
+int16_t TMR_GetMsgRecuTimeout();
+
 /**
  * determine le temps max pour prendre en compte un msg de type horloge,
  * au dela le paquet n'est pas utilisable 
  * 
  * @param timeout : 
  */
-void TMR_SetMsgRecuTimeout(uint16_t timeout);
+void TMR_SetMsgRecuTimeout(int16_t timeout);
 
 /**
  * 
@@ -107,7 +108,7 @@ void TMR_SetMsgRecuTimeout(uint16_t timeout);
  *      0 : timeout ==> Le Nirq n'est pas passe a l'etat bas et le temps est fini
  *      1 : si non 
  */
-uint16_t TMR_GetnIRQLowTimeout();
+int16_t TMR_GetnIRQLowTimeout();
 
 /**
  * 
@@ -120,14 +121,14 @@ void TMR_SetnIRQLowTimeout(int16_t timeout);
  * 
  * @param timeout 
  */
-void TMR_SetTimeout(uint16_t timeout);
+void TMR_SetTimeout(int16_t timeout);
 /**
  * 
  * @return :
  *      0 : timeout
  *      1 : si non  
  */
-uint16_t TMR_GetTimeout();
+int16_t TMR_GetTimeout();
 
 /**
  * 

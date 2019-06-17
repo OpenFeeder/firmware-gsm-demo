@@ -150,6 +150,7 @@ void extractInfos(uint8_t* paquet, int *j, uint8_t* out, int count) {
 
 int8_t srv_decode_packet_rf(uint8_t* paquet, Frame *pPaquetRecu, uint8_t size,
                             uint16_t idOF) {
+
     uint8_t s = 10; // permet de concatener les adresses 
     int j = 0;
     //on recup?re id dest pour verifier si c'est egale au notre==> c'est le slave 1
@@ -178,9 +179,7 @@ int8_t srv_decode_packet_rf(uint8_t* paquet, Frame *pPaquetRecu, uint8_t size,
     extractInfos(paquet, &j, pPaquetRecu->nonUtiliser, 2);
     //j = j + 3; //on saute les 2 oct non utiliser
     //data
-    if (size - j - 1 < )
     extractInfos(paquet, &j, pPaquetRecu->data, size - j - 1); //le -1 c'est pour ne pas recup?rer le crc
-
     return j;
 }
 

@@ -33,43 +33,43 @@
 
 /**-------------------------->> V A R I A B L E S <<---------------------------*/
 int8_t TMR_CptTrickHorloge = 1000;
-volatile uint16_t TMR_HorlogeTimeout = 0; 
+volatile int16_t TMR_HorlogeTimeout = 0; 
 
-volatile uint16_t TMR_WaitRqstTimeout = -1; //on s'en sert pour le poulling 
+volatile int16_t TMR_WaitRqstTimeout = -1; //on s'en sert pour le poulling 
 
 //TODO : penser rendre ça generique
-volatile uint16_t TMR_MsgRecuTimeout = 0;  
+volatile int16_t TMR_MsgRecuTimeout = 0;  
 
-volatile uint16_t TMR_nIRQLowTimeout = 0;
+volatile int16_t TMR_nIRQLowTimeout = 0;
 
-volatile uint16_t TMR_Timeout = 0;
+volatile int16_t TMR_Timeout = 0;
 
-volatile uint16_t TMR_DelayMs = 0;
+volatile int16_t TMR_DelayMs = 0;
 /*_____________________________________________________________________________*/
 
 /**-------------------------->> D E F I N I T I O N <<-------------------------*/
 
-uint16_t TMR_GetHorlogeTimeout() { return TMR_HorlogeTimeout; } 
-void TMR_SetHorlogeTimeout(uint16_t timeout) { 
+int16_t TMR_GetHorlogeTimeout() { return TMR_HorlogeTimeout; } 
+void TMR_SetHorlogeTimeout(int16_t timeout) { 
     TMR_HorlogeTimeout = timeout; 
 } 
 
 
-uint16_t TMR_GetWaitRqstTimeout() { return TMR_WaitRqstTimeout; } //on s'en sert pour le poulling 
-void TMR_SetWaitRqstTimeout(uint16_t set) { TMR_WaitRqstTimeout = set; }
+int16_t TMR_GetWaitRqstTimeout() { return TMR_WaitRqstTimeout; } //on s'en sert pour le poulling 
+void TMR_SetWaitRqstTimeout(int16_t set) { TMR_WaitRqstTimeout = set; }
 
-uint16_t TMR_GetMsgRecuTimeout() { 
+int16_t TMR_GetMsgRecuTimeout() { 
     int16_t temp = TMR_MsgRecuTimeout;
     TMR_MsgRecuTimeout = 0;
     return temp; 
 } 
-void TMR_SetMsgRecuTimeout(uint16_t timeout) { TMR_MsgRecuTimeout = timeout; }
+void TMR_SetMsgRecuTimeout(int16_t timeout) { TMR_MsgRecuTimeout = timeout; }
 
-uint16_t TMR_GetnIRQLowTimeout() { return TMR_nIRQLowTimeout; }
+int16_t TMR_GetnIRQLowTimeout() { return TMR_nIRQLowTimeout; }
 void TMR_SetnIRQLowTimeout(int16_t timeout) { TMR_nIRQLowTimeout = timeout; }
 
-void TMR_SetTimeout(uint16_t timeout) { TMR_Timeout = timeout; }
-uint16_t TMR_GetTimeout() { return TMR_Timeout; }
+void TMR_SetTimeout(int16_t timeout) { TMR_Timeout = timeout; }
+int16_t TMR_GetTimeout() { return TMR_Timeout; }
 
 void TMR_Delay(uint16_t delayMs) {
     TMR_DelayMs = delayMs;
@@ -77,20 +77,18 @@ void TMR_Delay(uint16_t delayMs) {
 }
 void TMR_CallBack( void ) {
     
-    if (TMR_DelayMs) --TMR_DelayMs;
+    if (TMR_DelayMs > 0) --TMR_DelayMs;
     
-    if (TMR_Timeout) --TMR_Timeout;
+    if (TMR_Timeout > 0) --TMR_Timeout;
     
     //nIRQ timeout
-    if (TMR_nIRQLowTimeout) --TMR_nIRQLowTimeout;
+    if (TMR_nIRQLowTimeout > 0) --TMR_nIRQLowTimeout;
 
     //dis si une reponse est recu ou pas 
-    if (TMR_WaitRqstTimeout) --TMR_WaitRqstTimeout;
-    
-    if (TMR_HorlogeTimeout) --TMR_HorlogeTimeout; // on ferra autrement 
+    if (TMR_WaitRqstTimeout > 0) --TMR_WaitRqstTimeout;
 
     //timer du buffer 
-    if (TMR_MsgRecuTimeout) --TMR_MsgRecuTimeout;
+    if (TMR_MsgRecuTimeout > 0) --TMR_MsgRecuTimeout;
 }
 
 /*_____________________________________________________________________________*/

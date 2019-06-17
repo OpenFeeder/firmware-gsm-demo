@@ -241,6 +241,7 @@ void radioAlphaTRX_SlaveHundlerMsgReceived() {
 #endif
         appData.state = APP_STATE_IDLE; // etat endormie 
     }
+    
 }
 
 /****************                                         *********************/
