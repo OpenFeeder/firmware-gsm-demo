@@ -123,10 +123,7 @@ void radioAlphaTRX_SlaveUpdateDate(uint8_t* date, int16_t derive) {
 
 void radioAlphaTRX_SlaveSendLog() {
     int8_t i = 0;
-#if defined(UART_DEBUG)
-    printf("w = %d, cur = %d, ack attendu %d\n", windows, curseur, ack_attedue);
-#endif
-    while (i < windows && curseur < NB_DATA_BUF) {
+    while (i < windows && (i+curseur-1) < NB_DATA_BUF) {
 #if defined(UART_DEBUG)
     printf("w = %d, cur = %d, ack attendu %d\n", windows, curseur+i-1, ack_attedue);
 #endif
@@ -157,9 +154,9 @@ void radioAlphaTRX_SlaveUpdateSendLogParam(uint8_t numSeq) {
         // il serait interressent de faire des statistique du nombre d'echec constate
     }
     TMR_GetWaitRqstTimeout(-1); // je le desactive 
-    if (curseur - 1 >= NB_DATA_BUF) {
+    if (curseur >= NB_DATA_BUF) {
 #if defined(UART_DEBUG)
-        printf("SEND END BLOCK  cur %d vs %d \n", curseur, NB_DATA_BUF);
+        printf("SEND END BLOCK  cur %d vs %d  \n", curseur, NB_DATA_BUF);
 #endif
         appData.state = APP_STATE_RADIO_SEND_END_BLOCK; // on demande l'envoie d'un msg de fin de block
         nbBlock++;

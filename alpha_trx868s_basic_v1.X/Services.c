@@ -178,6 +178,7 @@ int8_t srv_decode_packet_rf(uint8_t* paquet, Frame *pPaquetRecu, uint8_t size,
     extractInfos(paquet, &j, pPaquetRecu->nonUtiliser, 2);
     //j = j + 3; //on saute les 2 oct non utiliser
     //data
+    if (size - j - 1 < )
     extractInfos(paquet, &j, pPaquetRecu->data, size - j - 1); //le -1 c'est pour ne pas recup?rer le crc
 
     return j;
