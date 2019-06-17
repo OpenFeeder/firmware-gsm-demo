@@ -713,13 +713,13 @@ int8_t radioAlphaTRX_IsSendMode();
  * <pres condition : receive_msg == 1 > avant l'apelle de cette fonction 
  * @return : le contenue du buffer
  */
-int8_t * radioAlphaTRX_ReadBuf();
+uint8_t * radioAlphaTRX_ReadBuf();
 
 /**
  * 
  * @return : la taille du buffer indice
  */
-int8_t radioAlphaTRX_GetSizeBuf();
+uint8_t radioAlphaTRX_GetSizeBuf();
 
 
 /****************                                         *********************/

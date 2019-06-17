@@ -66,7 +66,7 @@ int8_t slaveSlected; // l'of en cours d'interogation
 void MASTER_Init() {
     int8_t i;
     for (i = 0; i < NB_SLAVE; i++) {
-        ensSlave[i].curseur = 0;
+        ensSlave[i].curseur = 1;
         ensSlave[i].nbBlocs = 0;
         ensSlave[i].nbTimeout = MAX_TIMEOUT;
         ensSlave[i].state = SLAVE_STATE_DESELCTED;
@@ -139,6 +139,11 @@ int8_t MASTER_SendDateRF() {
 void MASTER_HandlerMsgRF() {
     Frame dataReceive;
     int8_t sizeData;
+
+#if defined(UART_DEBUG)
+                printf("RF MSG RECEIVE %d\n", 
+                       ensSlave[slaveSlected].idSlave);
+#endif
     if ((sizeData = srv_decode_packet_rf(radioAlphaTRX_ReadBuf(),
                                          &dataReceive,
                                          radioAlphaTRX_GetSizeBuf(),
@@ -163,23 +168,51 @@ void MASTER_HandlerMsgRF() {
             printf("Le slave [%d] n'a rien a transmettre\n", dataReceive.ID_Src);
 #endif
         } else if (dataReceive.Type_Msg == srv_data()) {
+
+#if defined(UART_DEBUG)
+                printf("DATA RECEIVE\n");
+#endif
+#if defined(UART_DEBUG)
+                printf("recu %d vs %d attendu\n", dataReceive.ID_Msg, ensSlave[slaveSlected].curseur);
+#endif
             if (dataReceive.ID_Msg == ensSlave[slaveSlected].curseur) { // si c'est la donnee attendu 
-                srv_cpy(BUF_DATA[ensSlave[slaveSlected].curseur++], dataReceive.data, sizeData); // on recupere la donnee
+                strncpy(BUF_DATA[ensSlave[slaveSlected].curseur-1], dataReceive.data, sizeData);
+//                srv_cpy(BUF_DATA[ensSlave[slaveSlected].curseur-1], dataReceive.data, sizeData); // on recupere la donnee
+                ensSlave[slaveSlected].curseur +=1;
+
                 //on change d'etat si c'est le premier paquet attendu 
                 if (ensSlave[slaveSlected].state == SLAVE_STATE_SYNC) {
+#if defined(UART_DEBUG)
+                    printf("Slave %d connect\n", ensSlave[slaveSlected].idSlave);
+#endif
                     ensSlave[slaveSlected].tryToConnect = MAX_TRY_TO_SYNC; // on reset le nombre de demande de connxion 
+                    ensSlave[slaveSlected].state = SLAVE_STATE_COLLECT; //changement d'etat
                 } else
                     ensSlave[slaveSlected].nbTimeout = MAX_TIMEOUT;
+#if defined(UART_DEBUG)
+                printf("MSG RECIVE ==> WAIT EVENT\n");
+#endif
                 TMR_SetHorlogeTimeout(SEND_HORLOG_TIMEOUT); // on demarre le timeout  
                 mstrStateGetLog = MSTR_STATE_GET_LOG_WAIT_EVENT;
             } else {
                 mstrStateGetLog = MSTR_STATE_GET_LOG_ERROR;
             }
         } else if (dataReceive.Type_Msg == srv_end_block()) {
+#if defined(UART_DEBUG)
+                printf("MSG RECIVE ==> SEND GSM\n");
+#endif
             mstrStateGetLog = MSTR_STATE_GET_LOG_SEND_FROM_GSM;
         } else if (dataReceive.Type_Msg == srv_end_trans()) {
+#if defined(UART_DEBUG)
+                printf("MSG RECIVE ==> SEND GSM\n");
+#endif
             mstrStateGetLog = MSTR_STATE_GET_LOG_SEND_FROM_GSM; //pour l'instant 
         }
+    }else {
+#if defined(UART_DEBUG)
+        printf("Le msg n'est pas bon\n");
+#endif
+        mstrStateGetLog = MSTR_STATE_GET_LOG_ERROR;
     }
 }
 
@@ -214,17 +247,28 @@ void MASTER_HundlerError() {
     //time out pour l'instant on ne traite que ca 
     switch (ensSlave[slaveSlected].state) {
         case SLAVE_STATE_SYNC:
+#if defined(UART_DEBUG)
+            printf("hundler error phase de synchro\n");
+#endif
             if (--ensSlave[slaveSlected].tryToConnect) {
 #if defined(UART_DEBUG)
-            printf("tryToConnect\n");
+                printf("tryToConnect\n");
 #endif
                 Master_SendMsgRF(ensSlave[slaveSlected].idSlave,
                                  srv_data(),
                                  (uint8_t *) ("DATA"), 1); // demande de data 
                 TMR_SetWaitRqstTimeout(TIME_OUT_WAIT_RQST);
                 //j'attends à nouveau un evenement 
+#if defined(UART_DEBUG)
+                printf("ERROR ==> WAIT EVENT %d\n", 
+                       ensSlave[slaveSlected].idSlave);
+#endif
                 mstrStateGetLog = MSTR_STATE_GET_LOG_WAIT_EVENT;
             } else { // on ne peut pas se connecter à ce slave 
+#if defined(UART_DEBUG)
+                printf("hundler slave %d error\n ERROR ==> SELECT SLAVE\n", 
+                       ensSlave[slaveSlected].idSlave);
+#endif
                 ensSlave[slaveSlected].state = SLAVE_STATE_ERROR;
                 mstrStateGetLog = MSTR_STATE_GET_LOG_SELECT_SLAVE; // oui car je n'ai rien recupere 
             }
@@ -232,21 +276,39 @@ void MASTER_HundlerError() {
             /*-----------------------------------------------------------------*/
         case SLAVE_STATE_COLLECT:
 #if defined(UART_DEBUG)
-            printf("phase de collect\n");
+            printf("hundler error phase de collect\n");
 #endif
             if (--ensSlave[slaveSlected].nbTimeout) {
+#if defined(UART_DEBUG)
+                printf("envoit d'ack \n");
+#endif
                 Master_SendMsgRF(ensSlave[slaveSlected].idSlave, srv_ack(),
                                  (uint8_t *) ("ACK"),
                                  ensSlave[slaveSlected].curseur); // demande du paquet attendu 
                 TMR_SetWaitRqstTimeout(TIME_OUT_WAIT_RQST);
                 //j'attends à nouveau un evenement 
+#if defined(UART_DEBUG)
+                printf("ERROR ==> WAIT EVENT %d\n", 
+                       ensSlave[slaveSlected].idSlave);
+#endif
                 mstrStateGetLog = MSTR_STATE_GET_LOG_WAIT_EVENT;
             } else { // on une interuption dans la collect
+#if defined(UART_DEBUG)
+                printf("ERROR ==> SEND GSM %d\n", 
+                       ensSlave[slaveSlected].idSlave);
+#endif
                 ensSlave[slaveSlected].state = SLAVE_STATE_ERROR;
                 mstrStateGetLog = MSTR_STATE_GET_LOG_SEND_FROM_GSM; // on transmet le peut qu'on a recu 
             }
             break;
             /*-----------------------------------------------------------------*/
+        default:
+#if defined(UART_DEBUG)
+                printf("ERROR ==> SEND GSM %d\n", 
+                       ensSlave[slaveSlected].idSlave);
+#endif    
+            mstrStateGetLog = MSTR_STATE_GET_LOG_SEND_FROM_GSM;
+            break;
     }
 
 }
@@ -258,11 +320,12 @@ void MASTER_GetLog() { // ces etats sont consideres comme des phases
             if (MASTER_SelectSlave()) {
                 mstrStateGetLog = MSTR_STATE_GET_LOG_WAIT_EVENT;
 #if defined(UART_DEBUG)
+                printf("Slave selec %d\n", ensSlave[slaveSlected].idSlave);
                 printf("GO to Wait Event\n");
 #endif
             } else {
 #if defined(UART_DEBUG)
-                printf("MASTER END\n");
+                printf("Aucun slave a selectionner \nMASTER END\n");
 #endif
                 mstrState = MSTR_STATE_GENERAL_END;
             }
@@ -271,10 +334,13 @@ void MASTER_GetLog() { // ces etats sont consideres comme des phases
         case MSTR_STATE_GET_LOG_WAIT_EVENT:
             //TODO : select the slave to collect log 
             if ((msgReceiveRF + msgReceiveGSM) > 0) { // > 0 ==> msg recive, but we don't know what type of msg 
+#if defined(UART_DEBUG)
+                printf("WAIT EVENT ==> MSG_RECEVE\n");
+#endif
                 mstrStateGetLog = MSTR_STATE_GET_LOG_MSG_RECEIVE;
             } else if (!TMR_GetWaitRqstTimeout()) { // time out  aucun msg n'est recu 
 #if defined(UART_DEBUG)
-                printf("GO ERROR STATE\n");
+                printf("WAIT EVENT ==> ERROR \n");
 #endif
                 mstrStateGetLog = MSTR_STATE_GET_LOG_ERROR; // we have a timeout 
             }
@@ -285,8 +351,8 @@ void MASTER_GetLog() { // ces etats sont consideres comme des phases
             break;
             /*-----------------------------------------------------------------*/
         case MSTR_STATE_GET_LOG_MSG_RECEIVE:
+
             if (msgReceiveRF) {
-                msgReceiveRF = 0; // reset msgReceive
                 MASTER_HandlerMsgRF();
             } else if (msgReceiveGSM) {
                 msgReceiveGSM = 0;
@@ -296,9 +362,9 @@ void MASTER_GetLog() { // ces etats sont consideres comme des phases
             break;
             /*-----------------------------------------------------------------*/
         case MSTR_STATE_GET_LOG_SEND_FROM_GSM:
-            printf("Je transfere au serveur les donnee du slave %d\n", ensSlave[slaveSlected].idSlave);
+            printf("Je transfere au serveur les donnee %d\n", ensSlave[slaveSlected].curseur-1);
             int8_t i = 0;
-            for (; i < ensSlave[slaveSlected].curseur; i++) {
+            for (; i < ensSlave[slaveSlected].curseur-1; i++) {
                 printf("recu : %d << %s >>\n", i, BUF_DATA[i]);
             }
             ensSlave[slaveSlected].state = SLAVE_STATE_COLLECT_END; // pour les test on ne demande qu'un bloc

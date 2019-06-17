@@ -8,7 +8,7 @@
 
 #include "xc.h"
 #include "Services.h"
-
+#include <string.h>
 #define MAX_T_OUT 500 // 5 secondes
 #define MIN_T_OUT 5 // 50 ms
 const int8_t W_MAX = 20;
@@ -139,7 +139,7 @@ int8_t srv_create_paket_rf(uint8_t paquet[], uint8_t data[],
     uint8_t sum_ctl = srv_checksum(paquet, i);
     paquet[j++] = sum_ctl;
     paquet[j] = '\0'; // fin de chaine 
-    //    printf("paquet == %d\n", paquet[0]);
+    
     return j; // j = taille du taquet g?n?r? 
 }
 
@@ -152,7 +152,7 @@ void extractInfos(uint8_t* paquet, int *j, uint8_t* out, int count) {
     out[i] = '\0';
 }
 
-int8_t srv_decode_packet_rf(uint8_t* paquet, Frame *pPaquetRecu, int size,
+int8_t srv_decode_packet_rf(uint8_t* paquet, Frame *pPaquetRecu, uint8_t size,
                             uint16_t idOF) {
     uint8_t s = 10; // permet de concatener les adresses 
     int j = 0;

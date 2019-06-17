@@ -156,7 +156,7 @@ void radioAlphaTRX_SlaveAckHundler(Frame msgReceive);
 /**
  * determine l'action a effectue quand un msg est recu 
  */
-void radioAlphaTRX_SlaveBehaviourWhenMsgReceived();
+void radioAlphaTRX_SlaveHundlerMsgReceived();
 
 
 /****************                                         *********************/

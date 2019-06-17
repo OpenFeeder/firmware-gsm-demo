@@ -75,8 +75,8 @@
 #define NB_DATA_BUF                  20 // pour l'instat on dit qye c'est 20 ==>
 #define MAX_W                        10 // nombre MAX de paquet a transmettre avant d'attendre un ack 
 #define NB_SLAVE                      1
-#define MAX_TIMEOUT                  10 // nombre de timeout avant de decider que la liaison avec le slave est couper 
-#define MAX_TRY_TO_SYNC               5 // le nombre d'essaie avant de decider qu'on est pas connecte
+#define MAX_TIMEOUT                  20 // nombre de timeout avant de decider que la liaison avec le slave est couper 
+#define MAX_TRY_TO_SYNC              20 // le nombre d'essaie avant de decider qu'on est pas connecte
 
 // id and station 
 #define SLAVE1_ID 37
@@ -246,7 +246,7 @@ int8_t srv_create_paket_rf(uint8_t paquet[], uint8_t data[],
  * @param idOF : l'identifiant de l'of qui vient de recevoir le paquet
  * @return la taille du paquet c'est un bon paquet, 0 si non 
  */
-int8_t srv_decode_packet_rf(uint8_t* paquet, Frame *pPaquetRecu, int size, 
+int8_t srv_decode_packet_rf(uint8_t* paquet, Frame *pPaquetRecu, uint8_t size, 
         uint16_t idOF);
 
 /**

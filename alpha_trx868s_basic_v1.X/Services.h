@@ -65,12 +65,22 @@
 #define ERROR_LENGTH                  8
 #define SIZE_DATA                    40
 #define TIME_OUT_nIRQ                 2 // 2ms
-#define LAPS                          5 // on attend X ms avant de transmettre un nouveau msg 
+#define LAPS                        100 // on attend X ms avant de transmettre un nouveau msg 
 #define TIME_OUT_GET_FRAME         1500 // temps max, pour que le msg recu soit encore exploitable
                                         // au dela le mster ne m'ecoute pas donc cela ne sert à rien 
+#define TIME_OUT_WAIT_ACK           500
 #define NB_ERR_BUF                   10 // nombre d'errerur possible 
 #define NB_DATA_BUF                  20 // pour l'instat on dit qye c'est 20 ==>
-#define MAX_W                        10 // nombre MAX de paquet a transmettre avant d'attendre un ack 
+#define MAX_W                        10 // nombre MAX de paquet a transmettre avant d'attendre un ack
+
+/*******************************************************************************/
+//_______________________________IF__OF________________________________________*/
+#define SLAVE_ID 37
+#define MASTER_ID 34
+#define ID_BROADCAST 1023
+uint16_t  srv_getID_Slave();
+uint16_t  srv_getBroadcast();
+uint16_t  srv_getID_Master();
 /*_____________________________________________________________________________*/
 
 
@@ -130,12 +140,6 @@ uint8_t srv_end_block();
 uint8_t srv_config();
 uint8_t srv_nothing();
 /*____________________________________________________________________________*/
-
-/**------------------------>> I D-- O F <<-------------------------------------*/
-uint16_t  srv_getID_Slave();
-uint16_t  srv_getBroadcast();
-uint16_t  srv_getID_Master();
-/*_____________________________________________________________________________*/
 
 
 /******************************************************************************/
@@ -199,7 +203,7 @@ int8_t srv_cmp(const uint8_t *ch1, const uint8_t *ch2);
  * @param size : la taille de la chaie 
  * @return : 1 ok : 0 ko
  */
-int8_t srv_cpy(uint8_t *dest, uint8_t *src, int size);
+uint8_t srv_cpy(uint8_t *dest, uint8_t *src, uint8_t size);
 
 /**
  * genere un paquet a partir des infos fournis
@@ -224,7 +228,7 @@ int8_t srv_create_paket_rf(uint8_t paquet[], uint8_t data[],
  * @param idOF : l'identifiant de l'of qui vient de recevoir le paquet
  * @return la taille du paquet c'est un bon paquet, 0 si non 
  */
-int8_t srv_decode_packet_rf(uint8_t* paquet, Frame *pPaquetRecu, int size, 
+int8_t srv_decode_packet_rf(uint8_t* paquet, Frame *pPaquetRecu, uint8_t size, 
         uint16_t idOF);
 
 /**

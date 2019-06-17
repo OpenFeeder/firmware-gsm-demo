@@ -8,12 +8,8 @@
 
 #include "xc.h"
 #include "Services.h"
-
-#define MAX_T_OUT 500 // 5 secondes
-#define MIN_T_OUT 5 // 50 ms
-const int8_t W_MAX = 20;
-// pour les teste je le change manuellement mais apres ce sera automatique
-int8_t moment; // 0 avant le reveille des oiseaux, 1 la journee, 2 le soir
+#include "led_status.h"
+#include <string.h>
 
 /******************************************************************************/
 /******************************************************************************/
@@ -99,9 +95,9 @@ int8_t service_cmp(const uint8_t *ch1, const uint8_t *ch2) {
     return 1;
 }
 
-int8_t srv_cpy(uint8_t *dest, uint8_t *src, int size) {
-    int i = 0;
-    int t = srv_len(src);
+uint8_t srv_cpy(uint8_t *dest, uint8_t *src, uint8_t size) {
+    uint8_t i = 0;
+    uint8_t t = srv_len(src);
     if (size < t)
         return 0;
     while (i < t) {
@@ -152,7 +148,7 @@ void extractInfos(uint8_t* paquet, int *j, uint8_t* out, int count) {
     out[i] = '\0';
 }
 
-int8_t srv_decode_packet_rf(uint8_t* paquet, Frame *pPaquetRecu, int size,
+int8_t srv_decode_packet_rf(uint8_t* paquet, Frame *pPaquetRecu, uint8_t size,
                             uint16_t idOF) {
     uint8_t s = 10; // permet de concatener les adresses 
     int j = 0;
@@ -161,15 +157,15 @@ int8_t srv_decode_packet_rf(uint8_t* paquet, Frame *pPaquetRecu, int size,
     j += 2;
     //    printf("%d\n", pPaquetRecu->ID_Dest);
     //teste si le paquet m'est destin?
-    if (pPaquetRecu->ID_Dest != idOF && pPaquetRecu->ID_Dest != srv_getBroadcast()) // ?a veut dire pas les meme 
+    if (pPaquetRecu->ID_Dest != idOF && pPaquetRecu->ID_Dest != ID_BROADCAST) // ?a veut dire pas les meme 
         return 0; // le paquet n'est pas ? moi
-
+    
     //la premi?re chose qu'on recup?re c'est le crc
-    uint8_t sum_ctl = paquet[size - 1];
+    uint8_t sum_ctl = paquet[size-1];
     if (srv_test_cheksum(paquet, size - 1, sum_ctl) == 0) {
         return 0; // on retourn 0 dans ce cas precis 
     }
-
+    
     //on recup?re le type de paquet
     pPaquetRecu->Type_Msg = paquet[j++];
 

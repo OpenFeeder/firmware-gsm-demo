@@ -129,11 +129,11 @@ void APP_Tasks(void) {
             RTCC_TimeGet(&t);
             if (!TMR_GetTimeout()) {
                 printf("heur slave ==> %dh:%dmin:%ds\n", t.tm_hour, t.tm_min, t.tm_sec);
-                TMR_SetTimeout(30000); // 10s
+                TMR_SetTimeout(30000); // 30s
             }
 #endif      
             if (APP_isMsgReceive() == 1) {
-                APP_setMsgReceive(0);
+                APP_setMsgReceive(0); // on effce le flag 
                 appData.state = APP_STATE_RADIO_RECEIVED;
             } else {
 #if defined (USE_UART1_SERIAL_INTERFACE)
@@ -151,7 +151,7 @@ void APP_Tasks(void) {
 #endif
                 appData.previous_state = appData.state;
             }
-            radioAlphaTRX_SlaveBehaviourWhenMsgReceived();
+            radioAlphaTRX_SlaveHundlerMsgReceived();
             break;
             /* -------------------------------------------------------------- */
         case APP_STATE_RADIO_SEND_DATA:
