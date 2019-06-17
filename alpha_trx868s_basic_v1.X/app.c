@@ -109,6 +109,7 @@ void APP_Tasks(void) {
             /* -------------------------------------------------------------- */
 
         case APP_STATE_IDLE:
+            //NewFunction();
             /**
              * Application idle state.
              *  - waiting for a event during a timeout period
@@ -119,6 +120,7 @@ void APP_Tasks(void) {
             if (appData.state != appData.previous_state) {
                 appData.previous_state = appData.state;
 #if defined (USE_UART1_SERIAL_INTERFACE) && defined (DISPLAY_CURRENT_STATE)
+                
                 printf("> APP_STATE_IDLE\n");
 #endif
             }

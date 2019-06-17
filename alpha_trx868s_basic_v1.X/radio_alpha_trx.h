@@ -683,8 +683,8 @@ int8_t radioAlphaTRX_SendData(uint8_t* bytes, int8_t size);
 /**
  * 
  * @param timeout : le nombre de fois qu'il faut attendre le nIRQ en cas de non reponse
- * @return : 
- *         1 : on n a pas depasse le delais imposer pour l'attente
+ * @return <br />
+ *         1 : on n a pas depasse le delais imposer pour l'attente <br />
  *         0 : sinon  
  */
 int8_t radioAlphaTRX_WaitLownIRQ(int timeout);
@@ -703,6 +703,7 @@ void radioAlphaTRX_CaptureFrame();
  * @param mode_rf
  */
 void radioAlphaTRX_SetSendMode(int8_t modeRF);
+
 /**
  * 
  * @return 

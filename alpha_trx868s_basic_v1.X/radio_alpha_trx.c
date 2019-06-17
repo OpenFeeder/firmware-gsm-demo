@@ -169,9 +169,11 @@ int8_t radioAlphaTRX_SendMode(void) {
     //#if defined(UART_DEBUG)
     //    printf( "status: 0x%04X\r\n", RF_ConfigSet.Val);
     //#endif
-    radioAlphaTRX_SetSendMode(1); // on est en mode transmission 
+    radioAlphaTRX_SetSendMode(1); // on est en mode transmission
+    
     return radioAlphaTRX_WaitLownIRQ(SEND_TIME_OUT); // arbitraire 
 }
+
 
 // Transmission d'une donnee par le module RF
 

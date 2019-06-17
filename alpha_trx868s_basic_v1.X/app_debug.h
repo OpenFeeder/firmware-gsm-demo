@@ -40,8 +40,29 @@ extern uint8_t received_order;
 void displayBootMessage( void );
 //SERIAL_CONTROL APP_SerialDebugTasks( void );
 //uint8_t APP_SerialDebugTasks( void );
+
+/*********************************************************************
+ * Function:        void NewFunction(void)
+ *
+ * PreCondition:    None
+ *
+ * @param void
+ * None
+ *
+ * @return void
+ * None
+ *
+ * @Side Effects
+ * None
+ *
+ * @Overview:        None
+ *
+ * Note:            None
+ ********************************************************************/
 void APP_SerialDebugTasks( void );
+
 void printUSBHostDeviceStatus( void );
+
 uint16_t readIntFromUart1( void );
 
 
