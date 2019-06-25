@@ -134,7 +134,7 @@ typedef struct sFrame {
     uint16_t ID_Src;
     uint8_t ID_Msg;
     int8_t Type_Msg;
-    uint8_t nonUtiliser [3];
+    uint8_t nbRemaining;
     uint8_t data[SIZE_DATA];
 }Frame;
 /*_____________________________________________________________________________*/
@@ -234,8 +234,13 @@ int8_t srv_cpy(uint8_t *dest, uint8_t *src, int size);
  * @param numPaquet : numero du paquet 
  * @return la taille totale du paquet creee
  */
-int8_t srv_create_paket_rf(uint8_t paquet[], uint8_t data[], 
-        uint16_t dest, uint16_t src, uint8_t typeDePaquet, uint8_t numPaquet);
+int8_t srv_create_paket_rf(uint8_t paquet[], 
+        uint8_t data[], 
+        uint16_t dest, 
+        uint16_t src, 
+        uint8_t typeDePaquet,
+        uint8_t numPaquet,
+        uint8_t nbRemaining);
 
 /**
  * prends un paquet et de le decoder

@@ -53,7 +53,7 @@ void test_tx() {
     int8_t size_h = srv_create_paket_rf(date_send, paquet,
                                         srv_getBroadcast(), 
                                         MASTER_ID, 
-                                        srv_horloge(), '0');
+                                        srv_horloge(), '0', 1);
     while (1) {
     }
 }
@@ -89,7 +89,7 @@ void test_update_date_send() {
             int8_t size_h = srv_create_paket_rf(date_send,
                                                 date, srv_getBroadcast(), 
                                                 MASTER_ID, 
-                                                srv_horloge(), '0');
+                                                srv_horloge(), '0', 1);
             if (radioAlphaTRX_SendMode()) {
                 radioAlphaTRX_SendData(date_send, size_h);
             }

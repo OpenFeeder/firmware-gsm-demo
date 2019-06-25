@@ -62,24 +62,24 @@ typedef enum {
     MSTR_STATE_GENERAL_AFTER_DAYTIME,
     MSTR_STATE_GENERAL_END,
     MSTR_STATE_GENERAL_ERROR
-}MSTR_STATE_GENERAL;
+} MSTR_STATE_GENERAL;
 
 typedef enum {
-    MSTR_STATE_GET_LOG_WAIT_EVENT,      // on attend une reponse de notre demande 
-    MSTR_STATE_GET_LOG_MSG_RECEIVE,     // on demande un slave selectionner de transmettre des donneesr 
-    MSTR_STATE_GET_LOG_SEND_FROM_GSM,   // on transmet les donne le buffer au srver
-    MSTR_STATE_GET_LOG_SELECT_SLAVE,    // on selectionne un slave pour communiquer avec 
-    MSTR_STATE_GET_LOG_ERROR            // une erreur est survenue/ timeout 
-}MSTR_STATE_GET_LOG;
+    MSTR_STATE_GET_LOG_WAIT_EVENT, // on attend une reponse de notre demande 
+    MSTR_STATE_GET_LOG_MSG_RECEIVE, // on demande un slave selectionner de transmettre des donneesr 
+    MSTR_STATE_GET_LOG_SEND_FROM_GSM, // on transmet les donne le buffer au srver
+    MSTR_STATE_GET_LOG_SELECT_SLAVE, // on selectionne un slave pour communiquer avec 
+    MSTR_STATE_GET_LOG_ERROR // une erreur est survenue/ timeout 
+} MSTR_STATE_GET_LOG;
 
 typedef enum {
-    SLAVE_STATE_SELECTED,   // en cours d'interrogation 
-    SLAVE_STATE_DESELCTED,  // n'est pas encours selectionne
-    SLAVE_STATE_COLLECT_END,// si on a deja collecte ses donnees 
-    SLAVE_STATE_SYNC,       // si on est en phase de syncronisation 
-    SLAVE_STATE_COLLECT,    // si on est en phase de collecte
-    SLAVE_STATE_ERROR       // si le slave est en error 
-}SLAVE_STATE;
+    SLAVE_STATE_SELECTED, // en cours d'interrogation 
+    SLAVE_STATE_DESELCTED, // n'est pas encours selectionne
+    SLAVE_STATE_COLLECT_END, // si on a deja collecte ses donnees 
+    SLAVE_STATE_SYNC, // si on est en phase de syncronisation 
+    SLAVE_STATE_COLLECT, // si on est en phase de collecte
+    SLAVE_STATE_ERROR // si le slave est en error 
+} SLAVE_STATE;
 
 // *****************************************************************************
 // *****************************************************************************
@@ -126,7 +126,12 @@ int8_t MASTER_SelectSlave();
 void MASTER_SetMsgReceiveRF(uint8_t set);
 
 
-int8_t Master_SendMsgRF(uint16_t idSlave, uint8_t typeMsg, uint8_t * data, uint8_t idMsg);
+int8_t Master_SendMsgRF(
+        uint16_t idSlave,
+        uint8_t typeMsg,
+        uint8_t * data,
+        uint8_t idMsg,
+        uint8_t nbRemaining);
 
 /**
  * 

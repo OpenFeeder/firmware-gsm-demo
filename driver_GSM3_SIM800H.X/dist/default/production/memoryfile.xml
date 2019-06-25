@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <project>
-  <executable name="dist/default/production/OpenfeederRadio.production.elf">
+  <executable name="dist/default/production/driver_GSM3_SIM800H.X.production.elf">
     <memory name="data">
       <units>bytes</units>
       <length>8192</length>
-      <used>1354</used>
-      <free>6838</free>
+      <used>576</used>
+      <free>7616</free>
     </memory>
     <memory name="program">
       <units>bytes</units>
       <length>131316</length>
-      <used>17754</used>
-      <free>113562</free>
+      <used>10446</used>
+      <free>120870</free>
     </memory>
   </executable>
 </project>

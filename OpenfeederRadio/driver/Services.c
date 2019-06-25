@@ -112,8 +112,13 @@ int8_t srv_cpy(uint8_t *dest, uint8_t *src, int size) {
     return 1;
 }
 
-int8_t srv_create_paket_rf(uint8_t paquet[], uint8_t data[],
-                           uint16_t dest, uint16_t src, uint8_t typeDePaquet, uint8_t numPaquet) {
+int8_t srv_create_paket_rf(uint8_t paquet[], 
+                           uint8_t data[],
+                           uint16_t dest, 
+                           uint16_t src, 
+                           uint8_t typeDePaquet, 
+                           uint8_t numPaquet, 
+                           uint8_t nbRemaining) {
     uint8_t s = 10; // permet de diviser en octet l'entier sur 16 bit 
     int i;
     int j = 0;
@@ -129,9 +134,9 @@ int8_t srv_create_paket_rf(uint8_t paquet[], uint8_t data[],
     //src
     paquet[j++] = src / s;
     paquet[j++] = src % s;
-
-    paquet[j++] = 'A'; // non utilis?
-    paquet[j++] = 'A'; // non utilis?
+    //nb paquet restant 
+    paquet[j++] = nbRemaining;
+    
     for (i = 0; i < srv_len(data); i++) { //donn?es
         paquet[j++] = data[i];
     }
@@ -152,7 +157,9 @@ void extractInfos(uint8_t* paquet, int *j, uint8_t* out, int count) {
     out[i] = '\0';
 }
 
-int8_t srv_decode_packet_rf(uint8_t* paquet, Frame *pPaquetRecu, uint8_t size,
+int8_t srv_decode_packet_rf(uint8_t* paquet, 
+                            Frame *pPaquetRecu, 
+                            uint8_t size,
                             uint16_t idOF) {
     uint8_t s = 10; // permet de concatener les adresses 
     int j = 0;
@@ -178,9 +185,9 @@ int8_t srv_decode_packet_rf(uint8_t* paquet, Frame *pPaquetRecu, uint8_t size,
     //on recup?re le src
     pPaquetRecu->ID_Src = paquet[j] * s + paquet[j + 1];
     j += 2;
-    //on traitera ce cas plustard
-    extractInfos(paquet, &j, pPaquetRecu->nonUtiliser, 2);
-    //j = j + 3; //on saute les 2 oct non utiliser
+    
+    //nb paquet restant 
+    pPaquetRecu->nbRemaining = paquet[j++];
     //data
     int8_t i = size - j;
     extractInfos(paquet, &j, pPaquetRecu->data, i - 1); //le -1 c'est pour ne pas recup?rer le crc
