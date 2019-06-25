@@ -231,6 +231,7 @@ void radioAlphaTRX_SlaveHundlerMsgReceived() {
             radioAlphaTRX_SlaveAckHundler(msgReceive);
         } else if (msgReceive.Type_Msg == srv_data()) { // on me demande transmettre des données 
             //on est donc le soir et je bascule dans la recuperation des données
+            windows = 1;
             appData.state = APP_STATE_RADIO_SEND_DATA; // je lui demande transmettre 
         }else {
             appData.state = APP_STATE_IDLE;
