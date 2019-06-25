@@ -248,7 +248,6 @@ int8_t radioAlphaTRX_WaitLownIRQ(int timeout) {
 // 4 buffer remplie de circulairement 
 volatile uint8_t BUF[FRAME_LENGTH];
 uint8_t HUNDLER_BUF[FRAME_LENGTH];
-volatile int8_t indexeBuf = 0;
 volatile uint8_t sizeBuf = 0;
 volatile uint8_t sendMode = 0; // O receve mode    1 send mode  
 
@@ -264,11 +263,9 @@ uint8_t radioAlphaTRX_GetSizeBuf() {
     return sizeBuf;
 }
 
-uint8_t * radioAlphaTRX_ReadBuf() { // à voir aussi 
+uint8_t * radioAlphaTRX_ReadBuf() {
     MASTER_SetMsgReceiveRF(0);
-    uint8_t ret[FRAME_LENGTH];
-    strncpy(ret, BUF, indexeBuf);
-    return ret;
+    return BUF;
 }
 
 int8_t radioAlphaTRX_receive(uint8_t buffer[FRAME_LENGTH]) {
@@ -288,18 +285,14 @@ int8_t radioAlphaTRX_receive(uint8_t buffer[FRAME_LENGTH]) {
 }
 
 void radioAlphaTRX_CaptureFrame() {
-    WORD_VAL_T receiveData;
-    receiveData.word = radioAlphaTRX_Command(0xB000);
-    if (indexeBuf < FRAME_LENGTH && receiveData.word != 0)
-        BUF[indexeBuf++] = receiveData.byte.low;
-    else {
-        BUF[indexeBuf] = '\0';
+    if ((sizeBuf = radioAlphaTRX_receive(HUNDLER_BUF)) > 0) {
         LED_BLUE_Toggle();
         MASTER_SetMsgReceiveRF(1);
         TMR_SetMsgRecuTimeout(TIME_OUT_GET_FRAME); // on demare le timer, car le bufer est probablement remplie 
+        strncpy(BUF, HUNDLER_BUF, sizeBuf); // a voir 
     }
     //on se remet en ecoute 
-    //radioAlphaTRX_ReceivedMode(); // a voir 
+    radioAlphaTRX_ReceivedMode();
 }
 
 /****************                                         *********************/
