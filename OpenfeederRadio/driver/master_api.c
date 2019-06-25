@@ -21,9 +21,10 @@
 
 /**------------------------>> I N C L U D E <<---------------------------------*/
 #include <stdio.h>
-
+#include <stdbool.h>
 #include "master_api.h"
 #include "timer.h"
+#include "types.h"
 
 /******************************************************************************/
 /******************************************************************************/
@@ -63,6 +64,68 @@ int16_t slaveID[NB_SLAVE];
 int8_t slaveSlected; // l'of en cours d'interogation 
 //______________________________________________________________________________
 
+/**-------------------------->> L O C A L -- F O N C T I O N S <<--------------*/
+
+//_______________________________P R O T O T Y P E S_____________________________
+
+/*********************************************************************
+ * Function:        MASTER_isTimeToSendDate()
+ *
+ * PreCondition:    None
+ *
+ * Input:           None
+ *
+ * Output:          None
+ *
+ * Side Effects:    None
+ *
+ * Overview:        None
+ *
+ * Note:            None
+ ********************************************************************/
+bool MASTER_IsTimeToSendDate() {
+    return !TMR_GetHorlogeTimeout();
+}
+
+/*********************************************************************
+ * Function:        MASTER_IsMsgReceveRF() 
+ *
+ * PreCondition:    None
+ *
+ * Input:           None
+ *
+ * Output:          None
+ *
+ * Side Effects:    None
+ *
+ * Overview:        None
+ *
+ * Note:            None
+ ********************************************************************/
+bool MASTER_IsMsgReceveRF() {
+    return msgReceiveRF;
+}
+
+/*********************************************************************
+ * Function:        bool MASTER_RequestSlave(void)
+ *
+ * PreCondition:    None
+ *
+ * Input:           None
+ *
+ * Output:          None
+ *
+ * Side Effects:    None
+ *
+ * Overview:        None
+ *
+ * Note:            None
+ ********************************************************************/
+bool MASTER_RequestSlave(void) {
+    return TMR_GetWaitRqstTimeout() == 0;
+}
+
+/**-------------------------->> P U B L I C -- F O N C T I O N S <<------------*/
 void MASTER_Init() {
     int8_t i;
     for (i = 0; i < NB_SLAVE; i++) {
@@ -80,7 +143,7 @@ void MASTER_Init() {
 
 //chisit un autre slave a qestionner
 
-int8_t MASTER_SelectSlave() {
+int8_t MASTER_SelectNextSlave() {
     //TODO : choix du slave 
     int8_t i = slaveSlected + 1 % NB_SLAVE;
     int8_t stop = 0;
@@ -227,16 +290,16 @@ void MASTER_StateMachineOfDaytime() {
 #endif
     // ici il est important de respecter la hierarchie des test pour le bon 
     // fonctionnement l'appli 
-    if (!TMR_GetHorlogeTimeout()) { // on doit envoyer l'horloge en mode broadcast
+    if (MASTER_IsTimeToSendDate()) { // on doit envoyer l'horloge en mode broadcast
         MASTER_SendDateRF();
         TMR_SetHorlogeTimeout(SEND_HORLOG_TIMEOUT);
         TMR_Delay(AFTER_SEND_HORLOGE); //on attends 
-    } else if (msgReceiveRF == 1) {
+    } else if (MASTER_IsMsgReceveRF()) {
         MASTER_HandlerMsgRF();
         // a decommenter lorsqu'il y'a plusieurs of connecte
         // TMR_SetWaitRqstTimeout(0); // a pour effet d'arreter le temporisateur 
-    } else if (!TMR_GetWaitRqstTimeout()) {
-        MASTER_SelectSlave();
+    } else if (MASTER_RequestSlave()) {
+        MASTER_SelectNextSlave();
         Master_SendMsgRF(ensSlave[slaveSlected].idSlave,
                          srv_infos(), (uint8_t *) ("INFOS"), 1);
         TMR_SetWaitRqstTimeout(TIME_OUT_WAIT_RQST); //demarre le temporisateur
@@ -317,7 +380,7 @@ void MASTER_GetLog() { // ces etats sont consideres comme des phases
     switch (mstrStateGetLog) {
         case MSTR_STATE_GET_LOG_SELECT_SLAVE:
 
-            if (MASTER_SelectSlave()) {
+            if (MASTER_SelectNextSlave()) {
                 mstrStateGetLog = MSTR_STATE_GET_LOG_WAIT_EVENT;
 #if defined(UART_DEBUG)
                 printf("Slave selec %d\n", ensSlave[slaveSlected].idSlave);
@@ -352,7 +415,7 @@ void MASTER_GetLog() { // ces etats sont consideres comme des phases
             /*-----------------------------------------------------------------*/
         case MSTR_STATE_GET_LOG_MSG_RECEIVE:
 
-            if (msgReceiveRF) {
+            if (MASTER_IsMsgReceveRF()) {
                 MASTER_HandlerMsgRF();
             } else if (msgReceiveGSM) {
                 msgReceiveGSM = 0;

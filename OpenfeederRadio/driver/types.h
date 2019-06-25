@@ -54,16 +54,16 @@ typedef union {
 
 } registre_etat;
 
-struct heure_format {
-
-        uint8_t j;
-        uint8_t ms;
-        uint8_t a;
-        uint8_t h;
-        uint8_t m;
-        uint8_t s;
-        uint8_t wd;
-};
+//struct heure_format {
+//
+//        uint8_t j;
+//        uint8_t ms;
+//        uint8_t a;
+//        uint8_t h;
+//        uint8_t m;
+//        uint8_t s;
+//        uint8_t wd;
+//};
 
 
 #endif	/* TYPES_H */
