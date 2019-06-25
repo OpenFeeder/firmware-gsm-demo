@@ -165,10 +165,10 @@ int8_t radioAlphaTRX_SendMode(void) {
     //    b3_ex = 1; 
     //    b0_dc = 1;
     RF_PowerManagement.Val = 0x8239;
-    radioAlphaTRX_Command(RF_PowerManagement.Val);
-    //#if defined(UART_DEBUG)
-    //    printf( "status: 0x%04X\r\n", RF_ConfigSet.Val);
-    //#endif
+    RF_StatusRead.Val = radioAlphaTRX_Command(RF_PowerManagement.Val);
+//#if defined(UART_DEBUG)
+//    printf("status 0x%04X\n", RF_StatusRead.Val);
+//#endif
     radioAlphaTRX_SetSendMode(1); // on est en mode transmission 
     return radioAlphaTRX_WaitLownIRQ(SEND_TIME_OUT); // arbitraire 
 }

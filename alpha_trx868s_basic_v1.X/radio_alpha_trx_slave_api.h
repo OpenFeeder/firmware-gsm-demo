@@ -60,7 +60,7 @@
 typedef enum
 {
     ACK_STATES_ERROR,       //attend l'ack d'une erreur 
-    ACK_STATES_END_BLOCK,   //attent l'ack d'un d'une fin de blok
+    ACK_STATES_END_TRANS,   //attent l'ack d'un d'une fin de blok
     ACK_STATES_NOTHING,     //attend l'ack de l'envoie de nothing
     ACK_STATES_DATA         //attend l'ack de l'envoie de donnee
          
@@ -145,7 +145,7 @@ void radioAlphaTRX_SlaveUpdateSendLogParam(uint8_t numSeq);
 /**
  * 
  */
-void radioAlphaTRX_SlaveSendEndBlok();
+void radioAlphaTRX_SlaveSendEndTrans();
 
 /**
  * traitement de l'aquitement recu

@@ -73,6 +73,7 @@ typedef enum {
 }MSTR_STATE_GET_LOG;
 
 typedef enum {
+    SLAVE_STATE_COLLECT_END_BLOCK,// si on a deja collecte un block 
     SLAVE_STATE_SELECTED,   // en cours d'interrogation 
     SLAVE_STATE_DESELCTED,  // n'est pas encours selectionne
     SLAVE_STATE_COLLECT_END,// si on a deja collecte ses donnees 

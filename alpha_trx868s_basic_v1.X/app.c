@@ -57,7 +57,7 @@
 APP_DATA appData; /* Global application data. */
 
 volatile int8_t msgReceive = 0;
-
+int8_t noPrint = 0; 
 int8_t APP_isMsgReceive() {
     return msgReceive;
 }
@@ -129,9 +129,12 @@ void APP_Tasks(void) {
             LedsStatusBlink(LED_GREEN, 20, 1980);
 #if defined(UART_DEBUG)
             RTCC_TimeGet(&t);
-            if (!TMR_GetTimeout()) {
-                printf("heur slave ==> %dh:%dmin:%ds\n", t.tm_hour, t.tm_min, t.tm_sec);
-                TMR_SetTimeout(30000); // 30s
+            if (t.tm_sec%10 == 0 && noPrint) {
+                noPrint = 0;
+                printf("[heur ==> %dh:%dmin:%ds]\n", t.tm_hour, t.tm_min, t.tm_sec);
+                
+            }else if (t.tm_sec%10 != 0 && !noPrint){
+                noPrint = 1;
             }
 #endif      
             if (APP_isMsgReceive() == 1) {
@@ -153,6 +156,7 @@ void APP_Tasks(void) {
 #endif
                 appData.previous_state = appData.state;
             }
+            
             radioAlphaTRX_SlaveHundlerMsgReceived();
             break;
             /* -------------------------------------------------------------- */
@@ -167,14 +171,14 @@ void APP_Tasks(void) {
             //apelle la fonction qui s'occupe de transmettre les donnees 
             break;
             /* -------------------------------------------------------------- */
-        case APP_STATE_RADIO_SEND_END_BLOCK:
+        case APP_STATE_RADIO_SEND_END_TRANS:
             if (appData.state != appData.previous_state) {
 #if defined (USE_UART1_SERIAL_INTERFACE) && defined (DISPLAY_CURRENT_STATE)
                 printf("> APP_STATE_RADIO_SEND_END_BLOCK\n");
 #endif
                 appData.previous_state = appData.state;
             }
-            radioAlphaTRX_SlaveSendEndBlok();
+            radioAlphaTRX_SlaveSendEndTrans();
             //apelle la fonction qui s'occupe de transmettre les donnees 
             break;
             /* -------------------------------------------------------------- */
