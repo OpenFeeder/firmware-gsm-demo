@@ -4,10 +4,10 @@
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
             <file>file:/home/mmadi/Documents/stageM1/firmware-gsm-demo/OpenfeederRadio/driver/master_api.c</file>
-            <file>file:/home/mmadi/Documents/stageM1/firmware-gsm-demo/OpenfeederRadio/driver/Services.h</file>
-            <file>file:/home/mmadi/Documents/stageM1/firmware-gsm-demo/OpenfeederRadio/alpha_trx_driver/radio_alpha_trx.c</file>
+            <file>file:/home/mmadi/Documents/stageM1/firmware-gsm-demo/OpenfeederRadio/mcc_generated_files/traps.c</file>
             <file>file:/home/mmadi/Documents/stageM1/firmware-gsm-demo/OpenfeederRadio/mcc_generated_files/pin_manager.c</file>
-            <file>file:/home/mmadi/Documents/stageM1/firmware-gsm-demo/OpenfeederRadio/main.c</file>
+            <file>file:/home/mmadi/Documents/stageM1/firmware-gsm-demo/OpenfeederRadio/alpha_trx_driver/radio_alpha_trx.c</file>
+            <file>file:/home/mmadi/Documents/stageM1/firmware-gsm-demo/OpenfeederRadio/driver/Services.c</file>
         </group>
     </open-files>
 </project-private>
