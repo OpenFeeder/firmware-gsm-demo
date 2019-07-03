@@ -73,13 +73,14 @@ typedef enum {
 } MSTR_STATE_GET_LOG;
 
 typedef enum {
-    SLAVE_STATE_SELECTED, // en cours d'interrogation 
-    SLAVE_STATE_DESELCTED, // n'est pas encours selectionne
-    SLAVE_STATE_COLLECT_END, // si on a deja collecte ses donnees 
-    SLAVE_STATE_SYNC, // si on est en phase de syncronisation 
-    SLAVE_STATE_COLLECT, // si on est en phase de collecte
-    SLAVE_STATE_ERROR // si le slave est en error 
-} SLAVE_STATE;
+    SLAVE_STATE_COLLECT_END_BLOCK,// si on a deja collecte un block 
+    SLAVE_STATE_SELECTED,   // en cours d'interrogation 
+    SLAVE_STATE_DESELCTED,  // n'est pas encours selectionne
+    SLAVE_STATE_COLLECT_END,// si on a deja collecte ses donnees 
+    SLAVE_STATE_SYNC,       // si on est en phase de syncronisation 
+    SLAVE_STATE_COLLECT,    // si on est en phase de collecte
+    SLAVE_STATE_ERROR       // si le slave est en error 
+}SLAVE_STATE;
 
 // *****************************************************************************
 // *****************************************************************************

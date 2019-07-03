@@ -48,7 +48,9 @@ void radioAlphaTRX_Init(void) {
     RF_StatusRead.Val = 0;
     RF_StatusRead.Val = radioAlphaTRX_Command(STATUS_READ_CMD); // intitial SPI transfer added to avoid power-up problem
     /**-------------> Frequency Setting Command @ 433 MHz <--------------------*/
-
+//#if defined(UART_DEBUG)
+//    printf("status 0x%04X\n", RF_StatusRead.Val);
+//#endif
     //    ALPHA_TRX433S_Control(0xA640); // Set operation frequency: Fc= 430+F*0.0025 , soit 430+1600*0.0025= 434 MHz avec 0x640 --> 110 0100 0000
     RF_FrequencySet.Val = FQ_SET_CMD_POR;
     RF_StatusRead.Val = radioAlphaTRX_Command(RF_FrequencySet.Val); // Set operation frequency: Fc= 430+F*0.0025 , soit 430+1600*0.0025= 434 MHz avec 0x640 --> 110 0100 0000 
@@ -165,10 +167,10 @@ int8_t radioAlphaTRX_SendMode(void) {
     //    b3_ex = 1; 
     //    b0_dc = 1;
     RF_PowerManagement.Val = 0x8239;
-    radioAlphaTRX_Command(RF_PowerManagement.Val);
-    //#if defined(UART_DEBUG)
-    //    printf( "status: 0x%04X\r\n", RF_ConfigSet.Val);
-    //#endif
+    RF_StatusRead.Val = radioAlphaTRX_Command(RF_PowerManagement.Val);
+//    #if defined(UART_DEBUG)
+//        printf( "status: 0x%04X\r\n", RF_StatusRead.Val);
+//    #endif
     radioAlphaTRX_SetSendMode(1); // on est en mode transmission
     
     return radioAlphaTRX_WaitLownIRQ(SEND_TIME_OUT); // arbitraire 
