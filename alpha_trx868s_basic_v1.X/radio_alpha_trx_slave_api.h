@@ -79,9 +79,10 @@ void radioAlphaTRX_GetLogFromDisk();
  * @param type_msg : (une erreur , une donnee, pour l'instant il n'y a que ces types possible)
  * @param data : la donnee a transmetter 
  * @param id_msg : (a differencier avec le type de msg, ici c'est le numero du sequence si l'on veut)
+ * @param nbRemaining : 
  * @return : le nombre d'octets effectivement envoye.
  */
-int8_t radioAlphaTRX_SlaveSendMsgRF(uint8_t typeMsg, uint8_t * data, uint8_t idMsg);
+int8_t radioAlphaTRX_SlaveSendMsgRF(uint8_t typeMsg, uint8_t * data, uint8_t idMsg, uint8_t nbRemaining);
 
 
 /**

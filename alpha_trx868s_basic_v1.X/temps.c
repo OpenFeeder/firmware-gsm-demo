@@ -60,7 +60,7 @@ void set_time(struct heure_format hf) {
     time_set.tm_mon = (uint8_t) hf.ms;
     time_set.tm_year = (uint16_t) hf.a;
     time_set.tm_wday = (uint8_t) hf.wd;
-    RTCC_TimeSet(&time_set);
+    RTCC_TimeSet((struct tm *)&time_set);
 }
 
 void get_time(struct heure_format* hf) {

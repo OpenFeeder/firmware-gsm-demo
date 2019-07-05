@@ -63,9 +63,9 @@
 
 /*******************************************************************************/
 //_________________________Radio Alpha TRX Infos_______________________________*/
-#define FRAME_LENGTH                 60 // Longueur total d'une trame en octet
+#define FRAME_LENGTH                 50 // Longueur total d'une trame en octet
 #define ERROR_LENGTH                  8
-#define SIZE_DATA                    40
+#define SIZE_DATA                    36
 #define TIME_OUT_nIRQ                 2 // 2ms
 #define LAPS                        100 // on attend X ms avant de transmettre un nouveau msg 
 #define TIME_OUT_GET_FRAME         1500 // temps max, pour que le msg recu soit encore exploitable
@@ -92,9 +92,6 @@
 #define SLAVE_ID 1
 #define MASTER_ID 6
 #define ID_BROADCAST 255
-uint16_t srv_getID_Slave();
-uint16_t srv_getBroadcast();
-uint16_t srv_getID_Master();
 /*_____________________________________________________________________________*/
 
 
@@ -110,10 +107,10 @@ uint16_t srv_getID_Master();
 
 /**------------------------>> S T R U C T U R E - P A Q U E T <<---------------*/
 /* Structure d'une trame d'un message RF:
- *      +--------+--------+------------+----------+--------------+----------+
- *      |ID_DEST | ID_SRC | ID_Message | Typr_MSG | Data_Message | Checksum |
- *      +--------+--------+------------+----------+--------------+----------+
- * BYTE =   2    +    2   +     1      +    1     +     MAX = 40 +    1     
+ *      +---------+-----------+------------+----------+-----------+--------------+----------+
+ *      | ID_DEST | ID_SRC    | ID_Message | Typr_MSG | nbRem     | Data_Message | Checksum |
+ *      +---------+-----------+------------+----------+-----------+--------------+----------+
+ * BYTE = 4bits   + 4bits = 1 +     1      +     4bis + 4bits = 1 +   MAX = 36   +    1     
  * 
  * TAILLE EN TETE = 2+2+1+1+1 = 7
  *
@@ -143,16 +140,6 @@ uint16_t srv_getID_Master();
 
 
 /**------------------------>> T Y P E--M S G <<--------------------------------*/
-// type de paquet
-uint8_t srv_err();
-uint8_t srv_data();
-uint8_t srv_ack();
-uint8_t srv_horloge();
-uint8_t srv_infos();
-uint8_t srv_end_trans();
-uint8_t srv_end_block();
-uint8_t srv_config();
-uint8_t srv_nothing();
 
 typedef union {
     uint8_t code;
@@ -192,15 +179,6 @@ typedef struct {
 /*****************                                 ****************************/
 
 /**
- * dis si l'ack recu est dans la fenetre 
- * @param inf
- * @param pointeur
- * @param size 
- * @return 
- */
-int8_t srv_in_windows(unsigned int inf, unsigned int pointeur, int size);
-
-/**
  * genere une somme controle 
  * 
  * @param paquet : le paquet a calculer le checksum
@@ -223,20 +201,6 @@ uint8_t srv_checksum(uint8_t* paquet, int size);
 bool srv_test_cheksum(uint8_t* paquet, int size, uint8_t somme_ctrl);
 
 /**
- * genere un paquet a partir des infos fournis
- * 
- * @param paquet : conteneur du paquet cree
- * @param donnee : la donnee a encapsuler 
- * @param src : qui l'envoie ==> 
- * @param dest : a qui on l'envoie ==> 
- * @param typePaquet : le type de paquet a transmettre (err, ack, data, horloge ...)
- * @param numPaquet : numero du paquet 
- * @return la taille totale du paquet creee
- */
-int8_t srv_create_paket_rf(uint8_t paquet[], uint8_t data[],
-        uint16_t dest, uint16_t src, uint8_t typeDePaquet, uint8_t numPaquet);
-
-/**
  * 
  * @param frame
  * @param packetToSend
@@ -251,18 +215,6 @@ int8_t srv_CreatePaketRF(Frame frame, uint8_t *packetToSend);
  * @return 
  */
 int8_t srv_DecodePacketRF(uint8_t* buffer, Frame *frameReceive, uint8_t size);
-
-/**
- * prends un paquet et de le decoder
- * 
- * @param paquet : le paquet a deballer
- * @param size : la taille du paquet
- * @param pPaquetRecu : contient les element qui compose le paquet 
- * @param idOF : l'identifiant de l'of qui vient de recevoir le paquet
- * @return la taille du paquet c'est un bon paquet, 0 si non 
- */
-int8_t srv_decode_packet_rf(uint8_t* paquet, Frame *pPaquetRecu, uint8_t size,
-        uint16_t idOF);
 
 /****************                                         *********************/
 /*************************                     ********************************/
