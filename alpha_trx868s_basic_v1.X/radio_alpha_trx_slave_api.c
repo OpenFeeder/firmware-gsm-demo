@@ -20,6 +20,8 @@
  *******************************************************************************/
 
 /**------------------------>> I N C L U D E <<---------------------------------*/
+#include <string.h>
+
 #include "radio_alpha_trx_slave_api.h"
 #include "led_status.h"
 #include "app.h"
@@ -30,6 +32,17 @@
 /***************************                ***********************************/
 
 /*****************                                         ********************/
+
+
+/**-------------------------->> F R A M E - T O - S E N D <<-------------------*/
+
+Frame frameToSend;
+void init_Frame() {
+    frameToSend.id.id.src = SLAVE_ID;
+    frameToSend.id.id.dest = MASTER_ID;
+}
+
+
 
 /**-------------------------->> V A R I A B L E S <<---------------------------*/
 volatile uint8_t BUF_ERR[NB_ERR_BUF]; // sauve les erreur en transmettre 
@@ -49,7 +62,7 @@ ACK_STATES lastSend = ACK_STATES_NOTHING;
 void radioAlphaTRX_GetLogFromDisk() {
     int8_t i;
     for (i = 0; i < NB_DATA_BUF; i++) {
-        srv_cpy(BUF_DATA[i], "200119#132402#0700EE39BD0000100000#", SIZE_DATA);
+        strncpy(BUF_DATA[i], "200119#132402#0700EE39BD0000100000#", SIZE_DATA);
     }
 }
 
@@ -83,11 +96,14 @@ int8_t radioAlphaTRX_SlaveSendMsgRF(uint8_t typeMsg, uint8_t * data, uint8_t idM
 
     uint8_t dataToSend[FRAME_LENGTH];
     int8_t ret = 0;
-    int8_t size = srv_create_paket_rf(dataToSend, data, MASTER_ID, SLAVE_ID, typeMsg, idMsg);
+    frameToSend.data = data;
+    frameToSend.idMsg = idMsg;
+    frameToSend.rfTandNBR.ret.typePaquet = typeMsg;
+    int8_t size = srv_CreatePaketRF(frameToSend, dataToSend);
     if (radioAlphaTRX_SendMode()) {
         radioAlphaTRX_SendData(dataToSend, size);
         ret = 1;
-    }else {
+    } else {
 #if defined(UART_DEBUG)
         printf("non Envoye\n");
 #endif
@@ -192,18 +208,8 @@ void radioAlphaTRX_SlaveAckHundler(Frame msgReceive) {
             radioAlphaTRX_ReceivedMode(); // on se met en mode reception 
             break;
         case ACK_STATES_DATA:
-            radioAlphaTRX_SlaveUpdateSendLogParam(msgReceive.ID_Msg);
+            radioAlphaTRX_SlaveUpdateSendLogParam(msgReceive.idMsg);
             break;
-            //        case ACK_STATES_END_BLOCK:
-            //            if (msgReceive.ID_Msg == NB_DATA_BUF) {
-            //#if defined(UART_DEBUG)
-            //                printf("Block envoyer au serveur \n");
-            //#endif      
-            //                //TODO recharger un nouveau bloc et attendre 
-            //                appData.state = APP_STATE_IDLE;
-            //            }else
-            //                appData.state = APP_STATE_RADIO_SEND_END_BLOCK;
-            //            break;
         default:
             appData.state = APP_STATE_IDLE; // on rend la main
             break;
@@ -213,56 +219,54 @@ void radioAlphaTRX_SlaveAckHundler(Frame msgReceive) {
 void radioAlphaTRX_SlaveHundlerMsgReceived() {
     Frame msgReceive;
     uint16_t timeout = TMR_GetMsgRecuTimeout();
+    int8_t err;
+    if (srv_DecodePacketRF(radioAlphaTRX_ReadBuf(), &msgReceive,
+                           radioAlphaTRX_GetSizeBuf()) > 0) {
 
-    if (srv_decode_packet_rf(radioAlphaTRX_ReadBuf(), &msgReceive,
-                             radioAlphaTRX_GetSizeBuf(), SLAVE_ID) > 0) {
-        if (msgReceive.Type_Msg == srv_horloge()) {
+        switch (msgReceive.rfTandNBR.ret.typePaquet) {
+            case DATA:
+                //on est donc le soir et je bascule dans la recuperation des données
+                windows = 1;
 #if defined(UART_DEBUG)
-            printf("Msg synch recu \n");
+                printf("nume bloc a envoyer %d\n", msgReceive.idMsg);
 #endif
-            radioAlphaTRX_SlaveUpdateDate(msgReceive.data, timeout);
-            appData.state = APP_STATE_IDLE;
-        } else if (msgReceive.Type_Msg == srv_infos() && timeout) { // on est dans la journee
-            int8_t err = radioAlphaTRX_SlaveGetError();
-#if defined(UART_DEBUG)
-            printf("Demande d'infos recu || timeout %d\n", timeout);
-#endif  
-            if (err) { //l'error a transmettre 
-                radioAlphaTRX_SlaveSendErr(err);
-                lastSend = ACK_STATES_ERROR;
-            } else {
-                radioAlphaTRX_SlaveSendNothing();
-                lastSend = ACK_STATES_NOTHING;
-            }
-            radioAlphaTRX_ReceivedMode(); // je me remets en attente d'un msg
-            appData.state = APP_STATE_IDLE; // etat endormie 
-
-        } else if (msgReceive.Type_Msg == srv_ack()) { // un ack confirmant le dernier paquet envoyer 
-            radioAlphaTRX_SlaveAckHundler(msgReceive);
-        } else if (msgReceive.Type_Msg == srv_data()) { // on me demande transmettre des données 
-            //on est donc le soir et je bascule dans la recuperation des données
-            windows = 1;
-#if defined(UART_DEBUG)
-            printf("nume bloc a envoyer %d\n", msgReceive.ID_Msg);
-#endif
-            if (msgReceive.ID_Msg < NB_BLOC) {
-                if (msgReceive.ID_Msg > nbBlock) { // on recharge un nouveau blocs
-                    nbBlock = msgReceive.ID_Msg;
-                    //TODO recharge un nouveau block en calclant a partir du numero de bloc
-                    curseur = 1;
+                if (msgReceive.idMsg < NB_BLOC) {
+                    if (msgReceive.idMsg > nbBlock) { // on recharge un nouveau blocs
+                        nbBlock = msgReceive.idMsg;
+                        //TODO recharge un nouveau block en calclant a partir du numero de bloc
+                        curseur = 1;
+                    }
+                    appData.state = APP_STATE_RADIO_SEND_DATA; // je lui demande transmettre 
+                } else {
+                    appData.state = APP_STATE_RADIO_SEND_END_TRANS;
                 }
-                appData.state = APP_STATE_RADIO_SEND_DATA; // je lui demande transmettre 
-            } else {
-                appData.state = APP_STATE_RADIO_SEND_END_TRANS;
-            }
-        } else {
-            appData.state = APP_STATE_IDLE;
-        }
-    } else {
+                break;
+            case ERROR:
+                break;
+            case INFOS:
 #if defined(UART_DEBUG)
-        printf("Le msg n'est pas bon\n");
+                printf("Demande d'infos recu || timeout %d\n", timeout);
+#endif  
+                if ((err = radioAlphaTRX_SlaveGetError()) > 0) { //l'error a transmettre 
+                    radioAlphaTRX_SlaveSendErr(err);
+                    lastSend = ACK_STATES_ERROR;
+                } else {
+                    radioAlphaTRX_SlaveSendNothing();
+                    lastSend = ACK_STATES_NOTHING;
+                }
+                radioAlphaTRX_ReceivedMode(); // je me remets en attente d'un msg
+                appData.state = APP_STATE_IDLE; // etat endormie 
+                break;
+            case ACK:
+                radioAlphaTRX_SlaveAckHundler(msgReceive);
+                break;
+            default:
+#if defined(UART_DEBUG)
+                printf("Le msg n'est pas bon\n");
 #endif
-        appData.state = APP_STATE_IDLE; // etat endormie 
+                appData.state = APP_STATE_IDLE; // etat endormie 
+        }
+
     }
 
 }
