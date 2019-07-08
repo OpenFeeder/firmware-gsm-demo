@@ -36,11 +36,7 @@
 
 /**-------------------------->> F R A M E - T O - S E N D <<-------------------*/
 
-Frame frameToSend;
-void init_Frame() {
-    frameToSend.id.id.src = SLAVE_ID;
-    frameToSend.id.id.dest = MASTER_ID;
-}
+
 
 
 
@@ -55,7 +51,7 @@ int8_t nbFrameToSend = 0;
 int8_t curseur = 1; //le curseur
 int8_t ack_attedue = 1; //
 int8_t windows = 1;
-int8_t nbBlock = 1;
+int8_t nbBlock = 0;
 
 ACK_STATES lastSend = ACK_STATES_NOTHING;
 //______________________________________________________________________________
@@ -92,21 +88,27 @@ void radioAlphaTRX_SlaveUpdatePtrErrBuf() {
         errOver = 0;
 }
 
-int8_t radioAlphaTRX_SlaveSendMsgRF(uint8_t typeMsg, 
-                                    uint8_t * data, 
-                                    uint8_t idMsg, 
+int8_t radioAlphaTRX_SlaveSendMsgRF(uint8_t typeMsg,
+                                    uint8_t * data,
+                                    uint8_t idMsg,
                                     uint8_t nbRemaining) {
     //    radioAlphaTRX_SetSendMode(1); // j'annonce que je suis en mode transmission 
-
+    Frame frameToSend;
     uint8_t dataToSend[FRAME_LENGTH];
-    int8_t ret = 0; int8_t i;
-    for(i = 0; i < strlen(data); i++) 
+
+    //_____________CREATE FRAME____________________________________________
+    int8_t ret = 0;
+    int8_t i;
+    for (i = 0; i < strlen(data); i++)
         frameToSend.data[i] = data[i];
+    frameToSend.id.id.src = SLAVE_ID;
+    frameToSend.id.id.dest = MASTER_ID;
     frameToSend.idMsg = idMsg;
     frameToSend.rfTandNBR.ret.typePaquet = typeMsg;
     frameToSend.rfTandNBR.ret.nbRemaining = nbRemaining;
+    ///____________________________________________________________________
+
     int8_t size = srv_CreatePaketRF(frameToSend, dataToSend);
-    
     if (radioAlphaTRX_SendMode()) {
         radioAlphaTRX_SendData(dataToSend, size);
         ret = 1;
@@ -151,9 +153,15 @@ void radioAlphaTRX_SlaveSendLog() {
     int8_t i = 0;
     while (i < windows && (i + curseur - 1) < nbFrameToSend) {
         int8_t nbRemaining = windows - i;
-        if(i == nbFrameToSend-1)
-            nbRemaining = NB_DATA_BUF; // signifie que c'est fini
-     
+        if (nbBlock >= NB_BLOC) { // le dernier bloc
+            if ((i + curseur - 1) == nbFrameToSend - 1) { // si le dernier paquet 
+                nbRemaining = MAX_W + 1; // signifie qu'il n'y a plus de bloc
+            }
+        } else { // je ne suis pas le dernier bloc
+            if ((i + curseur - 1) == nbFrameToSend - 1) { // je suis a la fin d'un bloc
+                nbRemaining = MAX_W; // signifie qu'il n'y a plus de bloc
+            }
+        }
         TMR_Delay(LAPS); // on attends avant de retransmettre un autre msg 
         radioAlphaTRX_SlaveSendMsgRF(DATA,
                                      BUF_DATA[i + curseur - 1],
@@ -184,24 +192,17 @@ void radioAlphaTRX_SlaveSendLog() {
  * Note:            None
  ********************************************************************/
 void radioAlphaTRX_SlaveUpdateSendLogParam(uint8_t numSeq) {
-    curseur = numSeq;
-#if defined(UART_DEBUG)
-    printf("ACK RECU %d vs %d attendu \n", numSeq, ack_attedue);
-#endif
+    curseur = numSeq; // on met a jour le curseur
     if (numSeq == ack_attedue) { // tous les msg envoyees ont ete aquitte
-        if (windows < MAX_W) windows += 1;
+        if (windows < MAX_W - 1) windows += 1;
     } else if (!TMR_GetWaitRqstTimeout()) {
         if (windows > 1)
             windows = windows / 2; // on diminue la fenetre d'emission 
         // il serait interressent de faire des statistique du nombre d'echec constate
     }
     TMR_SetWaitRqstTimeout(-1); // je le desactive 
-    if (curseur >= nbFrameToSend) {
-#if defined(UART_DEBUG)
-        printf("le ");
-#endif
+    if (numSeq >= nbFrameToSend) {
         appData.state = APP_STATE_IDLE; // on demande l'envoie d'un msg de fin de block
-        nbBlock++;
     } else {
         appData.state = APP_STATE_RADIO_SEND_DATA; // on se remet en transmission de donnee 
     }
@@ -265,18 +266,19 @@ void radioAlphaTRX_SlaveHundlerMsgReceived() {
     int8_t err;
     if (srv_DecodePacketRF(radioAlphaTRX_ReadBuf(), &msgReceive,
                            radioAlphaTRX_GetSizeBuf()) > 0) {
-
+#if defined(UART_DEBUG)
+        printf("Message receive\n");
+#endif
         switch (msgReceive.rfTandNBR.ret.typePaquet) {
             case DATA:
-#if defined(UART_DEBUG)
-                printf("nume bloc a envoyer %d, %curseur %d\n", msgReceive.idMsg);
-#endif
                 if (msgReceive.idMsg <= NB_BLOC) {
                     if (msgReceive.idMsg > nbBlock) { // on recharge un nouveau blocs
                         nbBlock = msgReceive.idMsg;
                         //TODO recharge un nouveau block en calclant a partir du numero de bloc
+#if defined(UART_DEBUG)
+                printf("nume bloc a envoyer %d, recharge d'un bloc\n", msgReceive.idMsg);
+#endif
                         curseur = 1;
-                        nbBlock++;
                     }
                     appData.state = APP_STATE_RADIO_SEND_DATA; // je lui demande transmettre 
                 } else {
@@ -301,12 +303,15 @@ void radioAlphaTRX_SlaveHundlerMsgReceived() {
                 radioAlphaTRX_SlaveAckHundler(msgReceive);
                 break;
             default:
-#if defined(UART_DEBUG)
-                printf("Le msg n'est pas bon\n");
-#endif
-                appData.state = APP_STATE_IDLE; // etat endormie 
+                appData.state = APP_STATE_IDLE;
+                break;
         }
 
+    } else {
+#if defined(UART_DEBUG)
+        printf("Le msg n'est pas bon\n");
+#endif
+        appData.state = APP_STATE_IDLE; // etat endormie 
     }
 
 }

@@ -49,6 +49,7 @@
 /**------------------------>> I N C L U D E <<---------------------------------*/
 #include <xc.h> // include processor files - each processor file is guarded.  
 #include <stdlib.h>
+#include <stdbool.h>
 #include "../mcc_generated_files/pin_manager.h"
 #include "timer.h"
 #include "../temps/temps.h"
@@ -61,12 +62,12 @@
 
 /*******************************************************************************/
 //_________________________Radio Alpha TRX Infos_______________________________*/
-#define TIME_OUT_WAIT_RQST         1500
-#define FRAME_LENGTH                128 // Longueur total d'une trame en octet
+#define TIME_OUT_WAIT_RQST         3000
+#define FRAME_LENGTH                 50 // Longueur total d'une trame en octet
 #define ERROR_LENGTH                  8
-#define SIZE_DATA                    40
+#define SIZE_DATA                    36
 #define TIME_OUT_nIRQ                 2 // 2 ms
-#define LAPS                          5 // on attend X ms avant de transmettre un nouveau msg 
+#define LAPS                         50 // on attend X ms avant de transmettre un nouveau msg 
 #define SEND_HORLOG_TIMEOUT           1 // 1 min
 #define AFTER_SEND_HORLOGE           20 // 20 ms
 #define TIME_OUT_GET_FRAME         1500 // temps max, pour que le msg recu soit encore exploitable
@@ -79,14 +80,27 @@
 #define MAX_ERROR                    10 // nombre du quel on considere que la communication est interompue entre le slave est le master
 #define MAX_TRY_TO_SYNC              20 // le nombre d'essaie avant de decider qu'on est pas connecte
 
-// id and station 
-#define SLAVE1_ID 37
-#define SLAVE2_ID 36
-#define SLAVE3_ID 35
-#define SLAVE4_ID 33
-#define BROADCAST 1023
 
-#define MASTER_ID 34
+//_______________________________TYPE__PAQUET________________________________________*/
+//max 16 type de paquet possible coder sur 4bits
+#define ERROR       1
+#define HORLOGE     2
+#define DATA        3
+#define INFOS       4
+#define NOTHING     5
+#define CONFIG      6
+#define ACK         7
+
+
+//_______________________________IF__OF________________________________________*/
+// id and station 
+#define SLAVE1_ID 1
+#define SLAVE2_ID 2
+#define SLAVE3_ID 3
+#define SLAVE4_ID 4
+#define BROADCAST 15
+
+#define MASTER_ID 14
 #define STATION 1
 /*_____________________________________________________________________________*/
 
@@ -130,28 +144,46 @@
  *
  */
 //sauvdarde des info
-typedef struct sFrame {
-    uint16_t ID_Dest;
-    uint16_t ID_Src;
-    uint8_t ID_Msg;
-    int8_t Type_Msg;
-    uint8_t nbRemaining;
-    uint8_t data[SIZE_DATA];
-}Frame;
+//typedef struct sFrame {
+//    uint16_t ID_Dest;
+//    uint16_t ID_Src;
+//    uint8_t ID_Msg;
+//    int8_t Type_Msg;
+//    uint8_t nbRemaining;
+//    uint8_t data[SIZE_DATA];
+//}Frame;
 /*_____________________________________________________________________________*/
 
 
 /**------------------------>> T Y P E--M S G <<--------------------------------*/
-// type de paquet
-uint8_t srv_err();
-uint8_t srv_data();
-uint8_t srv_ack();
-uint8_t srv_horloge();
-uint8_t srv_infos();
-uint8_t srv_end_trans();
-uint8_t srv_end_block();
-uint8_t srv_config();
-uint8_t srv_nothing();
+
+typedef union {
+    uint8_t code;
+
+    struct {
+        unsigned typePaquet : 4;
+        unsigned nbRemaining : 4;
+    } ret; //trouver un autre nom
+
+} RF_Type_And_nbRemaining;
+
+typedef union {
+    uint8_t code;
+
+    struct {
+        unsigned src : 4;
+        unsigned dest : 4;
+    } id;
+
+} idOF;
+
+typedef struct {
+    idOF id;
+    RF_Type_And_nbRemaining rfTandNBR;
+    uint8_t idMsg; // nume seq 
+    uint8_t sumCtrl;
+    uint8_t data[SIZE_DATA];
+} Frame;
 /*____________________________________________________________________________*/
 
 /**------------------------>> I D-- O F <<-------------------------------------*/
@@ -168,22 +200,13 @@ uint16_t  srv_getID_Master();
 /*****************                                 ****************************/
 
 /**
- * dis si l'ack recu est dans la fenetre 
- * @param inf
- * @param pointeur
- * @param size 
- * @return 
- */
-int8_t srv_in_windows(unsigned int inf, unsigned int pointeur, int size);
-
-/**
  * genere une somme controle 
  * 
  * @param paquet : le paquet a calculer le checksum
  * @param size : la taille du paquet 
  * @return : somme controle 
  */
-uint8_t srv_checksum(uint8_t* paquet, int size);
+uint8_t srv_Checksum(uint8_t* paquet, int size);
 
 /**
  * verifie le paquet recu en calculant la somme controle et en le comparant
@@ -193,111 +216,28 @@ uint8_t srv_checksum(uint8_t* paquet, int size);
  * @param size : sa taille 
  * @param somme_ctrl : la valeure du somme controle recu 
  * @return : 
- *         1 : test positif 
- *         0 : test negatif 
+ *         true : test positif 
+ *         false : test negatif 
  */
-int8_t srv_test_cheksum(uint8_t* paquet, int size, uint8_t somme_ctrl);
+bool srv_TestCheksum(uint8_t* paquet, int size, uint8_t somme_ctrl);
 
 /**
- * donne la taille d'une chaine de caractere 
  * 
- * @param chaine 
- * @return : la taille de la chaine paissee en parametre 
- */
-int srv_len(const uint8_t *chaine);
-
-/**
- * compare deux chaines passees en parametre
- *  
- * @param ch1 : chaine de caractere 1
- * @param ch2 : chaine de caractere 2
- * @return 1 si ch1 == ch2, 0 sinon
- */
-int8_t srv_cmp(const uint8_t *ch1, const uint8_t *ch2);
-
-/**
- * copy d'une chaine source a une chaine dest
- * @param dest : ou on copie 
- * @param src : ce qu'on copie
- * @param size : la taille de la chaie 
- * @return : 1 ok : 0 ko
- */
-int8_t srv_cpy(uint8_t *dest, uint8_t *src, int size);
-
-/**
- * genere un paquet a partir des infos fournis
- * 
- * @param paquet : conteneur du paquet cree
- * @param donnee : la donnee a encapsuler 
- * @param src : qui l'envoie ==> 
- * @param dest : a qui on l'envoie ==> 
- * @param typePaquet : le type de paquet a transmettre (err, ack, data, horloge ...)
- * @param numPaquet : numero du paquet 
- * @return la taille totale du paquet creee
- */
-int8_t srv_create_paket_rf(uint8_t paquet[], 
-        uint8_t data[], 
-        uint16_t dest, 
-        uint16_t src, 
-        uint8_t typeDePaquet,
-        uint8_t numPaquet,
-        uint8_t nbRemaining);
-
-/**
- * prends un paquet et de le decoder
- * 
- * @param paquet : le paquet a deballer
- * @param size : la taille du paquet
- * @param pPaquetRecu : contient les element qui compose le paquet 
- * @param idOF : l'identifiant de l'of qui vient de recevoir le paquet
- * @return la taille du paquet c'est un bon paquet, 0 si non 
- */
-int8_t srv_decode_packet_rf(uint8_t* paquet, Frame *pPaquetRecu, uint8_t size, 
-        uint16_t idOF);
-
-/**
- * permet d'attends un temps donnee
- * 
- * @param delais : le temps d'attente en x10ms
- */
-void srv_wait(int delais);
-
-/**
- * permet d'implementer la methode du goBackN
- * 
- * @param data : la data qu'il faut envoyer les acks ne sont pas re?u 
- * @param offset : a partir du quel on doit debuter la retransmission 
- * @param curseur : cursseur la borne superieure 
- * @param idOfSrc : l'of qui recois le paquet 
- * @param idOfDest: l'of a qui on envoie le paquet 
- * @param taille de la fenetre 
+ * @param frame
+ * @param packetToSend
  * @return 
  */
-int8_t srv_goBackN(const uint8_t** data, int * offset, int curseur, 
-        uint16_t idOfsrc, uint16_t idOfDest, int8_t *w);
-
-/**
- * decrementer le delais de quelque x10ms
- * 
- * @param delais : le delais a modifier
- * @param seuil : le delais min a ne pas depasser
- * @param ms : la reduction a apporter x10 ms
- */
-void srv_dec_delais(int *delais, int seuil, int ms);
-
-/**
- * incremente le delais de quelque ms
- * @param delais : le delais a modifier
- * @param ms : l'ogmentation a apporter x10 ms
- */
-void srv_inc_delais(int *delais, int ms);
+int8_t srv_CreatePaketRF(Frame frame, uint8_t *packetToSend);
 
 /**
  * 
- * @param nbligne : le nombre de ligne qu'on recup?re sur le fichier 
- * @return : les log recup?rer depuis le fichier de sauvgarder 
+ * @param buffer
+ * @param frameReceive
+ * @return 
  */
-uint8_t **service_recup_data_sur_disque(int *nbligne);
+int8_t srv_DecodePacketRF(uint8_t* buffer, Frame *frameReceive, uint8_t size);
+
+
 
 /****************                                         *********************/
 /*************************                     ********************************/

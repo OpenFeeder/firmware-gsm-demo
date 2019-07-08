@@ -156,7 +156,6 @@ void APP_Tasks(void) {
 #endif
                 appData.previous_state = appData.state;
             }
-            
             radioAlphaTRX_SlaveHundlerMsgReceived();
             break;
             /* -------------------------------------------------------------- */

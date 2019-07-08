@@ -128,7 +128,7 @@ void MASTER_SetMsgReceiveRF(uint8_t set);
 
 
 int8_t Master_SendMsgRF(
-        uint16_t idSlave,
+        uint8_t idSlave,
         uint8_t typeMsg,
         uint8_t * data,
         uint8_t idMsg,

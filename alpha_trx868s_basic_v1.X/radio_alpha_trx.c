@@ -288,6 +288,9 @@ int8_t radioAlphaTRX_receive(uint8_t buffer[FRAME_LENGTH]) {
 
 void radioAlphaTRX_CaptureFrame() {
     if ((sizeBuf = radioAlphaTRX_receive(BUF)) > 0) {
+        //traitement si horloge si non msg receve
+        
+        if ()
         setLedsStatusColor(LED_BLUE);
         APP_setMsgReceive(1);
         TMR_SetMsgRecuTimeout(TIME_OUT_GET_FRAME); // on demare le timer, car le bufer est probablement remplie 

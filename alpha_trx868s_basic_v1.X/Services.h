@@ -65,7 +65,7 @@
 //_________________________Radio Alpha TRX Infos_______________________________*/
 #define FRAME_LENGTH                 50 // Longueur total d'une trame en octet
 #define ERROR_LENGTH                  8
-#define SIZE_DATA                    36
+#define SIZE_DATA                    35
 #define TIME_OUT_nIRQ                 2 // 2ms
 #define LAPS                        100 // on attend X ms avant de transmettre un nouveau msg 
 #define TIME_OUT_GET_FRAME         1500 // temps max, pour que le msg recu soit encore exploitable
@@ -90,8 +90,8 @@
 
 //_______________________________IF__OF________________________________________*/
 #define SLAVE_ID 1
-#define MASTER_ID 6
-#define ID_BROADCAST 255
+#define MASTER_ID 14
+#define ID_BROADCAST 15
 /*_____________________________________________________________________________*/
 
 
@@ -185,7 +185,7 @@ typedef struct {
  * @param size : la taille du paquet 
  * @return : somme controle 
  */
-uint8_t srv_checksum(uint8_t* paquet, int size);
+uint8_t srv_Checksum(uint8_t* paquet, int size);
 
 /**
  * verifie le paquet recu en calculant la somme controle et en le comparant
@@ -198,7 +198,7 @@ uint8_t srv_checksum(uint8_t* paquet, int size);
  *         true : test positif 
  *         false : test negatif 
  */
-bool srv_test_cheksum(uint8_t* paquet, int size, uint8_t somme_ctrl);
+bool srv_TestCheksum(uint8_t* paquet, int size, uint8_t somme_ctrl);
 
 /**
  * 
