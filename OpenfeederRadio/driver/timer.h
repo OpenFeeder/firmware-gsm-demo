@@ -140,7 +140,7 @@ void TMR_Delay();
  */
 void __attribute__ ((weak)) TMR_CallBackTMR(void);
 
-void __attribute__ ((weak)) TMR_CollBackRTC(void);
+void __attribute__ ((weak)) TMR_CallBackRTC(void);
 
 
 /****************                                         *********************/

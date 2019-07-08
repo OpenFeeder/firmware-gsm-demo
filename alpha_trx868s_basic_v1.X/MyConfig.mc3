@@ -17,12 +17,12 @@
          <string>class com.microchip.mcc.mcu16.systemManager.wdt.Wdt</string>
       </entry>
       <entry>
-         <string>ICD</string>
-         <string>class com.microchip.mcc.mcu16.systemManager.icd.Icd</string>
-      </entry>
-      <entry>
          <string>RESET</string>
          <string>class com.microchip.mcc.mcu16.systemManager.reset.RESET</string>
+      </entry>
+      <entry>
+         <string>ICD</string>
+         <string>class com.microchip.mcc.mcu16.systemManager.icd.Icd</string>
       </entry>
       <entry>
          <string>Interrupt Module</string>
@@ -2775,7 +2775,7 @@
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="RTCC" registerAlias="ALCFGRPT" settingAlias="ALRMEN"/>
-         <value>enabled</value>
+         <value>disabled</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="Pin Module" registerAlias="ODCE" settingAlias="ODCE7" alias="disabled"/>
@@ -5315,7 +5315,7 @@
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="RTCC" registerAlias="ALCFGRPT" settingAlias="AMASK"/>
-         <value>Every Minute</value>
+         <value>Every Second</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="Pin Module" registerAlias="IOCNH" settingAlias="IOCNH8" alias="disabled"/>
@@ -5454,12 +5454,12 @@
          <value>disabled</value>
       </entry>
       <entry>
-         <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="TMR3" name="TMR3_TIISRFunction"/>
-         <value>ISR_TMR3_TI</value>
-      </entry>
-      <entry>
          <key class="com.microchip.mcc.core.tokenManager.RegisterKey" moduleName="RTCC" registerAlias="TSATIMEH"/>
          <value>0</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="TMR3" name="TMR3_TIISRFunction"/>
+         <value>ISR_TMR3_TI</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="SPI1" registerAlias="SPICON1L" settingAlias="CKE" alias="Active to Idle"/>
@@ -9226,12 +9226,12 @@
          <value>31000</value>
       </entry>
       <entry>
-         <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="TMR3" name="tickerFactor"/>
-         <value>1</value>
-      </entry>
-      <entry>
          <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="RTCC" registerAlias="ALMDATEL" settingAlias="DAYTEN"/>
          <value>0</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="TMR3" name="tickerFactor"/>
+         <value>1</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="Pin Module" registerAlias="IOCNA" settingAlias="IOCNA2"/>
@@ -10038,11 +10038,11 @@
          <value>0</value>
       </entry>
       <entry>
-         <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="RTCC" registerAlias="TIMEH" settingAlias="HRONE"/>
+         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="TMR1" registerAlias="TCON" settingAlias="TSIDL" alias="disabled"/>
          <value>0</value>
       </entry>
       <entry>
-         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="TMR1" registerAlias="TCON" settingAlias="TSIDL" alias="disabled"/>
+         <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="RTCC" registerAlias="TIMEH" settingAlias="HRONE"/>
          <value>0</value>
       </entry>
       <entry>
@@ -13167,7 +13167,7 @@
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.RegisterKey" moduleName="RTCC" registerAlias="ALCFGRPT"/>
-         <value>33536</value>
+         <value>256</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="INTERNAL OSCILLATOR" name="REFOPinsInput"/>
@@ -16164,36 +16164,36 @@
          <hash>03a0985e12a1dc78e3c960c8bb985b12d318723e3074d26c3510799ff96adbd4</hash>
       </entry>
       <entry>
-         <file>mcc_generated_files/uart1.h</file>
-         <hash>f7c7790a93af36ed66e1a652fc56ef5060a0ee145813d845888ac6fe93c560b1</hash>
-      </entry>
-      <entry>
          <file>mcc_generated_files/tmr1.c</file>
          <hash>fdc270c6784a6c71cde7a1a4ac39afa2fefc06d6b62cea93c66b2227a23db1ee</hash>
       </entry>
       <entry>
+         <file>mcc_generated_files/uart1.h</file>
+         <hash>f7c7790a93af36ed66e1a652fc56ef5060a0ee145813d845888ac6fe93c560b1</hash>
+      </entry>
+      <entry>
          <file>mcc_generated_files/rtcc.c</file>
-         <hash>839697529d916bfd98ab0c06c50d8d2740a02057cd71739f9eb6d7818617ef6e</hash>
+         <hash>9ed7e9c2dbb3cb4a53b9df1e42523fedbab192866679c87ba215ee9205163318</hash>
       </entry>
       <entry>
          <file>mcc_generated_files/tmr1.h</file>
          <hash>b5bad41e30a4af8a5b2dea09aad295534e2a2db12470eee79da4f305ec095c60</hash>
       </entry>
       <entry>
-         <file>mcc_generated_files/traps.h</file>
-         <hash>ec6fbb602e94206062df25179028d60b743dba59f5a9075946e9f81d7797dedb</hash>
-      </entry>
-      <entry>
          <file>mcc_generated_files/tmr3.h</file>
          <hash>28d2fe9b7661715686a64420234a42f43867117bfd5ce94f9d101f292df8c52d</hash>
       </entry>
       <entry>
-         <file>mcc_generated_files/traps.c</file>
-         <hash>e58a17c3365780d008abd6b331852f5233917e64166d86f1f0bd4cb552f0361e</hash>
+         <file>mcc_generated_files/traps.h</file>
+         <hash>ec6fbb602e94206062df25179028d60b743dba59f5a9075946e9f81d7797dedb</hash>
       </entry>
       <entry>
          <file>mcc_generated_files/tmr3.c</file>
          <hash>07ec9214f1936d79adb8c9f30b87727129ece9be7b6aacc8283b60fbb30f4aa8</hash>
+      </entry>
+      <entry>
+         <file>mcc_generated_files/traps.c</file>
+         <hash>e58a17c3365780d008abd6b331852f5233917e64166d86f1f0bd4cb552f0361e</hash>
       </entry>
       <entry>
          <file>mcc_generated_files/spi1.h</file>
@@ -16201,7 +16201,7 @@
       </entry>
       <entry>
          <file>mcc_generated_files/mcc.h</file>
-         <hash>1ac00078762dc8063de1de822dfeef41e43dee4bb34f90d2ba517c31170285f5</hash>
+         <hash>8338fc51eb675d3b643742ea297d774cb4c99225c601d2976b696cf202dffb54</hash>
       </entry>
       <entry>
          <file>mcc_generated_files/interrupt_manager.c</file>
@@ -16209,7 +16209,7 @@
       </entry>
       <entry>
          <file>mcc_generated_files/mcc.c</file>
-         <hash>e135cfe53804bb5442ffe8fb070e510b5b31990eb9284e110eb53ba1f022285e</hash>
+         <hash>8e0c1891e3aac76235911d96a4a19f0f540a2c439d46d7c8d229f2035fad9fca</hash>
       </entry>
       <entry>
          <file>mcc_generated_files/uart1.c</file>

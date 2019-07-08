@@ -48,9 +48,9 @@ void radioAlphaTRX_Init(void) {
     RF_StatusRead.Val = 0;
     RF_StatusRead.Val = radioAlphaTRX_Command(STATUS_READ_CMD); // intitial SPI transfer added to avoid power-up problem
     /**-------------> Frequency Setting Command @ 433 MHz <--------------------*/
-//#if defined(UART_DEBUG)
-//    printf("status 0x%04X\n", RF_StatusRead.Val);
-//#endif
+    //#if defined(UART_DEBUG)
+    //    printf("status 0x%04X\n", RF_StatusRead.Val);
+    //#endif
     //    ALPHA_TRX433S_Control(0xA640); // Set operation frequency: Fc= 430+F*0.0025 , soit 430+1600*0.0025= 434 MHz avec 0x640 --> 110 0100 0000
     RF_FrequencySet.Val = FQ_SET_CMD_POR;
     RF_StatusRead.Val = radioAlphaTRX_Command(RF_FrequencySet.Val); // Set operation frequency: Fc= 430+F*0.0025 , soit 430+1600*0.0025= 434 MHz avec 0x640 --> 110 0100 0000 
@@ -139,8 +139,8 @@ void radioAlphaTRX_ReceivedMode(void) {
 
 int8_t radioAlphaTRX_SendMode(void) {
     //close Rx mode 
-     radioAlphaTRX_Command(0x8209);
-    
+    radioAlphaTRX_Command(0x8209);
+
     /**-------------> Configuration Setting Command <--------------------------*/
     //  bit  15  14  13  12  11  10   9   8   7   6   5   4   3   2   1   0   POR
     //  Val   1   0   0   0   0   0   0   0  el  ef  b1  b0  x3  x2  x1  x0   0x8008
@@ -168,11 +168,11 @@ int8_t radioAlphaTRX_SendMode(void) {
     //    b0_dc = 1;
     RF_PowerManagement.Val = 0x8239;
     RF_StatusRead.Val = radioAlphaTRX_Command(RF_PowerManagement.Val);
-//    #if defined(UART_DEBUG)
-//        printf( "status: 0x%04X\r\n", RF_StatusRead.Val);
-//    #endif
+    //    #if defined(UART_DEBUG)
+    //        printf( "status: 0x%04X\r\n", RF_StatusRead.Val);
+    //    #endif
     radioAlphaTRX_SetSendMode(1); // on est en mode transmission
-    
+
     return radioAlphaTRX_WaitLownIRQ(SEND_TIME_OUT); // arbitraire 
 }
 
@@ -286,14 +286,32 @@ int8_t radioAlphaTRX_receive(uint8_t buffer[FRAME_LENGTH]) {
     return i;
 }
 
+bool radioAlphaTRX_updateDate(uint8_t date[14]) {
+    int8_t i = 1;
+    RF_Type_And_nbRemaining paquet;
+    paquet.code = BUF[i++];
+    if (paquet.ret.typePaquet != HORLOGE) return false;
+    
+    if (!srv_TestCheksum(BUF, sizeBuf-1, BUF[sizeBuf-1])) return false;
+    i++;
+    int8_t j = 0;
+    for (j; j < sizeBuf-i; j++) date[j] = BUF[i++];
+    return true;
+}
+
+
 void radioAlphaTRX_CaptureFrame() {
     if ((sizeBuf = radioAlphaTRX_receive(BUF)) > 0) {
         //traitement si horloge si non msg receve
-        
-        if ()
-        setLedsStatusColor(LED_BLUE);
-        APP_setMsgReceive(1);
-        TMR_SetMsgRecuTimeout(TIME_OUT_GET_FRAME); // on demare le timer, car le bufer est probablement remplie 
+        uint8_t date[14];
+        if (radioAlphaTRX_updateDate(date)) {
+//            LED_STATUS_R_Toggle();
+            radioAlphaTRX_SlaveUpdateDate(date);
+        } else {
+            setLedsStatusColor(LED_BLUE);
+            APP_setMsgReceive(1);
+            TMR_SetMsgRecuTimeout(TIME_OUT_GET_FRAME); // on demare le timer, car le bufer est probablement remplie 
+        }
     }
     //on se remet en ecoute 
     radioAlphaTRX_ReceivedMode();

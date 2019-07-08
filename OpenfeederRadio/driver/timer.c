@@ -78,7 +78,7 @@ void TMR_Delay(int16_t delayMs) {
     while (TMR_DelayMs > 0) { }
 }
 
-void __attribute__ ((weak)) TMR_CollBackRTC() {
+void __attribute__ ((weak)) TMR_CallBackRTC() {
     if (TMR_HorlogeTimeout) --TMR_HorlogeTimeout; // on ferra autrement 
 }
 

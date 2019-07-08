@@ -85,7 +85,8 @@ int8_t slaveSlected; // l'of en cours d'interogation
  * Note:            None
  ********************************************************************/
 bool MASTER_IsTimeToSendDate() {
-    return !TMR_GetHorlogeTimeout();
+//    return !TMR_GetHorlogeTimeout();
+    return !TMR_GetTimeout();
 }
 
 /*********************************************************************
@@ -363,8 +364,12 @@ void MASTER_StateMachineOfDaytime() {
     // ici il est important de respecter la hierarchie des test pour le bon 
     // fonctionnement l'appli 
     if (MASTER_IsTimeToSendDate()) { // on doit envoyer l'horloge en mode broadcast
+#if defined(UART_DEBUG)
+        printf("send date\n");
+#endif
         MASTER_SendDateRF();
-        TMR_SetHorlogeTimeout(SEND_HORLOG_TIMEOUT);
+//        TMR_SetHorlogeTimeout(SEND_HORLOG_TIMEOUT);
+        TMR_SetTimeout(SEND_HORLOG_TIMEOUT);
         TMR_Delay(AFTER_SEND_HORLOGE); //on attends 
     } else if (MASTER_IsMsgReceveRF()) {
         MASTER_HandlerMsgRF();

@@ -257,7 +257,7 @@ static uint8_t ConvertBCDToHex(uint8_t bcdvalue)
 void __attribute__ ( ( interrupt, no_auto_psv ) ) _ISR _RTCCInterrupt( void )
 {
     /* TODO : Add interrupt handling code */
-    TMR_CollBackRTC();
+    TMR_CallBackRTC();
     IFS3bits.RTCIF = false;
 }
 

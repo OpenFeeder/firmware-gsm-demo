@@ -72,25 +72,16 @@ void RTCC_Initialize(void)
    
    __builtin_write_RTCC_WRLOCK();
    
-//   
-//   if(!RTCCTimeInitialized())
-//   {
-//       // set 2019-05-29 14-34-09
-//       DATEH = 0x1905;    // Year/Month
-//       DATEL = 0x2903;    // Date/Wday
-//       TIMEH = 0x1434;    // hours/minutes
-//       TIMEL = 0x900;    // seconds
-//   }
    
+   if(!RTCCTimeInitialized())
+   {
    // set 2019-05-29 14-34-09
-//   ALMDATEH = 0x1905;    // Year/Month
-//   ALMDATEL = 0x2903;    // Date/Wday
-//   ALMTIMEH = 0x1434;    // hours/minutes
-//   ALMTIMEL = 0x900;    // seconds
+       DATEH = 0x1905;    // Year/Month
+       DATEL = 0x2903;    // Date/Wday
+       TIMEH = 0x1434;    // hours/minutes
+       TIMEL = 0x900;    // seconds
+   }
    
-   // AMASK Every Minute; ALMRPT 0; CHIME disabled; ALRMEN enabled; 
-   RTCCON1H = 0x8300;
-
    // PWCPS 1:1; PS 1:1; CLKSEL SOSC; FDIV 0; 
    RTCCON2L = 0x0000;
    // DIV 16383; 
