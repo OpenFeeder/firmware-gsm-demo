@@ -48,9 +48,9 @@ void radioAlphaTRX_Init(void) {
     RF_StatusRead.Val = 0;
     RF_StatusRead.Val = radioAlphaTRX_Command(STATUS_READ_CMD); // intitial SPI transfer added to avoid power-up problem
     /**-------------> Frequency Setting Command @ 433 MHz <--------------------*/
-    //#if defined(UART_DEBUG)
-    //    printf("status 0x%04X\n", RF_StatusRead.Val);
-    //#endif
+#if defined(UART_DEBUG)
+    printf("status 0x%04X\n", RF_StatusRead.Val);
+#endif
     //    ALPHA_TRX433S_Control(0xA640); // Set operation frequency: Fc= 430+F*0.0025 , soit 430+1600*0.0025= 434 MHz avec 0x640 --> 110 0100 0000
     RF_FrequencySet.Val = FQ_SET_CMD_POR;
     RF_StatusRead.Val = radioAlphaTRX_Command(RF_FrequencySet.Val); // Set operation frequency: Fc= 430+F*0.0025 , soit 430+1600*0.0025= 434 MHz avec 0x640 --> 110 0100 0000 
@@ -131,7 +131,10 @@ void radioAlphaTRX_ReceivedMode(void) {
     //active the 
     radioAlphaTRX_Command(0x82C9);
     RF_FIFOandResetMode.bits.b1_ff = 1; // FIFO fill will be enabled after synchronize pattern reception
-    radioAlphaTRX_Command(RF_FIFOandResetMode.Val); // --> 0xCA83
+    RF_StatusRead.Val = radioAlphaTRX_Command(RF_FIFOandResetMode.Val); // --> 0xCA83
+#if defined(UART_DEBUG)
+        printf("status 0x%04X\n", RF_StatusRead.Val);
+#endif
     radioAlphaTRX_SetSendMode(0); // on n'est plus en mode emission
 }
 

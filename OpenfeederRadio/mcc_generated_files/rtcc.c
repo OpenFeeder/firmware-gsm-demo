@@ -72,25 +72,16 @@ void RTCC_Initialize(void)
 
    RCFGCALbits.RTCEN = 0;
    
-//   if(!RTCCTimeInitialized())
-//   {
-//       // set RTCC time 2019-02-04 10-43-44
-//       RCFGCALbits.RTCPTR = 3;        // start the sequence
-//       RTCVAL = 0x19;    // YEAR
-//       RTCVAL = 0x204;    // MONTH-1/DAY-1
-//       RTCVAL = 0x110;    // WEEKDAY/HOURS
-//       RTCVAL = 0x4344;    // MINUTES/SECONDS
-//   }
+   if(!RTCCTimeInitialized())
+   {
+       // set RTCC time 2019-02-04 10-43-44
+       RCFGCALbits.RTCPTR = 3;        // start the sequence
+       RTCVAL = 0x19;    // YEAR
+       RTCVAL = 0x204;    // MONTH-1/DAY-1
+       RTCVAL = 0x110;    // WEEKDAY/HOURS
+       RTCVAL = 0x4344;    // MINUTES/SECONDS
+   }
 
-   // set Alarm time 2019-02-02 22-58-44
-   ALCFGRPTbits.ALRMEN = 0;
-   ALCFGRPTbits.ALRMPTR = 2;
-   ALRMVAL = 0x202;
-   ALRMVAL = 0x622;
-   ALRMVAL = 0x5844;
-
-   // ALRMPTR MIN_SEC; AMASK Every Minute; ARPT 0; CHIME enabled; ALRMEN enabled; 
-   ALCFGRPT = 0xCC00;
    // RTCOUT RTCC Clock; PWSPRE disabled; RTCLK SOSC; PWCPRE disabled; PWCEN disabled; PWCPOL disabled; 
    RTCPWC = 0x0200;
 
