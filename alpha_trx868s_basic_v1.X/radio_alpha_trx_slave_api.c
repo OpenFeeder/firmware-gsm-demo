@@ -293,6 +293,7 @@ void radioAlphaTRX_SlaveHundlerMsgReceived() {
                     radioAlphaTRX_SlaveSendErr(err);
                     lastSend = ACK_STATES_ERROR;
                 } else {
+                    TMR_Delay(100);
                     radioAlphaTRX_SlaveSendNothing();
                     lastSend = ACK_STATES_NOTHING;
                 }

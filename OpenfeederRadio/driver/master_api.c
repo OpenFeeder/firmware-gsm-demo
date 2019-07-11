@@ -130,6 +130,7 @@ bool MASTER_RequestSlave(void) {
 /**-------------------------->> P U B L I C -- F O N C T I O N S <<------------*/
 void MASTER_initIdSlave (uint8_t s1, uint8_t s2, uint8_t s3, uint8_t s4) {
     ensSlave[0].idSlave.code = s1;
+    ensSlave[1].idSlave.code = s2;
 //    ensSlave[s2] = s2;
 //    ensSlave[s3] = s3;
 //    ensSlave[s4] = s4;
@@ -155,13 +156,13 @@ void MASTER_Init() {
 int8_t MASTER_SelectNextSlave() {
     //TODO : choix du slave 
     MASTER_initIdSlave(SLAVE1_ID, SLAVE2_ID, SLAVE3_ID, SLAVE4_ID);
-    int8_t i = slaveSlected + 1 % NB_SLAVE;
+    int8_t i = (slaveSlected + 1) % NB_SLAVE;
     int8_t stop = 0;
     int8_t ret = 0;
     do {
         if (ensSlave[i].state == SLAVE_STATE_ERROR ||
             ensSlave[i].state == SLAVE_STATE_COLLECT_END) {
-            i = i + 1 % NB_SLAVE;
+            i = (i + 1) % NB_SLAVE;
             if (i == slaveSlected) {
                 stop = 1; // pas de slave operationel  
             }
@@ -169,13 +170,12 @@ int8_t MASTER_SelectNextSlave() {
             stop = 1; // on a trouve un slave
             ensSlave[i].state = SLAVE_STATE_SYNC;
             slaveSlected = i;
-#if defined(UART_DEBUG)
-            printf("slave %d selected  %d  = i\n", ensSlave[slaveSlected].idSlave.code, slaveSlected);
-#endif
             ret = 1;
         }
     } while (!stop);
-
+    #if defined(UART_DEBUG)
+            printf("slave %d selected  %d  = i\n", i, slaveSlected);
+    #endif
     return ret;
 }
 
