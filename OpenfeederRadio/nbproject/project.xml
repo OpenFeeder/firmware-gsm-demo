@@ -18,6 +18,10 @@
                 <sourceRootElem>test</sourceRootElem>
                 <sourceRootElem>temps</sourceRootElem>
                 <sourceRootElem>alpha_trx_driver</sourceRootElem>
+                <sourceRootElem>mcc_generated_files/driver</sourceRootElem>
+                <sourceRootElem>mcc_generated_files/driver_uart</sourceRootElem>
+                <sourceRootElem>mcc_generated_files/appGSM</sourceRootElem>
+                <sourceRootElem>appGSM</sourceRootElem>
             </sourceRootList>
             <confList>
                 <confElem>

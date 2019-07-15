@@ -57,17 +57,17 @@ OBJECTDIR=build/${CND_CONF}/${IMAGE_TYPE}
 DISTDIR=dist/${CND_CONF}/${IMAGE_TYPE}
 
 # Source Files Quoted if spaced
-SOURCEFILES_QUOTED_IF_SPACED=mcc_generated_files/spi1.c mcc_generated_files/system.c mcc_generated_files/rtcc.c mcc_generated_files/traps.c mcc_generated_files/clock.c mcc_generated_files/interrupt_manager.c mcc_generated_files/uart1.c mcc_generated_files/mcc.c mcc_generated_files/pin_manager.c mcc_generated_files/tmr1.c mcc_generated_files/ext_int.c test/test.c temps/temps.c main.c driver/Services.c alpha_trx_driver/radio_alpha_trx.c driver/timer.c driver/master_api.c
+SOURCEFILES_QUOTED_IF_SPACED=mcc_generated_files/driver/driverGSM3_SIM800.c mcc_generated_files/driver_uart/uart.c appGSM/appGSM3_SIM800.c mcc_generated_files/spi1.c mcc_generated_files/system.c mcc_generated_files/rtcc.c mcc_generated_files/traps.c mcc_generated_files/clock.c mcc_generated_files/interrupt_manager.c mcc_generated_files/uart1.c mcc_generated_files/mcc.c mcc_generated_files/pin_manager.c mcc_generated_files/tmr1.c mcc_generated_files/ext_int.c mcc_generated_files/uart2.c test/test.c temps/temps.c main.c driver/Services.c alpha_trx_driver/radio_alpha_trx.c driver/timer.c driver/master_api.c
 
 # Object Files Quoted if spaced
-OBJECTFILES_QUOTED_IF_SPACED=${OBJECTDIR}/mcc_generated_files/spi1.o ${OBJECTDIR}/mcc_generated_files/system.o ${OBJECTDIR}/mcc_generated_files/rtcc.o ${OBJECTDIR}/mcc_generated_files/traps.o ${OBJECTDIR}/mcc_generated_files/clock.o ${OBJECTDIR}/mcc_generated_files/interrupt_manager.o ${OBJECTDIR}/mcc_generated_files/uart1.o ${OBJECTDIR}/mcc_generated_files/mcc.o ${OBJECTDIR}/mcc_generated_files/pin_manager.o ${OBJECTDIR}/mcc_generated_files/tmr1.o ${OBJECTDIR}/mcc_generated_files/ext_int.o ${OBJECTDIR}/test/test.o ${OBJECTDIR}/temps/temps.o ${OBJECTDIR}/main.o ${OBJECTDIR}/driver/Services.o ${OBJECTDIR}/alpha_trx_driver/radio_alpha_trx.o ${OBJECTDIR}/driver/timer.o ${OBJECTDIR}/driver/master_api.o
-POSSIBLE_DEPFILES=${OBJECTDIR}/mcc_generated_files/spi1.o.d ${OBJECTDIR}/mcc_generated_files/system.o.d ${OBJECTDIR}/mcc_generated_files/rtcc.o.d ${OBJECTDIR}/mcc_generated_files/traps.o.d ${OBJECTDIR}/mcc_generated_files/clock.o.d ${OBJECTDIR}/mcc_generated_files/interrupt_manager.o.d ${OBJECTDIR}/mcc_generated_files/uart1.o.d ${OBJECTDIR}/mcc_generated_files/mcc.o.d ${OBJECTDIR}/mcc_generated_files/pin_manager.o.d ${OBJECTDIR}/mcc_generated_files/tmr1.o.d ${OBJECTDIR}/mcc_generated_files/ext_int.o.d ${OBJECTDIR}/test/test.o.d ${OBJECTDIR}/temps/temps.o.d ${OBJECTDIR}/main.o.d ${OBJECTDIR}/driver/Services.o.d ${OBJECTDIR}/alpha_trx_driver/radio_alpha_trx.o.d ${OBJECTDIR}/driver/timer.o.d ${OBJECTDIR}/driver/master_api.o.d
+OBJECTFILES_QUOTED_IF_SPACED=${OBJECTDIR}/mcc_generated_files/driver/driverGSM3_SIM800.o ${OBJECTDIR}/mcc_generated_files/driver_uart/uart.o ${OBJECTDIR}/appGSM/appGSM3_SIM800.o ${OBJECTDIR}/mcc_generated_files/spi1.o ${OBJECTDIR}/mcc_generated_files/system.o ${OBJECTDIR}/mcc_generated_files/rtcc.o ${OBJECTDIR}/mcc_generated_files/traps.o ${OBJECTDIR}/mcc_generated_files/clock.o ${OBJECTDIR}/mcc_generated_files/interrupt_manager.o ${OBJECTDIR}/mcc_generated_files/uart1.o ${OBJECTDIR}/mcc_generated_files/mcc.o ${OBJECTDIR}/mcc_generated_files/pin_manager.o ${OBJECTDIR}/mcc_generated_files/tmr1.o ${OBJECTDIR}/mcc_generated_files/ext_int.o ${OBJECTDIR}/mcc_generated_files/uart2.o ${OBJECTDIR}/test/test.o ${OBJECTDIR}/temps/temps.o ${OBJECTDIR}/main.o ${OBJECTDIR}/driver/Services.o ${OBJECTDIR}/alpha_trx_driver/radio_alpha_trx.o ${OBJECTDIR}/driver/timer.o ${OBJECTDIR}/driver/master_api.o
+POSSIBLE_DEPFILES=${OBJECTDIR}/mcc_generated_files/driver/driverGSM3_SIM800.o.d ${OBJECTDIR}/mcc_generated_files/driver_uart/uart.o.d ${OBJECTDIR}/appGSM/appGSM3_SIM800.o.d ${OBJECTDIR}/mcc_generated_files/spi1.o.d ${OBJECTDIR}/mcc_generated_files/system.o.d ${OBJECTDIR}/mcc_generated_files/rtcc.o.d ${OBJECTDIR}/mcc_generated_files/traps.o.d ${OBJECTDIR}/mcc_generated_files/clock.o.d ${OBJECTDIR}/mcc_generated_files/interrupt_manager.o.d ${OBJECTDIR}/mcc_generated_files/uart1.o.d ${OBJECTDIR}/mcc_generated_files/mcc.o.d ${OBJECTDIR}/mcc_generated_files/pin_manager.o.d ${OBJECTDIR}/mcc_generated_files/tmr1.o.d ${OBJECTDIR}/mcc_generated_files/ext_int.o.d ${OBJECTDIR}/mcc_generated_files/uart2.o.d ${OBJECTDIR}/test/test.o.d ${OBJECTDIR}/temps/temps.o.d ${OBJECTDIR}/main.o.d ${OBJECTDIR}/driver/Services.o.d ${OBJECTDIR}/alpha_trx_driver/radio_alpha_trx.o.d ${OBJECTDIR}/driver/timer.o.d ${OBJECTDIR}/driver/master_api.o.d
 
 # Object Files
-OBJECTFILES=${OBJECTDIR}/mcc_generated_files/spi1.o ${OBJECTDIR}/mcc_generated_files/system.o ${OBJECTDIR}/mcc_generated_files/rtcc.o ${OBJECTDIR}/mcc_generated_files/traps.o ${OBJECTDIR}/mcc_generated_files/clock.o ${OBJECTDIR}/mcc_generated_files/interrupt_manager.o ${OBJECTDIR}/mcc_generated_files/uart1.o ${OBJECTDIR}/mcc_generated_files/mcc.o ${OBJECTDIR}/mcc_generated_files/pin_manager.o ${OBJECTDIR}/mcc_generated_files/tmr1.o ${OBJECTDIR}/mcc_generated_files/ext_int.o ${OBJECTDIR}/test/test.o ${OBJECTDIR}/temps/temps.o ${OBJECTDIR}/main.o ${OBJECTDIR}/driver/Services.o ${OBJECTDIR}/alpha_trx_driver/radio_alpha_trx.o ${OBJECTDIR}/driver/timer.o ${OBJECTDIR}/driver/master_api.o
+OBJECTFILES=${OBJECTDIR}/mcc_generated_files/driver/driverGSM3_SIM800.o ${OBJECTDIR}/mcc_generated_files/driver_uart/uart.o ${OBJECTDIR}/appGSM/appGSM3_SIM800.o ${OBJECTDIR}/mcc_generated_files/spi1.o ${OBJECTDIR}/mcc_generated_files/system.o ${OBJECTDIR}/mcc_generated_files/rtcc.o ${OBJECTDIR}/mcc_generated_files/traps.o ${OBJECTDIR}/mcc_generated_files/clock.o ${OBJECTDIR}/mcc_generated_files/interrupt_manager.o ${OBJECTDIR}/mcc_generated_files/uart1.o ${OBJECTDIR}/mcc_generated_files/mcc.o ${OBJECTDIR}/mcc_generated_files/pin_manager.o ${OBJECTDIR}/mcc_generated_files/tmr1.o ${OBJECTDIR}/mcc_generated_files/ext_int.o ${OBJECTDIR}/mcc_generated_files/uart2.o ${OBJECTDIR}/test/test.o ${OBJECTDIR}/temps/temps.o ${OBJECTDIR}/main.o ${OBJECTDIR}/driver/Services.o ${OBJECTDIR}/alpha_trx_driver/radio_alpha_trx.o ${OBJECTDIR}/driver/timer.o ${OBJECTDIR}/driver/master_api.o
 
 # Source Files
-SOURCEFILES=mcc_generated_files/spi1.c mcc_generated_files/system.c mcc_generated_files/rtcc.c mcc_generated_files/traps.c mcc_generated_files/clock.c mcc_generated_files/interrupt_manager.c mcc_generated_files/uart1.c mcc_generated_files/mcc.c mcc_generated_files/pin_manager.c mcc_generated_files/tmr1.c mcc_generated_files/ext_int.c test/test.c temps/temps.c main.c driver/Services.c alpha_trx_driver/radio_alpha_trx.c driver/timer.c driver/master_api.c
+SOURCEFILES=mcc_generated_files/driver/driverGSM3_SIM800.c mcc_generated_files/driver_uart/uart.c appGSM/appGSM3_SIM800.c mcc_generated_files/spi1.c mcc_generated_files/system.c mcc_generated_files/rtcc.c mcc_generated_files/traps.c mcc_generated_files/clock.c mcc_generated_files/interrupt_manager.c mcc_generated_files/uart1.c mcc_generated_files/mcc.c mcc_generated_files/pin_manager.c mcc_generated_files/tmr1.c mcc_generated_files/ext_int.c mcc_generated_files/uart2.c test/test.c temps/temps.c main.c driver/Services.c alpha_trx_driver/radio_alpha_trx.c driver/timer.c driver/master_api.c
 
 
 CFLAGS=
@@ -94,6 +94,27 @@ MP_LINKER_FILE_OPTION=,--script=p24FJ128GA204.gld
 # ------------------------------------------------------------------------------------
 # Rules for buildStep: compile
 ifeq ($(TYPE_IMAGE), DEBUG_RUN)
+${OBJECTDIR}/mcc_generated_files/driver/driverGSM3_SIM800.o: mcc_generated_files/driver/driverGSM3_SIM800.c  nbproject/Makefile-${CND_CONF}.mk
+	@${MKDIR} "${OBJECTDIR}/mcc_generated_files/driver" 
+	@${RM} ${OBJECTDIR}/mcc_generated_files/driver/driverGSM3_SIM800.o.d 
+	@${RM} ${OBJECTDIR}/mcc_generated_files/driver/driverGSM3_SIM800.o 
+	${MP_CC} $(MP_EXTRA_CC_PRE)  mcc_generated_files/driver/driverGSM3_SIM800.c  -o ${OBJECTDIR}/mcc_generated_files/driver/driverGSM3_SIM800.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/mcc_generated_files/driver/driverGSM3_SIM800.o.d"      -g -D__DEBUG -D__MPLAB_DEBUGGER_PK3=1  -mno-eds-warn  -omf=elf -DXPRJ_default=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O0 -msmart-io=1 -Wall -msfr-warn=off  
+	@${FIXDEPS} "${OBJECTDIR}/mcc_generated_files/driver/driverGSM3_SIM800.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
+	
+${OBJECTDIR}/mcc_generated_files/driver_uart/uart.o: mcc_generated_files/driver_uart/uart.c  nbproject/Makefile-${CND_CONF}.mk
+	@${MKDIR} "${OBJECTDIR}/mcc_generated_files/driver_uart" 
+	@${RM} ${OBJECTDIR}/mcc_generated_files/driver_uart/uart.o.d 
+	@${RM} ${OBJECTDIR}/mcc_generated_files/driver_uart/uart.o 
+	${MP_CC} $(MP_EXTRA_CC_PRE)  mcc_generated_files/driver_uart/uart.c  -o ${OBJECTDIR}/mcc_generated_files/driver_uart/uart.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/mcc_generated_files/driver_uart/uart.o.d"      -g -D__DEBUG -D__MPLAB_DEBUGGER_PK3=1  -mno-eds-warn  -omf=elf -DXPRJ_default=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O0 -msmart-io=1 -Wall -msfr-warn=off  
+	@${FIXDEPS} "${OBJECTDIR}/mcc_generated_files/driver_uart/uart.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
+	
+${OBJECTDIR}/appGSM/appGSM3_SIM800.o: appGSM/appGSM3_SIM800.c  nbproject/Makefile-${CND_CONF}.mk
+	@${MKDIR} "${OBJECTDIR}/appGSM" 
+	@${RM} ${OBJECTDIR}/appGSM/appGSM3_SIM800.o.d 
+	@${RM} ${OBJECTDIR}/appGSM/appGSM3_SIM800.o 
+	${MP_CC} $(MP_EXTRA_CC_PRE)  appGSM/appGSM3_SIM800.c  -o ${OBJECTDIR}/appGSM/appGSM3_SIM800.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/appGSM/appGSM3_SIM800.o.d"      -g -D__DEBUG -D__MPLAB_DEBUGGER_PK3=1  -mno-eds-warn  -omf=elf -DXPRJ_default=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O0 -msmart-io=1 -Wall -msfr-warn=off  
+	@${FIXDEPS} "${OBJECTDIR}/appGSM/appGSM3_SIM800.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
+	
 ${OBJECTDIR}/mcc_generated_files/spi1.o: mcc_generated_files/spi1.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} "${OBJECTDIR}/mcc_generated_files" 
 	@${RM} ${OBJECTDIR}/mcc_generated_files/spi1.o.d 
@@ -171,6 +192,13 @@ ${OBJECTDIR}/mcc_generated_files/ext_int.o: mcc_generated_files/ext_int.c  nbpro
 	${MP_CC} $(MP_EXTRA_CC_PRE)  mcc_generated_files/ext_int.c  -o ${OBJECTDIR}/mcc_generated_files/ext_int.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/mcc_generated_files/ext_int.o.d"      -g -D__DEBUG -D__MPLAB_DEBUGGER_PK3=1  -mno-eds-warn  -omf=elf -DXPRJ_default=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O0 -msmart-io=1 -Wall -msfr-warn=off  
 	@${FIXDEPS} "${OBJECTDIR}/mcc_generated_files/ext_int.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
 	
+${OBJECTDIR}/mcc_generated_files/uart2.o: mcc_generated_files/uart2.c  nbproject/Makefile-${CND_CONF}.mk
+	@${MKDIR} "${OBJECTDIR}/mcc_generated_files" 
+	@${RM} ${OBJECTDIR}/mcc_generated_files/uart2.o.d 
+	@${RM} ${OBJECTDIR}/mcc_generated_files/uart2.o 
+	${MP_CC} $(MP_EXTRA_CC_PRE)  mcc_generated_files/uart2.c  -o ${OBJECTDIR}/mcc_generated_files/uart2.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/mcc_generated_files/uart2.o.d"      -g -D__DEBUG -D__MPLAB_DEBUGGER_PK3=1  -mno-eds-warn  -omf=elf -DXPRJ_default=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O0 -msmart-io=1 -Wall -msfr-warn=off  
+	@${FIXDEPS} "${OBJECTDIR}/mcc_generated_files/uart2.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
+	
 ${OBJECTDIR}/test/test.o: test/test.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} "${OBJECTDIR}/test" 
 	@${RM} ${OBJECTDIR}/test/test.o.d 
@@ -221,6 +249,27 @@ ${OBJECTDIR}/driver/master_api.o: driver/master_api.c  nbproject/Makefile-${CND_
 	@${FIXDEPS} "${OBJECTDIR}/driver/master_api.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
 	
 else
+${OBJECTDIR}/mcc_generated_files/driver/driverGSM3_SIM800.o: mcc_generated_files/driver/driverGSM3_SIM800.c  nbproject/Makefile-${CND_CONF}.mk
+	@${MKDIR} "${OBJECTDIR}/mcc_generated_files/driver" 
+	@${RM} ${OBJECTDIR}/mcc_generated_files/driver/driverGSM3_SIM800.o.d 
+	@${RM} ${OBJECTDIR}/mcc_generated_files/driver/driverGSM3_SIM800.o 
+	${MP_CC} $(MP_EXTRA_CC_PRE)  mcc_generated_files/driver/driverGSM3_SIM800.c  -o ${OBJECTDIR}/mcc_generated_files/driver/driverGSM3_SIM800.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/mcc_generated_files/driver/driverGSM3_SIM800.o.d"      -mno-eds-warn  -g -omf=elf -DXPRJ_default=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O0 -msmart-io=1 -Wall -msfr-warn=off  
+	@${FIXDEPS} "${OBJECTDIR}/mcc_generated_files/driver/driverGSM3_SIM800.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
+	
+${OBJECTDIR}/mcc_generated_files/driver_uart/uart.o: mcc_generated_files/driver_uart/uart.c  nbproject/Makefile-${CND_CONF}.mk
+	@${MKDIR} "${OBJECTDIR}/mcc_generated_files/driver_uart" 
+	@${RM} ${OBJECTDIR}/mcc_generated_files/driver_uart/uart.o.d 
+	@${RM} ${OBJECTDIR}/mcc_generated_files/driver_uart/uart.o 
+	${MP_CC} $(MP_EXTRA_CC_PRE)  mcc_generated_files/driver_uart/uart.c  -o ${OBJECTDIR}/mcc_generated_files/driver_uart/uart.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/mcc_generated_files/driver_uart/uart.o.d"      -mno-eds-warn  -g -omf=elf -DXPRJ_default=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O0 -msmart-io=1 -Wall -msfr-warn=off  
+	@${FIXDEPS} "${OBJECTDIR}/mcc_generated_files/driver_uart/uart.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
+	
+${OBJECTDIR}/appGSM/appGSM3_SIM800.o: appGSM/appGSM3_SIM800.c  nbproject/Makefile-${CND_CONF}.mk
+	@${MKDIR} "${OBJECTDIR}/appGSM" 
+	@${RM} ${OBJECTDIR}/appGSM/appGSM3_SIM800.o.d 
+	@${RM} ${OBJECTDIR}/appGSM/appGSM3_SIM800.o 
+	${MP_CC} $(MP_EXTRA_CC_PRE)  appGSM/appGSM3_SIM800.c  -o ${OBJECTDIR}/appGSM/appGSM3_SIM800.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/appGSM/appGSM3_SIM800.o.d"      -mno-eds-warn  -g -omf=elf -DXPRJ_default=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O0 -msmart-io=1 -Wall -msfr-warn=off  
+	@${FIXDEPS} "${OBJECTDIR}/appGSM/appGSM3_SIM800.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
+	
 ${OBJECTDIR}/mcc_generated_files/spi1.o: mcc_generated_files/spi1.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} "${OBJECTDIR}/mcc_generated_files" 
 	@${RM} ${OBJECTDIR}/mcc_generated_files/spi1.o.d 
@@ -297,6 +346,13 @@ ${OBJECTDIR}/mcc_generated_files/ext_int.o: mcc_generated_files/ext_int.c  nbpro
 	@${RM} ${OBJECTDIR}/mcc_generated_files/ext_int.o 
 	${MP_CC} $(MP_EXTRA_CC_PRE)  mcc_generated_files/ext_int.c  -o ${OBJECTDIR}/mcc_generated_files/ext_int.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/mcc_generated_files/ext_int.o.d"      -mno-eds-warn  -g -omf=elf -DXPRJ_default=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O0 -msmart-io=1 -Wall -msfr-warn=off  
 	@${FIXDEPS} "${OBJECTDIR}/mcc_generated_files/ext_int.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
+	
+${OBJECTDIR}/mcc_generated_files/uart2.o: mcc_generated_files/uart2.c  nbproject/Makefile-${CND_CONF}.mk
+	@${MKDIR} "${OBJECTDIR}/mcc_generated_files" 
+	@${RM} ${OBJECTDIR}/mcc_generated_files/uart2.o.d 
+	@${RM} ${OBJECTDIR}/mcc_generated_files/uart2.o 
+	${MP_CC} $(MP_EXTRA_CC_PRE)  mcc_generated_files/uart2.c  -o ${OBJECTDIR}/mcc_generated_files/uart2.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/mcc_generated_files/uart2.o.d"      -mno-eds-warn  -g -omf=elf -DXPRJ_default=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O0 -msmart-io=1 -Wall -msfr-warn=off  
+	@${FIXDEPS} "${OBJECTDIR}/mcc_generated_files/uart2.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
 	
 ${OBJECTDIR}/test/test.o: test/test.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} "${OBJECTDIR}/test" 
