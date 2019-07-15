@@ -55,7 +55,8 @@
 /**
     void PIN_MANAGER_Initialize(void)
  */
-void PIN_MANAGER_Initialize(void) {
+void PIN_MANAGER_Initialize(void)
+{
     /****************************************************************************
      * Setting the Output Latch SFR(s)
      ***************************************************************************/
@@ -67,7 +68,7 @@ void PIN_MANAGER_Initialize(void) {
      * Setting the GPIO Direction SFR(s)
      ***************************************************************************/
     TRISA = 0x0797;
-    TRISB = 0x5DBB;
+    TRISB = 0x5DF7;
     TRISC = 0x030F;
 
     /****************************************************************************
@@ -91,7 +92,7 @@ void PIN_MANAGER_Initialize(void) {
      * Setting the Analog/Digital Configuration SFR(s)
      ***************************************************************************/
     ANSA = 0x0007;
-    ANSB = 0x500C;
+    ANSB = 0x5008;
     ANSC = 0x0007;
 
 
@@ -100,26 +101,29 @@ void PIN_MANAGER_Initialize(void) {
      ***************************************************************************/
     __builtin_write_OSCCONL(OSCCON & 0xbf); // unlock PPS
 
-    RPINR0bits.INT1R = 0x0018; //RC8->EXT_INT:INT1;
-    RPINR18bits.U1RXR = 0x0005; //RB5->UART1:U1RX;
-    RPOR4bits.RP9R = 0x0007; //RB9->SPI1:SDO1;
-    RPINR20bits.SDI1R = 0x0008; //RB8->SPI1:SDI1;
-    RPOR3bits.RP6R = 0x0003; //RB6->UART1:U1TX;
-    RPOR10bits.RP20R = 0x0008; //RC4->SPI1:SCK1OUT;
+    RPINR0bits.INT1R = 0x0018;   //RC8->EXT_INT:INT1;
+    RPINR18bits.U1RXR = 0x0002;   //RB2->UART1:U1RX;
+    RPINR1bits.INT2R = 0x0019;   //RC9->EXT_INT:INT2;
+    RPOR4bits.RP9R = 0x0007;   //RB9->SPI1:SDO1;
+    RPINR20bits.SDI1R = 0x0008;   //RB8->SPI1:SDI1;
+    RPOR1bits.RP3R = 0x0003;   //RB3->UART1:U1TX;
+    RPOR10bits.RP20R = 0x0008;   //RC4->SPI1:SCK1OUT;
 
     __builtin_write_OSCCONL(OSCCON | 0x40); // lock   PPS
 
     /****************************************************************************
-     * Interrupt On Change for group CNEN2 - any
+     * Interrupt On Change for group CNEN1 - any
      ***************************************************************************/
-    CNEN2bits.CN16IE = 1; // Pin : RB10
+	CNEN1bits.CN15IE = 1; // Pin : RB11
 
     IEC1bits.CNIE = 1; // Enable CNI interrupt 
 }
 
 /* Interrupt service routine for the CNI interrupt. */
-void __attribute__((interrupt, no_auto_psv)) _CNInterrupt(void) {
-    if (IFS1bits.CNIF == 1) {
+void __attribute__ (( interrupt, no_auto_psv )) _CNInterrupt ( void )
+{
+    if(IFS1bits.CNIF == 1)
+    {
         // Clear the flag
         IFS1bits.CNIF = 0;
         if (nIRQ_GetValue() == 0) {

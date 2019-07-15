@@ -55,13 +55,13 @@
 */
 /**
   @Summary
-    Sets the GPIO pin, RB10, high using LATB10.
+    Sets the GPIO pin, RB11, high using LATB11.
 
   @Description
-    Sets the GPIO pin, RB10, high using LATB10.
+    Sets the GPIO pin, RB11, high using LATB11.
 
   @Preconditions
-    The RB10 must be set to an output.
+    The RB11 must be set to an output.
 
   @Returns
     None.
@@ -71,21 +71,21 @@
 
   @Example
     <code>
-    // Set RB10 high (1)
+    // Set RB11 high (1)
     nIRQ_SetHigh();
     </code>
 
 */
-#define nIRQ_SetHigh()          _LATB10 = 1
+#define nIRQ_SetHigh()          _LATB11 = 1
 /**
   @Summary
-    Sets the GPIO pin, RB10, low using LATB10.
+    Sets the GPIO pin, RB11, low using LATB11.
 
   @Description
-    Sets the GPIO pin, RB10, low using LATB10.
+    Sets the GPIO pin, RB11, low using LATB11.
 
   @Preconditions
-    The RB10 must be set to an output.
+    The RB11 must be set to an output.
 
   @Returns
     None.
@@ -95,21 +95,21 @@
 
   @Example
     <code>
-    // Set RB10 low (0)
+    // Set RB11 low (0)
     nIRQ_SetLow();
     </code>
 
 */
-#define nIRQ_SetLow()           _LATB10 = 0
+#define nIRQ_SetLow()           _LATB11 = 0
 /**
   @Summary
-    Toggles the GPIO pin, RB10, using LATB10.
+    Toggles the GPIO pin, RB11, using LATB11.
 
   @Description
-    Toggles the GPIO pin, RB10, using LATB10.
+    Toggles the GPIO pin, RB11, using LATB11.
 
   @Preconditions
-    The RB10 must be set to an output.
+    The RB11 must be set to an output.
 
   @Returns
     None.
@@ -119,18 +119,18 @@
 
   @Example
     <code>
-    // Toggle RB10
+    // Toggle RB11
     nIRQ_Toggle();
     </code>
 
 */
-#define nIRQ_Toggle()           _LATB10 ^= 1
+#define nIRQ_Toggle()           _LATB11 ^= 1
 /**
   @Summary
-    Reads the value of the GPIO pin, RB10.
+    Reads the value of the GPIO pin, RB11.
 
   @Description
-    Reads the value of the GPIO pin, RB10.
+    Reads the value of the GPIO pin, RB11.
 
   @Preconditions
     None.
@@ -145,18 +145,18 @@
     <code>
     uint16_t portValue;
 
-    // Read RB10
+    // Read RB11
     postValue = nIRQ_GetValue();
     </code>
 
 */
-#define nIRQ_GetValue()         _RB10
+#define nIRQ_GetValue()         _RB11
 /**
   @Summary
-    Configures the GPIO pin, RB10, as an input.
+    Configures the GPIO pin, RB11, as an input.
 
   @Description
-    Configures the GPIO pin, RB10, as an input.
+    Configures the GPIO pin, RB11, as an input.
 
   @Preconditions
     None.
@@ -169,18 +169,18 @@
 
   @Example
     <code>
-    // Sets the RB10 as an input
+    // Sets the RB11 as an input
     nIRQ_SetDigitalInput();
     </code>
 
 */
-#define nIRQ_SetDigitalInput()  _TRISB10 = 1
+#define nIRQ_SetDigitalInput()  _TRISB11 = 1
 /**
   @Summary
-    Configures the GPIO pin, RB10, as an output.
+    Configures the GPIO pin, RB11, as an output.
 
   @Description
-    Configures the GPIO pin, RB10, as an output.
+    Configures the GPIO pin, RB11, as an output.
 
   @Preconditions
     None.
@@ -193,12 +193,12 @@
 
   @Example
     <code>
-    // Sets the RB10 as an output
+    // Sets the RB11 as an output
     nIRQ_SetDigitalOutput();
     </code>
 
 */
-#define nIRQ_SetDigitalOutput() _TRISB10 = 0
+#define nIRQ_SetDigitalOutput() _TRISB11 = 0
 /**
   @Summary
     Sets the GPIO pin, RB13, high using LATB13.

@@ -3442,7 +3442,7 @@ int8_t radioAlphaTRX_receive(uint8_t buffer[FRAME_LENGTH]) {
         buffer[i] = receiveData.byte.low;
         idOF id;
         id.code = receiveData.byte.low;
-        if (id.id.dest != SLAVE_ID && id.id.dest != ID_BROADCAST) {
+        if (id.id.dest != SLAVE_ID && id.id.dest != ID_BROADCAST && i == 0) {
             return 0;
         } else if (receiveData.byte.low == 0) {
             break;
