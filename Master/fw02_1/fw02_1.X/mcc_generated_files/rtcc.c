@@ -399,16 +399,9 @@ void __attribute__((interrupt, no_auto_psv)) _ISR _RTCCInterrupt(void) {
 #endif 
                 MASTER_StoreBehavior(MASTER_APP_STATE_SLEEP, PRIO_EXEPTIONNEL);
 //                appData.rtcc_alarm_action = RTCC_ALARM_SLEEP_OPENFEEDER;
-<<<<<<< HEAD
-            } else {
-
-                /* Battery level : evry hour and 30 sec*/
-                if (appData.current_time.tm_min == 0 && appData.current_time.tm_sec == 30) {
-=======
             } else if (appData.openfeeder_state == OPENFEEDER_IS_AWAKEN) {
                 /* Battery level : evry hour and 30 sec*/
                 if (appData.current_time.tm_min == 0 && appData.current_time.tm_sec == 0) {
->>>>>>> recuperation_35
 #if defined (USE_UART1_SERIAL_INTERFACE) && defined (DISPLAY_ISR_RTCC)
                     printf("- Battery check\n");
 #endif 
@@ -447,8 +440,14 @@ void __attribute__((interrupt, no_auto_psv)) _ISR _RTCCInterrupt(void) {
                 }
 //                
                 /* Horloge synchronize : ervry 5 min */
-                if ((appData.current_time.tm_min%appData.timeToSynchronizeHologe == 0)) {
+                /* Horloge synchronize : ervry 5 min */
+                if ((appData.current_time.tm_min%appData.timeToSynchronizeHologe == 0) && 
+                    appData.synchronizeTime) {
+                    appData.synchronizeTime = false;
                     MASTER_StoreBehavior(MASTER_APP_STATE_SEND_DATE, PRIO_EXEPTIONNEL);
+                }else if (appData.current_time.tm_min%appData.timeToSynchronizeHologe != 0
+                    && !appData.synchronizeTime) {
+                    appData.synchronizeTime = true;
                 }
             }
         }

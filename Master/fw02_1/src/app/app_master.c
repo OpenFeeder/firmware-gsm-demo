@@ -173,7 +173,7 @@ uint8_t MASTER_SendDateRF() {
 //______________________________________________________________________________
 //________________________________STATE MACHINE FUNCTION________________________
 
-bool MASTER_StoreBehavior(MASTER_APP_STATES state, PRIORITY prio) {    
+bool MASTER_StoreBehavior(MASTER_APP_STATES state, PRIORITY prio) { 
     appData.behavior[prio][GETpWRITE(prio)] = state; // on ecrit le comportement 
     INCpWRITE(prio);
     if (GETpREAD(prio) == GETpWRITE(prio)) { // Je viens d'ecraser un comportement 
@@ -258,7 +258,7 @@ void MASTER_AppTask(void) {
              * we try to power and init 10 repetition 
              */
             uint8_t i = 0;
-            do {
+            while (i < 10 && !appData.RfModuleInit) {
                 if (CMD_3V3_RF_GetValue() == false) {
                     if (radioAlphaTRX_Init()) {
 #if defined  (USE_UART1_SERIAL_INTERFACE )
@@ -280,7 +280,7 @@ void MASTER_AppTask(void) {
                     printf("RF Module disable.\n");
 #endif
                 }
-            } while (i < 10 && !appData.RfModuleInit);
+            }
 
             if (i >= 10) { // module n
 #if defined(USE_UART1_SERIAL_INTERFACE)
@@ -1029,7 +1029,7 @@ void MASTER_AppTask(void) {
                 appDataUsb.is_device_needed = true;
 
             }
-
+            
             //of state 
             appData.openfeeder_state = OPENFEEDER_IS_SLEEPING;
 
@@ -1048,7 +1048,13 @@ void MASTER_AppTask(void) {
                     break;
                 }
             }
-
+            
+            /* power off radio module */
+            if (appData.RfModuleInit) {
+                appData.RfModuleInit = false;
+                powerRFDisable();
+            }
+            
             /* Turn status LED off */
             setLedsStatusColor(LEDS_OFF);
 
@@ -1057,14 +1063,6 @@ void MASTER_AppTask(void) {
             /* Should be commented in normal mode */
             /* Modify time value according to wake up values in the CONFIG.INI file */
             setDateTime(19, 8, 12, 5, 59, 50);
-#endif
-#if defined(_DEBUG)
-            getDateTime();
-            printf("%d %d vs %d %d\n",
-                   appDataAlarmWakeup.time.tm_hour,
-                   appDataAlarmWakeup.time.tm_min,
-                   appData.current_time.tm_hour,
-                   appData.current_time.tm_min);
 #endif
             /* Set alarm for wake up time */
             rtcc_set_alarm(appDataAlarmWakeup.time.tm_hour, appDataAlarmWakeup.time.tm_min, appDataAlarmWakeup.time.tm_sec, EVERY_DAY);

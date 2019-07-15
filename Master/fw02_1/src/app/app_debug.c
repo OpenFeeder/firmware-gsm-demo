@@ -437,11 +437,7 @@ void APP_SerialDebugTasks(void) {
                     break;
                 }
                 user_choice = UART1_Read();
-<<<<<<< HEAD
                 
-                switch (user_choice) {
-=======
-
                 switch (user_choice) {
                     case 'p':
                     case 'P':
@@ -450,7 +446,6 @@ void APP_SerialDebugTasks(void) {
                         printPointeur(PRIO_MEDIUM);
                         printPointeur(PRIO_LOW);
                         break;
->>>>>>> recuperation_35
                     case 's':
                     case 'S':
                         printf("GO TO SLEEP\n");
