@@ -36,8 +36,8 @@ bool srv_TestCheksum(uint8_t* paquet, int size, uint8_t somme_ctrl) {
 int8_t srv_DecodePacketRF(uint8_t* buffer, Frame *frameReceive, uint8_t size) {
     int8_t i = 0;
     frameReceive->id.code = buffer[i++];
-    if (frameReceive->id.id.dest != MASTER_ID)
-        return 0;
+//    if (frameReceive->id.id.dest != MASTER_ID)
+//        return 0;
     //source d'erreur -2 ou -1
     if (!srv_TestCheksum(buffer, size-1, buffer[size-1]))
         return 0;

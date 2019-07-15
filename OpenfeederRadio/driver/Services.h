@@ -98,7 +98,7 @@
 #define SLAVE2_ID 2
 #define SLAVE3_ID 3
 #define SLAVE4_ID 4
-#define BROADCAST 15
+#define ID_BROADCAST 15
 
 #define MASTER_ID 14
 #define STATION 1

@@ -3428,7 +3428,11 @@ int8_t radioAlphaTRX_receive(uint8_t buffer[FRAME_LENGTH]) {
         }
         receiveData.word = radioAlphaTRX_Command(0xB000);
         buffer[i] = receiveData.byte.low;
-        if (receiveData.byte.low == 0) {
+        idOF id;
+        id.code = receiveData.byte.low;
+        if (id.id.dest != MASTER_ID && id.id.dest != ID_BROADCAST) {
+            return 0;
+        } else if (receiveData.byte.low == 0) {
             break;
         }
     }
@@ -3437,9 +3441,12 @@ int8_t radioAlphaTRX_receive(uint8_t buffer[FRAME_LENGTH]) {
 
 void radioAlphaTRX_CaptureFrame() {
     if ((sizeBuf = radioAlphaTRX_receive(BUF)) > 0) {
+        LED_RED_SetLow();
         LED_BLUE_Toggle();
         MASTER_SetMsgReceiveRF(1);
         TMR_SetMsgRecuTimeout(TIME_OUT_GET_FRAME); // on demare le timer, car le bufer est probablement remplie 
+    }else {
+        LED_RED_SetHigh();
     }
     //on se remet en ecoute 
     radioAlphaTRX_ReceivedMode();

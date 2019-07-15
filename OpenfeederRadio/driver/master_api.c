@@ -240,7 +240,7 @@ int8_t MASTER_SendDateRF() {
     get_time(&hf);
     //creation de du format pour l'envoie  ensEsclave[0].logRecup = 0;
     serial_buffer(date, hf);
-    return Master_SendMsgRF(BROADCAST, HORLOGE, (uint8_t *) date, 1, 1); // a voir
+    return Master_SendMsgRF(ID_BROADCAST, HORLOGE, (uint8_t *) date, 1, 1); // a voir
 }
 
 /*********************************************************************

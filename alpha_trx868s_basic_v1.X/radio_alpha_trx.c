@@ -45,14 +45,12 @@ STATUS_READ_VAL RF_StatusRead; // Status Read Command
 
 
 
-unsigned int FSK_Transceiver_ConfigFq( unsigned char freqSelected )
-{
+unsigned int FSK_Transceiver_ConfigFq(unsigned char freqSelected) {
     unsigned int FrequencySet;
     //    unsigned char FrequencySet;
 
     /* Mise a jour du registre du module RF */
-    switch ( freqSelected )
-    {
+    switch (freqSelected) {
         case FQ_001:
 #if defined(FQ_RESTRICTION_LOW)         // Restriction 37,5-40
             //FrequencySet = 0x0070; // F= 112 --> F0= 430.28 MHz
@@ -3172,30 +3170,26 @@ unsigned int FSK_Transceiver_ConfigFq( unsigned char freqSelected )
 
     FrequencySet |= FQ_SET_CMD_CODE; // ajouter le code commande ? la valeur de la Fq
 
-    return (FrequencySet );
+    return (FrequencySet);
 
 } // end of FSK_Transceiver_ConfigFq()
 
-
-
 void radioAlphaTRX_Init(void) {
-//
+    //
     RF_StatusRead.Val = 0;
-//    RF_StatusRead.Val = radioAlphaTRX_Command(STATUS_READ_CMD); // intitial SPI transfer added to avoid power-up problem
+    //    RF_StatusRead.Val = radioAlphaTRX_Command(STATUS_READ_CMD); // intitial SPI transfer added to avoid power-up problem
     /**-------------> Frequency Setting Command @ 433 MHz <--------------------*/
-//#if defined(UART_DEBUG)
-//    printf("status 0x%04X\n", RF_StatusRead.Val);
-//#endif
-    
-        do
-    {
+    //#if defined(UART_DEBUG)
+    //    printf("status 0x%04X\n", RF_StatusRead.Val);
+    //#endif
+
+    do {
         RF_StatusRead.Val = radioAlphaTRX_Command(STATUS_READ_CMD); // intitial SPI transfer added to avoid power-up problem
 #if defined(UART_DEBUG)
-        printf( "A other Wait until RFM12B is out of power-up reset, status: 0x%04X\r\n", RF_StatusRead.Val );
+        printf("A other Wait until RFM12B is out of power-up reset, status: 0x%04X\r\n", RF_StatusRead.Val);
 #endif
-    }
-    while ( RF_StatusRead.bits.b14_POR );
-    
+    }    while (RF_StatusRead.bits.b14_POR);
+
     //    ALPHA_TRX433S_Control(0xA640); // Set operation frequency: Fc= 430+F*0.0025 , soit 430+1600*0.0025= 434 MHz avec 0x640 --> 110 0100 0000
     RF_FrequencySet.Val = FQ_SET_CMD_POR;
     RF_StatusRead.Val = radioAlphaTRX_Command(RF_FrequencySet.Val); // Set operation frequency: Fc= 430+F*0.0025 , soit 430+1600*0.0025= 434 MHz avec 0x640 --> 110 0100 0000 
@@ -3217,7 +3211,7 @@ void radioAlphaTRX_Init(void) {
     RF_ReceiverControl.REGbits.Pin16_function = INTERRUPT_INPUT;
     radioAlphaTRX_Command(RF_ReceiverControl.Val);
 
-    
+
     /** REG03: Frequency Setting Command @ 868 MHz ***************************************/
     // 96 < F < 3903 = 1600
     // 433 band: Fc= 430+F*0.0025 MHz ou 10*(43+F/4000)=
@@ -3229,11 +3223,11 @@ void radioAlphaTRX_Init(void) {
     //    RF_FrequencySet.REGbits.SetOperationFrequency_L = 0x40;
 
     //    RF_FrequencySet.Val = FSK_Transceiver_ConfigFq( Switch_Read( ) );
-    RF_FrequencySet.Val = FSK_Transceiver_ConfigFq( FQ_001 );
-    radioAlphaTRX_Command( RF_FrequencySet.Val ); // Set operation frequency: Fc= 430+F*0.0025 , soit 430+1600*0.0025= 434 MHz avec 0x640 --> 110 0100 0000
+    RF_FrequencySet.Val = FSK_Transceiver_ConfigFq(FQ_001);
+    radioAlphaTRX_Command(RF_FrequencySet.Val); // Set operation frequency: Fc= 430+F*0.0025 , soit 430+1600*0.0025= 434 MHz avec 0x640 --> 110 0100 0000
 
-    
-    
+
+
     /** 0xC2AC - Data Filter Command */
     // AL,!ml,DIG,DQD4
     // al - Clock recovery (CR) auto lock control : auto mode
@@ -3296,9 +3290,9 @@ void radioAlphaTRX_ReceivedMode(void) {
     radioAlphaTRX_Command(0x82C9);
     RF_FIFOandResetMode.bits.b1_ff = 1; // FIFO fill will be enabled after synchronize pattern reception
     RF_StatusRead.Val = radioAlphaTRX_Command(RF_FIFOandResetMode.Val); // --> 0xCA83
-//#if defined(UART_DEBUG)
-//        printf("status 0x%04X\n", RF_StatusRead.Val);
-//#endif
+    //#if defined(UART_DEBUG)
+    //        printf("status 0x%04X\n", RF_StatusRead.Val);
+    //#endif
     radioAlphaTRX_SetSendMode(0); // on n'est plus en mode emission
 }
 
@@ -3446,7 +3440,11 @@ int8_t radioAlphaTRX_receive(uint8_t buffer[FRAME_LENGTH]) {
         }
         receiveData.word = radioAlphaTRX_Command(0xB000);
         buffer[i] = receiveData.byte.low;
-        if (receiveData.byte.low == 0) {
+        idOF id;
+        id.code = receiveData.byte.low;
+        if (id.id.dest != SLAVE_ID && id.id.dest != ID_BROADCAST) {
+            return 0;
+        } else if (receiveData.byte.low == 0) {
             break;
         }
     }
@@ -3458,27 +3456,27 @@ bool radioAlphaTRX_updateDate(uint8_t date[14]) {
     RF_Type_And_nbRemaining paquet;
     paquet.code = BUF[i++];
     if (paquet.ret.typePaquet != HORLOGE) return false;
-    
-    if (!srv_TestCheksum(BUF, sizeBuf-1, BUF[sizeBuf-1])) return false;
+    if (!srv_TestCheksum(BUF, sizeBuf - 1, BUF[sizeBuf - 1])) return false;
     i++;
     int8_t j = 0;
-    for (j; j < sizeBuf-i; j++) date[j] = BUF[i++];
+    for (j; j < sizeBuf - i; j++) date[j] = BUF[i++];
     return true;
 }
-
 
 void radioAlphaTRX_CaptureFrame() {
     if ((sizeBuf = radioAlphaTRX_receive(BUF)) > 0) {
         //traitement si horloge si non msg receve
+        LED_STATUS_R_SetLow();
         uint8_t date[14];
         if (radioAlphaTRX_updateDate(date)) {
-//            LED_STATUS_R_Toggle();
             radioAlphaTRX_SlaveUpdateDate(date);
         } else {
             setLedsStatusColor(LED_BLUE);
             APP_setMsgReceive(1);
             TMR_SetMsgRecuTimeout(TIME_OUT_GET_FRAME); // on demare le timer, car le bufer est probablement remplie 
         }
+    }else {
+        LED_STATUS_R_SetHigh();
     }
     //on se remet en ecoute 
     radioAlphaTRX_ReceivedMode();
