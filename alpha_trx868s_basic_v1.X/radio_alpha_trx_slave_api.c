@@ -107,7 +107,6 @@ int8_t radioAlphaTRX_SlaveSendMsgRF(uint8_t typeMsg,
     frameToSend.rfTandNBR.ret.typePaquet = typeMsg;
     frameToSend.rfTandNBR.ret.nbRemaining = nbRemaining;
     ///____________________________________________________________________
-
     int8_t size = srv_CreatePaketRF(frameToSend, dataToSend);
     if (radioAlphaTRX_SendMode()) {
         radioAlphaTRX_SendData(dataToSend, size);
@@ -276,7 +275,7 @@ void radioAlphaTRX_SlaveHundlerMsgReceived() {
                         nbBlock = msgReceive.idMsg;
                         //TODO recharge un nouveau block en calclant a partir du numero de bloc
 #if defined(UART_DEBUG)
-                printf("nume bloc a envoyer %d, recharge d'un bloc\n", msgReceive.idMsg);
+                        printf("nume bloc a envoyer %d, recharge d'un bloc\n", msgReceive.idMsg);
 #endif
                         curseur = 1;
                     }

@@ -71,6 +71,10 @@
     <Elem>test</Elem>
     <Elem>temps</Elem>
     <Elem>alpha_trx_driver</Elem>
+    <Elem>mcc_generated_files/driver</Elem>
+    <Elem>mcc_generated_files/driver_uart</Elem>
+    <Elem>mcc_generated_files/appGSM</Elem>
+    <Elem>appGSM</Elem>
   </sourceRootList>
   <projectmakefile>Makefile</projectmakefile>
   <confs>

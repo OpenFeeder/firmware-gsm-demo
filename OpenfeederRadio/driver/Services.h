@@ -62,7 +62,7 @@
 
 /*******************************************************************************/
 //_________________________Radio Alpha TRX Infos_______________________________*/
-#define TIME_OUT_WAIT_RQST        100
+#define TIME_OUT_WAIT_RQST         1000
 #define FRAME_LENGTH                 50 // Longueur total d'une trame en octet
 #define ERROR_LENGTH                  8
 #define SIZE_DATA                    36
@@ -75,7 +75,7 @@
 #define NB_ERR_BUF                   10 // nombre d'errerur possible 
 #define NB_DATA_BUF                  20 // pour l'instat on dit qye c'est 20 ==>
 #define MAX_W                        10 // nombre MAX de paquet a transmettre avant d'attendre un ack 
-#define NB_SLAVE                      2
+#define NB_SLAVE                      1
 #define MAX_TIMEOUT                  20 // nombre de timeout avant de decider que la liaison avec le slave est couper 
 #define MAX_ERROR                    10 // nombre du quel on considere que la communication est interompue entre le slave est le master
 #define MAX_TRY_TO_SYNC              5 // le nombre d'essaie avant de decider qu'on est pas connecte

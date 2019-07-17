@@ -3187,9 +3187,15 @@ void radioAlphaTRX_Init(void) {
     /**-------------> Frequency Setting Command @ 433 MHz <--------------------*/
 
     //    ALPHA_TRX433S_Control(0xA640); // Set operation frequency: Fc= 430+F*0.0025 , soit 430+1600*0.0025= 434 MHz avec 0x640 --> 110 0100 0000
-    //    RF_FrequencySet.Val = FQ_SET_CMD_POR;
-    //    RF_StatusRead.Val = radioAlphaTRX_Command(RF_FrequencySet.Val); // Set operation frequency: Fc= 430+F*0.0025 , soit 430+1600*0.0025= 434 MHz avec 0x640 --> 110 0100 0000 
-
+//        RF_FrequencySet.Val = FQ_SET_CMD_POR;
+//        RF_StatusRead.Val = radioAlphaTRX_Command(RF_FrequencySet.Val); // Set operation frequency: Fc= 430+F*0.0025 , soit 430+1600*0.0025= 434 MHz avec 0x640 --> 110 0100 0000 
+    
+    //le CS permet d'affiner le bpts
+    radioAlphaTRX_Command(0xC684);
+    
+    //force de sortie -21  TX configure controle commande 
+    radioAlphaTRX_CaptureFrame(9847);
+    
     /**-------------> FReceiver Control Command <------------------------------*/
     // Interrupt,FAST,200kHz,20dBm,-103dBm
     // p16 - Interrupt input (bit 10)
@@ -3200,7 +3206,7 @@ void radioAlphaTRX_Init(void) {
     RF_ReceiverControl.Val = RX_CTRL_CMD_POR;
     RF_ReceiverControl.REGbits.RSSIsetth = RSSIsetth_n103;
     RF_ReceiverControl.REGbits.GLNA = GAIN_n20_dB;
-    RF_ReceiverControl.REGbits.RX_BW_Select = BW_200_KHz;
+    RF_ReceiverControl.REGbits.RX_BW_Select = BW_67_KHz;
     RF_ReceiverControl.REGbits.VDI_RespSetting = FAST;
     RF_ReceiverControl.REGbits.Pin16_function = INTERRUPT_INPUT;
     radioAlphaTRX_Command(RF_ReceiverControl.Val);
@@ -3216,7 +3222,8 @@ void radioAlphaTRX_Init(void) {
     //    RF_FrequencySet.REGbits.SetOperationFrequency_L = 0x40;
 
     //    RF_FrequencySet.Val = FSK_Transceiver_ConfigFq( Switch_Read( ) );
-    RF_FrequencySet.Val = FSK_Transceiver_ConfigFq(FQ_001);
+//    RF_FrequencySet.Val = FSK_Transceiver_ConfigFq(FQ_001);
+//    RF_FrequencySet.Val 
     radioAlphaTRX_Command(RF_FrequencySet.Val); // Set operation frequency: Fc= 430+F*0.0025 , soit 430+1600*0.0025= 434 MHz avec 0x640 --> 110 0100 0000
 
 

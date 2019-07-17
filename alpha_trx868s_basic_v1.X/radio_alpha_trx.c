@@ -3179,9 +3179,6 @@ void radioAlphaTRX_Init(void) {
     RF_StatusRead.Val = 0;
     //    RF_StatusRead.Val = radioAlphaTRX_Command(STATUS_READ_CMD); // intitial SPI transfer added to avoid power-up problem
     /**-------------> Frequency Setting Command @ 433 MHz <--------------------*/
-    //#if defined(UART_DEBUG)
-    //    printf("status 0x%04X\n", RF_StatusRead.Val);
-    //#endif
 
     do {
         RF_StatusRead.Val = radioAlphaTRX_Command(STATUS_READ_CMD); // intitial SPI transfer added to avoid power-up problem
@@ -3191,11 +3188,19 @@ void radioAlphaTRX_Init(void) {
     }    while (RF_StatusRead.bits.b14_POR);
 
     //    ALPHA_TRX433S_Control(0xA640); // Set operation frequency: Fc= 430+F*0.0025 , soit 430+1600*0.0025= 434 MHz avec 0x640 --> 110 0100 0000
-    RF_FrequencySet.Val = FQ_SET_CMD_POR;
-    RF_StatusRead.Val = radioAlphaTRX_Command(RF_FrequencySet.Val); // Set operation frequency: Fc= 430+F*0.0025 , soit 430+1600*0.0025= 434 MHz avec 0x640 --> 110 0100 0000 
-#if defined(UART_DEBUG)
-    printf("fsq 0x%04X\n", RF_StatusRead.Val);
-#endif
+//    RF_FrequencySet.Val = FQ_SET_CMD_POR;
+//    RF_StatusRead.Val = radioAlphaTRX_Command(RF_FrequencySet.Val); // Set operation frequency: Fc= 430+F*0.0025 , soit 430+1600*0.0025= 434 MHz avec 0x640 --> 110 0100 0000 
+//#if defined(UART_DEBUG)
+//    printf("fsq 0x%04X\n", RF_StatusRead.Val);
+//#endif
+    
+    //le CS permet d'affiner le bpts
+    radioAlphaTRX_Command(0xC684);
+    
+    
+    //force de sortie -21  TX configure controle commande 
+    radioAlphaTRX_CaptureFrame(9847);
+    
     /**-------------> FReceiver Control Command <------------------------------*/
     // Interrupt,FAST,200kHz,20dBm,-103dBm
     // p16 - Interrupt input (bit 10)
@@ -3206,7 +3211,7 @@ void radioAlphaTRX_Init(void) {
     RF_ReceiverControl.Val = RX_CTRL_CMD_POR;
     RF_ReceiverControl.REGbits.RSSIsetth = RSSIsetth_n103;
     RF_ReceiverControl.REGbits.GLNA = GAIN_n20_dB;
-    RF_ReceiverControl.REGbits.RX_BW_Select = BW_200_KHz;
+    RF_ReceiverControl.REGbits.RX_BW_Select = BW_67_KHz;
     RF_ReceiverControl.REGbits.VDI_RespSetting = FAST;
     RF_ReceiverControl.REGbits.Pin16_function = INTERRUPT_INPUT;
     radioAlphaTRX_Command(RF_ReceiverControl.Val);
@@ -3223,7 +3228,7 @@ void radioAlphaTRX_Init(void) {
     //    RF_FrequencySet.REGbits.SetOperationFrequency_L = 0x40;
 
     //    RF_FrequencySet.Val = FSK_Transceiver_ConfigFq( Switch_Read( ) );
-    RF_FrequencySet.Val = FSK_Transceiver_ConfigFq(FQ_001);
+//    RF_FrequencySet.Val = FSK_Transceiver_ConfigFq(FQ_001);
     radioAlphaTRX_Command(RF_FrequencySet.Val); // Set operation frequency: Fc= 430+F*0.0025 , soit 430+1600*0.0025= 434 MHz avec 0x640 --> 110 0100 0000
 
 
@@ -3301,7 +3306,7 @@ void radioAlphaTRX_ReceivedMode(void) {
 int8_t radioAlphaTRX_SendMode(void) {
     //close Rx mode 
     radioAlphaTRX_Command(0x8209);
-
+//    radioAlphaTRX_CaptureFrame(RX_FIFO_READ_CMD);
     /**-------------> Configuration Setting Command <--------------------------*/
     //  bit  15  14  13  12  11  10   9   8   7   6   5   4   3   2   1   0   POR
     //  Val   1   0   0   0   0   0   0   0  el  ef  b1  b0  x3  x2  x1  x0   0x8008
