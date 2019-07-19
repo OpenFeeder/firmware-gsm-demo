@@ -10,7 +10,6 @@
 #include <stdio.h>
 #include "app.h"
 #include "app_debug.h"
-#include "radio_alpha_trx_slave_api.h"
 
 #if defined (USE_UART1_SERIAL_INTERFACE)
 

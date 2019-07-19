@@ -109,7 +109,11 @@ int8_t radioAlphaTRX_SlaveSendMsgRF(uint8_t typeMsg,
     ///____________________________________________________________________
     int8_t size = srv_CreatePaketRF(frameToSend, dataToSend);
     if (radioAlphaTRX_SendMode()) {
-        radioAlphaTRX_SendData(dataToSend, size);
+//        int8_t send = 
+            radioAlphaTRX_SendData(dataToSend, size);
+//#if defined(UART_DEBUG)
+//        printf("envoie de %d vs %d reelement envoye\n", size, send);
+//#endif
         ret = 1;
     } else {
 #if defined(UART_DEBUG)
