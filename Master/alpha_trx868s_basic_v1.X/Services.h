@@ -19,13 +19,13 @@
 
 /*******************************************************************************/
 //_________________________Radio Alpha TRX Infos_______________________________*/
-#define TIME_OUT_WAIT_RQST         1000
+#define TIME_OUT_WAIT_RQST         5000
 #define FRAME_LENGTH                 50 // Longueur total d'une trame en octet
 #define ERROR_LENGTH                  8
 #define SIZE_DATA                    36
 #define TIME_OUT_nIRQ                 2 // 2 ms
 #define LAPS                         50 // on attend X ms avant de transmettre un nouveau msg 
-#define SEND_HORLOG_TIMEOUT        5000 // 1 min
+#define SEND_HORLOG_TIMEOUT       10000 // 1 min
 #define AFTER_SEND_HORLOGE           20 // 20 ms
 #define TIME_OUT_GET_FRAME         1500 // temps max, pour que le msg recu soit encore exploitable
 // au dela le mster ne m'ecoute pas donc cela ne sert ? rien 
@@ -64,16 +64,16 @@
 
 
 /**------------------------>> M A C R O S <<-----------------------------------*/
-//CS => chip select
-#define RF_nSEL_SetLow( ) RF_nSEL_SetLow( )
-#define RF_nSEL_SetHigh( ) RF_nSEL_SetHigh( )
-#define RF_nSEL_Toggle( ) RF_nSEL_Toggle( )
-#define RF_nSEL_GetValue() RF_nSEL_GetValue()
-
-#define RF_nIRQ_SetLow( ) RF_nIRQ_SetLow( )
-#define RF_nIRQ_SetHigh( ) RF_nIRQ_SetHigh( )
-#define RF_nIRQ_Toggle( ) RF_nIRQ_Toggle( )
-#define RF_nIRQ_GetValue() RF_nIRQ_GetValue()
+////CS => chip select
+//#define RF_nSEL_SetLow( ) RF_nSEL_SetLow( )
+//#define RF_nSEL_SetHigh( ) RF_nSEL_SetHigh( )
+//#define RF_nSEL_Toggle( ) RF_nSEL_Toggle( )
+//#define RF_nSEL_GetValue() RF_nSEL_GetValue()
+//
+//#define RF_nIRQ_SetLow( ) RF_nIRQ_SetLow( )
+//#define RF_nIRQ_SetHigh( ) RF_nIRQ_SetHigh( )
+//#define RF_nIRQ_Toggle( ) RF_nIRQ_Toggle( )
+//#define RF_nIRQ_GetValue() RF_nIRQ_GetValue()
 
 /*_____________________________________________________________________________*/
 

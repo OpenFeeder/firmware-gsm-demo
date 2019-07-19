@@ -47,6 +47,7 @@ int8_t i = 0;
 //SERIAL_CONTROL APP_SerialDebugTasks( void )
 
 //uint8_t APP_SerialDebugTasks(void) {
+
 void APP_SerialDebugTasks(void) {
     //uint8_t new_serial_command = 0;
     //    uint16_t dc_pwm;
@@ -56,7 +57,7 @@ void APP_SerialDebugTasks(void) {
     if (UART1_TRANSFER_STATUS_RX_DATA_PRESENT & UART1_TransferStatusGet()) {
         /* If there is at least one byte of data has been received. */
         uint8_t data_from_uart1 = UART1_Read();
-        
+
         switch (data_from_uart1) {
             case ',':
             case '?':
@@ -79,22 +80,49 @@ void APP_SerialDebugTasks(void) {
                 //                return SC_NONE;
                 break;
                 /* -------------------------------------------------------------- */
+            case 'a':
+            case 'A':
 
-            case 'b':
-            case 'B':
-                
-                radioAlphaTRX_Init();
-                radioAlphaTRX_ReceivedMode();
+                appData.state = MSTR_STATE_GENERAL_AFTER_DAYTIME;
                 break;
                 /* -------------------------------------------------------------- */
-                
+            case 'b':
+            case 'B':
+
+                appData.state = MSTR_STATE_GENERAL_BEFOR_DAYTIME;
+                break;
+                /* -------------------------------------------------------------- */
+            case 'd':
+            case 'D':
+
+                appData.state = MSTR_STATE_GENERAL_DAYTIME;
+                break;
+                /* -------------------------------------------------------------- */
+            case 'n':
+            case 'N':
+
+#if defined(UART_DEBUG)
+                printf("demande d'infos\n");
+#endif
+                printf("send %d \n", Master_SendMsgRF(1,
+                                                      INFOS, (uint8_t *) ("INFO"), 1, 1));
+                break;
+                /* -------------------------------------------------------------- */
+            case 'm':
+            case 'M':
+
+#if defined(UART_DEBUG)
+                printf("demande d'infos\n");
+#endif
+                printf("send %d \n", Master_SendMsgRF(2,
+                                                      INFOS, (uint8_t *) ("INFO"), 1, 1));
+                break;
+                /* -------------------------------------------------------------- */
             case 'r':
             case 'R':
 #if defined(UART_DEBUG)
                 printf("ERROR GENERATED\n");
 #endif          
-                i = i%8+1;
-                radioAlphaTRX_SlaveSaveError(i);
                 break;
                 /* -------------------------------------------------------------- */
 
@@ -102,9 +130,9 @@ void APP_SerialDebugTasks(void) {
             case 'S':
                 //case 'S':
 #if defined(UART_DEBUG)
-                printf("envoie\n");
+                printf("envoie date\n");
 #endif
-                radioAlphaTRX_SlaveSendNothing();
+                MASTER_SendDateRF();
                 break;
                 /* -------------------------------------------------------------- */
 
@@ -112,12 +140,12 @@ void APP_SerialDebugTasks(void) {
             case 'T':
                 rf_power_status = !rf_power_status;
                 if (rf_power_status == false) {
-                    powerRFEnable( );
+                    powerRFEnable();
                     printf("RF Module enable\n");
                     radioAlphaTRX_Init();
                     radioAlphaTRX_ReceivedMode(); // receive mode actived
                 } else {
-                    powerRFDisable( );
+                    powerRFDisable();
                     printf("RF Module disable\n");
                 }
                 /* Display date and time from RTCC module. */
@@ -132,7 +160,7 @@ void APP_SerialDebugTasks(void) {
                 break;
         }
         //        return SC_NONE;
-//        return new_serial_command;
+        //        return new_serial_command;
     } /* end of if ( UART1_TRANSFER_STATUS_RX_DATA_PRESENT & UART1_TransferStatusGet( ) ) */
 }
 
@@ -157,7 +185,7 @@ uint16_t readIntFromUart1(void) {
 
             ++numBytes;
         }
-    }    while (numBytes < UART1_BUFFER_SIZE);
+    } while (numBytes < UART1_BUFFER_SIZE);
 
     rx_data_buffer[numBytes + 1] = '\0'; /* add end of string */
 

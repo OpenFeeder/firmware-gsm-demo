@@ -57,17 +57,17 @@ OBJECTDIR=build/${CND_CONF}/${IMAGE_TYPE}
 DISTDIR=dist/${CND_CONF}/${IMAGE_TYPE}
 
 # Source Files Quoted if spaced
-SOURCEFILES_QUOTED_IF_SPACED=mcc_generated_files/uart1.c mcc_generated_files/mcc.c mcc_generated_files/spi1.c mcc_generated_files/interrupt_manager.c mcc_generated_files/traps.c mcc_generated_files/pin_manager.c mcc_generated_files/tmr3.c mcc_generated_files/rtcc.c mcc_generated_files/tmr1.c main.c app.c app_debug.c app_power.c led_status.c delay.c app_timers_callback.c radio_alpha_trx.c Services.c radio_alpha_trx_slave_api.c timer.c temps.c
+SOURCEFILES_QUOTED_IF_SPACED=mcc_generated_files/uart1.c mcc_generated_files/mcc.c mcc_generated_files/spi1.c mcc_generated_files/interrupt_manager.c mcc_generated_files/traps.c mcc_generated_files/pin_manager.c mcc_generated_files/tmr3.c mcc_generated_files/rtcc.c mcc_generated_files/tmr1.c main.c app.c app_debug.c app_power.c led_status.c delay.c app_timers_callback.c radio_alpha_trx.c Services.c timer.c temps.c master_api.c
 
 # Object Files Quoted if spaced
-OBJECTFILES_QUOTED_IF_SPACED=${OBJECTDIR}/mcc_generated_files/uart1.o ${OBJECTDIR}/mcc_generated_files/mcc.o ${OBJECTDIR}/mcc_generated_files/spi1.o ${OBJECTDIR}/mcc_generated_files/interrupt_manager.o ${OBJECTDIR}/mcc_generated_files/traps.o ${OBJECTDIR}/mcc_generated_files/pin_manager.o ${OBJECTDIR}/mcc_generated_files/tmr3.o ${OBJECTDIR}/mcc_generated_files/rtcc.o ${OBJECTDIR}/mcc_generated_files/tmr1.o ${OBJECTDIR}/main.o ${OBJECTDIR}/app.o ${OBJECTDIR}/app_debug.o ${OBJECTDIR}/app_power.o ${OBJECTDIR}/led_status.o ${OBJECTDIR}/delay.o ${OBJECTDIR}/app_timers_callback.o ${OBJECTDIR}/radio_alpha_trx.o ${OBJECTDIR}/Services.o ${OBJECTDIR}/radio_alpha_trx_slave_api.o ${OBJECTDIR}/timer.o ${OBJECTDIR}/temps.o
-POSSIBLE_DEPFILES=${OBJECTDIR}/mcc_generated_files/uart1.o.d ${OBJECTDIR}/mcc_generated_files/mcc.o.d ${OBJECTDIR}/mcc_generated_files/spi1.o.d ${OBJECTDIR}/mcc_generated_files/interrupt_manager.o.d ${OBJECTDIR}/mcc_generated_files/traps.o.d ${OBJECTDIR}/mcc_generated_files/pin_manager.o.d ${OBJECTDIR}/mcc_generated_files/tmr3.o.d ${OBJECTDIR}/mcc_generated_files/rtcc.o.d ${OBJECTDIR}/mcc_generated_files/tmr1.o.d ${OBJECTDIR}/main.o.d ${OBJECTDIR}/app.o.d ${OBJECTDIR}/app_debug.o.d ${OBJECTDIR}/app_power.o.d ${OBJECTDIR}/led_status.o.d ${OBJECTDIR}/delay.o.d ${OBJECTDIR}/app_timers_callback.o.d ${OBJECTDIR}/radio_alpha_trx.o.d ${OBJECTDIR}/Services.o.d ${OBJECTDIR}/radio_alpha_trx_slave_api.o.d ${OBJECTDIR}/timer.o.d ${OBJECTDIR}/temps.o.d
+OBJECTFILES_QUOTED_IF_SPACED=${OBJECTDIR}/mcc_generated_files/uart1.o ${OBJECTDIR}/mcc_generated_files/mcc.o ${OBJECTDIR}/mcc_generated_files/spi1.o ${OBJECTDIR}/mcc_generated_files/interrupt_manager.o ${OBJECTDIR}/mcc_generated_files/traps.o ${OBJECTDIR}/mcc_generated_files/pin_manager.o ${OBJECTDIR}/mcc_generated_files/tmr3.o ${OBJECTDIR}/mcc_generated_files/rtcc.o ${OBJECTDIR}/mcc_generated_files/tmr1.o ${OBJECTDIR}/main.o ${OBJECTDIR}/app.o ${OBJECTDIR}/app_debug.o ${OBJECTDIR}/app_power.o ${OBJECTDIR}/led_status.o ${OBJECTDIR}/delay.o ${OBJECTDIR}/app_timers_callback.o ${OBJECTDIR}/radio_alpha_trx.o ${OBJECTDIR}/Services.o ${OBJECTDIR}/timer.o ${OBJECTDIR}/temps.o ${OBJECTDIR}/master_api.o
+POSSIBLE_DEPFILES=${OBJECTDIR}/mcc_generated_files/uart1.o.d ${OBJECTDIR}/mcc_generated_files/mcc.o.d ${OBJECTDIR}/mcc_generated_files/spi1.o.d ${OBJECTDIR}/mcc_generated_files/interrupt_manager.o.d ${OBJECTDIR}/mcc_generated_files/traps.o.d ${OBJECTDIR}/mcc_generated_files/pin_manager.o.d ${OBJECTDIR}/mcc_generated_files/tmr3.o.d ${OBJECTDIR}/mcc_generated_files/rtcc.o.d ${OBJECTDIR}/mcc_generated_files/tmr1.o.d ${OBJECTDIR}/main.o.d ${OBJECTDIR}/app.o.d ${OBJECTDIR}/app_debug.o.d ${OBJECTDIR}/app_power.o.d ${OBJECTDIR}/led_status.o.d ${OBJECTDIR}/delay.o.d ${OBJECTDIR}/app_timers_callback.o.d ${OBJECTDIR}/radio_alpha_trx.o.d ${OBJECTDIR}/Services.o.d ${OBJECTDIR}/timer.o.d ${OBJECTDIR}/temps.o.d ${OBJECTDIR}/master_api.o.d
 
 # Object Files
-OBJECTFILES=${OBJECTDIR}/mcc_generated_files/uart1.o ${OBJECTDIR}/mcc_generated_files/mcc.o ${OBJECTDIR}/mcc_generated_files/spi1.o ${OBJECTDIR}/mcc_generated_files/interrupt_manager.o ${OBJECTDIR}/mcc_generated_files/traps.o ${OBJECTDIR}/mcc_generated_files/pin_manager.o ${OBJECTDIR}/mcc_generated_files/tmr3.o ${OBJECTDIR}/mcc_generated_files/rtcc.o ${OBJECTDIR}/mcc_generated_files/tmr1.o ${OBJECTDIR}/main.o ${OBJECTDIR}/app.o ${OBJECTDIR}/app_debug.o ${OBJECTDIR}/app_power.o ${OBJECTDIR}/led_status.o ${OBJECTDIR}/delay.o ${OBJECTDIR}/app_timers_callback.o ${OBJECTDIR}/radio_alpha_trx.o ${OBJECTDIR}/Services.o ${OBJECTDIR}/radio_alpha_trx_slave_api.o ${OBJECTDIR}/timer.o ${OBJECTDIR}/temps.o
+OBJECTFILES=${OBJECTDIR}/mcc_generated_files/uart1.o ${OBJECTDIR}/mcc_generated_files/mcc.o ${OBJECTDIR}/mcc_generated_files/spi1.o ${OBJECTDIR}/mcc_generated_files/interrupt_manager.o ${OBJECTDIR}/mcc_generated_files/traps.o ${OBJECTDIR}/mcc_generated_files/pin_manager.o ${OBJECTDIR}/mcc_generated_files/tmr3.o ${OBJECTDIR}/mcc_generated_files/rtcc.o ${OBJECTDIR}/mcc_generated_files/tmr1.o ${OBJECTDIR}/main.o ${OBJECTDIR}/app.o ${OBJECTDIR}/app_debug.o ${OBJECTDIR}/app_power.o ${OBJECTDIR}/led_status.o ${OBJECTDIR}/delay.o ${OBJECTDIR}/app_timers_callback.o ${OBJECTDIR}/radio_alpha_trx.o ${OBJECTDIR}/Services.o ${OBJECTDIR}/timer.o ${OBJECTDIR}/temps.o ${OBJECTDIR}/master_api.o
 
 # Source Files
-SOURCEFILES=mcc_generated_files/uart1.c mcc_generated_files/mcc.c mcc_generated_files/spi1.c mcc_generated_files/interrupt_manager.c mcc_generated_files/traps.c mcc_generated_files/pin_manager.c mcc_generated_files/tmr3.c mcc_generated_files/rtcc.c mcc_generated_files/tmr1.c main.c app.c app_debug.c app_power.c led_status.c delay.c app_timers_callback.c radio_alpha_trx.c Services.c radio_alpha_trx_slave_api.c timer.c temps.c
+SOURCEFILES=mcc_generated_files/uart1.c mcc_generated_files/mcc.c mcc_generated_files/spi1.c mcc_generated_files/interrupt_manager.c mcc_generated_files/traps.c mcc_generated_files/pin_manager.c mcc_generated_files/tmr3.c mcc_generated_files/rtcc.c mcc_generated_files/tmr1.c main.c app.c app_debug.c app_power.c led_status.c delay.c app_timers_callback.c radio_alpha_trx.c Services.c timer.c temps.c master_api.c
 
 
 CFLAGS=
@@ -220,13 +220,6 @@ ${OBJECTDIR}/Services.o: Services.c  nbproject/Makefile-${CND_CONF}.mk
 	${MP_CC} $(MP_EXTRA_CC_PRE)  Services.c  -o ${OBJECTDIR}/Services.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/Services.o.d"      -g -D__DEBUG -D__MPLAB_DEBUGGER_PK3=1  -mno-eds-warn  -omf=elf -DXPRJ_default=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O0 -I"mcc_generated_files" -msmart-io=1 -Wall -msfr-warn=off  
 	@${FIXDEPS} "${OBJECTDIR}/Services.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
 	
-${OBJECTDIR}/radio_alpha_trx_slave_api.o: radio_alpha_trx_slave_api.c  nbproject/Makefile-${CND_CONF}.mk
-	@${MKDIR} "${OBJECTDIR}" 
-	@${RM} ${OBJECTDIR}/radio_alpha_trx_slave_api.o.d 
-	@${RM} ${OBJECTDIR}/radio_alpha_trx_slave_api.o 
-	${MP_CC} $(MP_EXTRA_CC_PRE)  radio_alpha_trx_slave_api.c  -o ${OBJECTDIR}/radio_alpha_trx_slave_api.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/radio_alpha_trx_slave_api.o.d"      -g -D__DEBUG -D__MPLAB_DEBUGGER_PK3=1  -mno-eds-warn  -omf=elf -DXPRJ_default=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O0 -I"mcc_generated_files" -msmart-io=1 -Wall -msfr-warn=off  
-	@${FIXDEPS} "${OBJECTDIR}/radio_alpha_trx_slave_api.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
-	
 ${OBJECTDIR}/timer.o: timer.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} "${OBJECTDIR}" 
 	@${RM} ${OBJECTDIR}/timer.o.d 
@@ -240,6 +233,13 @@ ${OBJECTDIR}/temps.o: temps.c  nbproject/Makefile-${CND_CONF}.mk
 	@${RM} ${OBJECTDIR}/temps.o 
 	${MP_CC} $(MP_EXTRA_CC_PRE)  temps.c  -o ${OBJECTDIR}/temps.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/temps.o.d"      -g -D__DEBUG -D__MPLAB_DEBUGGER_PK3=1  -mno-eds-warn  -omf=elf -DXPRJ_default=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O0 -I"mcc_generated_files" -msmart-io=1 -Wall -msfr-warn=off  
 	@${FIXDEPS} "${OBJECTDIR}/temps.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
+	
+${OBJECTDIR}/master_api.o: master_api.c  nbproject/Makefile-${CND_CONF}.mk
+	@${MKDIR} "${OBJECTDIR}" 
+	@${RM} ${OBJECTDIR}/master_api.o.d 
+	@${RM} ${OBJECTDIR}/master_api.o 
+	${MP_CC} $(MP_EXTRA_CC_PRE)  master_api.c  -o ${OBJECTDIR}/master_api.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/master_api.o.d"      -g -D__DEBUG -D__MPLAB_DEBUGGER_PK3=1  -mno-eds-warn  -omf=elf -DXPRJ_default=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O0 -I"mcc_generated_files" -msmart-io=1 -Wall -msfr-warn=off  
+	@${FIXDEPS} "${OBJECTDIR}/master_api.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
 	
 else
 ${OBJECTDIR}/mcc_generated_files/uart1.o: mcc_generated_files/uart1.c  nbproject/Makefile-${CND_CONF}.mk
@@ -368,13 +368,6 @@ ${OBJECTDIR}/Services.o: Services.c  nbproject/Makefile-${CND_CONF}.mk
 	${MP_CC} $(MP_EXTRA_CC_PRE)  Services.c  -o ${OBJECTDIR}/Services.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/Services.o.d"      -mno-eds-warn  -g -omf=elf -DXPRJ_default=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O0 -I"mcc_generated_files" -msmart-io=1 -Wall -msfr-warn=off  
 	@${FIXDEPS} "${OBJECTDIR}/Services.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
 	
-${OBJECTDIR}/radio_alpha_trx_slave_api.o: radio_alpha_trx_slave_api.c  nbproject/Makefile-${CND_CONF}.mk
-	@${MKDIR} "${OBJECTDIR}" 
-	@${RM} ${OBJECTDIR}/radio_alpha_trx_slave_api.o.d 
-	@${RM} ${OBJECTDIR}/radio_alpha_trx_slave_api.o 
-	${MP_CC} $(MP_EXTRA_CC_PRE)  radio_alpha_trx_slave_api.c  -o ${OBJECTDIR}/radio_alpha_trx_slave_api.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/radio_alpha_trx_slave_api.o.d"      -mno-eds-warn  -g -omf=elf -DXPRJ_default=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O0 -I"mcc_generated_files" -msmart-io=1 -Wall -msfr-warn=off  
-	@${FIXDEPS} "${OBJECTDIR}/radio_alpha_trx_slave_api.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
-	
 ${OBJECTDIR}/timer.o: timer.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} "${OBJECTDIR}" 
 	@${RM} ${OBJECTDIR}/timer.o.d 
@@ -388,6 +381,13 @@ ${OBJECTDIR}/temps.o: temps.c  nbproject/Makefile-${CND_CONF}.mk
 	@${RM} ${OBJECTDIR}/temps.o 
 	${MP_CC} $(MP_EXTRA_CC_PRE)  temps.c  -o ${OBJECTDIR}/temps.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/temps.o.d"      -mno-eds-warn  -g -omf=elf -DXPRJ_default=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O0 -I"mcc_generated_files" -msmart-io=1 -Wall -msfr-warn=off  
 	@${FIXDEPS} "${OBJECTDIR}/temps.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
+	
+${OBJECTDIR}/master_api.o: master_api.c  nbproject/Makefile-${CND_CONF}.mk
+	@${MKDIR} "${OBJECTDIR}" 
+	@${RM} ${OBJECTDIR}/master_api.o.d 
+	@${RM} ${OBJECTDIR}/master_api.o 
+	${MP_CC} $(MP_EXTRA_CC_PRE)  master_api.c  -o ${OBJECTDIR}/master_api.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/master_api.o.d"      -mno-eds-warn  -g -omf=elf -DXPRJ_default=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O0 -I"mcc_generated_files" -msmart-io=1 -Wall -msfr-warn=off  
+	@${FIXDEPS} "${OBJECTDIR}/master_api.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
 	
 endif
 

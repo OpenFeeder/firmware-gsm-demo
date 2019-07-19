@@ -3533,6 +3533,7 @@ uint8_t radioAlphaTRX_GetSizeBuf() {
 }
 
 uint8_t * radioAlphaTRX_ReadBuf() {
+    MASTER_SetMsgReceiveRF(0);
     return BUF;
 }
 
@@ -3547,7 +3548,7 @@ int8_t radioAlphaTRX_receive(uint8_t buffer[FRAME_LENGTH]) {
         buffer[i] = receiveData.byte.low;
         idOF id;
         id.code = receiveData.byte.low;
-        if (id.id.dest != SLAVE_ID && id.id.dest != ID_BROADCAST && i == 0) {
+        if (id.id.dest != MASTER_ID && id.id.dest != ID_BROADCAST && i == 0) {
             return 0;
         } else if (receiveData.byte.low == 0) {
             break;
@@ -3556,28 +3557,14 @@ int8_t radioAlphaTRX_receive(uint8_t buffer[FRAME_LENGTH]) {
     return i;
 }
 
-bool radioAlphaTRX_updateDate(uint8_t date[14]) {
-    int8_t i = 1;
-    RF_Type_And_nbRemaining paquet;
-    paquet.code = BUF[i++];
-    if (paquet.ret.typePaquet != HORLOGE) return false;
-    if (!srv_TestCheksum(BUF, sizeBuf - 1, BUF[sizeBuf - 1])) return false;
-    i++;
-    int8_t j = 0;
-    for (j; j < sizeBuf - i; j++) date[j] = BUF[i++];
-    return true;
-}
-
 void radioAlphaTRX_CaptureFrame() {
     if ((sizeBuf = radioAlphaTRX_receive(BUF)) > 0) {
-        uint8_t date[14];
-        if (radioAlphaTRX_updateDate(date)) {
-            radioAlphaTRX_SlaveUpdateDate(date);
-        } else {
-            setLedsStatusColor(LED_BLUE);
-            APP_setMsgReceive(1);
-            TMR_SetMsgRecuTimeout(TIME_OUT_GET_FRAME); // on demare le timer, car le bufer est probablement remplie 
-        }
+        LED_STATUS_R_SetLow();
+        LED_STATUS_B_Toggle();
+        MASTER_SetMsgReceiveRF(1);
+        TMR_SetMsgRecuTimeout(TIME_OUT_GET_FRAME); // on demare le timer, car le bufer est probablement remplie 
+    }else {
+        LED_STATUS_R_SetHigh();
     }
     //on se remet en ecoute 
     radioAlphaTRX_ReceivedMode();

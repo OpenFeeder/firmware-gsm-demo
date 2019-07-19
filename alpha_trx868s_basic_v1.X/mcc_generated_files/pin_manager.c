@@ -172,10 +172,6 @@ void __attribute__((interrupt, no_auto_psv)) _CNInterrupt(void) {
             STATUS_READ_VAL RF_StatusRead;
             RF_StatusRead.Val = radioAlphaTRX_Command(STATUS_READ_CMD); //lecture du registre status 
             if (RF_StatusRead.bits.b15_RGIT_FFIT && !radioAlphaTRX_IsSendMode()) { // on verifie si la fifo est remplie 
-//#if defined(UART_DEBUG)
-//                printf("staus 0x%04X\n", RF_StatusRead.Val);
-//#endif
-                LED_STATUS_R_Toggle();
                 radioAlphaTRX_CaptureFrame();
             }
         }

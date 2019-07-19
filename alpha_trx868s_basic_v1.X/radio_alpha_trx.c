@@ -3572,8 +3572,10 @@ void radioAlphaTRX_CaptureFrame() {
     if ((sizeBuf = radioAlphaTRX_receive(BUF)) > 0) {
         uint8_t date[14];
         if (radioAlphaTRX_updateDate(date)) {
+            LED_STATUS_Y_Toggle();
             radioAlphaTRX_SlaveUpdateDate(date);
         } else {
+            LED_STATUS_B_Toggle();
             setLedsStatusColor(LED_BLUE);
             APP_setMsgReceive(1);
             TMR_SetMsgRecuTimeout(TIME_OUT_GET_FRAME); // on demare le timer, car le bufer est probablement remplie 

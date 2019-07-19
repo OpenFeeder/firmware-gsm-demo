@@ -56,13 +56,13 @@
 /*****************                                 ****************************/
 
 /**------------------------>> E N U M & S T R U C T- S T A T E  <<-------------*/
-typedef enum {
-    MSTR_STATE_GENERAL_BEFOR_DAYTIME,
-    MSTR_STATE_GENERAL_DAYTIME,
-    MSTR_STATE_GENERAL_AFTER_DAYTIME,
-    MSTR_STATE_GENERAL_END,
-    MSTR_STATE_GENERAL_ERROR
-} MSTR_STATE_GENERAL;
+//typedef enum {
+//    MSTR_STATE_GENERAL_BEFOR_DAYTIME,
+//    MSTR_STATE_GENERAL_DAYTIME,
+//    MSTR_STATE_GENERAL_AFTER_DAYTIME,
+//    MSTR_STATE_GENERAL_END,
+//    MSTR_STATE_GENERAL_ERROR
+//} MSTR_STATE_GENERAL;
 
 typedef enum {
     MSTR_STATE_GET_LOG_WAIT_EVENT, // on attend une reponse de notre demande 
@@ -87,7 +87,7 @@ typedef enum {
 // Section: extern declarations
 // *****************************************************************************
 // *****************************************************************************
-extern MSTR_STATE_GENERAL mstrState;
+//extern MSTR_STATE_GENERAL mstrState;
 extern MSTR_STATE_GET_LOG mstrStateGetLog;
 //extern volatile int8_t msgReceiveRF = 0;  // informe de l'arriver d'un msg rf 
 //extern volatile int8_t msgReceiveGSM = 0; // informe de l'arriver d'un msg GSM

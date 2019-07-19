@@ -24,10 +24,10 @@
       <itemPath>delay.h</itemPath>
       <itemPath>app_timers_callback.h</itemPath>
       <itemPath>radio_alpha_trx.h</itemPath>
-      <itemPath>radio_alpha_trx_slave_api.h</itemPath>
       <itemPath>timer.h</itemPath>
       <itemPath>Services.h</itemPath>
       <itemPath>temps.h</itemPath>
+      <itemPath>master_api.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LinkerScript"
                    displayName="Linker Files"
@@ -58,9 +58,9 @@
       <itemPath>app_timers_callback.c</itemPath>
       <itemPath>radio_alpha_trx.c</itemPath>
       <itemPath>Services.c</itemPath>
-      <itemPath>radio_alpha_trx_slave_api.c</itemPath>
       <itemPath>timer.c</itemPath>
       <itemPath>temps.c</itemPath>
+      <itemPath>master_api.c</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"
