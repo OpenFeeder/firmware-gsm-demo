@@ -5,11 +5,7 @@
         <group>
             <file>file:/home/mmadi/Documents/stageM1/firmware-gsm-demo/Master/alpha_trx868s_basic_v1.X/radio_alpha_trx.c</file>
             <file>file:/home/mmadi/Documents/stageM1/firmware-gsm-demo/Master/alpha_trx868s_basic_v1.X/master_api.c</file>
-            <file>file:/home/mmadi/Documents/stageM1/firmware-gsm-demo/Master/alpha_trx868s_basic_v1.X/Services.h</file>
-            <file>file:/home/mmadi/Documents/stageM1/firmware-gsm-demo/Master/alpha_trx868s_basic_v1.X/radio_alpha_trx.h</file>
-            <file>file:/home/mmadi/Documents/stageM1/firmware-gsm-demo/Master/alpha_trx868s_basic_v1.X/mcc_generated_files/pin_manager.c</file>
-            <file>file:/home/mmadi/Documents/stageM1/firmware-gsm-demo/Master/alpha_trx868s_basic_v1.X/master_api.h</file>
-            <file>file:/home/mmadi/Documents/stageM1/firmware-gsm-demo/Master/alpha_trx868s_basic_v1.X/Services.c</file>
+            <file>file:/home/mmadi/Documents/stageM1/firmware-gsm-demo/Master/alpha_trx868s_basic_v1.X/app.c</file>
         </group>
     </open-files>
 </project-private>

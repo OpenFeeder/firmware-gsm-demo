@@ -169,7 +169,12 @@ void __attribute__((interrupt, no_auto_psv)) _CNInterrupt(void) {
         // interrupt on change for group IOCFE
         if (IOCFEbits.IOCFE2 == 1) {
             IOCFEbits.IOCFE2 = 0;
+            STATUS_READ_VAL RF_StatusRead;
+            RF_StatusRead.Val = radioAlphaTRX_Command(STATUS_READ_CMD); //lecture du registre status 
+            if (RF_StatusRead.bits.b15_RGIT_FFIT && !radioAlphaTRX_IsSendMode()) {
+                LED_STATUS_R_Toggle();
                 radioAlphaTRX_CaptureFrame();
+            }
         }
     }
 }

@@ -98,7 +98,7 @@ int8_t radioAlphaTRX_SlaveSendMsgRF(uint8_t typeMsg,
     //_____________CREATE FRAME____________________________________________
     int8_t ret = 0;
     // en tete 
-    frameToSend.Champ.dest = SLAVE_ID;
+    frameToSend.Champ.dest = MASTER_ID;
     frameToSend.Champ.crc ^= frameToSend.Champ.dest;
     frameToSend.Champ.src = SLAVE_ID;
     frameToSend.Champ.crc ^= frameToSend.Champ.src;
@@ -116,7 +116,16 @@ int8_t radioAlphaTRX_SlaveSendMsgRF(uint8_t typeMsg,
         frameToSend.Champ.data[i] = data[i];
         frameToSend.Champ.crc ^= frameToSend.Champ.data[i];
     }
-
+//    printf("src %d \ndes %d \ntypeMsg %d \nnbR %d \nidMsg %d\ncrc %d \nsize %d\n", 
+//    frameToSend.Champ.src, frameToSend.Champ.dest, frameToSend.Champ.typeMsg, 
+//           frameToSend.Champ.nbR, frameToSend.Champ.idMsg, frameToSend.Champ.crc,
+//           frameToSend.Champ.);
+//    int j;
+//    for (j = 0; j < frameToSend.Champ.size; j++) {
+//        printf("%d ",frameToSend.paquet[j]);
+//
+//    }
+//    printf("\n");
     ///____________________________________________________________________
     if (radioAlphaTRX_SendMode()) {
         ret = radioAlphaTRX_SendData(frameToSend);

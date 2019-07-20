@@ -49,6 +49,9 @@ typedef struct sSlave {
 volatile bool msgReceiveRF = 0; // informe de l'arriver d'un msg rf 
 volatile bool msgReceiveGSM = 0; // informe de l'arriver d'un msg GSM
 
+Frame dataReceive;
+int8_t sizeData;
+
 MSTR_STATE_GET_LOG mstrStateGetLog = MSTR_STATE_GET_LOG_SELECT_SLAVE; // init state 
 
 //TOASK : je pense utiliser Deux buffeurs pour pouvoir faire du pseudo
@@ -207,7 +210,7 @@ int8_t Master_SendMsgRF(uint8_t idSlave,
                         uint8_t idMsg,
                         uint8_t nbRemaining) {
     Frame frameToSend;
-
+    memset(frameToSend.paquet, 0, FRAME_LENGTH);
     //_____________CREATE FRAME____________________________________________
     int8_t ret = 0;
     // en tete 
@@ -229,11 +232,12 @@ int8_t Master_SendMsgRF(uint8_t idSlave,
         frameToSend.Champ.data[i] = data[i];
         frameToSend.Champ.crc ^= frameToSend.Champ.data[i];
     }
+
     ///____________________________________________________________________
 
     if (radioAlphaTRX_SendMode()) {
         ret = radioAlphaTRX_SendData(frameToSend);
-    }else {
+    } else {
 #if defined(UART_DEBUG)
         printf("Non envoye\n");
 #endif
@@ -250,9 +254,12 @@ int8_t MASTER_SendDateRF() {
     struct tm time_pic;
     RTCC_TimeGet(&time_pic);
     Date d;
-    d.Format.yy = time_pic.tm_year;  d.Format.h = time_pic.tm_hour;
-    d.Format.mm = time_pic.tm_mon;   d.Format.min = time_pic.tm_min;
-    d.Format.day = time_pic.tm_mday; d.Format.sec = time_pic.tm_sec;
+    d.Format.yy = time_pic.tm_year;
+    d.Format.h = time_pic.tm_hour;
+    d.Format.mm = time_pic.tm_mon;
+    d.Format.min = time_pic.tm_min;
+    d.Format.day = time_pic.tm_mday;
+    d.Format.sec = time_pic.tm_sec;
     return Master_SendMsgRF(ID_BROADCAST, HORLOGE, d.date, 1, 1); // a voir
 }
 
@@ -379,16 +386,17 @@ void MASTER_StateMachineOfDaytime() {
         MASTER_HandlerMsgRF();
         // a decommenter lorsqu'il y'a plusieurs of connecte
         // TMR_SetWaitRqstTimeout(0); // a pour effet d'arreter le temporisateur 
-    } else if (MASTER_IsTimeToSendDate()) {//(MASTER_RequestSlave()) {
-#if defined(UART_DEBUG)
-        printf("demande d'infos %d\n", (int8_t) ensSlave[slaveSlected].idSlave);
-#endif
-        MASTER_SelectNextSlave();
-        printf("send %d \n", Master_SendMsgRF((int8_t) ensSlave[slaveSlected].idSlave,
-                                              INFOS, (uint8_t *) ("INFO"), 1, 1));
-        TMR_SetTimeout(SEND_HORLOG_TIMEOUT);
-        //        TMR_SetWaitRqstTimeout(TIME_OUT_WAIT_RQST); //demarre le temporisateur
     }
+    //    else if (MASTER_IsTimeToSendDate()) {//(MASTER_RequestSlave()) {
+    //#if defined(UART_DEBUG)
+    //        printf("demande d'infos %d\n", (int8_t) ensSlave[slaveSlected].idSlave);
+    //#endif
+    //        MASTER_SelectNextSlave();
+    //        printf("send %d \n", Master_SendMsgRF((int8_t) ensSlave[slaveSlected].idSlave,
+    //                                              INFOS, (uint8_t *) ("INFO"), 1, 1));
+    //        TMR_SetTimeout(SEND_HORLOG_TIMEOUT);
+    //        //        TMR_SetWaitRqstTimeout(TIME_OUT_WAIT_RQST); //demarre le temporisateur
+    //    }
 }
 
 void MASTER_HundlerError() {

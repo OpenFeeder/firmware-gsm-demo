@@ -33,7 +33,7 @@
 #define NB_ERR_BUF                   10 // nombre d'errerur possible 
 #define NB_DATA_BUF                  20 // pour l'instat on dit qye c'est 20 ==>
 #define MAX_W                        10 // nombre MAX de paquet a transmettre avant d'attendre un ack 
-#define NB_SLAVE                      2
+#define NB_SLAVE                      1
 #define MAX_TIMEOUT                  20 // nombre de timeout avant de decider que la liaison avec le slave est couper 
 #define MAX_ERROR                    10 // nombre du quel on considere que la communication est interompue entre le slave est le master
 #define MAX_TRY_TO_SYNC              5 // le nombre d'essaie avant de decider qu'on est pas connecte
@@ -95,9 +95,14 @@
  */
 /*_____________________________________________________________________________*/
 
-typedef struct {
-    uint8_t paquet[FRAME_LENGTH];
-
+typedef union {
+    uint8_t paquet[25];
+    
+    struct {
+        uint8_t head[5];
+        uint8_t Infos[20];
+    }Section;
+    
     struct {
         unsigned dest    : 4;   //-----
         unsigned src     : 4;   //    |
@@ -106,7 +111,7 @@ typedef struct {
         uint8_t idMsg;          //    |
         uint8_t size;           //    | // taille de la data reelement envoye 
         uint8_t crc;            //-----
-        uint8_t data[SIZE_DATA];
+        uint8_t data[20];
     } Champ;
 } Frame;
 

@@ -121,9 +121,14 @@
  */
 /*_____________________________________________________________________________*/
 
-typedef struct {
-    uint8_t paquet[FRAME_LENGTH];
-
+typedef union {
+    uint8_t paquet[25];
+    
+    struct {
+        uint8_t head[5];
+        uint8_t Infos[20];
+    }Section;
+    
     struct {
         unsigned dest    : 4;   //-----
         unsigned src     : 4;   //    |
@@ -132,7 +137,7 @@ typedef struct {
         uint8_t idMsg;          //    |
         uint8_t size;           //    | // taille de la data reelement envoye 
         uint8_t crc;            //-----
-        uint8_t data[SIZE_DATA];
+        uint8_t data[20];
     } Champ;
 } Frame;
 

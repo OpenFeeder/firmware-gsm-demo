@@ -45,7 +45,7 @@ STATUS_READ_VAL RF_StatusRead; // Status Read Command
 
 
 //
-volatile bool sendMode = 0; // O receve mode    1 send mode 
+volatile bool sendMode = false; // O receve mode    1 send mode 
 
 /**-------------------------->> D E F I N I T I O N <<-------------------------*/
 
@@ -3518,7 +3518,7 @@ int8_t radioAlphaTRX_WaitLownIRQ(int timeout) {
 // 4 buffer remplie de circulairement 
 volatile Frame frameReceve;
 volatile uint8_t sizeDate = 0;
-volatile uint8_t sumCtrl = 0; 
+volatile uint8_t sumCtrl = 0;
 
 bool radioAlphaTRX_IsSendMode() {
     return sendMode;
@@ -3537,64 +3537,32 @@ Frame radioAlphaTRX_GetFrame() {
     return frameReceve;
 }
 
-//int8_t radioAlphaTRX_receive(uint8_t buffer[FRAME_LENGTH]) {
-//    WORD_VAL_T receiveData;
-//    uint8_t i = 0;
-//    for (i = 0; i < FRAME_LENGTH; i++) {
-//        if (0 == radioAlphaTRX_WaitLownIRQ(TIME_OUT_nIRQ)) {
-//            return 0;
-//        }
-//        receiveData.word = radioAlphaTRX_Command(0xB000);
-//        buffer[i] = receiveData.byte.low;
-//        idOF id;
-//        id.code = receiveData.byte.low;
-//        if (id.id.dest != MASTER_ID && id.id.dest != ID_BROADCAST && i == 0) {
-//            return 0;
-//        } else if (receiveData.byte.low == 0) {
-//            break;
-//        }
-//    }
-//    return i;
-//}
+bool radioAlphaTRX_receive() {
+    WORD_VAL_T receiveData;
+    uint8_t i = 0;
+    for (i = 0; i < FRAME_LENGTH; i++) {
+        if (0 == radioAlphaTRX_WaitLownIRQ(TIME_OUT_nIRQ)) {
+            return false;
+        }
+        receiveData.word = radioAlphaTRX_Command(0xB000);
+        frameReceve.paquet[i] = receiveData.byte.low;
+        if (frameReceve.Champ.dest != MASTER_ID &&
+            frameReceve.Champ.dest != ID_BROADCAST && i == 0) {
+            return false;
+        } else if (receiveData.byte.low == 0) {
+            break;
+        }
+        if (i != 4) sumCtrl ^= frameReceve.paquet[i];
+    }
+    return true;
+}
 
 void radioAlphaTRX_CaptureFrame() {
-    STATUS_READ_VAL RF_StatusRead;
-    RF_StatusRead.Val = radioAlphaTRX_Command(STATUS_READ_CMD); //lecture du registre status 
-    
-    if (RF_StatusRead.bits.b15_RGIT_FFIT && !sendMode) { // on verifie si la fifo est remplie 
-        memset(frameReceve.paquet, 0, FRAME_LENGTH); // reset frame to receve 
-        int8_t i;
-        WORD_VAL_T receiveData;
-        for (i = 0; i < 5; i++) { // on recupere l'en tete  
-            if (0 == radioAlphaTRX_WaitLownIRQ(TIME_OUT_nIRQ)) return;
-            receiveData.word = radioAlphaTRX_Command(0xB000);
-            frameReceve.paquet[i] = receiveData.byte.low;
-            if (i == 0 && frameReceve.Champ.dest != MASTER_ID &&
-                frameReceve.Champ.dest != ID_BROADCAST) return;
+    if (radioAlphaTRX_receive()) {
+        LED_STATUS_B_Toggle();
+        APP_setMsgReceive(1);
+        TMR_SetMsgRecuTimeout(TIME_OUT_GET_FRAME); // on demare le timer, car le bufer est probablement remplie 
 
-            sumCtrl ^= frameReceve.paquet[i]; // calcule du crc 
-        }
-        for (i = 0; i < frameReceve.Champ.size; i++) { // on recupère la data s'il y'en a 
-            if (0 == radioAlphaTRX_WaitLownIRQ(TIME_OUT_nIRQ)) {
-                return;
-            }
-            receiveData.word = radioAlphaTRX_Command(0xB000);
-            frameReceve.paquet[i] = receiveData.byte.low;
-            sumCtrl ^= frameReceve.paquet[i];
-        }
-        // c'est que tou c'est bien passer 
-#if defined(UART_DEBUG)
-        if (sumCtrl == frameReceve.Champ.crc) { //le paquet est
-            LED_STATUS_R_SetLow();
-            LED_STATUS_B_Toggle();
-            MASTER_SetMsgReceiveRF(true);
-            TMR_SetMsgRecuTimeout(TIME_OUT_GET_FRAME); // on demare le timer, car le bufer est probablement remplie 
-        } else {
-            LED_STATUS_R_SetHigh();
-        }
-#else
-        MASTER_SetMsgReceiveRF(sumCtrl == frameReceve.Champ.crc);
-#endif
     }
     //on se remet en ecoute 
     radioAlphaTRX_ReceivedMode();

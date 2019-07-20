@@ -44,7 +44,7 @@ DATA_RATE_CMD_VAL RF_DataRate;
 STATUS_READ_VAL RF_StatusRead; // Status Read Command
 
 
-volatile bool sendMode = 0; // O receve mode    1 send mode 
+volatile bool sendMode = false; // O receve mode    1 send mode 
 
 /**-------------------------->> D E F I N I T I O N <<-------------------------*/
 
@@ -3540,71 +3540,45 @@ Frame radioAlphaTRX_GetFrame() {
     return frameReceive;
 }
 
-// int8_t radioAlphaTRX_receive(uint8_t buffer[FRAME_LENGTH]) {
-//     WORD_VAL_T receiveData;
-//     uint8_t i = 0;
-//     for (i = 0; i < FRAME_LENGTH; i++) {
-//         if (0 == radioAlphaTRX_WaitLownIRQ(TIME_OUT_nIRQ)) {
-//             return 0;
-//         }
-//         receiveData.word = radioAlphaTRX_Command(0xB000);
-//         buffer[i] = receiveData.byte.low;
-//         idOF id;
-//         id.code = receiveData.byte.low;
-//         if (id.id.dest != SLAVE_ID && id.id.dest != ID_BROADCAST && i == 0) {
-//             return 0;
-//         } else if (receiveData.byte.low == 0) {
-//             break;
-//         }
-//     }
-//     return i;
-// }
+ bool radioAlphaTRX_receive() {
+    WORD_VAL_T receiveData;
+    uint8_t i = 0;
+    for (i = 0; i < FRAME_LENGTH; i++) {
+        if (0 == radioAlphaTRX_WaitLownIRQ(TIME_OUT_nIRQ)) {
+            return false;
+        }
+        receiveData.word = radioAlphaTRX_Command(0xB000);
+        frameReceive.paquet[i] = receiveData.byte.low;
+        if (frameReceive.Champ.dest != MASTER_ID &&
+            frameReceive.Champ.dest != ID_BROADCAST && i == 0) {
+            LED_STATUS_R_Toggle();
+            return false;
+        } else if (receiveData.byte.low == 0) {
+            break;
+        }
+        if (i != 4) sumCtrl ^= frameReceive.paquet[i];
+    }
+    return true;
+}
 
 void radioAlphaTRX_CaptureFrame() {
-    STATUS_READ_VAL RF_StatusRead;
-    RF_StatusRead.Val = radioAlphaTRX_Command(STATUS_READ_CMD); //lecture du registre status 
-    
-    if (RF_StatusRead.bits.b15_RGIT_FFIT && !sendMode) { // on verifie si la fifo est remplie 
-        memset(frameReceive.paquet, 0, FRAME_LENGTH); // reset frame to receve 
-        int8_t i;
-        WORD_VAL_T receiveData;
-        for (i = 0; i < 5; i++) { // on recupere l'en tete  
-            if (0 == radioAlphaTRX_WaitLownIRQ(TIME_OUT_nIRQ)) return;
-            receiveData.word = radioAlphaTRX_Command(0xB000);
-            frameReceive.paquet[i] = receiveData.byte.low;
-            if (i == 0 && frameReceive.Champ.dest != MASTER_ID &&
-                frameReceive.Champ.dest != ID_BROADCAST) return;
-
-            sumCtrl ^= frameReceive.paquet[i]; // calcule du crc 
-        }
-        for (i = 0; i < frameReceive.Champ.size; i++) { // on recupère la data s'il y'en a 
-            if (0 == radioAlphaTRX_WaitLownIRQ(TIME_OUT_nIRQ)) {
-                return;
-            }
-            receiveData.word = radioAlphaTRX_Command(0xB000);
-            frameReceive.paquet[i] = receiveData.byte.low;
-            sumCtrl ^= frameReceive.paquet[i];
-        }
-        // c'est que tou c'est bien passer 
-        if (sumCtrl == frameReceive.Champ.crc) { //le paquet est bon 
-            LED_STATUS_R_SetLow();
-            LED_STATUS_B_Toggle();
-            if (frameReceive.Champ.typeMsg == HORLOGE) {
-                LED_STATUS_Y_Toggle();
-                radioAlphaTRX_SlaveUpdateDate(frameReceive.Champ.data);
-            } else {
-                LED_STATUS_B_Toggle();
-                APP_setMsgReceive(1);
-                TMR_SetMsgRecuTimeout(TIME_OUT_GET_FRAME); // on demare le timer, car le bufer est probablement remplie 
-            }
+    if (radioAlphaTRX_receive()) {
+        if (frameReceive.Champ.typeMsg == HORLOGE) {
+            LED_STATUS_Y_Toggle();
+            radioAlphaTRX_SlaveUpdateDate(frameReceive.Champ.data);
         } else {
-            LED_STATUS_R_SetHigh();
+            LED_STATUS_B_Toggle();
+            setLedsStatusColor(LED_BLUE);
+            APP_setMsgReceive(1);
+            TMR_SetMsgRecuTimeout(TIME_OUT_GET_FRAME); // on demare le timer, car le bufer est probablement remplie 
         }
-
+    }else {
+        LED_STATUS_R_Toggle();
     }
     //on se remet en ecoute 
     radioAlphaTRX_ReceivedMode();
 }
+
 
 /****************                                         *********************/
 /*************************                     ********************************/
