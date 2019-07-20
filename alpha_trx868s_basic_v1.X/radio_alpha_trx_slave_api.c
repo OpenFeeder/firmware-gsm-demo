@@ -149,10 +149,14 @@ void radioAlphaTRX_SlaveSendNothing() {
 
 void radioAlphaTRX_SlaveUpdateDate(uint8_t* date, int16_t derive) {
     Date d;
+    d.dateVal = 0;
     int i;
-    for (i = 0; i < 4; i++)
+    for (i = 0; i < 5; i++) {
         d.date[i] = date[i];
+    }
+    
     // deserealise
+
     struct tm time_set;
     time_set.tm_sec = d.Format.sec;
     time_set.tm_min = d.Format.min;
@@ -161,16 +165,19 @@ void radioAlphaTRX_SlaveUpdateDate(uint8_t* date, int16_t derive) {
     time_set.tm_mon = d.Format.mm;
     time_set.tm_year = d.Format.yy;
     // mise a jour 
-    time_set.tm_sec += 1;
-    if (time_set.tm_sec == 60) {
-        time_set.tm_sec = 0;
-        time_set.tm_min += 1;
-        if (time_set.tm_min == 60) {
-            time_set.tm_min = 0;
-            time_set.tm_hour += 1;
-        }
-    }
+//    time_set.tm_sec += 1;
+//    if (time_set.tm_sec == 60) {
+//        time_set.tm_sec = 0;
+//        time_set.tm_min += 1;
+//        if (time_set.tm_min == 60) {
+//            time_set.tm_min = 0;
+//            time_set.tm_hour += 1;
+//        }
+//    }
     RTCC_TimeSet((struct tm *) &time_set);
+    LED_STATUS_R_Toggle();
+    LED_STATUS_B_Toggle();
+    LED_STATUS_Y_Toggle();
 }
 
 

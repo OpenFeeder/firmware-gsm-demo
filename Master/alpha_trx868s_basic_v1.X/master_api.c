@@ -66,9 +66,10 @@ int8_t noPrint = 0;
 
 int8_t MASTER_SendMsgRF(uint8_t dest,
                         uint8_t typeMsg,
-                        uint8_t * data,
                         uint8_t idMsg,
-                        uint8_t nbRemaining) {
+                        uint8_t nbR,
+                        uint8_t * data,
+                        uint8_t sizeData) {
     //    radioAlphaTRX_SetSendMode(1); // j'annonce que je suis en mode transmission 
     Frame frameToSend;
 
@@ -83,24 +84,16 @@ int8_t MASTER_SendMsgRF(uint8_t dest,
     frameToSend.Champ.crc ^= frameToSend.Champ.idMsg;
     frameToSend.Champ.typeMsg = typeMsg;
     frameToSend.Champ.crc ^= frameToSend.Champ.typeMsg;
-    frameToSend.Champ.nbR = nbRemaining;
+    frameToSend.Champ.nbR = nbR;
     frameToSend.Champ.crc ^= frameToSend.Champ.nbR;
 
     // data
     int8_t i;
-    frameToSend.Champ.size = strlen(data);
+    frameToSend.Champ.size = sizeData;
     for (i = 0; i < frameToSend.Champ.size; i++) {
         frameToSend.Champ.data[i] = data[i];
         frameToSend.Champ.crc ^= frameToSend.Champ.data[i];
     }
-    
-#if defined(UART_DEBUG)
-    for (i = 0; i < frameToSend.Champ.size+5; i++) {
-        printf("%d ",frameToSend.paquet[i]);
-    }
-    printf("\n");
-#endif
-
     
     ///____________________________________________________________________
     if (radioAlphaTRX_SendMode()) {
@@ -124,6 +117,7 @@ uint8_t MASTER_SendDateRF() {
     //________GET DATE____________
     if (RTCC_TimeGet(&picDate)) {
         Date d;
+        d.dateVal = 0;
         d.Format.yy = picDate.tm_year;
         d.Format.mom = picDate.tm_mon;
         d.Format.day = picDate.tm_mday;
@@ -132,7 +126,7 @@ uint8_t MASTER_SendDateRF() {
         d.Format.sec = picDate.tm_sec;
         //____________________________
         //________SEND DATE___________
-        return MASTER_SendMsgRF(ID_BROADCAST, HORLOGE, d.date, 1, 1);
+        return MASTER_SendMsgRF(ID_BROADCAST, HORLOGE, 1, 1, d.date, 5); // visualiser cette valeur 
     }
     return 0;
 }

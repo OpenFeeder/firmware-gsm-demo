@@ -3564,7 +3564,6 @@ Frame radioAlphaTRX_GetFrame() {
 void radioAlphaTRX_CaptureFrame() {
     if (radioAlphaTRX_receive()) {
         if (frameReceive.Champ.typeMsg == HORLOGE) {
-            LED_STATUS_Y_Toggle();
             radioAlphaTRX_SlaveUpdateDate(frameReceive.Champ.data);
         } else {
             LED_STATUS_B_Toggle();

@@ -89,16 +89,18 @@ typedef enum { // you can add others states
  * @param dest : le destinataire 0 < dest < 16 
  * @param typeMsg : ex : DATA, ACK, HORLOGE, ... etc
  *                  rensegner le bloc de donnee attendu 
- * @param data : la donner a transmettre ==> taille < 20
  * @param idMsg : l'identifiant du msg ==> ack, peut etre utiliser pour
- * @param nbRemaining : nombre de paquet que je souhaite transmettre 
+ * @param nbR : nombre de paquet que je souhaite transmettre 
+ * @param data : la donner a transmettre ==> taille < 20
+ * @param sizeData : la taille de la donnee a transmettre 
  * @return : le nombre d'octe transmis
  */
 int8_t MASTER_SendMsgRF(uint8_t dest,
-                                    uint8_t typeMsg,
-                                    uint8_t * data,
-                                    uint8_t idMsg,
-                                    uint8_t nbRemaining);
+                        uint8_t typeMsg,
+                        uint8_t idMsg,
+                        uint8_t nbR,
+                        uint8_t * data,
+                        uint8_t sizeData);
 
 
 /**

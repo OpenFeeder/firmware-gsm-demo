@@ -144,7 +144,7 @@ typedef union {
 
 /**------------------------>> D A T E  F O R M A T <<-------------------------*/
 typedef union {
-    uint8_t date [4]; // la date est compresse en 4 octe a la place de 12
+    uint8_t date [5]; // la date est compresse en 4 octe a la place de 12
     uint32_t dateVal;
 
     struct {

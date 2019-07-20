@@ -50,6 +50,7 @@
 
 #include <xc.h>
 #include "rtcc.h"
+#include "pin_manager.h"
 
 /**
 // Section: Static function
@@ -382,6 +383,7 @@ static uint8_t ConvertBCDToHex(uint8_t bcdvalue)
 void __attribute__ ( ( interrupt, no_auto_psv ) ) _ISR _RTCCInterrupt( void )
 {
     /* TODO : Add interrupt handling code */
+    LED_STATUS_Y_Toggle();
     IFS3bits.RTCIF = false;
 }
 /**
