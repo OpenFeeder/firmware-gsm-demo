@@ -3533,7 +3533,7 @@ uint8_t radioAlphaTRX_GetSizeData() {
 }
 
 Frame radioAlphaTRX_GetFrame() {
-    MASTER_SetMsgReceiveRF(false); // a voir 
+//    MASTER_SetMsgReceiveRF(false); // a voir 
     return frameReceve;
 }
 
@@ -3560,7 +3560,7 @@ bool radioAlphaTRX_receive() {
 void radioAlphaTRX_CaptureFrame() {
     if (radioAlphaTRX_receive()) {
         LED_STATUS_B_Toggle();
-        APP_setMsgReceive(1);
+//        APP_setMsgReceive(1);
         TMR_SetMsgRecuTimeout(TIME_OUT_GET_FRAME); // on demare le timer, car le bufer est probablement remplie 
 
     }

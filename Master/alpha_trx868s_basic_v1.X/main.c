@@ -73,6 +73,7 @@
 
 #include "mcc_generated_files/mcc.h"
 #include "app.h"
+#include "master_api.h"
 
 /*
                          Main application
@@ -83,11 +84,12 @@ int main(void)
     SYSTEM_Initialize();
     
     /* Initialize the application. */
-    APP_Initialize( );
+//    APP_Initialize( );
+    MASTER_AppInit();
     while (1)
     {
         /* Maintain the application's state machine. */
-        APP_Tasks( ); /* application specific tasks */
+        MASTER_AppTask( ); /* application specific tasks */
     }
 
         /* Execution should not come here during normal operation. */

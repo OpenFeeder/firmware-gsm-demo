@@ -104,7 +104,7 @@ void APP_SerialDebugTasks(void) {
 #if defined(UART_DEBUG)
                 printf("demande d'infos\n");
 #endif
-                printf("send %d \n", Master_SendMsgRF(1,
+                printf("send %d \n", MASTER_SendMsgRF(1,
                                                       INFOS, (uint8_t *) ("INFO"), 1, 1));
                 break;
                 /* -------------------------------------------------------------- */
@@ -114,7 +114,7 @@ void APP_SerialDebugTasks(void) {
 #if defined(UART_DEBUG)
                 printf("demande d'infos\n");
 #endif
-                printf("send %d \n", Master_SendMsgRF(2,
+                printf("send %d \n", MASTER_SendMsgRF(2,
                                                       INFOS, (uint8_t *) ("INFO"), 1, 1));
                 break;
                 /* -------------------------------------------------------------- */
@@ -130,9 +130,9 @@ void APP_SerialDebugTasks(void) {
             case 'S':
                 //case 'S':
 #if defined(UART_DEBUG)
-                printf("envoie date\n");
+                printf("envoie date %d \n", MASTER_SendDateRF());
 #endif
-                MASTER_SendDateRF();
+                
                 break;
                 /* -------------------------------------------------------------- */
 

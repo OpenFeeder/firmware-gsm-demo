@@ -36,7 +36,9 @@
 #define NB_SLAVE                      1
 #define MAX_TIMEOUT                  20 // nombre de timeout avant de decider que la liaison avec le slave est couper 
 #define MAX_ERROR                    10 // nombre du quel on considere que la communication est interompue entre le slave est le master
-#define MAX_TRY_TO_SYNC              5 // le nombre d'essaie avant de decider qu'on est pas connecte
+#define MAX_TRY_TO_SYNC               5 // le nombre d'essaie avant de decider qu'on est pas connecte
+#define MAX_LEVEL_PRIO                3
+#define NB_BEHAVIOR_PER_PRIO          3
 
 
 //_______________________________TYPE__PAQUET________________________________________*/
@@ -123,7 +125,7 @@ typedef union {
 
     struct {
         unsigned yy : 6;
-        unsigned mm : 4;
+        unsigned mom : 4;
         unsigned day : 5;
         unsigned h : 5;
         unsigned min : 6;
