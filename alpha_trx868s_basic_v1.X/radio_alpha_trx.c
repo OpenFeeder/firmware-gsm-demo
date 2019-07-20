@@ -43,6 +43,9 @@ TX_CONF_CTRL_CMD_VAL RF_TX_ConfCtrlCmd;
 DATA_RATE_CMD_VAL RF_DataRate;
 STATUS_READ_VAL RF_StatusRead; // Status Read Command
 
+
+volatile bool sendMode = 0; // O receve mode    1 send mode 
+
 /**-------------------------->> D E F I N I T I O N <<-------------------------*/
 
 
@@ -3379,7 +3382,7 @@ void radioAlphaTRX_ReceivedMode(void) {
     //#if defined(UART_DEBUG)
     //        printf("status 0x%04X\n", RF_StatusRead.Val);
     //#endif
-    radioAlphaTRX_SetSendMode(0); // on n'est plus en mode emission
+    sendMode = false; // on n'est plus en mode emission
 }
 
 // Configuration en mode TX avant l'envoie de donnee
@@ -3438,7 +3441,7 @@ int8_t radioAlphaTRX_SendMode(void) {
     RF_PowerManagement.bits.b0_dc = 1;
     RF_StatusRead.Val = radioAlphaTRX_Command(RF_PowerManagement.Val); //0x8239
 
-    radioAlphaTRX_SetSendMode(1); // on est en mode transmission
+    sendMode = true; // on est en mode transmission
     return radioAlphaTRX_WaitLownIRQ(SEND_TIME_OUT); // arbitraire 
 }
 
@@ -3453,7 +3456,7 @@ int8_t radioAlphaTRX_SendByte(uint8_t data_send, int8_t timeout) {
     return radioAlphaTRX_WaitLownIRQ(timeout);
 }
 
-int8_t radioAlphaTRX_SendData(uint8_t* bytes, int8_t size) {
+int8_t radioAlphaTRX_SendData(Frame frameToSned) {
     int i;
 
     //preamble
@@ -3466,8 +3469,8 @@ int8_t radioAlphaTRX_SendData(uint8_t* bytes, int8_t size) {
     radioAlphaTRX_SendByte(0x2D, SEND_TIME_OUT);
     radioAlphaTRX_SendByte(0xD4, SEND_TIME_OUT);
     //transmission des octet 
-    for (i = 0; i < size; i++) {
-        if (radioAlphaTRX_SendByte(bytes[i], SEND_TIME_OUT) == 0)
+    for (i = 0; i < frameToSned.Champ.size + 5; i++) {
+        if (radioAlphaTRX_SendByte(frameToSned.paquet[i], SEND_TIME_OUT) == 0)
             break;
     }
 
@@ -3516,15 +3519,16 @@ int8_t radioAlphaTRX_WaitLownIRQ(int timeout) {
 /******************************************************************************/
 /******************************************************************************/
 // 4 buffer remplie de circulairement 
-volatile uint8_t BUF[FRAME_LENGTH];
+volatile Frame frameReceive;
+volatile uint8_t sumCtrl = 0;
 volatile uint8_t sizeBuf = 0;
-volatile uint8_t sendMode = 0; // O receve mode    1 send mode  
+ 
 
-int8_t radioAlphaTRX_IsSendMode() {
+bool radioAlphaTRX_IsSendMode() {
     return sendMode;
 }
 
-void radioAlphaTRX_SetSendMode(int8_t modeRF) {
+void radioAlphaTRX_SetSendMode(bool modeRF) {
     sendMode = modeRF;
 }
 
@@ -3532,54 +3536,71 @@ uint8_t radioAlphaTRX_GetSizeBuf() {
     return sizeBuf;
 }
 
-uint8_t * radioAlphaTRX_ReadBuf() {
-    return BUF;
+Frame radioAlphaTRX_GetFrame() {
+    return frameReceive;
 }
 
-int8_t radioAlphaTRX_receive(uint8_t buffer[FRAME_LENGTH]) {
-    WORD_VAL_T receiveData;
-    uint8_t i = 0;
-    for (i = 0; i < FRAME_LENGTH; i++) {
-        if (0 == radioAlphaTRX_WaitLownIRQ(TIME_OUT_nIRQ)) {
-            return 0;
-        }
-        receiveData.word = radioAlphaTRX_Command(0xB000);
-        buffer[i] = receiveData.byte.low;
-        idOF id;
-        id.code = receiveData.byte.low;
-        if (id.id.dest != SLAVE_ID && id.id.dest != ID_BROADCAST && i == 0) {
-            return 0;
-        } else if (receiveData.byte.low == 0) {
-            break;
-        }
-    }
-    return i;
-}
-
-bool radioAlphaTRX_updateDate(uint8_t date[14]) {
-    int8_t i = 1;
-    RF_Type_And_nbRemaining paquet;
-    paquet.code = BUF[i++];
-    if (paquet.ret.typePaquet != HORLOGE) return false;
-    if (!srv_TestCheksum(BUF, sizeBuf - 1, BUF[sizeBuf - 1])) return false;
-    i++;
-    int8_t j = 0;
-    for (j; j < sizeBuf - i; j++) date[j] = BUF[i++];
-    return true;
-}
+// int8_t radioAlphaTRX_receive(uint8_t buffer[FRAME_LENGTH]) {
+//     WORD_VAL_T receiveData;
+//     uint8_t i = 0;
+//     for (i = 0; i < FRAME_LENGTH; i++) {
+//         if (0 == radioAlphaTRX_WaitLownIRQ(TIME_OUT_nIRQ)) {
+//             return 0;
+//         }
+//         receiveData.word = radioAlphaTRX_Command(0xB000);
+//         buffer[i] = receiveData.byte.low;
+//         idOF id;
+//         id.code = receiveData.byte.low;
+//         if (id.id.dest != SLAVE_ID && id.id.dest != ID_BROADCAST && i == 0) {
+//             return 0;
+//         } else if (receiveData.byte.low == 0) {
+//             break;
+//         }
+//     }
+//     return i;
+// }
 
 void radioAlphaTRX_CaptureFrame() {
-    if ((sizeBuf = radioAlphaTRX_receive(BUF)) > 0) {
-        uint8_t date[14];
-        if (radioAlphaTRX_updateDate(date)) {
-            LED_STATUS_Y_Toggle();
-            radioAlphaTRX_SlaveUpdateDate(date);
-        } else {
-            LED_STATUS_B_Toggle();
-            setLedsStatusColor(LED_BLUE);
-            APP_setMsgReceive(1);
-            TMR_SetMsgRecuTimeout(TIME_OUT_GET_FRAME); // on demare le timer, car le bufer est probablement remplie 
+    STATUS_READ_VAL RF_StatusRead;
+    RF_StatusRead.Val = radioAlphaTRX_Command(STATUS_READ_CMD); //lecture du registre status 
+    
+    if (RF_StatusRead.bits.b15_RGIT_FFIT && !sendMode) { // on verifie si la fifo est remplie 
+        memset(frameReceive.paquet, 0, FRAME_LENGTH); // reset frame to receve 
+        int8_t i;
+        WORD_VAL_T receiveData;
+        for (i = 0; i < 5; i++) { // on recupere l'en tete  
+            if (0 == radioAlphaTRX_WaitLownIRQ(TIME_OUT_nIRQ)) return;
+            receiveData.word = radioAlphaTRX_Command(0xB000);
+            frameReceive.paquet[i] = receiveData.byte.low;
+            if (i == 0 && frameReceive.Champ.dest != MASTER_ID &&
+                frameReceive.Champ.dest != ID_BROADCAST) return;
+
+            sumCtrl ^= frameReceive.paquet[i]; // calcule du crc 
         }
+        for (i = 0; i < frameReceive.Champ.size; i++) { // on recupère la data s'il y'en a 
+            if (0 == radioAlphaTRX_WaitLownIRQ(TIME_OUT_nIRQ)) {
+                return;
+            }
+            receiveData.word = radioAlphaTRX_Command(0xB000);
+            frameReceive.paquet[i] = receiveData.byte.low;
+            sumCtrl ^= frameReceive.paquet[i];
+        }
+        // c'est que tou c'est bien passer 
+        if (sumCtrl == frameReceive.Champ.crc) { //le paquet est bon 
+            LED_STATUS_R_SetLow();
+            LED_STATUS_B_Toggle();
+            if (frameReceive.Champ.typeMsg == HORLOGE) {
+                LED_STATUS_Y_Toggle();
+                radioAlphaTRX_SlaveUpdateDate(frameReceive.Champ.data);
+            } else {
+                LED_STATUS_B_Toggle();
+                APP_setMsgReceive(1);
+                TMR_SetMsgRecuTimeout(TIME_OUT_GET_FRAME); // on demare le timer, car le bufer est probablement remplie 
+            }
+        } else {
+            LED_STATUS_R_SetHigh();
+        }
+
     }
     //on se remet en ecoute 
     radioAlphaTRX_ReceivedMode();

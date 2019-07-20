@@ -69,7 +69,7 @@
 #define TIME_OUT_nIRQ                 2 // 2ms
 #define LAPS                        100 // on attend X ms avant de transmettre un nouveau msg 
 #define TIME_OUT_GET_FRAME         1500 // temps max, pour que le msg recu soit encore exploitable
-// au dela le mster ne m'ecoute pas donc cela ne sert à rien 
+// au dela le mster ne m'ecoute pas donc cela ne sert ï¿½ rien 
 #define TIME_OUT_WAIT_ACK           500
 #define NB_ERR_BUF                   10 // nombre d'errerur possible 
 #define NB_DATA_BUF                  20 // pour l'instat on dit qye c'est 20 ==>
@@ -107,67 +107,51 @@
 
 /**------------------------>> S T R U C T U R E - P A Q U E T <<---------------*/
 /* Structure d'une trame d'un message RF:
- *      +---------+-----------+------------+----------+-----------+--------------+----------+
- *      | ID_DEST | ID_SRC    | ID_Message | Typr_MSG | nbRem     | Data_Message | Checksum |
- *      +---------+-----------+------------+----------+-----------+--------------+----------+
- * BYTE = 4bits   + 4bits = 1 +     1      +     4bis + 4bits = 1 +   MAX = 36   +    1     
+ *      +------+------+---------+------+-------+-------+------+--------+
+ *      | DEST | SRC  | TypeMsg | nbRI | idMsg | size  |  crc |  Data  |
+ *      +------+------+---------+------+-------+-------+------+--------+
+ *        4bits+4bits +    4bits+4bits + 8bits + 8bist + 8bits  80bits = 25 octets
  * 
- * TAILLE EN TETE = 2+2+1+1+1 = 7
+ * TAILLE EN TETE = 1+1+1+1 = 4 oct
  *
  * ID_DEST / ID_SRC :
- *  . valeur min: 0x0001 (Hexa)
- *  . valeur max: 0xFFFF (Hexa)
- * ID_Message / Type_MSG / Checksum:
- *  . ex : msg num 1, num 2 .. ect 
- * Data_Message:
- *  . champ contenant les donnees a transmettre / ou recu 
- *    ex: la data : 200319172620 ==> 20/03/19 | 17h:26m:20s
- * Checksum:
- *  . champ de controle de la coherence : un XOR avec ID_XX^ID_MSG^Type_MSG^Data_Message
- *    --> detection d'erreur par checksum (somme controle) 
+ *  . valeur min: 0b0001 (binary)
+ *  . valeur max: 0b1111 (binary)
  *
  */
-//sauvdarde des info
-//typedef struct sFrame {
-//    uint16_t ID_Dest;
-//    uint16_t ID_Src;
-//    uint8_t ID_Msg;
-//    int8_t Type_Msg;
-//    uint8_t nonUtiliser [3];
-//    uint8_t data[SIZE_DATA];
-//}Frame;
 /*_____________________________________________________________________________*/
 
-
-/**------------------------>> T Y P E--M S G <<--------------------------------*/
-
-typedef union {
-    uint8_t code;
-
-    struct {
-        unsigned typePaquet : 4;
-        unsigned nbRemaining : 4;
-    } ret; //trouver un autre nom
-
-} RF_Type_And_nbRemaining;
-
-typedef union {
-    uint8_t code;
-
-    struct {
-        unsigned src : 4;
-        unsigned dest : 4;
-    } id;
-
-} idOF;
-
 typedef struct {
-    idOF id;
-    RF_Type_And_nbRemaining rfTandNBR;
-    uint8_t idMsg; // nume seq 
-    uint8_t sumCtrl;
-    uint8_t data[SIZE_DATA];
+    uint8_t paquet[FRAME_LENGTH];
+
+    struct {
+        unsigned dest    : 4;   //-----
+        unsigned src     : 4;   //    |
+        unsigned typeMsg : 4;   //    |  
+        unsigned nbR     : 4;   //     }==> l'en tete  
+        uint8_t idMsg;          //    |
+        uint8_t size;           //    | // taille de la data reelement envoye 
+        uint8_t crc;            //-----
+        uint8_t data[SIZE_DATA];
+    } Champ;
 } Frame;
+
+
+/**------------------------>> D A T E  F O R M A T <<-------------------------*/
+typedef union {
+    uint8_t date [4]; // la date est compresse en 4 octe a la place de 12
+    uint32_t dateVal;
+
+    struct {
+        unsigned yy : 6;
+        unsigned mm : 4;
+        unsigned day : 5;
+        unsigned h : 5;
+        unsigned min : 6;
+        unsigned sec : 6;
+    } Format;
+} Date;
+
 
 /*____________________________________________________________________________*/
 

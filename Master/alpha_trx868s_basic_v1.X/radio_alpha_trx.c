@@ -43,6 +43,10 @@ TX_CONF_CTRL_CMD_VAL RF_TX_ConfCtrlCmd;
 DATA_RATE_CMD_VAL RF_DataRate;
 STATUS_READ_VAL RF_StatusRead; // Status Read Command
 
+
+//
+volatile bool sendMode = 0; // O receve mode    1 send mode 
+
 /**-------------------------->> D E F I N I T I O N <<-------------------------*/
 
 
@@ -3287,7 +3291,7 @@ void radioAlphaTRX_Init(void) {
     //        1   1   0   0 #  1   0  1  0 # al=1  ml=0  1    s=0 #  1    f2=1  f1=1  f0?0   CA80h
     radioAlphaTRX_Command(0xC2AC); // al=1; ml=0;Data Filter: Digital filter, DATA QUALITY THRESHOLD 4
 
-    
+
     /**-------------> 0xCA83 - FIFO and Reset Mode Command (7) <---------------*/
     //  bit  15  14  13  12  11  10  9  8   7   6   5   4   3   2   1   0   POR
     //        1   1   0   0   1   0  1  0  f3  f2  f1  f0  sp  al  ff  dr   CA80h
@@ -3301,7 +3305,7 @@ void radioAlphaTRX_Init(void) {
     RF_FIFOandResetMode.bits.b0_dr = 1; // Non-sensitive reset
     RF_FIFOandResetMode.bits.b1_ff = 0; // FIFO fill will be enabled after synchron pattern reception
     radioAlphaTRX_Command(RF_FIFOandResetMode.Val); // al=1; ml=0;Data Filter: Digital filter, DATA QUALITY THRESHOLD 6
-    
+
     /**-------------> Synchron Pattern Command (8) <--------------------------*/
     // 0xCE00 | group
     // SYNC = 2DXX
@@ -3320,15 +3324,15 @@ void radioAlphaTRX_Init(void) {
     // AFC auto-mode: Keep offset indepently value VDI hi, [range limit: +15/-16,] 
     //st goes hi will store offset into output register, Enable AFC output register, Enable AFC function
     radioAlphaTRX_Command(0xC4D7); //0xC4F7
-    
-    
+
+
     /**-------------> PLL Setting Command (12) <-----------------*/
     // Microcontroller output clock buffer rise and fall time   : 5 or 10 Mhz (recommended)
     // Switches on the delay in the phase detector              : off
     // Disabled the dithering in the PLL loop                   : on
     // PLL bandwidth                                            : Max bit rate: 256 kbps, Phase noise at 1 Mhz offset: -102 dBc/Hc
     radioAlphaTRX_Command(0xCC7A); // 0xCC7A Pll Setting
-    
+
     /* 0xE000 - Wake-Up Timer Command */
     // NOT USE
     // T_wakeup = 0 ms
@@ -3348,7 +3352,7 @@ void radioAlphaTRX_ReceivedMode(void) {
     //close TX mode 
     RF_PowerManagement.Val = PWR_MGMT_CMD_POR;
     RF_PowerManagement.bits.b0_dc = 1;
-    radioAlphaTRX_Command(RF_PowerManagement.Val);//0x8209
+    radioAlphaTRX_Command(RF_PowerManagement.Val); //0x8209
     radioAlphaTRX_Command(RX_FIFO_READ_CMD_POR);
 
     /**-------------> Configuration Setting Command (2) <----------------------*/
@@ -3379,7 +3383,7 @@ void radioAlphaTRX_ReceivedMode(void) {
     //#if defined(UART_DEBUG)
     //        printf("status 0x%04X\n", RF_StatusRead.Val);
     //#endif
-    radioAlphaTRX_SetSendMode(0); // on n'est plus en mode emission
+    sendMode = false; // on n'est plus en mode emission
 }
 
 // Configuration en mode TX avant l'envoie de donnee
@@ -3388,27 +3392,27 @@ int8_t radioAlphaTRX_SendMode(void) {
     //close Rx mode 
     RF_PowerManagement.Val = PWR_MGMT_CMD_POR;
     RF_PowerManagement.bits.b0_dc = 1;
-    radioAlphaTRX_Command(RF_PowerManagement.Val);//0x8209
+    radioAlphaTRX_Command(RF_PowerManagement.Val); //0x8209
     radioAlphaTRX_Command(RX_FIFO_READ_CMD_POR);
 
 
-//    //    radioAlphaTRX_CaptureFrame(RX_FIFO_READ_CMD);
-//    /**-------------> Configuration Setting Command (1)<-----------------------*/
-//    //  bit  15  14  13  12  11  10   9   8   7   6   5   4   3   2   1   0   POR
-//    //  Val   1   0   0   0   0   0   0   0  el  ef  b1  b0  x3  x2  x1  x0   0x8008
-//    // --------------------- 0x80?? ---------------------
-//    // el     - Enabled the internal data register : off
-//    // ef     - Enabled the FIFO mode              : on
-//    // b<1:0> - Set up the band                    : 868 MHz
-//    // x<3:0> -                                    : 12.5 pF
-//    RF_ConfigSet.Val = CFG_SET_CMD_POR; // initialiser la variable globale avec la valeur interne pr?sente lors du Power On Reset
-//    //    radioAlphaTRX_Command(RF_ConfigSet.Val);
-//    //    el = 1;
-//    //    SelectBand = BAND_868 ==> initialer module at 868 Mhz
-//    //    SelectCrystalCapacitor = LOAD_C_12_0pF  
-    
-//    RF_ConfigSet.Val = 0x80A7;
-//    radioAlphaTRX_Command(RF_ConfigSet.Val);
+    //    //    radioAlphaTRX_CaptureFrame(RX_FIFO_READ_CMD);
+    //    /**-------------> Configuration Setting Command (1)<-----------------------*/
+    //    //  bit  15  14  13  12  11  10   9   8   7   6   5   4   3   2   1   0   POR
+    //    //  Val   1   0   0   0   0   0   0   0  el  ef  b1  b0  x3  x2  x1  x0   0x8008
+    //    // --------------------- 0x80?? ---------------------
+    //    // el     - Enabled the internal data register : off
+    //    // ef     - Enabled the FIFO mode              : on
+    //    // b<1:0> - Set up the band                    : 868 MHz
+    //    // x<3:0> -                                    : 12.5 pF
+    //    RF_ConfigSet.Val = CFG_SET_CMD_POR; // initialiser la variable globale avec la valeur interne pr?sente lors du Power On Reset
+    //    //    radioAlphaTRX_Command(RF_ConfigSet.Val);
+    //    //    el = 1;
+    //    //    SelectBand = BAND_868 ==> initialer module at 868 Mhz
+    //    //    SelectCrystalCapacitor = LOAD_C_12_0pF  
+
+    //    RF_ConfigSet.Val = 0x80A7;
+    //    radioAlphaTRX_Command(RF_ConfigSet.Val);
 
     /**-------------> Configuration Setting Command (2) <----------------------*/
     //  bit  15  14  13  12  11  10   9   8   7   6   5   4   3   2   1   0   POR
@@ -3424,8 +3428,8 @@ int8_t radioAlphaTRX_SendMode(void) {
     RF_ConfigSet.REGbits.SelectBand = BAND_868; // initialer module at 868 Mhz
     RF_ConfigSet.REGbits.SelectCrystalCapacitor = LOAD_C_12_0pF;
     radioAlphaTRX_Command(RF_ConfigSet.Val);
-    
-    
+
+
     //    Power Management Command
     //    b5_et = 1; // Enabling the Transmitter preloads the TX latch with 0xAAAA
     //    b4_es = 1;
@@ -3438,7 +3442,7 @@ int8_t radioAlphaTRX_SendMode(void) {
     RF_PowerManagement.bits.b0_dc = 1;
     RF_StatusRead.Val = radioAlphaTRX_Command(RF_PowerManagement.Val); //0x8239
 
-    radioAlphaTRX_SetSendMode(1); // on est en mode transmission
+    sendMode = true; // on est en mode transmission
     return radioAlphaTRX_WaitLownIRQ(SEND_TIME_OUT); // arbitraire 
 }
 
@@ -3453,7 +3457,7 @@ int8_t radioAlphaTRX_SendByte(uint8_t data_send, int8_t timeout) {
     return radioAlphaTRX_WaitLownIRQ(timeout);
 }
 
-int8_t radioAlphaTRX_SendData(uint8_t* bytes, int8_t size) {
+int8_t radioAlphaTRX_SendData(Frame frameToSend) {
     int i;
 
     //preamble
@@ -3461,22 +3465,18 @@ int8_t radioAlphaTRX_SendData(uint8_t* bytes, int8_t size) {
     radioAlphaTRX_SendByte(0xAA, SEND_TIME_OUT);
     radioAlphaTRX_SendByte(0xAA, SEND_TIME_OUT);
 
-    //peut g?n?rer des probleme ? surveiller
     //synchro pattern
     radioAlphaTRX_SendByte(0x2D, SEND_TIME_OUT);
     radioAlphaTRX_SendByte(0xD4, SEND_TIME_OUT);
     //transmission des octet 
-    for (i = 0; i < size; i++) {
-        if (radioAlphaTRX_SendByte(bytes[i], SEND_TIME_OUT) == 0)
+    for (i = 0; i < frameToSend.Champ.size + 5; i++) {
+        if (radioAlphaTRX_SendByte(frameToSend.paquet[i], SEND_TIME_OUT) == 0)
             break;
     }
 
     //dummy bytes
     radioAlphaTRX_SendByte(0x00, SEND_TIME_OUT);
     radioAlphaTRX_SendByte(0x00, SEND_TIME_OUT);
-    // clear TX
-    //    RF_PowerManagement.Val = 0x8209;
-    //    radioAlphaTRX_Command(RF_PowerManagement.Val);
     return i;
 }
 
@@ -3516,55 +3516,85 @@ int8_t radioAlphaTRX_WaitLownIRQ(int timeout) {
 /******************************************************************************/
 /******************************************************************************/
 // 4 buffer remplie de circulairement 
-volatile uint8_t BUF[FRAME_LENGTH];
-volatile uint8_t sizeBuf = 0;
-volatile uint8_t sendMode = 0; // O receve mode    1 send mode  
+volatile Frame frameReceve;
+volatile uint8_t sizeDate = 0;
+volatile uint8_t sumCtrl = 0; 
 
-int8_t radioAlphaTRX_IsSendMode() {
+bool radioAlphaTRX_IsSendMode() {
     return sendMode;
 }
 
-void radioAlphaTRX_SetSendMode(int8_t modeRF) {
+void radioAlphaTRX_SetSendMode(bool modeRF) {
     sendMode = modeRF;
 }
 
-uint8_t radioAlphaTRX_GetSizeBuf() {
-    return sizeBuf;
+uint8_t radioAlphaTRX_GetSizeData() {
+    return sizeDate;
 }
 
-uint8_t * radioAlphaTRX_ReadBuf() {
-    MASTER_SetMsgReceiveRF(0);
-    return BUF;
+Frame radioAlphaTRX_GetFrame() {
+    MASTER_SetMsgReceiveRF(false); // a voir 
+    return frameReceve;
 }
 
-int8_t radioAlphaTRX_receive(uint8_t buffer[FRAME_LENGTH]) {
-    WORD_VAL_T receiveData;
-    uint8_t i = 0;
-    for (i = 0; i < FRAME_LENGTH; i++) {
-        if (0 == radioAlphaTRX_WaitLownIRQ(TIME_OUT_nIRQ)) {
-            return 0;
-        }
-        receiveData.word = radioAlphaTRX_Command(0xB000);
-        buffer[i] = receiveData.byte.low;
-        idOF id;
-        id.code = receiveData.byte.low;
-        if (id.id.dest != MASTER_ID && id.id.dest != ID_BROADCAST && i == 0) {
-            return 0;
-        } else if (receiveData.byte.low == 0) {
-            break;
-        }
-    }
-    return i;
-}
+//int8_t radioAlphaTRX_receive(uint8_t buffer[FRAME_LENGTH]) {
+//    WORD_VAL_T receiveData;
+//    uint8_t i = 0;
+//    for (i = 0; i < FRAME_LENGTH; i++) {
+//        if (0 == radioAlphaTRX_WaitLownIRQ(TIME_OUT_nIRQ)) {
+//            return 0;
+//        }
+//        receiveData.word = radioAlphaTRX_Command(0xB000);
+//        buffer[i] = receiveData.byte.low;
+//        idOF id;
+//        id.code = receiveData.byte.low;
+//        if (id.id.dest != MASTER_ID && id.id.dest != ID_BROADCAST && i == 0) {
+//            return 0;
+//        } else if (receiveData.byte.low == 0) {
+//            break;
+//        }
+//    }
+//    return i;
+//}
 
 void radioAlphaTRX_CaptureFrame() {
-    if ((sizeBuf = radioAlphaTRX_receive(BUF)) > 0) {
-        LED_STATUS_R_SetLow();
-        LED_STATUS_B_Toggle();
-        MASTER_SetMsgReceiveRF(1);
-        TMR_SetMsgRecuTimeout(TIME_OUT_GET_FRAME); // on demare le timer, car le bufer est probablement remplie 
-    }else {
-        LED_STATUS_R_SetHigh();
+    STATUS_READ_VAL RF_StatusRead;
+    RF_StatusRead.Val = radioAlphaTRX_Command(STATUS_READ_CMD); //lecture du registre status 
+    
+    if (RF_StatusRead.bits.b15_RGIT_FFIT && !sendMode) { // on verifie si la fifo est remplie 
+        memset(frameReceve.paquet, 0, FRAME_LENGTH); // reset frame to receve 
+        int8_t i;
+        WORD_VAL_T receiveData;
+        for (i = 0; i < 5; i++) { // on recupere l'en tete  
+            if (0 == radioAlphaTRX_WaitLownIRQ(TIME_OUT_nIRQ)) return;
+            receiveData.word = radioAlphaTRX_Command(0xB000);
+            frameReceve.paquet[i] = receiveData.byte.low;
+            if (i == 0 && frameReceve.Champ.dest != MASTER_ID &&
+                frameReceve.Champ.dest != ID_BROADCAST) return;
+
+            sumCtrl ^= frameReceve.paquet[i]; // calcule du crc 
+        }
+        for (i = 0; i < frameReceve.Champ.size; i++) { // on recupère la data s'il y'en a 
+            if (0 == radioAlphaTRX_WaitLownIRQ(TIME_OUT_nIRQ)) {
+                return;
+            }
+            receiveData.word = radioAlphaTRX_Command(0xB000);
+            frameReceve.paquet[i] = receiveData.byte.low;
+            sumCtrl ^= frameReceve.paquet[i];
+        }
+        // c'est que tou c'est bien passer 
+#if defined(UART_DEBUG)
+        if (sumCtrl == frameReceve.Champ.crc) { //le paquet est
+            LED_STATUS_R_SetLow();
+            LED_STATUS_B_Toggle();
+            MASTER_SetMsgReceiveRF(true);
+            TMR_SetMsgRecuTimeout(TIME_OUT_GET_FRAME); // on demare le timer, car le bufer est probablement remplie 
+        } else {
+            LED_STATUS_R_SetHigh();
+        }
+#else
+        MASTER_SetMsgReceiveRF(sumCtrl == frameReceve.Champ.crc);
+#endif
     }
     //on se remet en ecoute 
     radioAlphaTRX_ReceivedMode();

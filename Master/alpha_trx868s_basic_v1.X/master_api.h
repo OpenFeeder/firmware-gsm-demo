@@ -114,7 +114,7 @@ void MASTER_HandlerMsgRF();
  *         0 : pas de slave selctionne
  *         1 : si un slave est selectionne
  */
-int8_t MASTER_SelectSlave();
+ bool MASTER_SelectSlave();
 
 /**
  * des qu'un msg est recu on declence un timer qui corespond au temps que master
@@ -124,7 +124,7 @@ int8_t MASTER_SelectSlave();
  *      0 : pas de msg ou n'est plus d'actalite 
  *      1 : un msg est presnt et il est toujours d'actualité 
  */
-void MASTER_SetMsgReceiveRF(uint8_t set);
+void MASTER_SetMsgReceiveRF(bool set);
 
 
 int8_t Master_SendMsgRF(

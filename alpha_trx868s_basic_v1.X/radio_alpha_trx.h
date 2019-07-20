@@ -779,14 +779,11 @@ int8_t radioAlphaTRX_SendMode(void);
 int8_t radioAlphaTRX_SendByte(uint8_t dataToSend, int8_t timeout);
 
 /**
- * transmission flot d'octets a la suite 
- * 
- * @param bytes : tableau d'octet
- * @param size : la taille du tableau 
- * @param timeout : delais apres quoi on gener une erreur de transmsission 
- * @return : nombre d'octets effectivement transmis 
+ * transmet une trame complete
+ * @param frameToSend : la trame a transmettre 
+ * @return : le nombre de d'octet transmis 
  */
-int8_t radioAlphaTRX_SendData(uint8_t* bytes, int8_t size);
+int8_t radioAlphaTRX_SendData(Frame frameToSend);
 
 /**
  * 
@@ -810,25 +807,25 @@ void radioAlphaTRX_CaptureFrame();
  * 
  * @param mode_rf
  */
-void radioAlphaTRX_SetSendMode(int8_t modeRF);
+void radioAlphaTRX_SetSendMode(bool modeRF);
 
 /**
  * 
  * @return 
  */
-int8_t radioAlphaTRX_IsSendMode();
+bool radioAlphaTRX_IsSendMode();
 
 /**
  * <pres condition : receive_msg == 1 > avant l'apelle de cette fonction 
  * @return : le contenue du buffer
  */
-uint8_t * radioAlphaTRX_ReadBuf();
+Frame radioAlphaTRX_GetFrame();
 
 /**
  * 
  * @return : la taille du buffer indice
  */
-uint8_t radioAlphaTRX_GetSizeBuf();
+uint8_t radioAlphaTRX_GetSizeData();
 
 
 /****************                                         *********************/
