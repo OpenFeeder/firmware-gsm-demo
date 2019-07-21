@@ -42,8 +42,8 @@
 
 // This is a guard condition so that contents of this file are not included
 // more than once.  
-#ifndef XC_HEADER_TEMPLATE_H
-#define	XC_HEADER_TEMPLATE_H
+#ifndef MASTER_API_H
+#define	MASTER_API_H
 
 /**------------------------>> I N C L U D E <<---------------------------------*/
 #include <xc.h> // include processor files - each processor file is guarded.  
@@ -57,9 +57,9 @@
 /*****************                                 ****************************/
 
 typedef enum { // if you want to add a new level, you must be increase MAX_LEVEL_PRIO
-    HIGH, //00
-    MEDIUM, //01
-    LOW //02
+    PRIO_HIGH, //00
+    PRIO_MEDIUM, //01
+    PRIO_LOW //02
 } PRIORITY;
 
 typedef enum {
@@ -78,7 +78,8 @@ typedef enum { // you can add others states
     MASTER_STATE_NONE // no comportementent
 } MASTER_STATES;
 
-
+/**-------------------------->> D E B U G <<----------------------------------*/
+void printPointeur(PRIORITY prio);
 
 /**-------------------------->> P R O T O T Y P E S <<------------------------*/
 
@@ -142,5 +143,5 @@ void MASTER_AppInit();
 /******************************************************************************/
 /******************************************************************************/
 
-#endif	/* XC_HEADER_TEMPLATE_H */
+#endif	/* MASTER_API */
 

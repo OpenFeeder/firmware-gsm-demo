@@ -51,6 +51,7 @@
 #include <xc.h>
 #include "rtcc.h"
 #include "pin_manager.h"
+#include "../timer.h"
 
 /**
 // Section: Static function
@@ -82,6 +83,13 @@ void RTCC_Initialize(void)
        TIMEH = 0x1434;    // hours/minutes
        TIMEL = 0x900;    // seconds
    }
+   // set 2019-05-29 14-34-09
+   ALMDATEH = 0x1905;    // Year/Month
+   ALMDATEL = 0x2903;    // Date/Wday
+   ALMTIMEH = 0x1434;    // hours/minutes
+   ALMTIMEL = 0x900;    // seconds
+   // AMASK Every Minute; ALMRPT 0; CHIME enabled; ALRMEN enabled; 
+   RTCCON1H = 0xC300;
    
    // PWCPS 1:1; PS 1:1; CLKSEL SOSC; FDIV 0; 
    RTCCON2L = 0x0000;
@@ -383,7 +391,7 @@ static uint8_t ConvertBCDToHex(uint8_t bcdvalue)
 void __attribute__ ( ( interrupt, no_auto_psv ) ) _ISR _RTCCInterrupt( void )
 {
     /* TODO : Add interrupt handling code */
-    LED_STATUS_Y_Toggle();
+    TMR_RtccCallBack();
     IFS3bits.RTCIF = false;
 }
 /**

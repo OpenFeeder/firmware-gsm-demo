@@ -66,10 +66,10 @@
 #define FRAME_LENGTH                 50 // Longueur total d'une trame en octet
 #define ERROR_LENGTH                  8
 #define SIZE_DATA                    36
-#define TIME_OUT_nIRQ                 2 // 2 ms
+#define TIME_OUT_nIRQ                 2 // en ms
 #define LAPS                         50 // on attend X ms avant de transmettre un nouveau msg 
-#define SEND_HORLOG_TIMEOUT        5000 // 1 min
-#define AFTER_SEND_HORLOGE           20 // 20 ms
+#define SEND_HORLOG_TIMEOUT           2 // en min
+#define AFTER_SEND_HORLOGE           20 // en ms
 #define TIME_OUT_GET_FRAME         1500 // temps max, pour que le msg recu soit encore exploitable
                                         // au dela le mster ne m'ecoute pas donc cela ne sert ? rien 
 #define NB_ERR_BUF                   10 // nombre d'errerur possible 
@@ -78,7 +78,7 @@
 #define NB_SLAVE                      1
 #define MAX_TIMEOUT                  20 // nombre de timeout avant de decider que la liaison avec le slave est couper 
 #define MAX_ERROR                    10 // nombre du quel on considere que la communication est interompue entre le slave est le master
-#define MAX_TRY_TO_SYNC              5 // le nombre d'essaie avant de decider qu'on est pas connecte
+#define MAX_TRY_TO_SYNC               5 // le nombre d'essaie avant de decider qu'on est pas connecte
 
 
 //_______________________________TYPE__PAQUET________________________________________*/

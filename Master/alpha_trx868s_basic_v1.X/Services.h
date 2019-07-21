@@ -24,9 +24,9 @@
 #define FRAME_LENGTH                 25 // Longueur total d'une trame en octet
 #define ERROR_LENGTH                  8
 #define SIZE_DATA                    20
-#define TIME_OUT_nIRQ                 2 // 2 ms
+#define TIME_OUT_nIRQ                10 // en ms
 #define LAPS                         50 // on attend X ms avant de transmettre un nouveau msg 
-#define SEND_HORLOG_TIMEOUT       10000 // 1 min
+#define SEND_HORLOG_TIMEOUT           2 // en min
 #define AFTER_SEND_HORLOGE           20 // 20 ms
 #define TIME_OUT_GET_FRAME         1500 // temps max, pour que le msg recu soit encore exploitable
 // au dela le mster ne m'ecoute pas donc cela ne sert ? rien 
@@ -37,7 +37,7 @@
 #define MAX_TIMEOUT                  20 // nombre de timeout avant de decider que la liaison avec le slave est couper 
 #define MAX_ERROR                    10 // nombre du quel on considere que la communication est interompue entre le slave est le master
 #define MAX_TRY_TO_SYNC               5 // le nombre d'essaie avant de decider qu'on est pas connecte
-#define MAX_LEVEL_PRIO                3
+#define MAX_LEVEL_PRIO                3 // 3 niveau de priorite, si l'on veut en ajouter il suiffit de modifier 
 #define NB_BEHAVIOR_PER_PRIO          3
 
 
@@ -58,7 +58,7 @@
 #define SLAVE2_ID 2
 #define SLAVE3_ID 3
 #define SLAVE4_ID 4
-#define ID_BROADCAST 15
+#define BROADCAST_ID 15 // la plus grande valeur possible 
 
 #define MASTER_ID 14
 #define STATION 1
@@ -98,11 +98,11 @@
 /*_____________________________________________________________________________*/
 
 typedef union {
-    uint8_t paquet[25];
+    uint8_t paquet[FRAME_LENGTH];
     
     struct {
         uint8_t head[5];
-        uint8_t Infos[20];
+        uint8_t Infos[SIZE_DATA];
     }Section;
     
     struct {
@@ -113,7 +113,7 @@ typedef union {
         uint8_t idMsg;          //    |
         uint8_t size;           //    | // taille de la data reelement envoye 
         uint8_t crc;            //-----
-        uint8_t data[20];
+        uint8_t data[SIZE_DATA];
     } Champ;
 } Frame;
 

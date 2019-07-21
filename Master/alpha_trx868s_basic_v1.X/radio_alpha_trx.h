@@ -106,14 +106,15 @@
 
 // This is a guard condition so that contents of this file are not included
 // more than once.  
-#ifndef XC_HEADER_TEMPLATE_H
-#define	XC_HEADER_TEMPLATE_H
+#ifndef RADIO_ALPHA_TRX_H
+#define	RADIO_ALPHA_TRX_H
 
 /**------------------------>> I N C L U D E <<---------------------------------*/
 #include <xc.h> // include processor files - each processor file is guarded.  
 #include "mcc_generated_files/pin_manager.h"
 #include "Services.h"
 #include "led_status.h"
+#include "master_api.h"
 
 /******************************************************************************/
 /******************************************************************************/
@@ -833,4 +834,4 @@ uint8_t radioAlphaTRX_GetSizeData();
 /******************************************************************************/
 /******************************************************************************/
 
-#endif	/* XC_HEADER_TEMPLATE_H */
+#endif	/* RADIO_ALPHA_TRX_H */

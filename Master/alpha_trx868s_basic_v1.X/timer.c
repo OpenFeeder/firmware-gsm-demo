@@ -20,7 +20,6 @@
  *******************************************************************************/
 
 /**------------------------>> I N C L U D E <<---------------------------------*/
-#include <time.h>
 #include "xc.h"
 #include "timer.h"
 
@@ -75,6 +74,7 @@ void TMR_Delay(uint16_t delayMs) {
     TMR_DelayMs = delayMs;
     while (TMR_DelayMs > 0) { }
 }
+
 void TMR_CallBack( void ) {
     
     if (TMR_DelayMs > 0) --TMR_DelayMs;
@@ -89,6 +89,12 @@ void TMR_CallBack( void ) {
 
     //timer du buffer 
     if (TMR_MsgRecuTimeout > 0) --TMR_MsgRecuTimeout;
+}
+
+
+void TMR_RtccCallBack( void ) {
+    if (TMR_HorlogeTimeout > 0) --TMR_HorlogeTimeout;
+    else MASTER_StoreBehavior(MASTER_STATE_SEND_DATE, PRIO_HIGH); // prio eleve 
 }
 
 /*_____________________________________________________________________________*/

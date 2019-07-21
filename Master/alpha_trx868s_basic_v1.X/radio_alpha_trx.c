@@ -3547,22 +3547,28 @@ bool radioAlphaTRX_receive() {
         receiveData.word = radioAlphaTRX_Command(0xB000);
         frameReceve.paquet[i] = receiveData.byte.low;
         if (frameReceve.Champ.dest != MASTER_ID &&
-            frameReceve.Champ.dest != ID_BROADCAST && i == 0) {
+            frameReceve.Champ.dest != BROADCAST_ID && i == 0) {
             return false;
         } else if (receiveData.byte.low == 0) {
             break;
         }
-        if (i != 4) sumCtrl ^= frameReceve.paquet[i];
+        if (i != 4) sumCtrl ^= frameReceve.paquet[i]; // c'est l'octet 4 ou se trouve le sum contrle 
     }
-    return true;
+#if defined(UART_DEBUG)
+    printf("juste pour un test %d vs %d\n", sumCtrl, frameReceve.Champ.crc);
+#endif
+    return sumCtrl == frameReceve.Champ.crc; // test sum controle
 }
 
 void radioAlphaTRX_CaptureFrame() {
     if (radioAlphaTRX_receive()) {
         LED_STATUS_B_Toggle();
-//        APP_setMsgReceive(1);
-        TMR_SetMsgRecuTimeout(TIME_OUT_GET_FRAME); // on demare le timer, car le bufer est probablement remplie 
-
+        // à ce niveau le msg est corectemnt reçu 
+        MASTER_StoreBehavior(MASTER_STATE_MSG_RF_RECEIVE, PRIO_HIGH); // c'est une information très importante 
+    }else {
+#if defined(UART_DEBUG)
+        LED_STATUS_R_Toggle();
+#endif
     }
     //on se remet en ecoute 
     radioAlphaTRX_ReceivedMode();

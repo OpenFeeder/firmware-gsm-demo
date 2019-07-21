@@ -10,6 +10,7 @@
 #include <stdio.h>
 #include "app.h"
 #include "app_debug.h"
+#include "master_api.h"
 
 #if defined (USE_UART1_SERIAL_INTERFACE)
 
@@ -82,20 +83,14 @@ void APP_SerialDebugTasks(void) {
                 /* -------------------------------------------------------------- */
             case 'a':
             case 'A':
-
-                appData.state = MSTR_STATE_GENERAL_AFTER_DAYTIME;
                 break;
                 /* -------------------------------------------------------------- */
             case 'b':
             case 'B':
-
-                appData.state = MSTR_STATE_GENERAL_BEFOR_DAYTIME;
                 break;
                 /* -------------------------------------------------------------- */
             case 'd':
             case 'D':
-
-                appData.state = MSTR_STATE_GENERAL_DAYTIME;
                 break;
                 /* -------------------------------------------------------------- */
             case 'n':
@@ -104,8 +99,7 @@ void APP_SerialDebugTasks(void) {
 #if defined(UART_DEBUG)
                 printf("demande d'infos\n");
 #endif
-                printf("send %d \n", MASTER_SendMsgRF(1,
-                                                      INFOS, (uint8_t *) ("INFO"), 1, 1));
+                printf("send %d \n", MASTER_SendMsgRF(1,INFOS, 1, 1, "INFO", 4));
                 break;
                 /* -------------------------------------------------------------- */
             case 'm':
@@ -114,8 +108,13 @@ void APP_SerialDebugTasks(void) {
 #if defined(UART_DEBUG)
                 printf("demande d'infos\n");
 #endif
-                printf("send %d \n", MASTER_SendMsgRF(2,
-                                                      INFOS, (uint8_t *) ("INFO"), 1, 1));
+                printf("send %d \n", MASTER_SendMsgRF(2,INFOS, 1, 1, "INFO", 4));
+                break;
+                /* -------------------------------------------------------------- */
+            case 'p':
+            case 'P':
+                
+                printPointeur(0);
                 break;
                 /* -------------------------------------------------------------- */
             case 'r':
@@ -132,7 +131,7 @@ void APP_SerialDebugTasks(void) {
 #if defined(UART_DEBUG)
                 printf("envoie date %d \n", MASTER_SendDateRF());
 #endif
-                
+
                 break;
                 /* -------------------------------------------------------------- */
 

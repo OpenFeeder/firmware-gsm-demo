@@ -54,13 +54,13 @@ void INTERRUPT_Initialize (void)
 {
     //    RTCI: RTCC - Real-Time Clock and Calendar
     //    Priority: 1
-        IPC15bits.RTCIP = 2;
+        IPC15bits.RTCIP = 1;
     //    CNI: CN -  Change Notification Interrupt
     //    Priority: 1
         IPC4bits.CNIP = 1;
     //    TI: T3 - Timer3
     //    Priority: 1
-        IPC2bits.T3IP = 2;
+        IPC2bits.T3IP = 1;
     //    UERI: U1E - UART1 Error
     //    Priority: 1
         IPC16bits.U1ERIP = 1;
