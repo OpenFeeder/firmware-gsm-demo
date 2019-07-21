@@ -3518,7 +3518,6 @@ int8_t radioAlphaTRX_WaitLownIRQ(int timeout) {
 // 4 buffer remplie de circulairement 
 volatile Frame frameReceve;
 volatile uint8_t sizeDate = 0;
-volatile uint8_t sumCtrl = 0;
 
 bool radioAlphaTRX_IsSendMode() {
     return sendMode;
@@ -3533,13 +3532,13 @@ uint8_t radioAlphaTRX_GetSizeData() {
 }
 
 Frame radioAlphaTRX_GetFrame() {
-//    MASTER_SetMsgReceiveRF(false); // a voir 
+    //    MASTER_SetMsgReceiveRF(false); // a voir 
     return frameReceve;
 }
 
 bool radioAlphaTRX_receive() {
     WORD_VAL_T receiveData;
-    uint8_t i = 0;
+    uint8_t i = 0; uint8_t sumCtrl = 0;
     for (i = 0; i < FRAME_LENGTH; i++) {
         if (0 == radioAlphaTRX_WaitLownIRQ(TIME_OUT_nIRQ)) {
             return false;
@@ -3552,11 +3551,8 @@ bool radioAlphaTRX_receive() {
         } else if (receiveData.byte.low == 0) {
             break;
         }
-        if (i != 4) sumCtrl ^= frameReceve.paquet[i]; // c'est l'octet 4 ou se trouve le sum contrle 
+        if (i != 4) sumCtrl ^= receiveData.byte.low; // c'est l'octet 4 ou se trouve le sum contrle 
     }
-#if defined(UART_DEBUG)
-    printf("juste pour un test %d vs %d\n", sumCtrl, frameReceve.Champ.crc);
-#endif
     return sumCtrl == frameReceve.Champ.crc; // test sum controle
 }
 
@@ -3565,7 +3561,7 @@ void radioAlphaTRX_CaptureFrame() {
         LED_STATUS_B_Toggle();
         // à ce niveau le msg est corectemnt reçu 
         MASTER_StoreBehavior(MASTER_STATE_MSG_RF_RECEIVE, PRIO_HIGH); // c'est une information très importante 
-    }else {
+    } else {
 #if defined(UART_DEBUG)
         LED_STATUS_R_Toggle();
 #endif

@@ -63,7 +63,7 @@
 
 /*******************************************************************************/
 //_________________________Radio Alpha TRX Infos_______________________________*/
-#define FRAME_LENGTH                 50 // Longueur total d'une trame en octet
+#define FRAME_LENGTH                 25 // Longueur total d'une trame en octet
 #define ERROR_LENGTH                  8
 #define SIZE_DATA                    35
 #define TIME_OUT_nIRQ                 2 // 2ms
@@ -91,7 +91,7 @@
 //_______________________________IF__OF________________________________________*/
 #define SLAVE_ID 2
 #define MASTER_ID 14
-#define ID_BROADCAST 15
+#define BROADCAST_ID 15
 /*_____________________________________________________________________________*/
 
 
@@ -122,7 +122,7 @@
 /*_____________________________________________________________________________*/
 
 typedef union {
-    uint8_t paquet[25];
+    uint8_t paquet[FRAME_LENGTH];
     
     struct {
         uint8_t head[5];

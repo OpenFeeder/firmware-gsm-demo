@@ -234,6 +234,7 @@ void MASTER_AppTask() { // machiine a etat general
 #else
             MASTER_SendDateRF();
 #endif
+            TMR_SetHorlogeTimeout(SEND_HORLOG_TIMEOUT);
             break;
             /* -------------------------------------------------------------- */
         case MASTER_STATE_SEND_REQUEST_INFOS: 

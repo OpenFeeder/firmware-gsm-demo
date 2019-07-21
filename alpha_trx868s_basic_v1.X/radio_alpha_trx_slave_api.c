@@ -94,42 +94,30 @@ int8_t radioAlphaTRX_SlaveSendMsgRF(uint8_t typeMsg,
                                     uint8_t nbRemaining) {
     //    radioAlphaTRX_SetSendMode(1); // j'annonce que je suis en mode transmission 
     Frame frameToSend;
-
+    memset(frameToSend.paquet, 0, FRAME_LENGTH);
     //_____________CREATE FRAME____________________________________________
     int8_t ret = 0;
     // en tete 
     frameToSend.Champ.dest = MASTER_ID;
-    frameToSend.Champ.crc ^= frameToSend.Champ.dest;
     frameToSend.Champ.src = SLAVE_ID;
-    frameToSend.Champ.crc ^= frameToSend.Champ.src;
-    frameToSend.Champ.idMsg = idMsg;
-    frameToSend.Champ.crc ^= frameToSend.Champ.idMsg;
+    frameToSend.Champ.crc ^= frameToSend.paquet[0];
     frameToSend.Champ.typeMsg = typeMsg;
-    frameToSend.Champ.crc ^= frameToSend.Champ.typeMsg;
     frameToSend.Champ.nbR = nbRemaining;
-    frameToSend.Champ.crc ^= frameToSend.Champ.nbR;
-
+    frameToSend.Champ.crc ^= frameToSend.paquet[1];
+    frameToSend.Champ.idMsg = idMsg;
+    frameToSend.Champ.crc ^= frameToSend.paquet[2];
     // data
     int8_t i;
     frameToSend.Champ.size = strlen(data);
+    frameToSend.Champ.crc ^= frameToSend.paquet[3];
     for (i = 0; i < frameToSend.Champ.size; i++) {
         frameToSend.Champ.data[i] = data[i];
-        frameToSend.Champ.crc ^= frameToSend.Champ.data[i];
+        frameToSend.Champ.crc ^= frameToSend.paquet[i+5];
     }
-//    printf("src %d \ndes %d \ntypeMsg %d \nnbR %d \nidMsg %d\ncrc %d \nsize %d\n", 
-//    frameToSend.Champ.src, frameToSend.Champ.dest, frameToSend.Champ.typeMsg, 
-//           frameToSend.Champ.nbR, frameToSend.Champ.idMsg, frameToSend.Champ.crc,
-//           frameToSend.Champ.);
-//    int j;
-//    for (j = 0; j < frameToSend.Champ.size; j++) {
-//        printf("%d ",frameToSend.paquet[j]);
-//
-//    }
-//    printf("\n");
-    ///____________________________________________________________________
+    //____________________________________________________________________
+    //________________________TRANSMSISSION_______________________________
     if (radioAlphaTRX_SendMode()) {
         ret = radioAlphaTRX_SendData(frameToSend);
-        ret = 1;
     } else {
 #if defined(UART_DEBUG)
         printf("non Envoye\n");

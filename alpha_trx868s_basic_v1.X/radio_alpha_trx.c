@@ -3549,9 +3549,8 @@ Frame radioAlphaTRX_GetFrame() {
         }
         receiveData.word = radioAlphaTRX_Command(0xB000);
         frameReceive.paquet[i] = receiveData.byte.low;
-        if (frameReceive.Champ.dest != MASTER_ID &&
-            frameReceive.Champ.dest != ID_BROADCAST && i == 0) {
-            LED_STATUS_R_Toggle();
+        if (frameReceive.Champ.dest != SLAVE_ID &&
+            frameReceive.Champ.dest != BROADCAST_ID && i == 0) {
             return false;
         } else if (receiveData.byte.low == 0) {
             break;
@@ -3567,7 +3566,6 @@ void radioAlphaTRX_CaptureFrame() {
             radioAlphaTRX_SlaveUpdateDate(frameReceive.Champ.data);
         } else {
             LED_STATUS_B_Toggle();
-            setLedsStatusColor(LED_BLUE);
             APP_setMsgReceive(1);
             TMR_SetMsgRecuTimeout(TIME_OUT_GET_FRAME); // on demare le timer, car le bufer est probablement remplie 
         }
