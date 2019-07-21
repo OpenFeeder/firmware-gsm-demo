@@ -3520,7 +3520,6 @@ int8_t radioAlphaTRX_WaitLownIRQ(int timeout) {
 /******************************************************************************/
 // 4 buffer remplie de circulairement 
 volatile Frame frameReceive;
-volatile uint8_t sumCtrl = 0;
 volatile uint8_t sizeBuf = 0;
  
 
@@ -3542,7 +3541,7 @@ Frame radioAlphaTRX_GetFrame() {
 
  bool radioAlphaTRX_receive() {
     WORD_VAL_T receiveData;
-    uint8_t i = 0;
+    uint8_t i = 0; uint8_t sumCtrl = 0;
     for (i = 0; i < FRAME_LENGTH; i++) {
         if (0 == radioAlphaTRX_WaitLownIRQ(TIME_OUT_nIRQ)) {
             return false;
@@ -3555,9 +3554,9 @@ Frame radioAlphaTRX_GetFrame() {
         } else if (receiveData.byte.low == 0) {
             break;
         }
-        if (i != 4) sumCtrl ^= frameReceive.paquet[i];
+        if (i != 4) sumCtrl ^= receiveData.byte.low;;
     }
-    return true;
+    return sumCtrl == frameReceive.Champ.crc;
 }
 
 void radioAlphaTRX_CaptureFrame() {

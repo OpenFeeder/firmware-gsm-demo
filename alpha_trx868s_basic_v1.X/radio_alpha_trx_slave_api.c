@@ -112,7 +112,7 @@ int8_t radioAlphaTRX_SlaveSendMsgRF(uint8_t typeMsg,
     frameToSend.Champ.crc ^= frameToSend.paquet[3];
     for (i = 0; i < frameToSend.Champ.size; i++) {
         frameToSend.Champ.data[i] = data[i];
-        frameToSend.Champ.crc ^= frameToSend.paquet[i+5];
+        frameToSend.Champ.crc ^= frameToSend.paquet[i+5]; // penser à changer le 5 en generique 
     }
     //____________________________________________________________________
     //________________________TRANSMSISSION_______________________________

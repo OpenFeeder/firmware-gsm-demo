@@ -74,31 +74,29 @@ int8_t MASTER_SendMsgRF(uint8_t dest,
                         uint8_t nbR,
                         uint8_t * data,
                         uint8_t sizeData) {
-    //    radioAlphaTRX_SetSendMode(1); // j'annonce que je suis en mode transmission 
     Frame frameToSend;
-
+    memset(frameToSend.paquet, 0, FRAME_LENGTH);
     //_____________CREATE FRAME____________________________________________
-    int8_t ret = 0;
+    int8_t ret = 0; uint8_t sumCtrl = 0;
     // en tete 
     frameToSend.Champ.dest = dest;
-    frameToSend.Champ.crc ^= frameToSend.Champ.dest;
     frameToSend.Champ.src = MASTER_ID;
-    frameToSend.Champ.crc ^= frameToSend.Champ.src;
-    frameToSend.Champ.idMsg = idMsg;
-    frameToSend.Champ.crc ^= frameToSend.Champ.idMsg;
-    frameToSend.Champ.typeMsg = typeMsg;
-    frameToSend.Champ.crc ^= frameToSend.Champ.typeMsg;
+    frameToSend.Champ.crc ^= frameToSend.paquet[0];
     frameToSend.Champ.nbR = nbR;
-    frameToSend.Champ.crc ^= frameToSend.Champ.nbR;
+    frameToSend.Champ.typeMsg = typeMsg;
+    frameToSend.Champ.crc ^= frameToSend.paquet[1];
+    frameToSend.Champ.idMsg = idMsg;
+    frameToSend.Champ.crc ^= frameToSend.paquet[2];
     // data
     int8_t i;
     frameToSend.Champ.size = sizeData;
+    frameToSend.Champ.crc ^= frameToSend.paquet[3];
     for (i = 0; i < frameToSend.Champ.size; i++) {
         frameToSend.Champ.data[i] = data[i];
-        frameToSend.Champ.crc ^= frameToSend.Champ.data[i];
+        frameToSend.Champ.crc ^= frameToSend.paquet[i+5]; // penser à changer le 5 en generique 
     }
-
-    ///_____________________TRANSMISSION________________________________________
+    //____________________________________________________________________
+    //________________________TRANSMSISSION_______________________________
     if (radioAlphaTRX_SendMode()) {
         ret = radioAlphaTRX_SendData(frameToSend);
     } else {
