@@ -1,6 +1,7 @@
 {
     "files.associations": {
         "app.h": "c",
-        "radio_alpha_trx.h": "c"
+        "radio_alpha_trx.h": "c",
+        "radio_alpha_trx_slave_api.h": "c"
     }
 }
