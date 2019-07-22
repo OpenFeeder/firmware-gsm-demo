@@ -48,6 +48,7 @@ int8_t i = 0;
 //SERIAL_CONTROL APP_SerialDebugTasks( void )
 
 //uint8_t APP_SerialDebugTasks(void) {
+
 void APP_SerialDebugTasks(void) {
     //uint8_t new_serial_command = 0;
     //    uint16_t dc_pwm;
@@ -57,7 +58,7 @@ void APP_SerialDebugTasks(void) {
     if (UART1_TRANSFER_STATUS_RX_DATA_PRESENT & UART1_TransferStatusGet()) {
         /* If there is at least one byte of data has been received. */
         uint8_t data_from_uart1 = UART1_Read();
-        
+
         switch (data_from_uart1) {
             case ',':
             case '?':
@@ -83,18 +84,23 @@ void APP_SerialDebugTasks(void) {
 
             case 'b':
             case 'B':
-                
                 radioAlphaTRX_Init();
                 radioAlphaTRX_ReceivedMode();
                 break;
                 /* -------------------------------------------------------------- */
                 
+            case 'p':
+            case 'P':
+                display_STATUS_register_from_RF_module();
+                break;
+                /* -------------------------------------------------------------- */
+                display_STATUS_register_from_RF_module();
             case 'r':
             case 'R':
 #if defined(UART_DEBUG)
                 printf("ERROR GENERATED\n");
 #endif          
-                i = i%8+1;
+                i = i % 8 + 1;
                 radioAlphaTRX_SlaveSaveError(i);
                 break;
                 /* -------------------------------------------------------------- */
@@ -112,12 +118,12 @@ void APP_SerialDebugTasks(void) {
             case 'T':
                 rf_power_status = !rf_power_status;
                 if (rf_power_status == false) {
-                    powerRFEnable( );
+                    powerRFEnable();
                     printf("RF Module enable\n");
-                    radioAlphaTRX_Init();
-                    radioAlphaTRX_ReceivedMode(); // receive mode actived
+                    //                    radioAlphaTRX_Init();
+                    //                    radioAlphaTRX_ReceivedMode(); // receive mode actived
                 } else {
-                    powerRFDisable( );
+                    powerRFDisable();
                     printf("RF Module disable\n");
                 }
                 /* Display date and time from RTCC module. */
@@ -132,7 +138,7 @@ void APP_SerialDebugTasks(void) {
                 break;
         }
         //        return SC_NONE;
-//        return new_serial_command;
+        //        return new_serial_command;
     } /* end of if ( UART1_TRANSFER_STATUS_RX_DATA_PRESENT & UART1_TransferStatusGet( ) ) */
 }
 
@@ -157,7 +163,7 @@ uint16_t readIntFromUart1(void) {
 
             ++numBytes;
         }
-    }    while (numBytes < UART1_BUFFER_SIZE);
+    } while (numBytes < UART1_BUFFER_SIZE);
 
     rx_data_buffer[numBytes + 1] = '\0'; /* add end of string */
 
@@ -167,6 +173,36 @@ uint16_t readIntFromUart1(void) {
 
 #endif
 
+void display_STATUS_register_from_RF_module(void) {
+    if (true == appPower_get_RFPowerState()) {
+        /* Read RF module STATUS register */
+        RF_StatusRead.Val = radioAlphaTRX_Command(STATUS_READ_CMD);
+        printf("Read RF STATUS register: 0x%04X\n", RF_StatusRead.Val); // 4.1. ?criture format?e de donn?es --> https://www.ltam.lu/cours-c/prg-c42.htm
+        printf("Bit [ 15 | 14 | 13 | 12 | 11 | 10 |  9 |  8 |  7 |  6 |  5 |  4 |  3 |  2 |  1 |  0 ]\n");
+        printf("    [  %u |  %u |  %u |  %u |  %u |  %u |  %u |  %u |  %u |  %u |  %u |  %u |  %u |  %u |  %u |  %u ]\n", \
+                        RF_StatusRead.bits.b15_RGIT_FFIT, \
+                        RF_StatusRead.bits.b14_POR, \
+                        RF_StatusRead.bits.b13_RGUR_FFOV, \
+                        RF_StatusRead.bits.b12_WKUP, \
+                        RF_StatusRead.bits.b11_EXT, \
+                        RF_StatusRead.bits.b10_LBD, \
+                        RF_StatusRead.bits.b9_FFEM, \
+                        RF_StatusRead.bits.b8_ATSS, \
+                        RF_StatusRead.bits.b7_ATS_RSSI, \
+                        RF_StatusRead.bits.b6_DQD, \
+                        RF_StatusRead.bits.b5_CRL, \
+                        RF_StatusRead.bits.b4_ATGL, \
+                        RF_StatusRead.bits.b3_OFFS_Sign, \
+                        RF_StatusRead.bits.b2_OFFS_b2, \
+                        RF_StatusRead.bits.b1_OFFS_b1, \
+                        RF_StatusRead.bits.b0_OFFS_b0 \
+                        );
+        printf("     FFIT| POR|FFOV|WKUP| EXT| LBD|FFEM|RSSI| DQD| CRL|ATGL|OFFS|OFFS|OFFS|OFFS|OFFS|\n"); // transceiver in receive (RX) mode, bit 'er' is set
+        printf("     RGIT      RGUR                      ATS                 <6>  <3>  <2>  <1>  <0>\n"); // bit 'er' is cleared
+    } else {
+        printf("Can't read status register, RF module is power OFF!\n");
+    }
+}
 
 /*******************************************************************************
  End of File

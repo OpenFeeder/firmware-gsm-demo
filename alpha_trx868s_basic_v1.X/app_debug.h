@@ -65,6 +65,8 @@ void printUSBHostDeviceStatus( void );
 
 uint16_t readIntFromUart1( void );
 
+void display_STATUS_register_from_RF_module();
+
 
 #endif /* APP_DEBUG_H */
 
