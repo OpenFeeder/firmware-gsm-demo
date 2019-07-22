@@ -156,7 +156,8 @@ void APP_Tasks(void) {
 #endif
                 appData.previous_state = appData.state;
             }
-            radioAlphaTRX_SlaveHundlerMsgReceived();
+            Frame msgReceive = radioAlphaTRX_GetFrame();
+            radioAlphaTRX_SlaveHundlerMsgReceived(msgReceive);
             break;
             /* -------------------------------------------------------------- */
         case APP_STATE_RADIO_SEND_DATA:

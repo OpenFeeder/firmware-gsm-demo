@@ -112,7 +112,7 @@ int8_t radioAlphaTRX_SlaveSendMsgRF(uint8_t typeMsg,
     frameToSend.Champ.crc ^= frameToSend.paquet[3];
     for (i = 0; i < frameToSend.Champ.size; i++) {
         frameToSend.Champ.data[i] = data[i];
-        frameToSend.Champ.crc ^= frameToSend.paquet[i+5]; // penser à changer le 5 en generique 
+        frameToSend.Champ.crc ^= frameToSend.paquet[i + 5]; // penser à changer le 5 en generique 
     }
     //____________________________________________________________________
     //________________________TRANSMSISSION_______________________________
@@ -142,7 +142,7 @@ void radioAlphaTRX_SlaveUpdateDate(uint8_t* date, int16_t derive) {
     for (i = 0; i < 5; i++) {
         d.date[i] = date[i];
     }
-    
+
     // deserealise
 
     struct tm time_set;
@@ -153,15 +153,15 @@ void radioAlphaTRX_SlaveUpdateDate(uint8_t* date, int16_t derive) {
     time_set.tm_mon = d.Format.mm;
     time_set.tm_year = d.Format.yy;
     // mise a jour 
-//    time_set.tm_sec += 1;
-//    if (time_set.tm_sec == 60) {
-//        time_set.tm_sec = 0;
-//        time_set.tm_min += 1;
-//        if (time_set.tm_min == 60) {
-//            time_set.tm_min = 0;
-//            time_set.tm_hour += 1;
-//        }
-//    }
+    //    time_set.tm_sec += 1;
+    //    if (time_set.tm_sec == 60) {
+    //        time_set.tm_sec = 0;
+    //        time_set.tm_min += 1;
+    //        if (time_set.tm_min == 60) {
+    //            time_set.tm_min = 0;
+    //            time_set.tm_hour += 1;
+    //        }
+    //    }
     RTCC_TimeSet((struct tm *) &time_set);
     LED_STATUS_R_Toggle();
     LED_STATUS_B_Toggle();
@@ -236,40 +236,6 @@ void radioAlphaTRX_SlaveUpdateSendLogParam(uint8_t numSeq) {
 /**-------------------------->>                   <<---------------------------*/
 
 /*********************************************************************
- * Function:        void radioAlphaTRX_SlaveAckHundler(Frame msgReceive)
- *
- * PreCondition:    None
- *
- * Input:           None
- *
- * Output:          None
- *
- * Side Effects:    None
- *
- * Overview:        None
- *
- * Note:            None
- ********************************************************************/
-void radioAlphaTRX_SlaveAckHundler(Frame msgReceive) {
-#if defined(UART_DEBUG)
-    printf("ACK RECU \n");
-#endif
-    switch (lastSend) {
-        case ACK_STATES_ERROR:
-            radioAlphaTRX_SlaveUpdatePtrErrBuf();
-            appData.state = APP_STATE_IDLE; // on rend la main
-            radioAlphaTRX_ReceivedMode(); // on se met en mode reception 
-            break;
-        case ACK_STATES_DATA:
-            radioAlphaTRX_SlaveUpdateSendLogParam(msgReceive.Champ.idMsg);
-            break;
-        default:
-            appData.state = APP_STATE_IDLE; // on rend la main
-            break;
-    }
-}
-
-/*********************************************************************
  * Function:        radioAlphaTRX_SlaveHundlerMsgReceived()
  *
  * PreCondition:    None
@@ -284,10 +250,9 @@ void radioAlphaTRX_SlaveAckHundler(Frame msgReceive) {
  *
  * Note:            None
  ********************************************************************/
-void radioAlphaTRX_SlaveHundlerMsgReceived() {
-    Frame msgReceive;
+void radioAlphaTRX_SlaveHundlerMsgReceived(Frame msgReceive) {
+    appData.state = APP_STATE_IDLE; // etat endormie
     int16_t timeout = TMR_GetMsgRecuTimeout();
-    int8_t err;
     switch (msgReceive.Champ.typeMsg) {
         case DATA:
             if (msgReceive.Champ.idMsg <= NB_BLOC) {
@@ -300,11 +265,11 @@ void radioAlphaTRX_SlaveHundlerMsgReceived() {
                     curseur = 1;
                 }
                 appData.state = APP_STATE_RADIO_SEND_DATA; // je lui demande transmettre 
-            } else {
-                appData.state = APP_STATE_IDLE;
             }
             break;
         case INFOS:
+        {
+            int8_t err;
 #if defined(UART_DEBUG)
             printf("Demande d'infos recu || timeout %d\n", timeout);
 #endif  
@@ -313,15 +278,44 @@ void radioAlphaTRX_SlaveHundlerMsgReceived() {
                 lastSend = ACK_STATES_ERROR;
             } else {
                 TMR_Delay(100);
-                radioAlphaTRX_SlaveSendNothing();
+                radioAlphaTRX_SlaveSendMsgRF(NOTHING, "NOTHING", 1, 1);
                 lastSend = ACK_STATES_NOTHING;
             }
-            radioAlphaTRX_ReceivedMode(); // je me remets en attente d'un msg
-            appData.state = APP_STATE_IDLE; // etat endormie 
             break;
+        }
         case ACK:
-            radioAlphaTRX_SlaveAckHundler(msgReceive);
-            break;
+        {
+#if defined(UART_DEBUG)
+            printf("ACK RECU \n");
+#endif
+            switch (lastSend) {
+                case ACK_STATES_ERROR:
+                    radioAlphaTRX_SlaveUpdatePtrErrBuf();
+                    appData.state = APP_STATE_IDLE; // on rend la main
+                    radioAlphaTRX_ReceivedMode(); // on se met en mode reception 
+                    break;
+                case ACK_STATES_DATA:
+                    curseur = msgReceive.Champ.idMsg; // on met a jour le curseur
+                    if (msgReceive.Champ.idMsg == ack_attedue) { // tous les msg envoyees ont ete aquitte
+                        if (windows < MAX_W - 1) windows += 1;
+                    } else if (!TMR_GetWaitRqstTimeout()) {
+                        if (windows > 1)
+                            windows = windows / 2; // on diminue la fenetre d'emission 
+                        // il serait interressent de faire des statistique du nombre d'echec constate
+                    }
+                    TMR_SetWaitRqstTimeout(-1); // je le desactive 
+                    if (msgReceive.Champ.idMsg >= nbFrameToSend) {
+                        appData.state = APP_STATE_IDLE; // on demande l'envoie d'un msg de fin de block
+                    } else {
+                        appData.state = APP_STATE_RADIO_SEND_DATA; // on se remet en transmission de donnee 
+                    }
+//                    radioAlphaTRX_SlaveUpdateSendLogParam(msgReceive.Champ.idMsg);
+                    break;
+                default:
+                    appData.state = APP_STATE_IDLE; // on rend la main
+                    break;
+            }
+        }
         default:
             appData.state = APP_STATE_IDLE;
             break;

@@ -136,8 +136,8 @@
 // ---- Control Register -------------- Power-On Reset Value -------------- Control Command -------------------- Related control bits
 #define CFG_SET_CMD_POR                 (0x8008)    // 1000 0000 0000 1000, Configuration Setting Command ...... el, ef, b1 to b0, x3 to x0
 #define PWR_MGMT_CMD_POR                (0x8208)    // 1000 0010 0000 1000, Power Management Command ........... er, ebb, et, es, ex, eb, ew, dc
-//#define FQ_SET_CMD_POR                  (0xA680)    // 1010 0110 1000 0000, Frequency Setting Command .......... f11 to f0
-#define FQ_SET_CMD_POR                  (0xA640)    // 1010 0110 1000 0000, Frequency Setting Command .......... f11 to f0
+#define FQ_SET_CMD_POR                  (0xA680)    // 1010 0110 1000 0000, Frequency Setting Command .......... f11 to f0
+//#define FQ_SET_CMD_POR                  (0xA640)    // 1010 0110 1000 0000, Frequency Setting Command .......... f11 to f0
 #define DATA_RATE_CMD_POR               (0xC623)    // 1100 0110 0010 0011, Data Rate Command .................. cs, r6 to r0
 #define RX_CTRL_CMD_POR                 (0x9080)    // 1001 0000 1000 0000, Receiver Control Command ........... p16, d1 to d0, i2 to i0, g1 to g0, r2 to r0
 #define DATA_FILTER_CMD_POR             (0xC22C)    // 1100 0010 0010 1100, Data Filter Command ................ al, ml, s, f2 to f0
@@ -365,7 +365,12 @@ typedef union {
         unsigned b11_f11 : 1;
         unsigned b12to15_cmd_code : 4; // Command code
     } bits;
-
+    
+    struct {
+        unsigned SetOperationFrequency : 12;
+        unsigned cmd_code : 4; // Command code
+    }Fsq;
+    
     struct {
         unsigned SetOperationFrequency_L : 8; // Set operation frequency
         unsigned SetOperationFrequency_H : 4; // Set operation frequency
@@ -385,6 +390,10 @@ typedef union {
 // 868band: Fc=860+F*0.0050 MHz
 // 915band: Fc=900+F*0.0075 MHz
 // Fc is carrier frequency and F is the frequency parameter. 36 < F < 3903
+
+#define C1_868 2
+#define C2_868 43
+
 
 /**
  * Data Rate Command:

@@ -95,6 +95,14 @@ int8_t MASTER_SendMsgRF(uint8_t dest,
         frameToSend.Champ.data[i] = data[i];
         frameToSend.Champ.crc ^= frameToSend.paquet[i+5]; // penser à changer le 5 en generique 
     }
+
+    for (i = 0; i < frameToSend.Champ.size+5; i++) {
+        printf("%d ",frameToSend.paquet[i]);
+    }
+#if defined(UART_DEBUG)
+    printf("\nsize\n");
+#endif
+    
     //____________________________________________________________________
     //________________________TRANSMSISSION_______________________________
     if (radioAlphaTRX_SendMode()) {

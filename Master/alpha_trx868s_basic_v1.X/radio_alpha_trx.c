@@ -24,6 +24,7 @@
 #include <stdio.h>
 #include "radio_alpha_trx.h"
 #include "app.h"
+#include "app_debug.h"
 /******************************************************************************/
 
 /******************************************************************************/
@@ -51,7 +52,8 @@ volatile bool sendMode = false; // O receve mode    1 send mode
 
 
 
-unsigned int FSK_Transceiver_ConfigFq(unsigned char freqSelected) {
+
+unsigned int radioAlphaTRX_TransceiverConfigFq(unsigned char freqSelected) {
     unsigned int FrequencySet;
     //    unsigned char FrequencySet;
 
@@ -3186,12 +3188,12 @@ void radioAlphaTRX_Init(void) {
     //    RF_StatusRead.Val = radioAlphaTRX_Command(STATUS_READ_CMD); // intitial SPI transfer added to avoid power-up problem
     /**-------------> Frequency Setting Command @ 433 MHz <--------------------*/
 
-    do {
+//    do {
         RF_StatusRead.Val = radioAlphaTRX_Command(STATUS_READ_CMD); // intitial SPI transfer added to avoid power-up problem
 #if defined(UART_DEBUG)
         printf("A other Wait until RFM12B is out of power-up reset, status: 0x%04X\r\n", RF_StatusRead.Val);
 #endif
-    } while (RF_StatusRead.bits.b14_POR);
+//    } while (RF_StatusRead.bits.b14_POR);
 
 
     /**-------------> Power Management Command(2) <---------------------------*/
@@ -3320,10 +3322,10 @@ void radioAlphaTRX_Init(void) {
     // Strobe edge                          : off
     // High accuracy mode                   : off
     // Enable frequency offset register     : on
-    // Enable calculation of offset freq    : on
+    // Enable calculation of offset freq    : off : attention 
     // AFC auto-mode: Keep offset indepently value VDI hi, [range limit: +15/-16,] 
     //st goes hi will store offset into output register, Enable AFC output register, Enable AFC function
-    radioAlphaTRX_Command(0xC4D7); //0xC4F7
+    radioAlphaTRX_Command(0xC4F6); //0xC4F7
 
 
     /**-------------> PLL Setting Command (12) <-----------------*/
@@ -3343,17 +3345,39 @@ void radioAlphaTRX_Init(void) {
     // duty-cyle                    : 0 %
     // low duty-cycle mode enabled  : off
     radioAlphaTRX_Command(0xC800); // disable low duty cycle mode --> NOT USE
+
+    /**-------------> Low Battery Detector and Microcontroller  */
+    /**-------------> Clock Divider Command (16) <--------------*/
+    // V<v3:v0>         = 9
+    // Vlb              = 2.25+9*0.1= 3.15 V
+    // Clock Divider    = 1 Mhz
+    radioAlphaTRX_Command(0xC009); // CLK OUTPUT = 1 MHz
     __delay32(SLEEP_AFTER_INIT);
 }
 
 // Initialiser la detection d'une nouvelle donnee
-
+// le buffer est vide si non erreur on initialise tou les registre et on recomence 
+bool radioAlphaTRX_FlushFIFO() {
+    bool stop = false;
+    int i = 10;
+    do { //attention risque de boocle infii 
+        RF_StatusRead.Val = radioAlphaTRX_Command(STATUS_READ_CMD);
+        if (!RF_StatusRead.bits.b9_FFEM && RF_StatusRead.bits.b6_DQD)
+            radioAlphaTRX_Command(RX_FIFO_READ_CMD_POR); // vide la fifo
+        else
+            stop = true;
+        i--; // eviter la boucle infinit 
+    } while (!stop && i > 0); // tant que la fifo nest pas vide 
+    return !(i == 0); // 
+}
 void radioAlphaTRX_ReceivedMode(void) {
     //close TX mode 
+    if (!radioAlphaTRX_FlushFIFO()) radioAlphaTRX_Init();
+    
     RF_PowerManagement.Val = PWR_MGMT_CMD_POR;
     RF_PowerManagement.bits.b0_dc = 1;
     radioAlphaTRX_Command(RF_PowerManagement.Val); //0x8209
-    radioAlphaTRX_Command(RX_FIFO_READ_CMD_POR);
+    //    
 
     /**-------------> Configuration Setting Command (2) <----------------------*/
     //  bit  15  14  13  12  11  10   9   8   7   6   5   4   3   2   1   0   POR
@@ -3371,6 +3395,11 @@ void radioAlphaTRX_ReceivedMode(void) {
     radioAlphaTRX_Command(RF_ConfigSet.Val);
 
     //active the 
+    //    Power Management Command
+    //    b7_er = 1; // Enabling the Transmitter preloads the TX latch with 0xAAAA
+    //    b6_ebb = 1;
+    //    b3_ex = 1; 
+    //    b0_dc = 1;
     RF_PowerManagement.Val = PWR_MGMT_CMD_POR;
     RF_PowerManagement.bits.b7_er = 1;
     RF_PowerManagement.bits.b6_ebb = 1;
@@ -3393,6 +3422,7 @@ int8_t radioAlphaTRX_SendMode(void) {
     RF_PowerManagement.Val = PWR_MGMT_CMD_POR;
     RF_PowerManagement.bits.b0_dc = 1;
     radioAlphaTRX_Command(RF_PowerManagement.Val); //0x8209
+    //    radioAlphaTRX_Command(0x8201);
     radioAlphaTRX_Command(RX_FIFO_READ_CMD_POR);
 
 
