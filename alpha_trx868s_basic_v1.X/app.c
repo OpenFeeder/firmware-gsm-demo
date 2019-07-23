@@ -16,12 +16,12 @@
 // Docklight COM connections (RS232 terminal to communicate with USB Serial Port)
 // Downloads: http://docklight.de/
 // Lors de l'appuis dans Docklight sur la touche [Enter] le PC envoie 0D 0A soit 2 octets,
-// dont 0A est interpréter comme la valeur suivante !
-// --> pour résoudre cela dans Docklight, il faut appuyer sur la combinaison de touches
+// dont 0A est interprï¿½ter comme la valeur suivante !
+// --> pour rï¿½soudre cela dans Docklight, il faut appuyer sur la combinaison de touches
 //     [Ctrl]+[Enter] pour n'envoyer que la valeur 0D (Carriage Return <CR>)
 //     https://en.wikipedia.org/wiki/Control_character
 
-// TODO: RE02/SPARE_4 => SP1 à relier sur nIRQ pin 2 du ALPHA-TRX433S
+// TODO: RE02/SPARE_4 => SP1 ï¿½ relier sur nIRQ pin 2 du ALPHA-TRX433S
 
 
 // *****************************************************************************
@@ -82,7 +82,7 @@ void APP_Tasks(void) {
             /**
              * Initializing the application.
              * (en) Application initialization when starting the main power.
-             * (fr) Initialisation de l'application lors du démarrage de l'alimentation principale.
+             * (fr) Initialisation de l'application lors du dï¿½marrage de l'alimentation principale.
              */
             if (appData.state != appData.previous_state) {
                 appData.previous_state = appData.state;
@@ -156,8 +156,7 @@ void APP_Tasks(void) {
 #endif
                 appData.previous_state = appData.state;
             }
-            Frame msgReceive = radioAlphaTRX_GetFrame();
-            radioAlphaTRX_SlaveHundlerMsgReceived(msgReceive);
+            radioAlphaTRX_SlaveHundlerMsgReceived(radioAlphaTRX_GetFrame());
             break;
             /* -------------------------------------------------------------- */
         case APP_STATE_RADIO_SEND_DATA:
