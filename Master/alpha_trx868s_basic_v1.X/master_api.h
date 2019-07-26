@@ -66,25 +66,50 @@ typedef enum {
     READ, //00
     WRITE, //01
     OVFF //10
-}PTR;
+} PTR;
 
 typedef enum { // you can add others states
     MASTER_STATE_INIT,
+    MASTER_STATE_TIMEOUT,
     MASTER_STATE_SEND_DATE,
+    MASTER_STATE_SEND_FROME_GSM,
+    MASTER_STATE_SELECTE_SLAVE,
     MASTER_STATE_MSG_RF_RECEIVE,
+    MASTER_STATE_MSG_GSM_RECEIVE,
     MASTER_STATE_SEND_REQUEST_INFOS,
     MASTER_STATE_IDLE,
     MASTER_STATE_ERROR,
     MASTER_STATE_NONE // no comportementent
 } MASTER_STATES;
 
+typedef enum {
+    SLAVE_SYNC, // phase de syncronisation 
+    SLAVE_ERROR, // en etat d'erreur 
+    SLAVE_COLLECT, // Slave en etat de collecte de donnee
+    SLAVE_SLECTED, // Slave selectionner 
+    SLAVE_COLLECT_END, // fin de la collecte
+    SLAVE_COLLECT_END_BLOCK, // fin de recuperation d'un bloc
+    SLAVE_NONE // etat neutre 
+} SLAVE_STATES;
+
 /**-------------------------->> D E B U G <<----------------------------------*/
 void printPointeur(PRIORITY prio);
 
 /**-------------------------->> P R O T O T Y P E S <<------------------------*/
 
+/**-------------------------->> S T R U C T -O F- S L A V E - S T A T E <<----*/
+typedef struct {
+    uint8_t idSlave; // l'identifiant du slave 
+    uint8_t tryToConnect; // nb d'essaie de connexion 
+    uint8_t nbTimeout; // le nombre consecutif de timeout lorsqu'on attend une reponse de ce slave
+    uint8_t nbError; // nombre d'erreurs, survenue pour ce slave
+    uint8_t index; // le numero de paquet attendu, lors de la collecte des donnees 
+    uint8_t nbBloc; // nombre de bloc reçu 
+    SLAVE_STATES state; // etat du slave 
+} SlaveState;
 
-/**
+
+/**SIZE_DATA
  * tramet un ensemble de octets
  * 
  * @param dest : le destinataire 0 < dest < 16 
@@ -97,11 +122,11 @@ void printPointeur(PRIORITY prio);
  * @return : le nombre d'octe transmis
  */
 int8_t MASTER_SendMsgRF(uint8_t dest,
-                        uint8_t typeMsg,
-                        uint8_t idMsg,
-                        uint8_t nbR,
-                        uint8_t * data,
-                        uint8_t sizeData);
+        uint8_t typeMsg,
+        uint8_t idMsg,
+        uint8_t nbR,
+        uint8_t * data,
+        uint8_t sizeData);
 
 
 /**

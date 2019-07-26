@@ -86,6 +86,8 @@ void TMR_CallBack( void ) {
 
     //dis si une reponse est recu ou pas 
     if (TMR_WaitRqstTimeout > 0) --TMR_WaitRqstTimeout;
+    else if (TMR_WaitRqstTimeout == 0)
+        MASTER_StoreBehavior(MASTER_STATE_TIMEOUT, PRIO_HIGH);
 
     //timer du buffer 
     if (TMR_MsgRecuTimeout > 0) --TMR_MsgRecuTimeout;
