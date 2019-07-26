@@ -49,7 +49,7 @@
 
 #include <xc.h>
 #include "tmr1.h"
-
+#include "../timer.h"
 /**
   Section: Data Type Definitions
 */

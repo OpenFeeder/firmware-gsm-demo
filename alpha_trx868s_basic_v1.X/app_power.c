@@ -35,7 +35,9 @@ void powerRFDisable( void )
     CMD_3v3_RF_SetHigh( );
 }
 
-
+bool appPower_get_RFPowerState() {
+    return !CMD_3v3_RF_GetValue();
+}
 //void powerUsbRfidEnable( void )
 //{
 //    CMD_VDD_APP_V_USB_SetHigh( );

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project>
+  <executable name="dist/default/production/alpha_trx868s_basic_v1.X.production.elf">
+    <memory name="data">
+      <units>bytes</units>
+      <length>16384</length>
+      <used>452</used>
+      <free>15932</free>
+    </memory>
+    <memory name="program">
+      <units>bytes</units>
+      <length>263616</length>
+      <used>21903</used>
+      <free>241713</free>
+    </memory>
+  </executable>
+</project>

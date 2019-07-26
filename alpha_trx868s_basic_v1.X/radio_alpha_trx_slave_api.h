@@ -112,15 +112,16 @@ void radioAlphaTRX_SlaveUpdatePtrErrBuf();
  * lorsque l'on transmet une erreur, le num paquet devient le numero de l'erreur 
  * @param err_to_send : l'erreur à transmettre 
  */
-void radioAlphaTRX_SlaveSendErr(int8_t errToSend);
+int8_t radioAlphaTRX_SlaveSendErr(int8_t errToSend);
 
 
 /**
  * si l'on recois une demande d'infos que l'on a rien a transmettre 
  * on notifie quand meme, au master de notre existance, pour lui eviter de nous 
  * considerer infonctionnel 
+ * @return : 
  */
-void radioAlphaTRX_SlaveSendNothing();
+int8_t radioAlphaTRX_SlaveSendNothing();
 
 
 /**
@@ -155,9 +156,11 @@ void radioAlphaTRX_SlaveSendEndTrans();
 void radioAlphaTRX_SlaveAckHundler(Frame msgReceive);
 
 /**
- * determine l'action a effectue quand un msg est recu 
+ * determine l'action a effectue quand un msg est recu
+ * 
+ * @param msgReceive
  */
-void radioAlphaTRX_SlaveHundlerMsgReceived();
+void radioAlphaTRX_SlaveHundlerMsgReceived(Frame msgReceive);
 
 
 /****************                                         *********************/
