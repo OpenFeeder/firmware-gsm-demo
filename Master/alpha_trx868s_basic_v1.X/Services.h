@@ -40,7 +40,9 @@
 #define MAX_TRY_TO_SYNC               5 // le nombre d'essaie avant de decider qu'on est pas connecte
 #define MAX_LEVEL_PRIO                3 // 3 niveau de priorite, si l'on veut en ajouter il suiffit de modifier 
 #define NB_BEHAVIOR_PER_PRIO          3
-
+#define TIME_LIMIT_OF_CONFIG          6 // avant 6h
+#define TIME_LIMIT_TO_GET_INFOS      19 // avant 19h
+#define TIME_LIMIT_TO_COLLECT_LOG    00 // avant 00h et apres 19h
 
 //_______________________________TYPE__PAQUET________________________________________*/
 //max 16 type de paquet possible coder sur 4bits

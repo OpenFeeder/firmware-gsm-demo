@@ -78,6 +78,7 @@ typedef enum { // you can add others states
     MASTER_STATE_MSG_GSM_RECEIVE,
     MASTER_STATE_SEND_REQUEST_INFOS,
     MASTER_STATE_IDLE,
+    MASTER_STATE_END,
     MASTER_STATE_ERROR,
     MASTER_STATE_NONE // no comportementent
 } MASTER_STATES;
@@ -85,6 +86,8 @@ typedef enum { // you can add others states
 typedef enum {
     SLAVE_SYNC, // phase de syncronisation 
     SLAVE_ERROR, // en etat d'erreur 
+    SLAVE_DAYTIME, // on est en journee 
+    SLAVE_CONFIG, // etat de configiration 
     SLAVE_COLLECT, // Slave en etat de collecte de donnee
     SLAVE_SLECTED, // Slave selectionner 
     SLAVE_COLLECT_END, // fin de la collecte

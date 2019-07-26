@@ -274,7 +274,8 @@ void radioAlphaTRX_SlaveHundlerMsgReceived(Frame msgReceive) {
             printf("Demande d'infos recu || timeout %d\n", timeout);
 #endif  
             if ((err = radioAlphaTRX_SlaveGetError()) > 0) { //l'error a transmettre 
-                radioAlphaTRX_SlaveSendErr(err);
+//                radioAlphaTRX_SlaveSendErr(err);
+                radioAlphaTRX_SlaveSendMsgRF(ERROR, "ERROR", err, 1);
                 lastSend = ACK_STATES_ERROR;
             } else {
                 TMR_Delay(100);
@@ -291,7 +292,6 @@ void radioAlphaTRX_SlaveHundlerMsgReceived(Frame msgReceive) {
             switch (lastSend) {
                 case ACK_STATES_ERROR:
                     radioAlphaTRX_SlaveUpdatePtrErrBuf();
-                    appData.state = APP_STATE_IDLE; // on rend la main
                     radioAlphaTRX_ReceivedMode(); // on se met en mode reception 
                     break;
                 case ACK_STATES_DATA:
@@ -303,7 +303,7 @@ void radioAlphaTRX_SlaveHundlerMsgReceived(Frame msgReceive) {
                             windows = windows / 2; // on diminue la fenetre d'emission 
                         // il serait interressent de faire des statistique du nombre d'echec constate
                     }
-                    TMR_SetWaitRqstTimeout(-1); // je le desactive 
+                    TMR_SetWaitRqstTimeout(-1); // je desactive le timer 
                     if (msgReceive.Champ.idMsg >= nbFrameToSend) {
                         appData.state = APP_STATE_IDLE; // on demande l'envoie d'un msg de fin de block
                     } else {

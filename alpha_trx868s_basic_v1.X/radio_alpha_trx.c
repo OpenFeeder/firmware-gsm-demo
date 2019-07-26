@@ -3228,9 +3228,6 @@ void radioAlphaTRX_Init(void) {
     RF_FrequencySet.Val = FQ_SET_CMD_POR;
     //    RF_FrequencySet.REGbits.SetOperationFrequency_H = 0x6;
     //    RF_FrequencySet.REGbits.SetOperationFrequency_L = 0x40;
-
-    //    RF_FrequencySet.Val = FSK_Transceiver_ConfigFq( Switch_Read( ) );
-    //    RF_FrequencySet.Val = FSK_Transceiver_ConfigFq(FQ_001);
     radioAlphaTRX_Command(RF_FrequencySet.Val); // Set operation frequency: Fc= 430+F*0.0025 , soit 430+1600*0.0025= 434 MHz avec 0x640 --> 110 0100 0000
 
 

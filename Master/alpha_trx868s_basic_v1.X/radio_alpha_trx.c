@@ -42,6 +42,7 @@ RX_FIFO_READ_CMD_VAL RF_FIFO_Read; // Receiver FIFO Read
 FIFO_RST_MODE_CMD_VAL RF_FIFOandResetMode; // FIFO and Reset Mode Command
 TX_CONF_CTRL_CMD_VAL RF_TX_ConfCtrlCmd;
 DATA_RATE_CMD_VAL RF_DataRate;
+AFC_CMD_VAL RF_AfcCmd;
 STATUS_READ_VAL RF_StatusRead; // Status Read Command
 
 
@@ -3230,9 +3231,6 @@ void radioAlphaTRX_Init(void) {
     RF_FrequencySet.Val = FQ_SET_CMD_POR;
     //    RF_FrequencySet.REGbits.SetOperationFrequency_H = 0x6;
     //    RF_FrequencySet.REGbits.SetOperationFrequency_L = 0x40;
-
-    //    RF_FrequencySet.Val = FSK_Transceiver_ConfigFq( Switch_Read( ) );
-    //    RF_FrequencySet.Val = FSK_Transceiver_ConfigFq(FQ_001);
     radioAlphaTRX_Command(RF_FrequencySet.Val); // Set operation frequency: Fc= 430+F*0.0025 , soit 430+1600*0.0025= 434 MHz avec 0x640 --> 110 0100 0000
 
 
@@ -3325,10 +3323,14 @@ void radioAlphaTRX_Init(void) {
     // Enable calculation of offset freq    : off : attention 
     // AFC auto-mode: Keep offset indepently value VDI hi, [range limit: +15/-16,] 
     //st goes hi will store offset into output register, Enable AFC output register, Enable AFC function
-    radioAlphaTRX_Command(0xC4F6); //0xC4F7
+    RF_AfcCmd.Val = AFC_CMD_POR;
+    RF_AfcCmd.REGbits.en = 0;
+    RF_AfcCmd.REGbits.range_limit = PLUS_3_TO_MOINS_4;
+    RF_AfcCmd.REGbits.SetCommandeOfAFC = KEEP_Fosette_VALUE_INDEP;
+    radioAlphaTRX_Command(RF_AfcCmd.Val); //0xC4F6
 
 
-    /**-------------> PLL Setting Command (12) <-----------------*/
+    /**-------------> PLL Setting Command (12) <------------------------------*/
     // Microcontroller output clock buffer rise and fall time   : 5 or 10 Mhz (recommended)
     // Switches on the delay in the phase detector              : off
     // Disabled the dithering in the PLL loop                   : on
@@ -3476,7 +3478,6 @@ int8_t radioAlphaTRX_SendMode(void) {
     return radioAlphaTRX_WaitLownIRQ(SEND_TIME_OUT); // arbitraire 
 }
 
-
 // Transmission d'une donnee par le module RF
 
 int8_t radioAlphaTRX_SendByte(uint8_t data_send, int8_t timeout) {
@@ -3589,8 +3590,8 @@ bool radioAlphaTRX_receive() {
 void radioAlphaTRX_CaptureFrame() {
     if (radioAlphaTRX_receive()) {
         LED_STATUS_B_Toggle();
-        // à ce niveau le msg est corectemnt reçu 
-        MASTER_StoreBehavior(MASTER_STATE_MSG_RF_RECEIVE, PRIO_HIGH); // c'est une information très importante 
+        // ï¿½ ce niveau le msg est corectemnt reï¿½u 
+        MASTER_StoreBehavior(MASTER_STATE_MSG_RF_RECEIVE, PRIO_HIGH); // c'est une information trï¿½s importante 
     } else {
 #if defined(UART_DEBUG)
         LED_STATUS_R_Toggle();

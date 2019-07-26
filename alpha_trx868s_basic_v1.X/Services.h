@@ -63,12 +63,12 @@
 
 /*******************************************************************************/
 //_________________________Radio Alpha TRX Infos_______________________________*/
-#define FRAME_LENGTH                 25 // Longueur total d'une trame en octet
+#define FRAME_LENGTH                 40 // Longueur total d'une trame en octet
 #define ERROR_LENGTH                  8
-#define SIZE_DATA                    20
+#define SIZE_DATA                    34
 #define TIME_OUT_nIRQ                 2 // 2ms
-#define LAPS                        100 // on attend X ms avant de transmettre un nouveau msg 
-#define TIME_OUT_GET_FRAME         1500 // temps max, pour que le msg recu soit encore exploitable
+#define LAPS                         50 // on attend X ms avant de transmettre un nouveau msg 
+#define TIME_OUT_GET_FRAME          700 // temps max, pour que le msg recu soit encore exploitable
 // au dela le mster ne m'ecoute pas donc cela ne sert � rien 
 #define TIME_OUT_WAIT_ACK           500
 #define NB_ERR_BUF                   10 // nombre d'errerur possible 
@@ -137,7 +137,7 @@ typedef union {
         uint8_t idMsg;          //    |
         uint8_t size;           //    | // taille de la data reelement envoye 
         uint8_t crc;            //-----
-        uint8_t data[20];
+        uint8_t data[SIZE_DATA];
     } Champ;
 } Frame;
 
