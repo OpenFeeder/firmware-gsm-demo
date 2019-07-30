@@ -9,6 +9,7 @@
 #include "xc.h"
 #include "Services.h"
 #include <string.h>
+#include <stdio.h>
 
 /******************************************************************************/
 /******************************************************************************/
@@ -29,26 +30,27 @@ uint8_t srv_Checksum(uint8_t* paquet, int size) {
 }
 
 bool srv_TestCheksum(uint8_t* paquet, int size, uint8_t somme_ctrl) {
+    //    uint8_t temp = srv_Checksum(paquet, size);
+    //    printf("\ncrc %d vs %d\n", somme_ctrl, temp);
+    //    return temp == somme_ctrl;
     return (srv_Checksum(paquet, size) == somme_ctrl);
 }
-
 
 int8_t srv_DecodePacketRF(uint8_t* buffer, Frame *frameReceive, uint8_t size) {
     int8_t i = 0;
     frameReceive->id.code = buffer[i++];
-//    if (frameReceive->id.id.dest != MASTER_ID)
-//        return 0;
     //source d'erreur -2 ou -1
-    if (!srv_TestCheksum(buffer, size-1, buffer[size-1]))
+    if (!srv_TestCheksum(buffer, size - 1, buffer[size - 1]))
         return 0;
-    
+
     frameReceive->rfTandNBR.code = buffer[i++];
     frameReceive->idMsg = buffer[i++];
-    int8_t j; int8_t lenData = size-i-1;
-    for (j = 0; j < lenData; j++) 
+    int8_t j;
+    int8_t lenData = size - i - 1;
+    for (j = 0; j < lenData; j++)
         frameReceive->data[j] = buffer[i++];
-    frameReceive->sumCtrl = buffer[i++];
-    return i;
+//    frameReceive->sumCtrl = buffer[i++];
+    return j;
 }
 
 int8_t srv_CreatePaketRF(Frame frame, uint8_t *packetToSend) {

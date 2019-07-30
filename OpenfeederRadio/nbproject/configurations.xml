@@ -97,7 +97,7 @@
         <targetDevice>PIC24FJ128GA204</targetDevice>
         <targetHeader></targetHeader>
         <targetPluginBoard></targetPluginBoard>
-        <platformTool>PICkit3PlatformTool</platformTool>
+        <platformTool>PKOBSKDEPlatformTool</platformTool>
         <languageToolchain>XC16</languageToolchain>
         <languageToolchainVersion>1.35</languageToolchainVersion>
         <platform>2</platform>
@@ -252,7 +252,6 @@
         <property key="save-temps" value="false"/>
       </C30Global>
       <PICkit3PlatformTool>
-<<<<<<< HEAD
         <property key="ADC 1" value="true"/>
         <property key="AutoSelectMemRanges" value="auto"/>
         <property key="COMPARATOR" value="true"/>
@@ -329,9 +328,6 @@
         <property key="programoptions.usehighvoltageonmclr" value="false"/>
         <property key="programoptions.uselvpprogramming" value="false"/>
         <property key="voltagevalue" value="3.25"/>
-=======
-        <property key="firmware.download.all" value="false"/>
->>>>>>> ameliorationProtocole
       </PICkit3PlatformTool>
       <PKOBSKDEPlatformTool>
         <property key="AutoSelectMemRanges" value="auto"/>

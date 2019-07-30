@@ -5,7 +5,6 @@ inline uint8_t conv_dec(uint8_t g, uint8_t d) {
     return (uint8_t) ((g - 48) * 10 + (d - 48));
 }
 
-
 void conv_date_readed(uint8_t* buff, struct heure_format* res) {
     res->j = conv_dec(buff[0], buff[1]);
     res->ms = conv_dec(buff[2], buff[3]);
@@ -18,6 +17,7 @@ void conv_date_readed(uint8_t* buff, struct heure_format* res) {
 
 
 //7 bits pour l'horloge
+
 void serial_buffer(uint8_t* buff, struct heure_format hf) {
     buff[0] = hf.j;
     buff[1] = hf.ms;
@@ -29,6 +29,7 @@ void serial_buffer(uint8_t* buff, struct heure_format hf) {
 }
 
 //7 bits pour l'horloge
+
 void deserial_buffer(uint8_t* buff, struct heure_format* hf) {
     hf->j = buff[0];
     hf->ms = buff[1];
@@ -48,7 +49,7 @@ void read_clock_uart(struct heure_format* hf) {
         i++;
     }
     printf("%s\n", data_uart);
-    conv_date_readed(data_uart,hf);
+    conv_date_readed(data_uart, hf);
 }
 
 void set_time(struct heure_format hf) {

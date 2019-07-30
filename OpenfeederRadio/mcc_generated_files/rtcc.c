@@ -74,12 +74,12 @@ void RTCC_Initialize(void)
    
    if(!RTCCTimeInitialized())
    {
-       // set RTCC time 2019-02-04 10-43-44
-       RCFGCALbits.RTCPTR = 3;        // start the sequence
-       RTCVAL = 0x19;    // YEAR
-       RTCVAL = 0x204;    // MONTH-1/DAY-1
-       RTCVAL = 0x110;    // WEEKDAY/HOURS
-       RTCVAL = 0x4344;    // MINUTES/SECONDS
+//       // set RTCC time 2019-02-04 10-43-44
+//       RCFGCALbits.RTCPTR = 3;        // start the sequence
+//       RTCVAL = 0x19;    // YEAR
+//       RTCVAL = 0x204;    // MONTH-1/DAY-1
+//       RTCVAL = 0x110;    // WEEKDAY/HOURS
+//       RTCVAL = 0x4344;    // MINUTES/SECONDS
    }
 
    // RTCOUT RTCC Clock; PWSPRE disabled; RTCLK SOSC; PWCPRE disabled; PWCEN disabled; PWCPOL disabled; 

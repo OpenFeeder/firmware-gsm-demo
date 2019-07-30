@@ -39,11 +39,12 @@ FQ_SET_CMD_VAL RF_FrequencySet; // Frequency Setting Command
 RX_CTRL_CMD_VAL RF_ReceiverControl; // Receiver Control Command
 RX_FIFO_READ_CMD_VAL RF_FIFO_Read; // Receiver FIFO Read
 FIFO_RST_MODE_CMD_VAL RF_FIFOandResetMode; // FIFO and Reset Mode Command
+TX_CONF_CTRL_CMD_VAL RF_TX_ConfCtrlCmd; // controle the power output ad the modulation of frequency
 STATUS_READ_VAL RF_StatusRead; // Status Read Command
 
 /**-------------------------->> D E F I N I T I O N <<-------------------------*/
 
-unsigned int FSK_Transceiver_ConfigFq(unsigned char freqSelected) {
+unsigned int radioAlphaTRX_TransceiverConfigFq(unsigned char freqSelected) {
     unsigned int FrequencySet;
     //    unsigned char FrequencySet;
 
@@ -3170,72 +3171,115 @@ unsigned int FSK_Transceiver_ConfigFq(unsigned char freqSelected) {
 
     return (FrequencySet);
 
-} // end of FSK_Transceiver_ConfigFq()
+} // end of radioAlphaTRX_TransceiverConfigFq()
 
 void radioAlphaTRX_Init(void) {
     nRES_SetHigh();
-    RF_StatusRead.Val = 0;
-    //    RF_StatusRead.Val = radioAlphaTRX_Command(STATUS_READ_CMD); // intitial SPI transfer added to avoid power-up problem
+    RF_StatusRead.Val = radioAlphaTRX_Command(STATUS_READ_CMD);
 
-    do {
-        RF_StatusRead.Val = radioAlphaTRX_Command(STATUS_READ_CMD); // intitial SPI transfer added to avoid power-up problem
+
+    /**-------------> Configuration Setting Command (1) <---------------------*/
+    //  bit  15  14  13  12  11  10   9   8   7   6   5   4   3   2   1   0   POR
+    //  Val   1   0   0   0   0   0   0   0  el  ef  b1  b0  x3  x2  x1  x0   0x8008
+    // --------------------- 0x80?? ---------------------
+    // el     - Enabled the internal data register : off
+    // ef     - Enabled the FIFO mode              : on
+    // b<1:0> - Set up the band                    : 868 MHz
+    // x<3:0> -                                    : 12.5 pF
+    RF_ConfigSet.Val = CFG_SET_CMD_POR; // initialiser la variable globale avec la valeur interne pr?sente
+    RF_ConfigSet.bits.b6_ef = 1;
+    RF_ConfigSet.REGbits.SelectBand = BAND_868; // initialer module at 868 Mhz
+    RF_ConfigSet.REGbits.SelectCrystalCapacitor = LOAD_C_12_5pF; // test
 #if defined(UART_DEBUG)
-        printf("A other Wait until RFM12B is out of power-up reset, status: 0x%04X\r\n", RF_StatusRead.Val);
+    printf("CFG_SET_CMD 0x%04X\n", RF_ConfigSet.Val);
 #endif
-    } while (RF_StatusRead.bits.b14_POR);
+    radioAlphaTRX_Command(RF_ConfigSet.Val);
 
-    /**-------------> Frequency Setting Command @ 433 MHz <--------------------*/
+    /**-------------> Power Management Command(2) <---------------------------*/
+    //  bit  15  14  13  12  11  10   9   8   7    6   5   4   3   2   1   0   POR
+    //        1   0   0   0   0   0   1   0  er  ebb  et  es  ex  eb  ew  dc   0x8208
+    // --------------------- 0x82D9 ---------------------
+    // er  - Enabled the whole receiver chain	    : on
+    // ebb - The recv. baseband circuit can be sep. : on
+    // et  - Switches on the PLL, the PA, starts tr.: off
+    // es  - Turns on the synthesizer               : on
+    // ex  - Turns on the crystal oscillator        : on
+    // eb  - Enabled the low battery detector       : off
+    // ew  - Enabled the wake-up timer              : off
+    // dc  - Disabled the clock output (pin 8)      : on
+    // 0x82A0
+    // The ebb, es, and exbits are provided to optimize the TX to RX or RX to TX turnaround time.
+    //    ALPHA_TRX433S_Control(0x82D9); // enable receive, enable base band block, enable synthesizer, enable crystal oscillator, disable clock output of CLK pin
+    RF_PowerManagement.Val = PWR_MGMT_CMD_POR; // enable receive OFF, enable base band block OFF, enable synthesizer OFF, enable crystal oscillator ON, dc = 0 --> enable clock output of CLK pin
+    RF_PowerManagement.bits.b7_er = 1; // Enabled the whole receiver chain
+    RF_PowerManagement.bits.b6_ebb = 1; // The receiver baseband circuit can be separately switched on
+    RF_PowerManagement.bits.b5_et = 0; // Switch on the PLL
+    RF_PowerManagement.bits.b4_es = 1; // Turns on the synthesizer
+    RF_PowerManagement.bits.b0_dc = 1; // Disable clock output of CLK pin
+#if defined(UART_DEBUG)
+    printf("PWR_MGMT_CMD 0x%04X\n", RF_PowerManagement.Val);
+#endif
+    radioAlphaTRX_Command(RF_PowerManagement.Val);
 
-    //    ALPHA_TRX433S_Control(0xA640); // Set operation frequency: Fc= 430+F*0.0025 , soit 430+1600*0.0025= 434 MHz avec 0x640 --> 110 0100 0000
-//        RF_FrequencySet.Val = FQ_SET_CMD_POR;
-//        RF_StatusRead.Val = radioAlphaTRX_Command(RF_FrequencySet.Val); // Set operation frequency: Fc= 430+F*0.0025 , soit 430+1600*0.0025= 434 MHz avec 0x640 --> 110 0100 0000 
-    
-    //le CS permet d'affiner le bpts
-    radioAlphaTRX_Command(0xC684);
-    
-    //force de sortie -21  TX configure controle commande 
-    radioAlphaTRX_CaptureFrame(9847);
-    
-    /**-------------> FReceiver Control Command <------------------------------*/
-    // Interrupt,FAST,200kHz,20dBm,-103dBm
-    // p16 - Interrupt input (bit 10)
-    // d.  - Fast
-    // i.  - Receiver baseband bandwidth (BW) select: 200 KHz
-    // g.  - Gain relative to maximum               :  20 dBm
-    // r.  - RSSI detector threshold                : -103 dBm
-    RF_ReceiverControl.Val = RX_CTRL_CMD_POR;
-    RF_ReceiverControl.REGbits.RSSIsetth = RSSIsetth_n103;
-    RF_ReceiverControl.REGbits.GLNA = GAIN_n20_dB;
-    RF_ReceiverControl.REGbits.RX_BW_Select = BW_67_KHz;
-    RF_ReceiverControl.REGbits.VDI_RespSetting = FAST;
-    RF_ReceiverControl.REGbits.Pin16_function = INTERRUPT_INPUT;
-    radioAlphaTRX_Command(RF_ReceiverControl.Val);
+    TMR_Delay(2); // deux ms d'attente ==> a voir 
 
-    /** REG03: Frequency Setting Command @ 868 MHz ***************************************/
+    /**-------------> Frequency Setting Command (3) <-------------------------*/
     // 96 < F < 3903 = 1600
     // 433 band: Fc= 430+F*0.0025 MHz ou 10*(43+F/4000)=
     // 430+1600*0.0025= 434 MHz (433 MHz band, 2.5 KHz step)
     // 1600d --> 0x640
-    //    ALPHA_TRX433S_Control(0xA640); // Set operation frequency: Fc= 430+F*0.0025 , soit 430+1600*0.0025= 434 MHz avec 0x640 --> 110 0100 0000
+    // Set operation frequency: Fc= 430+F*0.0025 , soit 430+1600*0.0025= 434 MHz avec 0x640 --> 110 0100 0000
     RF_FrequencySet.Val = FQ_SET_CMD_POR;
     //    RF_FrequencySet.REGbits.SetOperationFrequency_H = 0x6;
     //    RF_FrequencySet.REGbits.SetOperationFrequency_L = 0x40;
+    RF_FrequencySet.Val = radioAlphaTRX_TransceiverConfigFq(FQ_001);
+#if defined(UART_DEBUG)
+    printf("Frequence set 0X%04X\n", RF_FrequencySet.Val);
+#endif
+    radioAlphaTRX_Command(RF_FrequencySet.Val);
 
-    //    RF_FrequencySet.Val = FSK_Transceiver_ConfigFq( Switch_Read( ) );
-//    RF_FrequencySet.Val = FSK_Transceiver_ConfigFq(FQ_001);
-//    RF_FrequencySet.Val 
-    radioAlphaTRX_Command(RF_FrequencySet.Val); // Set operation frequency: Fc= 430+F*0.0025 , soit 430+1600*0.0025= 434 MHz avec 0x640 --> 110 0100 0000
+
+    /**-------------> Data Rate Command (4) <---------------------------------*/
+    // BR = 10000000/29/(r+1)/(1+cs*7)
+    // BR = 10000000/29/(35+1)/(1+0*7)= 9.579 Kbps
+    // Approximately 9.579 Kbps
+    //    radioAlphaTRX_Command(0xC623); // Data rate command 9600 bauds
+    radioAlphaTRX_Command(0xC647); // Data rate command 4800 bauds 0xC647 BR= 10000000/29/(71+1)/(1+0*7)= 4789.272 baud
+    //    calcul de la valeur :: exemple ==> 0xC6A3 = 
+    //    R= (10000 / 29 / (1+cs * 7) / BR)-1
 
 
+    /**-------------> Receiver Control Command (5) <--------------------------*/
+    // Interrupt,FAST,67kHz,20dBm,-97dBm
+    // p16 - Interrupt input (bit 10)
+    // d.  - Fast
+    // i.  - Receiver baseband bandwidth (BW) select: 67 KHz
+    // g.  - Gain relative to maximum               :  20 dBm
+    // r.  - RSSI detector threshold                : -67 dBm
+    RF_ReceiverControl.Val = RX_CTRL_CMD_POR;
+    RF_ReceiverControl.REGbits.RSSIsetth = RSSIsetth_n97;
+    RF_ReceiverControl.REGbits.GLNA = GAIN_n20_dB;
+    RF_ReceiverControl.REGbits.RX_BW_Select = BW_67_KHz;
+    RF_ReceiverControl.REGbits.VDI_RespSetting = FAST; // on testera avec medium
+    RF_ReceiverControl.REGbits.Pin16_function = INTERRUPT_INPUT;
+#if defined(UART_DEBUG)
+    printf("RX_CTRL_CMD 0X%04X\n", RF_ReceiverControl.Val);
+#endif
+    radioAlphaTRX_Command(RF_ReceiverControl.Val);
+
+    /**-------------> Data Filter Command (6) <-------------------------------*/
     /** 0xC2AC - Data Filter Command */
     // AL,!ml,DIG,DQD4
     // al - Clock recovery (CR) auto lock control : auto mode
     // ml - Clock recovery lock control           : slow mode, slow attack and slow release
     // s  - Digital filter
-    // f  - DQD threshold parameter               : 4
+    // f  - DQD threshold parameter : 4
+    //  bit  15  14  13  12 # 11  10  9  8 #  7    6     5    4   #  3     2    1     0   POR
+    //        1   1   0   0 #  1   0  1  0 # al=1  ml=0  1    s=0 #  1    f2=1  f1=1  f0?0   CA80h
     radioAlphaTRX_Command(0xC2AC); // al=1; ml=0;Data Filter: Digital filter, DATA QUALITY THRESHOLD 4
 
-    /**-------------> 0xCA83 - FIFO and Reset Mode Command <-------------------*/
+
+    /**-------------> 0xCA83 - FIFO and Reset Mode Command (7) <--------------*/
     //  bit  15  14  13  12  11  10  9  8   7   6   5   4   3   2   1   0   POR
     //        1   1   0   0   1   0  1  0  f3  f2  f1  f0  sp  al  ff  dr   CA80h
     // f<3:0> - FIFO IT level                   : 8
@@ -3247,8 +3291,53 @@ void radioAlphaTRX_Init(void) {
     RF_FIFOandResetMode.Val = FIFO_RST_MODE_CMD_POR;
     RF_FIFOandResetMode.bits.b0_dr = 1; // Non-sensitive reset
     RF_FIFOandResetMode.bits.b1_ff = 0; // FIFO fill will be enabled after synchron pattern reception
+#if defined(UART_DEBUG)
+    printf("FIFO_RST_MODE_CMD 0X%04X\n", RF_FIFOandResetMode.Val);
+#endif
     radioAlphaTRX_Command(RF_FIFOandResetMode.Val); // al=1; ml=0;Data Filter: Digital filter, DATA QUALITY THRESHOLD 6
 
+    //plus 
+    /**-------------> Synchron Pattern Command (8) <--------------------------*/
+    // 0xCE00 | group
+    // SYNC = 2DXX
+    // byte 0 of the synchron patern (group 212 = D4h)
+    //    result = rf12_xferCmd(fd, 0xCE00 | jl_group);
+    //    printCmdAndResult(0xCE00 | jl_group, result, "SYNC=2DXX");
+    radioAlphaTRX_Command(0xCED4); // Synchron Pattern Byte0 = 0xD4
+
+    /**-------------> AFC Command (10) <--------------------------------------*/
+    // Automatic operation mode selector    : Keep the f_offset only during receiving (VDI=high)
+    // Range limits                         : No restriction
+    // Strobe edge                          : off
+    // High accuracy mode                   : off
+    // Enable frequency offset register     : on
+    // Enable calculation of offset freq    : on
+    radioAlphaTRX_Command(0xC4F7); // AFC auto-mode: Keep offset indepently value VDI hi, range limit: +15/-16, st goes hi will store offset into output register, Enable AFC output register, Enable AFC function
+
+    /**-------------> TX Configuration Control Command (11) <-----------------*/
+    // FSK modulation           : 90 KHz frequency deviation
+    // 434000+(6*15)= 434090 KHz soit F0= 434 MHz + dFfsk= 90 KHz
+    // avec mp= 0, on aura:
+    //   la frequence FSK pour representer le 0 sera de F0-dFfsk= 433,910 MHz
+    //   la frequence FSK pour representer le 1 sera de F0+dFfsk= 434,090 MHz
+    //  434,090-433,910= 0,180 MHz --> band passante BW par rapport a F0
+    // Relative output power	:  0 dB
+    RF_TX_ConfCtrlCmd.Val = TX_CONF_CTRL_CMD_POR; //9800
+    RF_TX_ConfCtrlCmd.REGbits.SetDeviation = FSQ_DEV_45_KHZ;
+    RF_TX_ConfCtrlCmd.REGbits.SetOutputPower = OUTPUT_PWER_21_dB; // pour le test
+#if defined(UART_DEBUG)
+    printf("TX_CONF_CTRL_CMD 0x%04X\n", RF_TX_ConfCtrlCmd.Val);
+#endif
+    radioAlphaTRX_Command(RF_TX_ConfCtrlCmd.Val);
+    //radioAlphaTRX_Command(0x9827); // !mp: modulation polarity disable, 45 KHz valeur page 37(0x9810 = 30 KHz), output power: min (-17.5 dB)
+
+
+    /**-------------> PLL Setting Command (12) <-----------------*/
+    // Microcontroller output clock buffer rise and fall time   : 5 or 10 Mhz (recommended)
+    // Switches on the delay in the phase detector              : off
+    // Disabled the dithering in the PLL loop                   : on
+    // PLL bandwidth                                            : Max bit rate: 256 kbps, Phase noise at 1 Mhz offset: -102 dBc/Hc
+    radioAlphaTRX_Command(0xCC7A); // Pll Setting
 
     /* 0xE000 - Wake-Up Timer Command */
     // NOT USE
@@ -3260,6 +3349,12 @@ void radioAlphaTRX_Init(void) {
     // duty-cyle                    : 0 %
     // low duty-cycle mode enabled  : off
     radioAlphaTRX_Command(0xC800); // disable low duty cycle mode --> NOT USE
+    
+    //0xC009 - Low Battery Detector and Microcontroller Clock Divider Command
+    // V<v3:v0>         = 9
+    // Vlb              = 2.25+9*0.1= 3.15 V
+    // Clock Divider    = 1 Mhz
+    radioAlphaTRX_Command( 0xC009 ); // CLK OUTPUT = 1 MHz
     __delay32(SLEEP_AFTER_INIT);
 }
 
@@ -3267,28 +3362,20 @@ void radioAlphaTRX_Init(void) {
 
 void radioAlphaTRX_ReceivedMode(void) {
     //    nRES_SetHigh();
-    //close TX mode 
-    radioAlphaTRX_Command(0x8209);
+    /** Initialisation des variables */
 
-    /**-------------> Configuration Setting Command <--------------------------*/
-    //  bit  15  14  13  12  11  10   9   8   7   6   5   4   3   2   1   0   POR
-    //  Val   1   0   0   0   0   0   0   0  el  ef  b1  b0  x3  x2  x1  x0   0x8008
-    // --------------------- 0x80?? ---------------------
-    // el     - Enabled the internal data register : off
-    // ef     - Enabled the FIFO mode              : on
-    // b<1:0> - Set up the band                    : 868 MHz
-    // x<3:0> -                                    : 12.5 pF
-    RF_ConfigSet.Val = CFG_SET_CMD_POR; // initialiser la variable globale avec la valeur interne pr?sente
-    //active receive mode (RX)lors du Power On Reset
-    RF_ConfigSet.bits.b6_ef = 1;
-    RF_ConfigSet.REGbits.SelectBand = BAND_868; // initialer module at 868 Mhz
-    RF_ConfigSet.REGbits.SelectCrystalCapacitor = LOAD_C_12_0pF;
-    radioAlphaTRX_Command(RF_ConfigSet.Val);
-
-    //active the 
-    radioAlphaTRX_Command(0x82C9);
-    RF_FIFOandResetMode.bits.b1_ff = 1; // FIFO fill will be enabled after synchronize pattern reception
-    radioAlphaTRX_Command(RF_FIFOandResetMode.Val); // --> 0xCA83
+    /** Restart the synchron pattern recognition */
+    RF_FIFOandResetMode.bits.b1_ff = 0; // FIFO fill stops
+    radioAlphaTRX_Command( RF_FIFOandResetMode.Val ); // --> 0xCA81
+    RF_FIFOandResetMode.bits.b1_ff = 1; // FIFO fill will be enabled after synchron pattern reception
+    radioAlphaTRX_Command( RF_FIFOandResetMode.Val ); // --> 0xCA83
+//    //close TX mode 
+//    radioAlphaTRX_Command(0x8209);
+//
+//    //active the 
+//    radioAlphaTRX_Command(0x82C9);
+//    RF_FIFOandResetMode.bits.b1_ff = 1; // FIFO fill will be enabled after synchronize pattern reception
+//    radioAlphaTRX_Command(RF_FIFOandResetMode.Val); // --> 0xCA83
     radioAlphaTRX_SetSendMode(0); // on n'est plus en mode send
 }
 
@@ -3296,38 +3383,58 @@ void radioAlphaTRX_ReceivedMode(void) {
 
 int8_t radioAlphaTRX_SendMode(void) {
     //close Rx mode 
-    radioAlphaTRX_Command(0x8209);
+//    radioAlphaTRX_Command(0x8209);
 
-    /**-------------> Configuration Setting Command <--------------------------*/
-    //  bit  15  14  13  12  11  10   9   8   7   6   5   4   3   2   1   0   POR
-    //  Val   1   0   0   0   0   0   0   0  el  ef  b1  b0  x3  x2  x1  x0   0x8008
-    // --------------------- 0x80?? ---------------------
-    // el     - Enabled the internal data register : off
-    // ef     - Enabled the FIFO mode              : on
-    // b<1:0> - Set up the band                    : 868 MHz
-    // x<3:0> -                                    : 12.5 pF
-    RF_ConfigSet.Val = CFG_SET_CMD_POR; // initialiser la variable globale avec la valeur interne pr?sente lors du Power On Reset
-    //    radioAlphaTRX_Command(RF_ConfigSet.Val);
-    //    el = 1;
-    //    SelectBand = BAND_868 ==> initialer module at 868 Mhz
-    //    SelectCrystalCapacitor = LOAD_C_12_0pF  
-    RF_ConfigSet.Val = 0x80A7;
-    radioAlphaTRX_Command(RF_ConfigSet.Val);
+    // Mesure with Logic Analyser (100us/div): 4 byte --> 285 us
+    /** Stop received mode */
+    //    RF_PowerManagement.bits.b6_ebb = 0; // The receiver baseband circuit can be separately switched on
+    RF_PowerManagement.bits.b7_er = 0; // disabled the whole receiver chain
+    radioAlphaTRX_Command( RF_PowerManagement.Val ); // --> 0x8259
 
-    //#if defined(UART_DEBUG)
-    //    printf( "status: 0x%04X\r\n", RF_ConfigSet.Val);
-    //#endif
+    RF_FIFOandResetMode.bits.b1_ff = 0; // FIFO fill stops
+    radioAlphaTRX_Command( RF_FIFOandResetMode.Val ); // --> 0xCA81
 
-    //    Power Management Command
-    //    b5_et = 1; // Enabling the Transmitter preloads the TX latch with 0xAAAA
-    //    b4_es = 1;
-    //    b3_ex = 1; 
-    //    b0_dc = 1;
-    RF_PowerManagement.Val = 0x8239;
-    RF_StatusRead.Val = radioAlphaTRX_Command(RF_PowerManagement.Val);
-    //#if defined(UART_DEBUG)
-    //    printf("status 0x%04X\n", RF_StatusRead.Val);
-    //#endif
+    //    if (nIRQ_Pin_Read() == 0)
+    //        ALPHA_TRX433S_Control(0x0000); // si ? 0 lire registre status
+
+    /** Passer en mode ?mission - configure transmitter "Configuration Setting Command" */
+    RF_ConfigSet.bits.b7_el = 1; // enables the internal data register
+    radioAlphaTRX_Command( RF_ConfigSet.Val ); // --> 0x80D8
+
+    //RF_Status.bits.TX_Mode_Start = 1; /** D?marrage du Mode TX */
+    // Power Management Command
+    RF_PowerManagement.bits.b5_et = 1; // Enabling the Transmitter preloads the TX latch with 0xAAAA
+    radioAlphaTRX_Command( RF_PowerManagement.Val ); // --> 0x8279
+//    /**-------------> Configuration Setting Command <--------------------------*/
+//    //  bit  15  14  13  12  11  10   9   8   7   6   5   4   3   2   1   0   POR
+//    //  Val   1   0   0   0   0   0   0   0  el  ef  b1  b0  x3  x2  x1  x0   0x8008
+//    // --------------------- 0x80?? ---------------------
+//    // el     - Enabled the internal data register : off
+//    // ef     - Enabled the FIFO mode              : on
+//    // b<1:0> - Set up the band                    : 868 MHz
+//    // x<3:0> -                                    : 12.5 pF
+//    RF_ConfigSet.Val = CFG_SET_CMD_POR; // initialiser la variable globale avec la valeur interne pr?sente lors du Power On Reset
+//    //    radioAlphaTRX_Command(RF_ConfigSet.Val);
+//    //    el = 1;
+//    //    SelectBand = BAND_868 ==> initialer module at 868 Mhz
+//    //    SelectCrystalCapacitor = LOAD_C_12_0pF  
+//    RF_ConfigSet.Val = 0x80A7;
+//    radioAlphaTRX_Command(RF_ConfigSet.Val);
+//
+//    //#if defined(UART_DEBUG)
+//    //    printf( "status: 0x%04X\r\n", RF_ConfigSet.Val);
+//    //#endif
+//
+//    //    Power Management Command
+//    //    b5_et = 1; // Enabling the Transmitter preloads the TX latch with 0xAAAA
+//    //    b4_es = 1;
+//    //    b3_ex = 1; 
+//    //    b0_dc = 1;
+//    RF_PowerManagement.Val = 0x8239;
+//    RF_StatusRead.Val = radioAlphaTRX_Command(RF_PowerManagement.Val);
+//    //#if defined(UART_DEBUG)
+//    //    printf("status 0x%04X\n", RF_StatusRead.Val);
+//    //#endif
     radioAlphaTRX_SetSendMode(1); // on est en mode transmission 
     return radioAlphaTRX_WaitLownIRQ(SEND_TIME_OUT); // arbitraire 
 }
@@ -3346,14 +3453,16 @@ int8_t radioAlphaTRX_SendData(uint8_t* bytes, int8_t size) {
     int i;
 
     //preamble
-    radioAlphaTRX_SendByte(0xAA, SEND_TIME_OUT);
-    radioAlphaTRX_SendByte(0xAA, SEND_TIME_OUT);
-    radioAlphaTRX_SendByte(0xAA, SEND_TIME_OUT);
+    if (radioAlphaTRX_SendByte(0xAA, SEND_TIME_OUT) == 0) return 0;
+    if (radioAlphaTRX_SendByte(0xAA, SEND_TIME_OUT) == 0) return 0;
+    if (radioAlphaTRX_SendByte(0xAA, SEND_TIME_OUT) == 0) return 0;
+    //    radioAlphaTRX_SendByte(0xAA, SEND_TIME_OUT);
+    //    radioAlphaTRX_SendByte(0xAA, SEND_TIME_OUT);
 
     //peut g?n?rer des probleme ? surveiller
     //synchro pattern
-    radioAlphaTRX_SendByte(0x2D, SEND_TIME_OUT);
-    radioAlphaTRX_SendByte(0xD4, SEND_TIME_OUT);
+    if (radioAlphaTRX_SendByte(0x2D, SEND_TIME_OUT) == 0) return 0;
+    if (radioAlphaTRX_SendByte(0xD4, SEND_TIME_OUT) == 0) return 0;
     //transmission des octet 
     for (i = 0; i < size; i++) {
         if (radioAlphaTRX_SendByte(bytes[i], SEND_TIME_OUT) == 0)
@@ -3361,8 +3470,8 @@ int8_t radioAlphaTRX_SendData(uint8_t* bytes, int8_t size) {
     }
 
     //dummy bytes
-    radioAlphaTRX_SendByte(0x00, SEND_TIME_OUT);
-    radioAlphaTRX_SendByte(0x00, SEND_TIME_OUT);
+    if (radioAlphaTRX_SendByte(0x00, SEND_TIME_OUT) == 0) return 0;
+    if (radioAlphaTRX_SendByte(0x00, SEND_TIME_OUT) == 0) return 0;
     // clear TX
     //    RF_PowerManagement.Val = 0x8209;
     //    radioAlphaTRX_Command(RF_PowerManagement.Val);
@@ -3434,13 +3543,15 @@ int8_t radioAlphaTRX_receive(uint8_t buffer[FRAME_LENGTH]) {
             return 0;
         }
         receiveData.word = radioAlphaTRX_Command(0xB000);
-        buffer[i] = receiveData.byte.low;
         idOF id;
         id.code = receiveData.byte.low;
         if (id.id.dest != MASTER_ID && id.id.dest != ID_BROADCAST && i == 0) {
             return 0;
         } else if (receiveData.byte.low == 0) {
+            buffer[i] = 0;
             break;
+        } else {
+            buffer[i] = receiveData.byte.low;
         }
     }
     return i;
@@ -3452,7 +3563,7 @@ void radioAlphaTRX_CaptureFrame() {
         LED_BLUE_Toggle();
         MASTER_SetMsgReceiveRF(1);
         TMR_SetMsgRecuTimeout(TIME_OUT_GET_FRAME); // on demare le timer, car le bufer est probablement remplie 
-    }else {
+    } else {
         LED_RED_SetHigh();
     }
     //on se remet en ecoute 

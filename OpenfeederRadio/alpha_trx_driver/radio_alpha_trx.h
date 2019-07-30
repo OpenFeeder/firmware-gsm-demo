@@ -134,14 +134,13 @@
 // ---- Control Register -------------- Power-On Reset Value -------------- Control Command -------------------- Related control bits
 #define CFG_SET_CMD_POR                 (0x8008)    // 1000 0000 0000 1000, Configuration Setting Command ...... el, ef, b1 to b0, x3 to x0
 #define PWR_MGMT_CMD_POR                (0x8208)    // 1000 0010 0000 1000, Power Management Command ........... er, ebb, et, es, ex, eb, ew, dc
-//#define FQ_SET_CMD_POR                  (0xA680)    // 1010 0110 1000 0000, Frequency Setting Command .......... f11 to f0
 #define FQ_SET_CMD_POR                  (0xA640)    // 1010 0110 1000 0000, Frequency Setting Command .......... f11 to f0
 #define DATA_RATE_CMD_POR               (0xC623)    // 1100 0110 0010 0011, Data Rate Command .................. cs, r6 to r0
 #define RX_CTRL_CMD_POR                 (0x9080)    // 1001 0000 1000 0000, Receiver Control Command ........... p16, d1 to d0, i2 to i0, g1 to g0, r2 to r0
 #define DATA_FILTER_CMD_POR             (0xC22C)    // 1100 0010 0010 1100, Data Filter Command ................ al, ml, s, f2 to f0
 #define FIFO_RST_MODE_CMD_POR           (0xCA80)    // 1100 1010 1000 0000, FIFO and Reset Mode Command ........ f3 to f0, sp, ff, al, dr
 #define SYNC_PATT_CMD_POR               (0xCED4)    // 1100 1110 1101 0100, Synchron pattern Command ........... b7 to b0
-//#define RX_FIFO_READ_CMD_POR            (0xB000)    // 1011 0000 0000 0000, Receiver FIFO Read Command
+#define RX_FIFO_READ_CMD_POR            (0xB000)    // 1011 0000 0000 0000, Receiver FIFO Read Command
 #define RX_FIFO_READ_CMD                (0xB000)    // 1011 0000 0000 0000, Receiver FIFO Read Command
 #define AFC_CMD_POR                     (0xC4F7)    // 1100 0100 1111 0111, AFC Command ........................ a1 to a0, rl1 to rl0, st, fi, oe, en
 #define TX_CONF_CTRL_CMD_POR            (0x9800)    // 1001 1000 0000 0000, TX Configuration Control Command ... mp, m3 to m0, p2 to p0
@@ -150,7 +149,7 @@
 #define WKUP_TIMER_CMD_POR              (0xE196)    // 1110 0001 1001 0110, Wake-Up Timer Command .............. r4 to r0, m7 to m0
 #define LOW_DUTY_CYCLE_CMD_POR          (0xC80E)    // 1100 1000 0000 1110, Low Duty-Cycle Command ............. d6 to d0, en
 #define LOW_BAT_AND_MCU_CLK_DIV_CMD_POR (0xC000)    // 1100 0000 0000 0000, Low Bat. Detect. and MCU Clock Div . d2 to d0, v3to v0
-//#define STATUS_READ_CMD_POR             (0x0000)    // 0000 0000 0000 0000, Status Read Command
+#define STATUS_READ_CMD_POR             (0x0000)    // 0000 0000 0000 0000, Status Read Command
 #define STATUS_READ_CMD                 (0x0000)    // 0000 0000 0000 0000, Status Read Command
 //delay
 #define SLEEP_AFTER_INIT (850000)
@@ -303,7 +302,7 @@ typedef enum _SELECT_BAND_T {
 } SELECT_BAND;
 
 
-/** ------------------------>> PWR_MGMT_CMD_POR <<----------------------------*/
+/** ------------------------>> PWR_MGMT_CMD_POR 2<<----------------------------*/
 
 /**
  * Power Management Command
@@ -333,7 +332,7 @@ typedef union {
     } bits;
 } PWR_MGMT_CMD_VAL;
 
-/** ------------------------>> FQ_SET_CMD_POR <<------------------------------*/
+/** ------------------------>> FQ_SET_CMD_POR 3<<------------------------------*/
 
 /**
  * Frequency Setting Command
@@ -493,6 +492,12 @@ typedef enum _SELECT_VDI_RESPONSE_TIMING_T {
 #define DIGITAL_FILTER      (0)     // Digital filter
 #define ANALOG_RC_FILTER    (1)     // Analog RC filter
 
+//bit 7 (al)
+#define AUTO_MODE (1) // ml has no effect, in this mode 
+#define MANUAL_MODE (0) // the clock recovery mode
+
+
+
 /** ------------------------>> FIFO_RST_MODE_CMD_POR <<------------------------*/
 
 /** 
@@ -552,6 +557,81 @@ typedef union {
         uint8_t FFIT;
     } REGbyte;
 } RX_FIFO_READ_CMD_VAL;
+
+/** ------------------------>> TX_CONF_CTRL_CMD_POR (11) <<--------------------*/
+
+/*
+ * To have better perform, it's recomended to use this configuration 
+ * 
+ * LNA gain maximum, filter bandwidth 67 kHz, data rate 9.6 kbps,
+ * AFC switched off, FSK deviation ± 45 kHz, Vdd = 2.7 V
+ * 
+ * 
+ * FSK modulation parameters
+ * fout = f0 + (-1)SIGN · (M + 1) · (15 kHz)
+ */
+typedef enum _SELECT_FSQ_DEVIATION_T {
+    FSQ_DEV_15_KHZ,  // 0000: 
+    FSQ_DEV_30_KHZ,  // 0001:
+    FSQ_DEV_45_KHZ,  // 0010:
+    FSQ_DEV_60_KHZ,  // 0011:
+    FSQ_DEV_75_KHZ,  // 0100:
+    FSQ_DEV_90_KHZ,  // 0101:
+    FSQ_DEV_105_KHZ, // 0110:
+    FSQ_DEV_120_KHZ, // 0111:
+    FSQ_DEV_135_KHZ, // 1000:
+    FSQ_DEV_150_KHZ, // 1001:
+    FSQ_DEV_165_KHZ, // 1010:
+    FSQ_DEV_180_KHZ, // 1011:
+    FSQ_DEV_195_KHZ, // 1100:
+    FSQ_DEV_210_KHZ, // 1101:
+    FSQ_DEV_225_KHZ, // 1110:
+    FSQ_DEV_240_KHZ, // 1111:
+} _SELECT_FSQ_DEVIATION_T;
+
+typedef enum _SELECT_RELATIVE_OUTPUT_POWER_T {
+    OUTPUT_PWER_0_dB, // 000:  0 dB  : maximum value 
+    OUTPUT_PWER_3_dB, // 001:  3 dB
+    OUTPUT_PWER_6_dB, // 010:  6 dB
+    OUTPUT_PWER_9_dB, // 011:  9 dB
+    OUTPUT_PWER_12_dB, // 100: 12 dB
+    OUTPUT_PWER_15_dB, // 101: 15 dB
+    OUTPUT_PWER_18_dB, // 110: 18 dB
+    OUTPUT_PWER_21_dB // 111: 21 dB
+} _SELECT_RELATIVE_OUTPUT_POWER_T;
+
+typedef union {
+    uint16_t Val;
+    uint8_t v[2];
+
+    struct {
+        uint8_t LB;
+        uint8_t HB;
+    } byte;
+
+    struct {
+        unsigned b0_p0 : 1; 
+        unsigned b1_p1 : 1; 
+        unsigned b2_p2 : 1; 
+        unsigned b3_0  : 1; 
+        unsigned b4_m0 : 1; 
+        unsigned b5_m1 : 1;
+        unsigned b6_m2 : 1;
+        unsigned b7_m3 : 1;
+        unsigned b8_mp : 1;
+        unsigned b9to15_cmd_code : 7; // Command code
+    } bits;
+
+    struct {
+        unsigned SetCommandeOfTxConfControl : 7; // Set operation frequency
+        unsigned SetMp : 1;
+        unsigned SetDeviation : 4; // Set modulation of frequency deviation 
+        unsigned noUse : 1;
+        unsigned SetOutputPower : 3; // select aout power 
+    } REGbits;
+} TX_CONF_CTRL_CMD_VAL;
+
+
 
 /** ------------------------>> STATUS_READ_POR <<------------------------------*/
 //...
@@ -627,6 +707,7 @@ extern FQ_SET_CMD_VAL RF_FrequencySet; // Frequency Setting Command
 extern RX_CTRL_CMD_VAL RF_ReceiverControl; // Receiver Control Command 
 extern RX_FIFO_READ_CMD_VAL RF_FIFO_Read; // Receiver FIFO Read
 extern FIFO_RST_MODE_CMD_VAL RF_FIFOandResetMode; // FIFO and Reset Mode Command
+extern TX_CONF_CTRL_CMD_VAL RF_TX_ConfCtrlCmd; // controle the power output ad the modulation of frequency
 extern STATUS_READ_VAL RF_StatusRead; // Status Read Command
 
 /*------------------------> P R I V A T E   P R O T O T Y P E S <--------------*/
