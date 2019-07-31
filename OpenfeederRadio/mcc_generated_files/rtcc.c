@@ -50,7 +50,7 @@
 
 #include <xc.h>
 #include "rtcc.h"
-#include "pin_manager.h"
+#include "../driver/timer.h"
 
 /**
 * Section: Function Prototype
@@ -74,14 +74,23 @@ void RTCC_Initialize(void)
    
    if(!RTCCTimeInitialized())
    {
-//       // set RTCC time 2019-02-04 10-43-44
-//       RCFGCALbits.RTCPTR = 3;        // start the sequence
-//       RTCVAL = 0x19;    // YEAR
-//       RTCVAL = 0x204;    // MONTH-1/DAY-1
-//       RTCVAL = 0x110;    // WEEKDAY/HOURS
-//       RTCVAL = 0x4344;    // MINUTES/SECONDS
+       // set RTCC time 2019-02-04 10-43-44
+       RCFGCALbits.RTCPTR = 3;        // start the sequence
+       RTCVAL = 0x19;    // YEAR
+       RTCVAL = 0x204;    // MONTH-1/DAY-1
+       RTCVAL = 0x110;    // WEEKDAY/HOURS
+       RTCVAL = 0x4344;    // MINUTES/SECONDS
    }
 
+   // set Alarm time 2019-02-02 22-58-44
+   ALCFGRPTbits.ALRMEN = 0;
+   ALCFGRPTbits.ALRMPTR = 2;
+   ALRMVAL = 0x202;
+   ALRMVAL = 0x622;
+   ALRMVAL = 0x5844;
+
+   // ALRMPTR MIN_SEC; AMASK Every Minute; ARPT 0; CHIME enabled; ALRMEN enabled; 
+   ALCFGRPT = 0xCC00;
    // RTCOUT RTCC Clock; PWSPRE disabled; RTCLK SOSC; PWCPRE disabled; PWCEN disabled; PWCPOL disabled; 
    RTCPWC = 0x0200;
 
@@ -248,7 +257,7 @@ static uint8_t ConvertBCDToHex(uint8_t bcdvalue)
 void __attribute__ ( ( interrupt, no_auto_psv ) ) _ISR _RTCCInterrupt( void )
 {
     /* TODO : Add interrupt handling code */
-    TMR_CallBackRTC();
+    TMR_RtccCallBack();
     IFS3bits.RTCIF = false;
 }
 

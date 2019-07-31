@@ -106,13 +106,14 @@
 
 // This is a guard condition so that contents of this file are not included
 // more than once.  
-#ifndef XC_HEADER_TEMPLATE_H
-#define	XC_HEADER_TEMPLATE_H
+#ifndef RADIO_ALPHA_TRX_H
+#define	RADIO_ALPHA_TRX_H
 
 /**------------------------>> I N C L U D E <<---------------------------------*/
 #include <xc.h> // include processor files - each processor file is guarded.  
 #include "../mcc_generated_files/pin_manager.h"
 #include "../driver/Services.h"
+#include "../driver/master_api.h"
 
 /******************************************************************************/
 /******************************************************************************/
@@ -134,7 +135,8 @@
 // ---- Control Register -------------- Power-On Reset Value -------------- Control Command -------------------- Related control bits
 #define CFG_SET_CMD_POR                 (0x8008)    // 1000 0000 0000 1000, Configuration Setting Command ...... el, ef, b1 to b0, x3 to x0
 #define PWR_MGMT_CMD_POR                (0x8208)    // 1000 0010 0000 1000, Power Management Command ........... er, ebb, et, es, ex, eb, ew, dc
-#define FQ_SET_CMD_POR                  (0xA640)    // 1010 0110 1000 0000, Frequency Setting Command .......... f11 to f0
+#define FQ_SET_CMD_POR                  (0xA680)    // 1010 0110 1000 0000, Frequency Setting Command .......... f11 to f0
+//#define FQ_SET_CMD_POR                  (0xA640)    // 1010 0110 1000 0000, Frequency Setting Command .......... f11 to f0
 #define DATA_RATE_CMD_POR               (0xC623)    // 1100 0110 0010 0011, Data Rate Command .................. cs, r6 to r0
 #define RX_CTRL_CMD_POR                 (0x9080)    // 1001 0000 1000 0000, Receiver Control Command ........... p16, d1 to d0, i2 to i0, g1 to g0, r2 to r0
 #define DATA_FILTER_CMD_POR             (0xC22C)    // 1100 0010 0010 1100, Data Filter Command ................ al, ml, s, f2 to f0
@@ -149,7 +151,7 @@
 #define WKUP_TIMER_CMD_POR              (0xE196)    // 1110 0001 1001 0110, Wake-Up Timer Command .............. r4 to r0, m7 to m0
 #define LOW_DUTY_CYCLE_CMD_POR          (0xC80E)    // 1100 1000 0000 1110, Low Duty-Cycle Command ............. d6 to d0, en
 #define LOW_BAT_AND_MCU_CLK_DIV_CMD_POR (0xC000)    // 1100 0000 0000 0000, Low Bat. Detect. and MCU Clock Div . d2 to d0, v3to v0
-#define STATUS_READ_CMD_POR             (0x0000)    // 0000 0000 0000 0000, Status Read Command
+//#define STATUS_READ_CMD_POR             (0x0000)    // 0000 0000 0000 0000, Status Read Command
 #define STATUS_READ_CMD                 (0x0000)    // 0000 0000 0000 0000, Status Read Command
 //delay
 #define SLEEP_AFTER_INIT (850000)
@@ -302,7 +304,7 @@ typedef enum _SELECT_BAND_T {
 } SELECT_BAND;
 
 
-/** ------------------------>> PWR_MGMT_CMD_POR 2<<----------------------------*/
+/** ------------------------>> PWR_MGMT_CMD_POR <<----------------------------*/
 
 /**
  * Power Management Command
@@ -332,7 +334,7 @@ typedef union {
     } bits;
 } PWR_MGMT_CMD_VAL;
 
-/** ------------------------>> FQ_SET_CMD_POR 3<<------------------------------*/
+/** ------------------------>> FQ_SET_CMD_POR <<------------------------------*/
 
 /**
  * Frequency Setting Command
@@ -364,6 +366,11 @@ typedef union {
     } bits;
 
     struct {
+        unsigned SetOperationFrequency : 12;
+        unsigned cmd_code : 4; // Command code
+    } Fsq;
+
+    struct {
         unsigned SetOperationFrequency_L : 8; // Set operation frequency
         unsigned SetOperationFrequency_H : 4; // Set operation frequency
         unsigned cmd_code : 4; // Command code
@@ -382,6 +389,10 @@ typedef union {
 // 868band: Fc=860+F*0.0050 MHz
 // 915band: Fc=900+F*0.0075 MHz
 // Fc is carrier frequency and F is the frequency parameter. 36 < F < 3903
+
+#define C1_868 2
+#define C2_868 43
+
 
 /**
  * Data Rate Command:
@@ -492,12 +503,6 @@ typedef enum _SELECT_VDI_RESPONSE_TIMING_T {
 #define DIGITAL_FILTER      (0)     // Digital filter
 #define ANALOG_RC_FILTER    (1)     // Analog RC filter
 
-//bit 7 (al)
-#define AUTO_MODE (1) // ml has no effect, in this mode 
-#define MANUAL_MODE (0) // the clock recovery mode
-
-
-
 /** ------------------------>> FIFO_RST_MODE_CMD_POR <<------------------------*/
 
 /** 
@@ -558,25 +563,114 @@ typedef union {
     } REGbyte;
 } RX_FIFO_READ_CMD_VAL;
 
+/** ------------------------>> DATA_RATE_CMD_POR (4) <<------------------------*/
+#define CS_HIGH (1)
+#define CS_LOW (0)
+
+typedef union {
+    uint16_t Val;
+    uint8_t v[2];
+
+    struct {
+        uint8_t LB;
+        uint8_t HB;
+    } byte;
+
+    struct {
+        unsigned b0_r0 : 1;
+        unsigned b1_r1 : 1;
+        unsigned b2_r2 : 1;
+        unsigned b3_r3 : 1;
+        unsigned b4_r4 : 1;
+        unsigned b5_r5 : 1;
+        unsigned b6_r6 : 1;
+        unsigned b7_cs : 1;
+        unsigned b8to15_cmd_code : 8; // Command code
+    } bits;
+
+    struct {
+        unsigned SetRate : 7; // Set R
+        unsigned SetCs : 1;
+        unsigned SetCommandeOfdataRate : 8; // Set data rate commande code
+    } REGbits;
+} DATA_RATE_CMD_VAL;
+
+/** ------------------------>> AFC_CMD_POR (10) <<----------------------------*/
+
+/**
+ * 
+ * 
+ */
+typedef union {
+    uint16_t Val;
+    uint8_t v[2];
+
+    struct {
+        uint8_t LB;
+        uint8_t HB;
+    } byte;
+
+    struct {
+        unsigned b0_en : 1; 
+        unsigned b1_oe : 1; 
+        unsigned b2_fi : 1; 
+        unsigned b3_st : 1; 
+        unsigned b4_rl0 : 1;
+        unsigned b5_rl1 : 1;
+        unsigned b6_a0 : 1;
+        unsigned b7_a1 : 1;
+        unsigned b8to15_cmd_code : 8; // Command code
+    } bits;
+
+    struct {
+        unsigned en : 1; // Enables the calculation of the offset frequency by the AFC circuit.
+        unsigned oe : 1; // Enables the frequency offset register. It allows the addition of the offset register to the frequency control word of
+                         // the PLL.
+        unsigned fi : 1; // Switches the circuit to high accuracy (fine) mode. In this case, the processing time is about twice as long, but the
+                         // measurement uncertainty is about half
+        unsigned st : 1; // Strobe edge, when st goes to high, the actual latest calculated frequency error is stored into the offset register of
+                         // the AFC block
+        unsigned range_limit : 2;
+        unsigned Automatic_operation_mode_selec : 2;
+        unsigned SetCommandeOfAFC : 8;
+    } REGbits;
+
+} AFC_CMD_VAL;
+
+//Automatic operation mode selector
+typedef enum {
+    AUTO_MODE_OFF, //00 : Auto mode off (Strobe is controlled by microcontroller)
+    RUNS_ONLY_ONCE, // 01 : Runs only once after each power-up
+    KEEP_Fosette_ONLY, // 10 : Keep the foffset only during receiving (VDI=high)
+    KEEP_Fosette_VALUE_INDEP //11 : Keep the foffset value independently from the state of the VDI signal
+}ATOMIC_OPERATOR_MODE;
+
+typedef enum {
+    NORESTRICTION,
+    PLUS_15_TO_MOINS_16, // +15 fres to -16 fres
+    PLUS_7_TO_MOINS_8,   // +7 fres to -8 fres
+    PLUS_3_TO_MOINS_4    // +3 fres to -4 fres 
+}RESTRICTION;
+
 /** ------------------------>> TX_CONF_CTRL_CMD_POR (11) <<--------------------*/
 
 /*
  * To have better perform, it's recomended to use this configuration 
  * 
  * LNA gain maximum, filter bandwidth 67 kHz, data rate 9.6 kbps,
- * AFC switched off, FSK deviation ± 45 kHz, Vdd = 2.7 V
+ * AFC switched off, FSK deviation ? 45 kHz, Vdd = 2.7 V
  * 
  * 
  * FSK modulation parameters
- * fout = f0 + (-1)SIGN · (M + 1) · (15 kHz)
+ * fout = f0 + (-1)SIGN ? (M + 1) ? (15 kHz)
  */
 typedef enum _SELECT_FSQ_DEVIATION_T {
-    FSQ_DEV_15_KHZ,  // 0000: 
-    FSQ_DEV_30_KHZ,  // 0001:
-    FSQ_DEV_45_KHZ,  // 0010:
-    FSQ_DEV_60_KHZ,  // 0011:
-    FSQ_DEV_75_KHZ,  // 0100:
-    FSQ_DEV_90_KHZ,  // 0101:
+    FSQ_DEV_15_KHZ, // 0000: 
+    FSQ_DEV_30_KHZ, // 0001:
+    FSQ_DEV_45_KHZ, // 0010:
+    FSQ_DEV_60_KHZ, // 0011:
+    FSQ_DEV_75_KHZ, // 0100:
+    FSQ_DEV_90_KHZ, // 0101:
     FSQ_DEV_105_KHZ, // 0110:
     FSQ_DEV_120_KHZ, // 0111:
     FSQ_DEV_135_KHZ, // 1000:
@@ -610,11 +704,11 @@ typedef union {
     } byte;
 
     struct {
-        unsigned b0_p0 : 1; 
-        unsigned b1_p1 : 1; 
-        unsigned b2_p2 : 1; 
-        unsigned b3_0  : 1; 
-        unsigned b4_m0 : 1; 
+        unsigned b0_p0 : 1;
+        unsigned b1_p1 : 1;
+        unsigned b2_p2 : 1;
+        unsigned b3_0 : 1;
+        unsigned b4_m0 : 1;
         unsigned b5_m1 : 1;
         unsigned b6_m2 : 1;
         unsigned b7_m3 : 1;
@@ -623,16 +717,13 @@ typedef union {
     } bits;
 
     struct {
-        unsigned SetCommandeOfTxConfControl : 7; // Set operation frequency
-        unsigned SetMp : 1;
-        unsigned SetDeviation : 4; // Set modulation of frequency deviation 
-        unsigned noUse : 1;
         unsigned SetOutputPower : 3; // select aout power 
+        unsigned noUse : 1;
+        unsigned SetDeviation : 4; // Set modulation of frequency deviation 
+        unsigned SetMp : 1;
+        unsigned SetCommandeOfTxConfControl : 7; // Set operation frequency
     } REGbits;
 } TX_CONF_CTRL_CMD_VAL;
-
-
-
 /** ------------------------>> STATUS_READ_POR <<------------------------------*/
 //...
 // AFC Command
@@ -684,6 +775,40 @@ typedef union {
     } REGbits;
 } STATUS_READ_VAL;
 
+
+/** ------------------------>> FIFO_RST_MODE_CMD_POR <<------------------------*/
+
+typedef union {
+    uint16_t Val;
+    uint8_t v[2];
+
+    struct {
+        uint8_t LB;
+        uint8_t HB;
+    } byte;
+
+    struct {
+        unsigned b0_p0 : 1;
+        unsigned b1_p1 : 1;
+        unsigned b2_p2 : 1;
+        unsigned b3_0 : 1;
+        unsigned b4_m0 : 1;
+        unsigned b5_m1 : 1;
+        unsigned b6_m2 : 1;
+        unsigned b7_m3 : 1;
+        unsigned b8_mp : 1;
+        unsigned b9to15_cmd_code : 7; // Command code
+    } bits;
+
+    struct {
+        unsigned SetOutputPower : 3; // select aout power 
+        unsigned noUse : 1;
+        unsigned SetDeviation : 4; // Set modulation of frequency deviation 
+        unsigned SetMp : 1;
+        unsigned SetCommandeOfTxConfControl : 7; // Set operation frequency
+    } REGbits;
+} PLL_SET_CMD_VAL;
+
 /** ------------------------>> FIFO_RST_MODE_CMD_POR <<------------------------*/
 //FIXME: Correction des testes de 2 bits vers 1 bits
 
@@ -708,6 +833,8 @@ extern RX_CTRL_CMD_VAL RF_ReceiverControl; // Receiver Control Command
 extern RX_FIFO_READ_CMD_VAL RF_FIFO_Read; // Receiver FIFO Read
 extern FIFO_RST_MODE_CMD_VAL RF_FIFOandResetMode; // FIFO and Reset Mode Command
 extern TX_CONF_CTRL_CMD_VAL RF_TX_ConfCtrlCmd; // controle the power output ad the modulation of frequency
+extern DATA_RATE_CMD_VAL RF_DataRate;
+extern AFC_CMD_VAL RF_AfcCmd;  
 extern STATUS_READ_VAL RF_StatusRead; // Status Read Command
 
 /*------------------------> P R I V A T E   P R O T O T Y P E S <--------------*/
@@ -752,20 +879,17 @@ int8_t radioAlphaTRX_SendMode(void);
 int8_t radioAlphaTRX_SendByte(uint8_t dataToSend, int8_t timeout);
 
 /**
- * transmission flot d'octets a la suite 
- * 
- * @param bytes : tableau d'octet
- * @param size : la taille du tableau 
- * @param timeout : delais apres quoi on gener une erreur de transmsission 
- * @return : nombre d'octets effectivement transmis 
+ * transmet une trame complete
+ * @param frameToSend : la trame a transmettre 
+ * @return : le nombre de d'octet transmis 
  */
-int8_t radioAlphaTRX_SendData(uint8_t* bytes, int8_t size);
+int8_t radioAlphaTRX_SendData(Frame frameToSend);
 
 /**
  * 
  * @param timeout : le nombre de fois qu'il faut attendre le nIRQ en cas de non reponse
- * @return : 
- *         1 : on n a pas depasse le delais imposer pour l'attente
+ * @return <br />
+ *         1 : on n a pas depasse le delais imposer pour l'attente <br />
  *         0 : sinon  
  */
 int8_t radioAlphaTRX_WaitLownIRQ(int timeout);
@@ -783,24 +907,25 @@ void radioAlphaTRX_CaptureFrame();
  * 
  * @param mode_rf
  */
-void radioAlphaTRX_SetSendMode(int8_t modeRF);
+void radioAlphaTRX_SetSendMode(bool modeRF);
+
 /**
  * 
  * @return 
  */
-int8_t radioAlphaTRX_IsSendMode();
+bool radioAlphaTRX_IsSendMode();
 
 /**
  * <pres condition : receive_msg == 1 > avant l'apelle de cette fonction 
  * @return : le contenue du buffer
  */
-uint8_t * radioAlphaTRX_ReadBuf();
+Frame radioAlphaTRX_GetFrame();
 
 /**
  * 
  * @return : la taille du buffer indice
  */
-uint8_t radioAlphaTRX_GetSizeBuf();
+uint8_t radioAlphaTRX_GetSizeData();
 
 
 /****************                                         *********************/
@@ -808,4 +933,4 @@ uint8_t radioAlphaTRX_GetSizeBuf();
 /******************************************************************************/
 /******************************************************************************/
 
-#endif	/* XC_HEADER_TEMPLATE_H */
+#endif	/* RADIO_ALPHA_TRX_H */

@@ -221,7 +221,7 @@ bool app_ChangePinCode(int16_t lastPinCode, int16_t newPinCode) {
 uint8_t * app_GetSimState() {
     GSM3_ReadyReceiveBuffer();
     GSM3_TransmitCommand("AT+CPIN?");
-    TMR_Delay(1000);
+    TMR_Delay(100);
     return GSM3_GetResponse();
 }
 

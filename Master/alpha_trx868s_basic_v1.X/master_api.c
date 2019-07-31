@@ -103,7 +103,7 @@ int8_t MASTER_SendMsgRF(uint8_t dest,
     frameToSend.Champ.crc ^= frameToSend.paquet[3];
     for (i = 0; i < frameToSend.Champ.size; i++) {
         frameToSend.Champ.data[i] = data[i];
-        frameToSend.Champ.crc ^= frameToSend.paquet[i + 5]; // penser à changer le 5 en generique 
+        frameToSend.Champ.crc ^= frameToSend.paquet[i + 5]; // penser ï¿½ changer le 5 en generique 
     }
 
     for (i = 0; i < frameToSend.Champ.size + 5; i++) {
@@ -316,7 +316,7 @@ void MASTER_AppTask() { // machiine a etat general
                 case SLAVE_DAYTIME: // j'aurais pu utiliser le neutre
                     ensSlave[slaveSelected].nbTimeout++;
                     if (--ensSlave[slaveSelected].nbTimeout)
-                        MASTER_StoreBehavior(MASTER_STATE_SEND_REQUEST_INFOS, MEDIUM);
+                        MASTER_StoreBehavior(MASTER_STATE_SEND_REQUEST_INFOS, PRIO_MEDIUM);
                     else
                         if (!(--ensSlave[slaveSelected].nbError)) {
                         ensSlave[slaveSelected].state = SLAVE_ERROR;

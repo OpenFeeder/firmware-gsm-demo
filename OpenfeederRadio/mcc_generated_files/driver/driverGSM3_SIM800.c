@@ -190,6 +190,16 @@ bool GMS3_ModulePower(bool powerState) {
                 return false;
             }
         } while(!GSM3_findStringInResponse("OK", read));
+        //code pin 
+        if(!GSM3_findStringInResponse("READY", app_GetSimState())) {
+            if(!app_SetPinCode(PIN_INPUT)) {
+#if defined(_DEBUG)
+                printf("No PIN in module\n");
+#endif
+                return false;
+            }
+            TMR_Delay(6000);
+        }
     }
     return true;
 }

@@ -1,5 +1,9 @@
 {
     "files.associations": {
-        "app.h": "c"
+        "app.h": "c",
+        "master_api.h": "c",
+        "services.h": "c",
+        "timer.h": "c",
+        "stdio.h": "c"
     }
 }

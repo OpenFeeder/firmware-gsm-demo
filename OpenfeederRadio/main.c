@@ -17,26 +17,27 @@ int main(void) {
     
     printf("Init ok\n");
     
-#if defined(UART_DEBUG)
-    printf("Module alpha trx Power on\n");
-#endif
-    radioAlphaTRX_Init();
-    radioAlphaTRX_ReceivedMode();
+//#if defined(UART_DEBUG)
+//    printf("Module alpha trx Power on\n");
+//#endif
+//    radioAlphaTRX_Init();
+//    radioAlphaTRX_ReceivedMode();
     
 #if defined(UART_DEBUG)
     printf("Module GSM Power on\n");
 #endif
-    int8_t ok = 0;
-    if (GMS3_ModulePower(true)) {
-        //        demo();
-        ok = 1;
-    } else {
-#if defined(UART_DEBUG)
-        printf("non conncter \n");
-#endif
-    }
+//    int8_t ok = 0;
+//    if (GMS3_ModulePower(true)) {
+//        //        demo();
+//        ok = 1;
+//    } else {
+//#if defined(UART_DEBUG)
+//        printf("non conncter \n");
+//#endif
+//    }
+    MASTER_AppInit();
     while (1) {
-        MASTER_Task();
+        MASTER_AppTask();
     }
     return -1;
 }

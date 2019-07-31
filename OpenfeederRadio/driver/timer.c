@@ -35,8 +35,7 @@
 int8_t TMR_CptTrickHorloge = 1000;
 volatile int16_t TMR_HorlogeTimeout = 0; 
 
-// il a besoin d'etre activer 
-volatile int16_t TMR_WaitRqstTimeout = 0; //on s'en sert pour le poulling 
+volatile int16_t TMR_WaitRqstTimeout = -1; //on s'en sert pour le poulling 
 
 //TODO : penser rendre ?a generique
 volatile int16_t TMR_MsgRecuTimeout = 0;  
@@ -51,8 +50,8 @@ volatile int16_t TMR_DelayMs = 0;
 /**-------------------------->> D E F I N I T I O N <<-------------------------*/
 
 int16_t TMR_GetHorlogeTimeout() { return TMR_HorlogeTimeout; } 
-void TMR_SetHorlogeTimeout(int16_t timeout_min) { 
-    TMR_HorlogeTimeout = timeout_min; 
+void TMR_SetHorlogeTimeout(int16_t timeout) { 
+    TMR_HorlogeTimeout = timeout; 
 } 
 
 
@@ -64,7 +63,6 @@ int16_t TMR_GetMsgRecuTimeout() {
     TMR_MsgRecuTimeout = 0;
     return temp; 
 } 
-
 void TMR_SetMsgRecuTimeout(int16_t timeout) { TMR_MsgRecuTimeout = timeout; }
 
 int16_t TMR_GetnIRQLowTimeout() { return TMR_nIRQLowTimeout; }
@@ -73,16 +71,12 @@ void TMR_SetnIRQLowTimeout(int16_t timeout) { TMR_nIRQLowTimeout = timeout; }
 void TMR_SetTimeout(int16_t timeout) { TMR_Timeout = timeout; }
 int16_t TMR_GetTimeout() { return TMR_Timeout; }
 
-void TMR_Delay(int16_t delayMs) {
+void TMR_Delay(uint16_t delayMs) {
     TMR_DelayMs = delayMs;
     while (TMR_DelayMs > 0) { }
 }
 
-void __attribute__ ((weak)) TMR_CallBackRTC() {
-    if (TMR_HorlogeTimeout) --TMR_HorlogeTimeout; // on ferra autrement 
-}
-
-void __attribute__ ((weak)) TMR_CallBackTMR( void ) {
+void TMR_CallBack( void ) {
     
     if (TMR_DelayMs > 0) --TMR_DelayMs;
     
@@ -93,9 +87,19 @@ void __attribute__ ((weak)) TMR_CallBackTMR( void ) {
 
     //dis si une reponse est recu ou pas 
     if (TMR_WaitRqstTimeout > 0) --TMR_WaitRqstTimeout;
-    
+    else if (TMR_WaitRqstTimeout == 0) {
+        TMR_WaitRqstTimeout = -1; // deactive timer 
+        MASTER_StoreBehavior(MASTER_STATE_TIMEOUT, PRIO_HIGH);
+    }
+
     //timer du buffer 
     if (TMR_MsgRecuTimeout > 0) --TMR_MsgRecuTimeout;
+}
+
+
+void TMR_RtccCallBack( void ) {
+    if (TMR_HorlogeTimeout > 0) --TMR_HorlogeTimeout;
+    else MASTER_StoreBehavior(MASTER_STATE_SEND_DATE, PRIO_HIGH); // prio eleve 
 }
 
 /*_____________________________________________________________________________*/

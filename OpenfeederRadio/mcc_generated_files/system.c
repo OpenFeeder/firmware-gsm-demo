@@ -46,20 +46,20 @@
 #include "clock.h"
 #include "system.h"
 #include "stdint.h"
-#include "uart2.h"
 #include "ext_int.h"
+#include "rtcc.h"
 #include "uart1.h"
 #include "spi1.h"
+#include "uart2.h"
 #include "interrupt_manager.h"
 #include "traps.h"
 #include "tmr1.h"
-#include "rtcc.h"
 
 void SYSTEM_Initialize(void)
 {
     PIN_MANAGER_Initialize();
-    INTERRUPT_Initialize();
     CLOCK_Initialize();
+    INTERRUPT_Initialize();
     UART2_Initialize();
     RTCC_Initialize();
     SPI1_Initialize();

@@ -42,12 +42,13 @@
 
 // This is a guard condition so that contents of this file are not included
 // more than once.  
-#ifndef XC_HEADER_TEMPLATE_H
-#define	XC_HEADER_TEMPLATE_H
+#ifndef TIMER_H
+#define	TIMER_H
 
 /**------------------------>> I N C L U D E <<---------------------------------*/
 #include <xc.h> // include processor files - each processor file is guarded.
 #include "Services.h"
+#include "master_api.h"
 
 /******************************************************************************/
 /******************************************************************************/
@@ -69,7 +70,7 @@ int16_t TMR_GetHorlogeTimeout();
  * determine combirne de minute il faut attendre avant de transmettre la date
  * @param timeout : le temps qu'il faut attendre avant de transmettre l'horloge 
  */
-void TMR_SetHorlogeTimeout(int16_t timeout_min);
+void TMR_SetHorlogeTimeout(int16_t timeout);
 
 /**
  * tant que cette fonction me retourne une valeure differente de 0 
@@ -93,7 +94,6 @@ void TMR_SetWaitRqstTimeout(int16_t timeout);
  * @return : le temps ecoule en (ms) depuis le dernier remplissage du buffer 
  */
 int16_t TMR_GetMsgRecuTimeout();
-
 /**
  * determine le temps max pour prendre en compte un msg de type horloge,
  * au dela le paquet n'est pas utilisable 
@@ -138,9 +138,12 @@ void TMR_Delay();
 /**
  * fonction principale de gestion des timer 
  */
-void __attribute__ ((weak)) TMR_CallBackTMR(void);
+void TMR_CallBack(void);
 
-void __attribute__ ((weak)) TMR_CallBackRTC(void);
+/**
+ * se base sur l'alarme du rtcc
+ */
+void TMR_RtccCallBack( void );
 
 
 /****************                                         *********************/
@@ -148,5 +151,5 @@ void __attribute__ ((weak)) TMR_CallBackRTC(void);
 /******************************************************************************/
 /******************************************************************************/
 
-#endif	/* XC_HEADER_TEMPLATE_H */
+#endif	/* TIMER_H */
 

@@ -128,7 +128,7 @@ void __attribute__ (( interrupt, no_auto_psv )) _CNInterrupt ( void )
     {
         // Clear the flag
         IFS1bits.CNIF = 0;
-        if (nIRQ_GetValue() == 0) {
+        if (nIRQ_GetValue() == 0) { // a l'etat bas 
             STATUS_READ_VAL RF_StatusRead;
             RF_StatusRead.Val = radioAlphaTRX_Command(STATUS_READ_CMD); //lecture du registre status 
             if (RF_StatusRead.bits.b15_RGIT_FFIT && !radioAlphaTRX_IsSendMode()) { // on verifie si la fifo est remplie 

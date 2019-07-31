@@ -180,7 +180,7 @@
  *         OK 
  */
 
-#define PIN_INPUT "AT+CPIN=\"1234\""     // saisir le code pin : remplacer 1234 par le votre 5983
+#define PIN_INPUT 1234     // saisir le code pin : remplacer 1234 par le votre 5983
 /*response :
  *         +CPIN: READY    authentification succcessful
  *         

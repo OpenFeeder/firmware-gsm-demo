@@ -42,107 +42,140 @@
 
 // This is a guard condition so that contents of this file are not included
 // more than once.  
-#ifndef XC_HEADER_TEMPLATE_H
-#define	XC_HEADER_TEMPLATE_H
+#ifndef MASTER_API_H
+#define	MASTER_API_H
 
 /**------------------------>> I N C L U D E <<---------------------------------*/
 #include <xc.h> // include processor files - each processor file is guarded.  
 #include "Services.h"
-
+#include "../alpha_trx_driver/radio_alpha_trx.h"
 /******************************************************************************/
 /******************************************************************************/
 /******************     MASTER APPLICATION CONTROL         ********************/
 /***************************                ***********************************/
+
 /*****************                                 ****************************/
 
-/**------------------------>> E N U M & S T R U C T- S T A T E  <<-------------*/
-typedef enum {
-    MSTR_STATE_GENERAL_BEFOR_DAYTIME,
-    MSTR_STATE_GENERAL_DAYTIME,
-    MSTR_STATE_GENERAL_AFTER_DAYTIME,
-    MSTR_STATE_GENERAL_END,
-    MSTR_STATE_GENERAL_ERROR
-} MSTR_STATE_GENERAL;
+
+//______________________________________________________________________________
+//______________________________DEBUG___________________________________________
+void modif(int val);
+//______________________________________________________________________________
+
+typedef enum { // if you want to add a new level, you must be increase MAX_LEVEL_PRIO
+    PRIO_HIGH, //00
+    PRIO_MEDIUM, //01
+    PRIO_LOW //02
+} PRIORITY;
 
 typedef enum {
-    MSTR_STATE_GET_LOG_WAIT_EVENT, // on attend une reponse de notre demande 
-    MSTR_STATE_GET_LOG_MSG_RECEIVE, // on demande un slave selectionner de transmettre des donneesr 
-    MSTR_STATE_GET_LOG_SEND_FROM_GSM, // on transmet les donne le buffer au srver
-    MSTR_STATE_GET_LOG_SELECT_SLAVE, // on selectionne un slave pour communiquer avec 
-    MSTR_STATE_GET_LOG_ERROR // une erreur est survenue/ timeout 
-} MSTR_STATE_GET_LOG;
+    READ, //00
+    WRITE, //01
+    OVFF //10
+} PTR;
+
+typedef enum { // you can add others states
+    MASTER_STATE_INIT,
+    MASTER_STATE_TIMEOUT,
+    MASTER_STATE_SEND_DATE,
+    MASTER_STATE_SEND_FROME_GSM,
+    MASTER_STATE_SELECTE_SLAVE,
+    MASTER_STATE_MSG_RF_RECEIVE,
+    MASTER_STATE_MSG_GSM_RECEIVE,
+    MASTER_STATE_SEND_REQUEST_INFOS,
+    MASTER_STATE_IDLE,
+    MASTER_STATE_END,
+    MASTER_STATE_ERROR,
+    MASTER_STATE_NONE // no comportementent
+} MASTER_STATES;
 
 typedef enum {
-    SLAVE_STATE_COLLECT_END_BLOCK,// si on a deja collecte un block 
-    SLAVE_STATE_SELECTED,   // en cours d'interrogation 
-    SLAVE_STATE_DESELCTED,  // n'est pas encours selectionne
-    SLAVE_STATE_COLLECT_END,// si on a deja collecte ses donnees 
-    SLAVE_STATE_SYNC,       // si on est en phase de syncronisation 
-    SLAVE_STATE_COLLECT,    // si on est en phase de collecte
-    SLAVE_STATE_ERROR       // si le slave est en error 
-}SLAVE_STATE;
+    SLAVE_SYNC, // phase de syncronisation 
+    SLAVE_ERROR, // en etat d'erreur 
+    SLAVE_DAYTIME, // on est en journee 
+    SLAVE_CONFIG, // etat de configiration 
+    SLAVE_COLLECT, // Slave en etat de collecte de donnee
+    SLAVE_SLECTED, // Slave selectionner 
+    SLAVE_COLLECT_END, // fin de la collecte
+    SLAVE_COLLECT_END_BLOCK, // fin de recuperation d'un bloc
+    SLAVE_NONE // etat neutre 
+} SLAVE_STATES;
 
-// *****************************************************************************
-// *****************************************************************************
-// Section: extern declarations
-// *****************************************************************************
-// *****************************************************************************
-extern MSTR_STATE_GENERAL mstrState;
-extern MSTR_STATE_GET_LOG mstrStateGetLog;
-//extern volatile int8_t msgReceiveRF = 0;  // informe de l'arriver d'un msg rf 
-//extern volatile int8_t msgReceiveGSM = 0; // informe de l'arriver d'un msg GSM
+/**-------------------------->> D E B U G <<----------------------------------*/
+void printPointeur(PRIORITY prio);
+
+/**-------------------------->> P R O T O T Y P E S <<------------------------*/
+
+/**-------------------------->> S T R U C T -O F- S L A V E - S T A T E <<----*/
+typedef struct {
+    uint8_t idSlave; // l'identifiant du slave 
+    uint8_t tryToConnect; // nb d'essaie de connexion 
+    uint8_t nbTimeout; // le nombre consecutif de timeout lorsqu'on attend une reponse de ce slave
+    uint8_t nbError; // nombre d'erreurs, survenue pour ce slave
+    uint8_t index; // le numero de paquet attendu, lors de la collecte des donnees 
+    uint8_t nbBloc; // nombre de bloc re?u 
+    SLAVE_STATES state; // etat du slave 
+} SlaveState;
 
 
-void MASTER_Init();
-
-/**
- * envoie la date a tout les slaves present 
- * @return 
- *      0 : si non envoye
- *      1 : si oui 
- */
-int8_t MASTER_SendDateRF();
-
-/**
+/**SIZE_DATA
+ * tramet un ensemble de octets
  * 
+ * @param dest : le destinataire 0 < dest < 16 
+ * @param typeMsg : ex : DATA, ACK, HORLOGE, ... etc
+ *                  rensegner le bloc de donnee attendu 
+ * @param idMsg : l'identifiant du msg ==> ack, peut etre utiliser pour
+ * @param nbR : nombre de paquet que je souhaite transmettre 
+ * @param data : la donner a transmettre ==> taille < 20
+ * @param sizeData : la taille de la donnee a transmettre 
+ * @return : le nombre d'octe transmis
  */
-void MASTER_HandlerMsgRF();
-
-/**
- * 
- * @return :
- *         0 : pas de slave selctionne
- *         1 : si un slave est selectionne
- */
-int8_t MASTER_SelectSlave();
-
-/**
- * des qu'un msg est recu on declence un timer qui corespond au temps que master
- * va ecouter avant de decider qu'il y a timeout 
- *  
- * @return :
- *      0 : pas de msg ou n'est plus d'actalite 
- *      1 : un msg est presnt et il est toujours d'actualité 
- */
-void MASTER_SetMsgReceiveRF(uint8_t set);
-
-
-int8_t Master_SendMsgRF(
-        uint8_t idSlave,
+int8_t MASTER_SendMsgRF(uint8_t dest,
         uint8_t typeMsg,
-        uint8_t * data,
         uint8_t idMsg,
-        uint8_t nbRemaining);
+        uint8_t nbR,
+        uint8_t * data,
+        uint8_t sizeData);
+
 
 /**
  * 
+ * @return : le nombre d'octe transmis
  */
-void MASTER_StateMachineOfDaytime();
+uint8_t MASTER_SendDateRF();
+
+/**
+ * enregistre le comportement dans le tableau des comportements,
+ * en fonction sa priorite
+ *  
+ * @param behavior : le comportement a traiter 
+ * @param prio : la priorite du comportement a traiter 
+ * @return :
+ *          true  : le comportement est enregistre avec succes 
+ *          false : on a ecrase un comportement  
+ */
+bool MASTER_StoreBehavior(MASTER_STATES behavior, PRIORITY prio);
+
+/**
+ * 
+ * @return : le prochain comportement a adopter 
+ */
+MASTER_STATES MASTER_GetBehavior();
+
+/**
+ * machine a etat general ==> noyau du systeme master 
+ */
+void MASTER_AppTask();
+
+/**
+ * initialisation des la machine a etat 
+ */
+void MASTER_AppInit();
 
 /****************                                         *********************/
 /*************************                     ********************************/
 /******************************************************************************/
 /******************************************************************************/
 
-#endif	/* XC_HEADER_TEMPLATE_H */
+#endif	/* MASTER_API */
 

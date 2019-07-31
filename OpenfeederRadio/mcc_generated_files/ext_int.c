@@ -51,7 +51,7 @@
 #include "ext_int.h"
 #include "../driver/master_api.h"
 //***User Area Begin->code: Add External Interrupt handler specific headers 
-
+int8_t j = 0;
 //***User Area End->code: Add External Interrupt handler specific headers
 
 /**
@@ -63,10 +63,8 @@
 void __attribute__ ( ( interrupt, no_auto_psv ) ) _INT1Interrupt(void)
 {
     //***User Area Begin->code: INT1 - External Interrupt 1***
-    if (mstrState == MSTR_STATE_GENERAL_DAYTIME)
-        mstrState = MSTR_STATE_GENERAL_AFTER_DAYTIME;
-    else
-        mstrState = MSTR_STATE_GENERAL_DAYTIME;
+    j = (j+1)%3;
+    modif(j);
     //***User Area End->code: INT1 - External Interrupt 1***
     EX_INT1_InterruptFlagClear();
 }
@@ -77,7 +75,7 @@ void __attribute__ ( ( interrupt, no_auto_psv ) ) _INT2Interrupt(void)
 {
     //***User Area Begin->code: INT2 - External Interrupt 2***
     LED_GREEN_Toggle();
-    mstrState = MSTR_STATE_GENERAL_AFTER_DAYTIME;
+    printf("send %d \n", MASTER_SendMsgRF(1,INFOS, 1, 1, "INFO", 4));
     //***User Area End->code: INT2 - External Interrupt 2***
     EX_INT2_InterruptFlagClear();
 }

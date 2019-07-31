@@ -53,34 +53,39 @@
 #include "../mcc_generated_files/pin_manager.h"
 #include "timer.h"
 #include "../temps/temps.h"
+
 /**------------------------>> D E F I N I T I O N S - G L O B A L <<-----------*/
 
 /*******************************************************************************/
 //______________________________D E B U G______________________________________*/
 #define UART_DEBUG (1)
-#define _DEBUG (2)
 /*_____________________________________________________________________________*/
 
 /*******************************************************************************/
 //_________________________Radio Alpha TRX Infos_______________________________*/
-#define TIME_OUT_WAIT_RQST         3000
-#define FRAME_LENGTH                 50 // Longueur total d'une trame en octet
+#define TIME_OUT_WAIT_RQST        10000
+#define TIME_OUT_COLLECT_LOG       1000
+#define FRAME_LENGTH                 40 // Longueur total d'une trame en octet
 #define ERROR_LENGTH                  8
-#define SIZE_DATA                    36
-#define TIME_OUT_nIRQ                10 // 2 ms
+#define SIZE_DATA                    34
+#define TIME_OUT_nIRQ                10 // en ms
 #define LAPS                         50 // on attend X ms avant de transmettre un nouveau msg 
-#define SEND_HORLOG_TIMEOUT       27000 // 1 min
+#define SEND_HORLOG_TIMEOUT           1 // en +1 min
 #define AFTER_SEND_HORLOGE           20 // 20 ms
-#define TIME_OUT_GET_FRAME          500 // temps max, pour que le msg recu soit encore exploitable
-                                         // au dela le mster ne m'ecoute pas donc cela ne sert ? rien 
+#define TIME_OUT_GET_FRAME         1500 // temps max, pour que le msg recu soit encore exploitable
+// au dela le mster ne m'ecoute pas donc cela ne sert ? rien 
 #define NB_ERR_BUF                   10 // nombre d'errerur possible 
 #define NB_DATA_BUF                  20 // pour l'instat on dit qye c'est 20 ==>
 #define MAX_W                        10 // nombre MAX de paquet a transmettre avant d'attendre un ack 
-#define NB_SLAVE                      1
+#define NB_SLAVE                      2
 #define MAX_TIMEOUT                  20 // nombre de timeout avant de decider que la liaison avec le slave est couper 
 #define MAX_ERROR                    10 // nombre du quel on considere que la communication est interompue entre le slave est le master
-#define MAX_TRY_TO_SYNC              5 // le nombre d'essaie avant de decider qu'on est pas connecte
-
+#define MAX_TRY_TO_SYNC               5 // le nombre d'essaie avant de decider qu'on est pas connecte
+#define MAX_LEVEL_PRIO                3 // 3 niveau de priorite, si l'on veut en ajouter il suiffit de modifier 
+#define NB_BEHAVIOR_PER_PRIO          3
+#define TIME_LIMIT_OF_CONFIG          6 // avant 6h
+#define TIME_LIMIT_TO_GET_INFOS      19 // avant 19h
+#define TIME_LIMIT_TO_COLLECT_LOG    00 // avant 00h et apres 19h
 
 //_______________________________TYPE__PAQUET________________________________________*/
 //max 16 type de paquet possible coder sur 4bits
@@ -99,12 +104,11 @@
 #define SLAVE2_ID 2
 #define SLAVE3_ID 3
 #define SLAVE4_ID 4
-#define ID_BROADCAST 15
+#define BROADCAST_ID 15 // la plus grande valeur possible 
 
 #define MASTER_ID 14
 #define STATION 1
 /*_____________________________________________________________________________*/
-
 
 
 /**------------------------>> M A C R O S <<-----------------------------------*/
@@ -124,74 +128,57 @@
 
 /**------------------------>> S T R U C T U R E - P A Q U E T <<---------------*/
 /* Structure d'une trame d'un message RF:
- *      +--------+--------+------------+----------+--------------+----------+
- *      |ID_DEST | ID_SRC | ID_Message | Typr_MSG | Data_Message | Checksum |
- *      +--------+--------+------------+----------+--------------+----------+
- * BYTE =   2    +    2   +     1      +    1     +     MAX = 40 +    1     
+ *      +------+------+---------+------+-------+-------+------+--------+
+ *      | DEST | SRC  | TypeMsg | nbRI | idMsg | size  |  crc |  Data  |
+ *      +------+------+---------+------+-------+-------+------+--------+
+ *        4bits+4bits +    4bits+4bits + 8bits + 8bist + 8bits  80bits = 25 octets
  * 
- * TAILLE EN TETE = 2+2+1+1+1 = 7
+ * TAILLE EN TETE = 1+1+1+1 = 4 oct
  *
  * ID_DEST / ID_SRC :
- *  . valeur min: 0x0001 (Hexa)
- *  . valeur max: 0xFFFF (Hexa)
- * ID_Message / Type_MSG / Checksum:
- *  . ex : msg num 1, num 2 .. ect 
- * Data_Message:
- *  . champ contenant les donnees a transmettre / ou recu 
- *    ex: la data : 200319172620 ==> 20/03/19 | 17h:26m:20s
- * Checksum:
- *  . champ de controle de la coherence : un XOR avec ID_XX^ID_MSG^Type_MSG^Data_Message
- *    --> detection d'erreur par checksum (somme controle) 
+ *  . valeur min: 0b0001 (binary)
+ *  . valeur max: 0b1111 (binary)
  *
  */
-//sauvdarde des info
-//typedef struct sFrame {
-//    uint16_t ID_Dest;
-//    uint16_t ID_Src;
-//    uint8_t ID_Msg;
-//    int8_t Type_Msg;
-//    uint8_t nbRemaining;
-//    uint8_t data[SIZE_DATA];
-//}Frame;
+
 /*_____________________________________________________________________________*/
 
-
-/**------------------------>> T Y P E--M S G <<--------------------------------*/
-
 typedef union {
-    uint8_t code;
+    uint8_t paquet[FRAME_LENGTH];
 
     struct {
-        unsigned typePaquet : 4;
-        unsigned nbRemaining : 4;
-    } ret; //trouver un autre nom
-
-} RF_Type_And_nbRemaining;
-
-typedef union {
-    uint8_t code;
+        uint8_t head[5];
+        uint8_t Infos[SIZE_DATA];
+    } Section;
 
     struct {
-        unsigned src : 4;
-        unsigned dest : 4;
-    } id;
-
-} idOF;
-
-typedef struct {
-    idOF id;
-    RF_Type_And_nbRemaining rfTandNBR;
-    uint8_t idMsg; // nume seq 
-    uint8_t sumCtrl;
-    uint8_t data[SIZE_DATA];
+        unsigned dest : 4;    //-----
+        unsigned src : 4;     //    |
+        unsigned typeMsg : 4; //    |  
+        unsigned nbR : 4;     //     }==> l'en tete  
+        uint8_t idMsg;        //    |
+        uint8_t size;         //    | // taille de la data reelement envoye 
+        uint8_t crc;          //-----
+        uint8_t data[SIZE_DATA];
+    } Champ;
 } Frame;
-/*____________________________________________________________________________*/
 
-/**------------------------>> I D-- O F <<-------------------------------------*/
-uint16_t  srv_getID_Slave();
-uint16_t  srv_getBroadcast();
-uint16_t  srv_getID_Master();
-/*_____________________________________________________________________________*/
+/**------------------------>> D A T E  F O R M A T <<-------------------------*/
+typedef union {
+    uint8_t date [4]; // la date est compresse en 4 octe a la place de 12
+    uint32_t dateVal;
+
+    struct {
+        unsigned yy : 6;
+        unsigned mom : 4;
+        unsigned day : 5;
+        unsigned h : 5;
+        unsigned min : 6;
+        unsigned sec : 6;
+    } Format;
+} Date;
+
+/*____________________________________________________________________________*/
 
 
 /******************************************************************************/
@@ -245,4 +232,3 @@ int8_t srv_DecodePacketRF(uint8_t* buffer, Frame *frameReceive, uint8_t size);
 /******************************************************************************/
 /******************************************************************************/
 #endif	/* SERVICE_H */
-
