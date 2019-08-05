@@ -95,6 +95,7 @@ void APP_Tasks(void) {
                     printf("RF Module enable.\n");
                     radioAlphaTRX_Init();
                     radioAlphaTRX_ReceivedMode(); // receive mode actived
+                    radioAlphaTRX_GetLogFromDisk();
                 } else {
                     printf("RF Module disable.\n");
                     printf("Send 'T' to change power state of radio module.\n");

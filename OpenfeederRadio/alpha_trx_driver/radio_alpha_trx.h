@@ -114,6 +114,7 @@
 #include "../mcc_generated_files/pin_manager.h"
 #include "../driver/Services.h"
 #include "../driver/master_api.h"
+#include "../driver/timer.h"
 
 /******************************************************************************/
 /******************************************************************************/

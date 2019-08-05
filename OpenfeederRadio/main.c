@@ -9,35 +9,31 @@
 #include "test/test.h"
 #include "driver/master_api.h"
 #include "driver/Services.h"
-
+#include "appGSM/appGSM3_SIM800.h"
 
 int main(void) {
     // initialize the device
     SYSTEM_Initialize();
-    
+
     printf("Init ok\n");
-    
-//#if defined(UART_DEBUG)
-//    printf("Module alpha trx Power on\n");
-//#endif
-//    radioAlphaTRX_Init();
-//    radioAlphaTRX_ReceivedMode();
-    
+
 #if defined(UART_DEBUG)
     printf("Module GSM Power on\n");
 #endif
-//    int8_t ok = 0;
-//    if (GMS3_ModulePower(true)) {
-//        //        demo();
-//        ok = 1;
-//    } else {
-//#if defined(UART_DEBUG)
-//        printf("non conncter \n");
-//#endif
-//    }
+    bool ok = false;
+    ok = GMS3_ModulePower(true);
+
     MASTER_AppInit();
     while (1) {
-        MASTER_AppTask();
+        if (ok) {
+//            demo();
+            MASTER_AppTask();
+        } else {
+#if defined(UART_DEBUG)
+            printf("non conncter \n");
+#endif
+            ok = GMS3_ModulePower(true);
+        }
     }
     return -1;
 }

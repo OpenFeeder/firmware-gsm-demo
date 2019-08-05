@@ -149,7 +149,10 @@ void GSM3_TransmitCommand(uint8_t * inToSend) {
  * Note:            None
  ********************************************************************/
 void GSM3_TransmitString(uint8_t * string, uint8_t delimiter) {
-    GSM3_UART_WriteBuffer(string, strlen(string));
+    int8_t size = strlen(string);
+    uint8_t buf[size + 2];
+    sprintf(buf, "%s%c", string, delimiter);
+    GSM3_UART_WriteBuffer(string, size + 1);
     GSM3_Write(delimiter);
 }
 
@@ -189,17 +192,21 @@ bool GMS3_ModulePower(bool powerState) {
             if (tryToConnect++ > GSM_TRY_TO_CON_MAX) {
                 return false;
             }
-        } while(!GSM3_findStringInResponse("OK", read));
+        } while (!GSM3_findStringInResponse("OK", read));
         //code pin 
-        if(!GSM3_findStringInResponse("READY", app_GetSimState())) {
-            if(!app_SetPinCode(PIN_INPUT)) {
+        read = app_GetSimState();
+        if (!GSM3_findStringInResponse("READY", read)) {
+            if (app_SetPinCode(PIN_INPUT) == false) {
 #if defined(_DEBUG)
                 printf("No PIN in module\n");
 #endif
                 return false;
             }
-            TMR_Delay(6000);
+            TMR_Delay(6000); // 12 seconde 
         }
+#if defined(_DEBUG)
+        printf("PIN OK ==> REDY \n");
+#endif
     }
     return true;
 }
@@ -230,7 +237,9 @@ bool GSM3_findStringInResponse(uint8_t* strToSearch, uint8_t * response) {
     while (response[i] != '\0') {
         if (strToSearch[j] == response[i]) {
             j++;
-            if (j == siezeStr-1) return true;
+            if (j == siezeStr) {
+                return true;
+            }
         } else
             j = 0;
         i++;

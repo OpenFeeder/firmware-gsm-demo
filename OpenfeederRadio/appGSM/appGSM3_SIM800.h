@@ -70,6 +70,12 @@
 
 /**
  * 
+ * @return 
+ */
+bool app_Echo();
+
+/**
+ * 
  */
 void app_DisplayProductIdInfos();
 

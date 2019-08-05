@@ -109,7 +109,7 @@ void APP_SerialDebugTasks(void) {
             case 'S':
                 //case 'S':
 #if defined(UART_DEBUG)
-                printf("envoie  %d\n", radioAlphaTRX_SlaveSendNothing());
+                printf("envoie  %d\n", radioAlphaTRX_SlaveSendMsgRF(NOTHING, "NOTHING", 1, 1, 7));
 #endif
                 break;
                 /* -------------------------------------------------------------- */

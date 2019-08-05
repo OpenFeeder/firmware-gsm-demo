@@ -3189,12 +3189,12 @@ void radioAlphaTRX_Init(void) {
     //    RF_StatusRead.Val = radioAlphaTRX_Command(STATUS_READ_CMD); // intitial SPI transfer added to avoid power-up problem
     /**-------------> Frequency Setting Command @ 433 MHz <--------------------*/
 
-//    do {
-        RF_StatusRead.Val = radioAlphaTRX_Command(STATUS_READ_CMD); // intitial SPI transfer added to avoid power-up problem
+    //    do {
+    RF_StatusRead.Val = radioAlphaTRX_Command(STATUS_READ_CMD); // intitial SPI transfer added to avoid power-up problem
 #if defined(UART_DEBUG)
-        printf("A other Wait until RFM12B is out of power-up reset, status: 0x%04X\r\n", RF_StatusRead.Val);
+    printf("A other Wait until RFM12B is out of power-up reset, status: 0x%04X\r\n", RF_StatusRead.Val);
 #endif
-//    } while (RF_StatusRead.bits.b14_POR);
+    //    } while (RF_StatusRead.bits.b14_POR);
 
 
     /**-------------> Power Management Command(2) <---------------------------*/
@@ -3359,23 +3359,38 @@ void radioAlphaTRX_Init(void) {
 
 // Initialiser la detection d'une nouvelle donnee
 // le buffer est vide si non erreur on initialise tou les registre et on recomence 
+
 bool radioAlphaTRX_FlushFIFO() {
     bool stop = false;
     int i = 10;
     do { //attention risque de boocle infii 
         RF_StatusRead.Val = radioAlphaTRX_Command(STATUS_READ_CMD);
-        if (!RF_StatusRead.bits.b9_FFEM && RF_StatusRead.bits.b6_DQD)
+        if (RF_StatusRead.bits.b9_FFEM == 0 && RF_StatusRead.bits.b6_DQD == 1)
             radioAlphaTRX_Command(RX_FIFO_READ_CMD_POR); // vide la fifo
-        else
+        else //TOASK : penser a faire une autre fonction de test ici 
             stop = true;
         i--; // eviter la boucle infinit 
     } while (!stop && i > 0); // tant que la fifo nest pas vide 
     return !(i == 0); // 
 }
+
 void radioAlphaTRX_ReceivedMode(void) {
     //close TX mode 
     if (!radioAlphaTRX_FlushFIFO()) radioAlphaTRX_Init();
-    
+    //
+    RF_StatusRead.Val = radioAlphaTRX_Command(STATUS_READ_CMD);
+    if (RF_StatusRead.bits.b4_ATGL == 1 ||
+        RF_StatusRead.REGbits.FreqOffset > 0) {
+#if defined(UART_DEBUG)
+        printf("ATGL %d\n", RF_StatusRead.bits.b4_ATGL);
+#endif
+        nRES_SetLow();
+        TMR_Delay(50);
+        radioAlphaTRX_Init();
+        TMR_Delay(50);
+    }
+
+
     RF_PowerManagement.Val = PWR_MGMT_CMD_POR;
     RF_PowerManagement.bits.b0_dc = 1;
     radioAlphaTRX_Command(RF_PowerManagement.Val); //0x8209
@@ -3569,7 +3584,8 @@ Frame radioAlphaTRX_GetFrame() {
 
 bool radioAlphaTRX_receive() {
     WORD_VAL_T receiveData;
-    uint8_t i = 0; uint8_t sumCtrl = 0;
+    uint8_t i = 0;
+    uint8_t sumCtrl = 0;
     for (i = 0; i < FRAME_LENGTH; i++) {
         if (0 == radioAlphaTRX_WaitLownIRQ(TIME_OUT_nIRQ)) {
             return false;
@@ -3593,11 +3609,6 @@ void radioAlphaTRX_CaptureFrame() {
         // ? ce niveau le msg est corectemnt re?u 
         MASTER_StoreBehavior(MASTER_STATE_MSG_RF_RECEIVE, PRIO_HIGH); // c'est une information tr?s importante 
     } 
-//    else {
-//#if defined(UART_DEBUG)
-//        LED_RED_Toggle();
-//#endif
-//    }
     //on se remet en ecoute 
     radioAlphaTRX_ReceivedMode();
 }

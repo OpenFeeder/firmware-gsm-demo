@@ -60,6 +60,7 @@
 //______________________________________________________________________________
 //______________________________DEBUG___________________________________________
 void modif(int val);
+void display_STATUS_register_from_RF_module(void);
 //______________________________________________________________________________
 
 typedef enum { // if you want to add a new level, you must be increase MAX_LEVEL_PRIO

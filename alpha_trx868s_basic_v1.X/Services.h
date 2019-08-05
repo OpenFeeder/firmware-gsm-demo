@@ -67,7 +67,7 @@
 #define ERROR_LENGTH                  8
 #define SIZE_DATA                    34
 #define TIME_OUT_nIRQ                 2 // 2ms
-#define LAPS                         50 // on attend X ms avant de transmettre un nouveau msg 
+#define LAPS                        100 // on attend X ms avant de transmettre un nouveau msg 
 #define TIME_OUT_GET_FRAME          700 // temps max, pour que le msg recu soit encore exploitable
 // au dela le mster ne m'ecoute pas donc cela ne sert � rien 
 #define TIME_OUT_WAIT_ACK           500

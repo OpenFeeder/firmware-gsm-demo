@@ -74,8 +74,7 @@ void __attribute__ ( ( interrupt, no_auto_psv ) ) _INT1Interrupt(void)
 void __attribute__ ( ( interrupt, no_auto_psv ) ) _INT2Interrupt(void)
 {
     //***User Area Begin->code: INT2 - External Interrupt 2***
-    LED_GREEN_Toggle();
-    printf("send %d \n", MASTER_SendMsgRF(1,INFOS, 1, 1, "INFO", 4));
+    display_STATUS_register_from_RF_module();
     //***User Area End->code: INT2 - External Interrupt 2***
     EX_INT2_InterruptFlagClear();
 }
