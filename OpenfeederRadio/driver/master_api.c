@@ -475,6 +475,12 @@ void MASTER_AppTask() { // machiine a etat general
 #endif
                             b = app_SendSMS("une erreur type 3");
                             break;
+                        case 4:
+#if defined(UART_DEBUG)
+                            printf("transmission de 4\n");
+#endif
+                            b = app_SendSMS("une erreur type 4");
+                            break;
                         default:
                             break;
                     }

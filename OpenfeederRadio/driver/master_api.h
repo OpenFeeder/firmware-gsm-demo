@@ -66,7 +66,7 @@ void display_STATUS_register_from_RF_module(void);
 typedef enum { // if you want to add a new level, you must be increase MAX_LEVEL_PRIO
     PRIO_HIGH, //00
     PRIO_MEDIUM, //01
-    PRIO_LOW //02
+    PRIO_LOW //10
 } PRIORITY;
 
 typedef enum {

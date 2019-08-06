@@ -73,7 +73,7 @@ void radioAlphaTRX_GetLogFromDisk();
 
 /**
  * envoie d'un msg en liaison radio. Attention !! l'envoie du msg est bloquant 
- * mais pour un certain nombre de milliesecondes (2ms par caractère au pire dans notre cas)  
+ * mais pour un certain nombre de milliesecondes (2ms par caractï¿½re au pire dans notre cas)  
  * (vous remarquez qu'on ne precise pas a qui car on ne peut que discuter avec le master)
  * 
  * @param type_msg : (une erreur , une donnee, pour l'instant il n'y a que ces types possible)
@@ -87,7 +87,7 @@ int8_t radioAlphaTRX_SlaveSendMsgRF(uint8_t typeMsg, uint8_t * data, uint8_t idM
 
 
 /**
- * ajoute l'erreur dans le buffer des erreurs et met à jour les pointeurs des erreur 
+ * ajoute l'erreur dans le buffer des erreurs et met ï¿½ jour les pointeurs des erreur 
  * @param num_error : identifiant de l'erreur 
  */
 void radioAlphaTRX_SlaveSaveError(int8_t numError);
@@ -111,7 +111,7 @@ void radioAlphaTRX_SlaveUpdatePtrErrBuf();
 
 /**
  * lorsque l'on transmet une erreur, le num paquet devient le numero de l'erreur 
- * @param err_to_send : l'erreur à transmettre 
+ * @param err_to_send : l'erreur ï¿½ transmettre 
  */
 int8_t radioAlphaTRX_SlaveSendErr(int8_t errToSend);
 
