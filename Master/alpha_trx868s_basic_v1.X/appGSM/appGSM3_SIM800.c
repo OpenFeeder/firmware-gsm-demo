@@ -375,14 +375,17 @@ bool app_SetSmsFormat(bool mode) {
 bool app_SendSMS(uint8_t * smsToSend) {
     GSM3_ReadyReceiveBuffer();
     GSM3_TransmitCommand(SMS_SEND_NUM);
-    TMR_Delay(100);
+    TMR_Delay(1000);
     char * response = GSM3_GetResponse();
     if (!GSM3_findStringInResponse(">", response)) {
         return false;
     }
     GSM3_ReadyReceiveBuffer();
     GSM3_TransmitString(smsToSend, TERMINATION_CHAR_ADD);
-    TMR_Delay(100);
+    TMR_Delay(1000);
+#if defined(_DEBUG)
+    printf("SEND ok\n");
+#endif
     // un test doit se faire ici pour etre sur que le sms est transmis
     return true; //for the moment we do that 
 }

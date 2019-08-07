@@ -304,6 +304,9 @@ void MASTER_AppTask() { // machiine a etat general
                     noPrint = 1;
                 }
             }
+            if (TMR_GetWaitRqstTimeout() == -1) {
+                TMR_SetWaitRqstTimeout(TIME_OUT_WAIT_RQST);
+            }
             APP_SerialDebugTasks();
 #endif     
             break;
@@ -498,6 +501,7 @@ void MASTER_AppTask() { // machiine a etat general
 
                             sprintf(bufErrorMSG, "OF %d du site %d PORTE OUVERTE",
                                     GET_PUBLIC_ID_SLAVE(slaveSelected), STATION);
+                            b = true;
                             break;
                         default:
 #if defined(UART_DEBUG)
@@ -506,12 +510,18 @@ void MASTER_AppTask() { // machiine a etat general
 #endif
                             break;
                     }
-                    if (b && app_SendSMS(bufErrorMSG)) { // aquitter 
-                        MASTER_SendMsgRF(ensSlave[slaveSelected].idSlave,
+                    if (b) { // aquitter 
+                        if (app_SendSMS(bufErrorMSG)) {
+                            MASTER_SendMsgRF(ensSlave[slaveSelected].idSlave,
                                          ACK, receive.Champ.idMsg, 1, "ACK", 3);
+                        }else {
+#if defined(UART_DEBUG)
+                            printf("ERROR non transmisi\n");
+#endif
+                        }
                     } else {
 #if defined(UART_DEBUG)
-                        printf("ERROR non transmise \n");
+                        printf("ERROR non reconuue \n");
 #endif
                     }
                     TMR_SetWaitRqstTimeout(0); // fin timeout
@@ -724,6 +734,8 @@ void MASTER_AppInit() {
         ensSlave[i].nbTimeout = MAX_TIMEOUT;
         ensSlave[i].tryToConnect = MAX_TRY_TO_SYNC;
     }
+    ensSlave[0].idSlave = 1;
+    ensSlave[1].idSlave = 2;
 
     for (i = 0; i < NB_DATA_BUF; i++) {
         memset(BUFF_COLLECT[i], 0, SIZE_DATA);

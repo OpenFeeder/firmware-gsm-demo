@@ -27,14 +27,14 @@
 #define SIZE_DATA                    20
 #define TIME_OUT_nIRQ                10 // en ms
 #define LAPS                         50 // on attend X ms avant de transmettre un nouveau msg 
-#define SEND_HORLOG_TIMEOUT           1 // en +1 min
+#define SEND_HORLOG_TIMEOUT           4 // en +1 min
 #define AFTER_SEND_HORLOGE           20 // 20 ms
 #define TIME_OUT_GET_FRAME         1500 // temps max, pour que le msg recu soit encore exploitable
 // au dela le mster ne m'ecoute pas donc cela ne sert ? rien 
 #define NB_ERR_BUF                   10 // nombre d'errerur possible 
 #define NB_DATA_BUF                  20 // pour l'instat on dit qye c'est 20 ==>
 #define MAX_W                        10 // nombre MAX de paquet a transmettre avant d'attendre un ack 
-#define NB_SLAVE                      2
+#define NB_SLAVE                      3
 #define MAX_TIMEOUT                  20 // nombre de timeout avant de decider que la liaison avec le slave est couper 
 #define MAX_ERROR                    10 // nombre du quel on considere que la communication est interompue entre le slave est le master
 #define MAX_TRY_TO_SYNC               5 // le nombre d'essaie avant de decider qu'on est pas connecte
@@ -57,10 +57,10 @@
 
 //_______________________________IF__OF________________________________________*/
 // id public 
-#define SLAVE_ID_PUB1 33
-#define SLAVE_ID_PUB2 34
-#define SLAVE_ID_PUB3 35
-#define SLAVE_ID_PUB4 36
+#define SLAVE_ID_PUB1 18
+#define SLAVE_ID_PUB2 36
+#define SLAVE_ID_PUB3 39
+#define SLAVE_ID_PUB4 37
 //------
 #define SLAVE_ID_PUB5 36
 #define SLAVE_ID_PUB6 35

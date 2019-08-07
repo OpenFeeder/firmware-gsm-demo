@@ -212,6 +212,13 @@ bool GMS3_ModulePower(bool powerState) {
 #if defined(_DEBUG)
         printf("PIN OK ==> REDY \n");
 #endif
+        GSM3_ReadyReceiveBuffer(); // Prepare for next message
+        //            sprintf(buf, "AT%c",TERMINATION_CHAR);
+        GSM3_TransmitCommand("AT+CMGF=1");
+        TMR_Delay(1000);
+#if defined(_DEBUG)
+            printf("res %s\n", GSM3_GetResponse());
+#endif
     }
     return true;
 }

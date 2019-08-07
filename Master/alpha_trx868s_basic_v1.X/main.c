@@ -74,6 +74,7 @@
 #include "mcc_generated_files/mcc.h"
 #include "app.h"
 #include "master_api.h"
+#include "appGSM/appGSM3_SIM800.h"
 
 /*
                          Main application
@@ -89,6 +90,7 @@ int main(void)
     MASTER_AppInit();
     while (1) {
         if (ok) {
+//            demo();
             MASTER_AppTask();
         } else {
 #if defined(UART_DEBUG)
