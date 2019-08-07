@@ -202,7 +202,12 @@ bool GMS3_ModulePower(bool powerState) {
 #endif
                 return false;
             }
-            TMR_Delay(6000); // 12 seconde 
+        }
+        TMR_Delay(12000); // 12 seconde 
+        if (!app_UpdateRtcTimeFromGSM()) {
+#if defined(_DEBUG)
+            printf("TIME NO UPDATE \n");
+#endif
         }
 #if defined(_DEBUG)
         printf("PIN OK ==> REDY \n");

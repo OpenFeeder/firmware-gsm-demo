@@ -78,7 +78,7 @@ typedef enum { // you can add others states
     MASTER_STATE_INIT,
     MASTER_STATE_TIMEOUT,
     MASTER_STATE_SEND_DATE,
-    MASTER_STATE_SEND_FROME_GSM,
+    MASTER_STATE_SEND_FROM_GSM,
     MASTER_STATE_SELECTE_SLAVE,
     MASTER_STATE_MSG_RF_RECEIVE,
     MASTER_STATE_MSG_GSM_RECEIVE,
@@ -101,6 +101,15 @@ typedef enum {
     SLAVE_NONE // etat neutre 
 } SLAVE_STATES;
 
+typedef enum {
+    ERROR_NONE,
+    /* Critical errors: the system stops if errors below occurred */
+    ERROR_LOW_BATTERY,
+    ERROR_LOW_FOOD,
+    ERROR_LOW_VBAT,
+    ERROR_DOOR_CANT_CLOSE
+} ERROR_NUMBER;
+
 /**-------------------------->> D E B U G <<----------------------------------*/
 void printPointeur(PRIORITY prio);
 
@@ -117,6 +126,13 @@ typedef struct {
     SLAVE_STATES state; // etat du slave 
 } SlaveState;
 
+
+//______________________________________________________________________________
+/**
+ * 
+ * @return 
+ */
+uint8_t MASTER_GetSlaveSelected();
 
 /**SIZE_DATA
  * tramet un ensemble de octets
@@ -171,7 +187,6 @@ void MASTER_AppTask();
  * initialisation des la machine a etat 
  */
 void MASTER_AppInit();
-
 /****************                                         *********************/
 /*************************                     ********************************/
 /******************************************************************************/

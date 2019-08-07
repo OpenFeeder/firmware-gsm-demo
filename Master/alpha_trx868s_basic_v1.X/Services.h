@@ -56,7 +56,18 @@
 
 
 //_______________________________IF__OF________________________________________*/
-// id and station 
+// id public 
+#define SLAVE_ID_PUB1 33
+#define SLAVE_ID_PUB2 34
+#define SLAVE_ID_PUB3 35
+#define SLAVE_ID_PUB4 36
+//------
+#define SLAVE_ID_PUB5 37
+#define SLAVE_ID_PUB6 38
+#define SLAVE_ID_PUB7 39
+#define SLAVE_ID_PUB8 40
+
+// id locale 
 #define SLAVE1_ID 1
 #define SLAVE2_ID 2
 #define SLAVE3_ID 3

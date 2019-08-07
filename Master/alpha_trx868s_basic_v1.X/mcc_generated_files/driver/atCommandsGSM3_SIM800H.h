@@ -88,14 +88,14 @@
  * CMD entry : AT+CMD<CR>
  * Response format : <CR><LF><response><CR><LF>
  * 
- * いい Basic syntax
+ * ???? Basic syntax
  * These AT Commands have the format of ?AT<x><n>?, or ?AT&<x><n>?, where ?<x>? is the
  * command, and ?<n>? is/are the argument(s) for that command. An example of this is ?ATE<n>?,
  * which tells the DCE whether received characters should be echoed back to the DTE according to
  * the value of ?<n>?. ?<n>? is optional and a default will be used if it is missing. 
  * 
  * 
- * いい S parameter syntax
+ * ???? S parameter syntax
  * These AT Commands have the format of ?ATS<n>=<m>?, where ?<n>? is the index of the S
  * register to set, and ?<m>? is the value to assign to it. ?<m>? is optional; if it is missing, then a 
  * default value is assigned. 

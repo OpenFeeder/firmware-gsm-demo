@@ -50,7 +50,7 @@ void modif(int val) { // changement de journee ==> selection de slave
 }
 
 void display_STATUS_register_from_RF_module(void) {
-    if (true == CMD_3v3_RF_GetValue()) {
+    if (false == CMD_3v3_RF_GetValue()) {
         /* Read RF module STATUS register */
         RF_StatusRead.Val = radioAlphaTRX_Command(STATUS_READ_CMD);
         printf("Read RF STATUS register: 0x%04X\n", RF_StatusRead.Val); // 4.1. ?criture format?e de donn?es --> https://www.ltam.lu/cours-c/prg-c42.htm
@@ -88,10 +88,13 @@ volatile uint8_t behavior[MAX_LEVEL_PRIO][NB_BEHAVIOR_PER_PRIO]; // tableau des 
 volatile uint8_t ptr[MAX_LEVEL_PRIO][3]; //READ - WRITE - OVFF (overflow)
 
 
+
 //buffer de collecte de donnees 
 uint8_t BUFF_COLLECT[NB_DATA_BUF][SIZE_DATA];
 
-//ensembele de slave de ce site 
+uint8_t publicSlaveAdress[NB_SLAVE]; // id reel des slave 
+
+//ensembele de slave de ce site, adresse local 
 SlaveState ensSlave[NB_SLAVE];
 
 //slave en cours d'interogation
@@ -112,6 +115,7 @@ int8_t noPrint = 0;
 #define INCpWRITE(prio) (ptr[prio][WRITE] = (ptr[prio][WRITE]+1) % NB_BEHAVIOR_PER_PRIO)
 #define SET_0VFF(prio, set) (ptr[prio][OVFF] = set)
 
+#define GET_PUBLIC_ID_SLAVE(localIdSlave) (publicSlaveAdress[localIdSlave])
 /**-------------------------->> S T R U C T U R E -- S L A V E <<--------------*/
 
 /**-------------------------->> D E B U G <<----------------------------------*/
@@ -182,7 +186,7 @@ uint8_t MASTER_SendDateRF() {
     //TODO : use GSM function to update date here
     if (!app_UpdateRtcTimeFromGSM()) {
 #if defined(UART_DEBUG)
-        printf("No update frome GSM\n");
+        printf("No update from GSM\n");
 #endif
         return 0;
     }
@@ -211,6 +215,10 @@ uint8_t MASTER_SendDateRF() {
 //______________________________________________________________________________
 //________________________________STATE MACHINE FUNCTION________________________
 
+uint8_t MASTER_GetSlaveSelected() {
+    return (ensSlave[slaveSelected].idSlave);
+}
+
 bool MASTER_GetNextSlave() {
     int8_t i = (slaveSelected + 1) % NB_SLAVE;
     bool stop = false;
@@ -232,7 +240,6 @@ bool MASTER_GetNextSlave() {
 #if defined(UART_DEBUG)
     printf("slave %d selected\n", slaveSelected + 1);
 #endif
-    return b;
 }
 
 bool MASTER_StoreBehavior(MASTER_STATES state, PRIORITY prio) {
@@ -288,14 +295,16 @@ void MASTER_AppTask() { // machiine a etat general
             }
             struct tm t;
 #if defined(UART_DEBUG)
-            RTCC_TimeGet(&t);
-            if (t.tm_sec % 10 == 0 && noPrint) {
-                noPrint = 0;
-                printf("[heur ==> %dh:%dmin:%ds]\n", t.tm_hour, t.tm_min, t.tm_sec);
+            if (RTCC_TimeGet(&t)) {
+                if (t.tm_sec % 10 == 0 && noPrint) {
+                    noPrint = 0;
+                    printf("[heur ==> %02d:%02d:%02d]\n", t.tm_hour, t.tm_min, t.tm_sec);
 
-            } else if (t.tm_sec % 10 != 0 && !noPrint) {
-                noPrint = 1;
+                } else if (t.tm_sec % 10 != 0 && !noPrint) {
+                    noPrint = 1;
+                }
             }
+            APP_SerialDebugTasks();
 #endif     
             break;
         }
@@ -330,8 +339,10 @@ void MASTER_AppTask() { // machiine a etat general
                                    ensSlave[slaveSelected].idSlave);
 #endif
                             ensSlave[slaveSelected].state = SLAVE_ERROR;
+                            MASTER_StoreBehavior(MASTER_STATE_ERROR, PRIO_HIGH); // traitement de l'erreur 
+                        } else {
+                            MASTER_StoreBehavior(MASTER_STATE_SELECTE_SLAVE, PRIO_MEDIUM);
                         }
-                        MASTER_StoreBehavior(MASTER_STATE_SELECTE_SLAVE, PRIO_MEDIUM);
                     }
                     break;
                     /*-----------------------------------------------------------------*/
@@ -341,7 +352,7 @@ void MASTER_AppTask() { // machiine a etat general
 #endif
                     if (--ensSlave[slaveSelected].nbTimeout) {
 #if defined(UART_DEBUG)
-                        printf("envoit d'ack \n");
+                        printf("envoit d'ack N? %d \n", ensSlave[slaveSelected].index);
 #endif
                         MASTER_SendMsgRF(ensSlave[slaveSelected].idSlave,
                                          ACK,
@@ -362,14 +373,14 @@ void MASTER_AppTask() { // machiine a etat general
                     break;
                     /*-----------------------------------------------------------------*/
 
-                case SLAVE_DAYTIME: // j'aurais pu utiliser le neutre
-                    ensSlave[slaveSelected].nbTimeout++;
-                    if (--ensSlave[slaveSelected].nbTimeout)
+                case SLAVE_DAYTIME:
+                    if (!(--ensSlave[slaveSelected].nbTimeout))
                         MASTER_StoreBehavior(MASTER_STATE_SELECTE_SLAVE, PRIO_MEDIUM);
-                    else
+                    else {
                         if (!(--ensSlave[slaveSelected].nbError)) {
-                        ensSlave[slaveSelected].state = SLAVE_ERROR;
-                        MASTER_StoreBehavior(MASTER_STATE_ERROR, PRIO_HIGH);
+                            ensSlave[slaveSelected].state = SLAVE_ERROR;
+                            MASTER_StoreBehavior(MASTER_STATE_ERROR, PRIO_HIGH);
+                        }
                     }
                     break;
                 default:
@@ -407,23 +418,16 @@ void MASTER_AppTask() { // machiine a etat general
                         ensSlave[slaveSelected].state = SLAVE_COLLECT;
                         strncpy(BUFF_COLLECT[ensSlave[slaveSelected].index - 1],
                                 receive.Champ.data, receive.Champ.size); // save data
-
-                        //#if defined(UART_DEBUG)
-                        //                        printf("date save : %s\n"
-                        //                            "data recev : %s\n"
-                        //                            "size %d\n",BUFF_COLLECT[ensSlave[slaveSelected].index - 1],
-                        //                               receive.Champ.data, receive.Champ.size);
-                        //#endif
                         if (receive.Champ.nbR == MAX_W) {
                             TMR_SetWaitRqstTimeout(-1);
-                            MASTER_StoreBehavior(MASTER_STATE_SEND_FROME_GSM, PRIO_HIGH);
+                            MASTER_StoreBehavior(MASTER_STATE_SEND_FROM_GSM, PRIO_HIGH);
                             ensSlave[slaveSelected].state = SLAVE_COLLECT_END_BLOCK;
 #if defined(UART_DEBUG)
                             printf("END BLOC\n");
 #endif  
                         } else if (receive.Champ.nbR == MAX_W + 1) { // fin de trans
                             TMR_SetWaitRqstTimeout(-1);
-                            MASTER_StoreBehavior(MASTER_STATE_SEND_FROME_GSM, PRIO_HIGH);
+                            MASTER_StoreBehavior(MASTER_STATE_SEND_FROM_GSM, PRIO_HIGH);
                             ensSlave[slaveSelected].state = SLAVE_COLLECT_END;
 #if defined(UART_DEBUG)
                             printf("END BLOC Trans\n");
@@ -448,7 +452,8 @@ void MASTER_AppTask() { // machiine a etat general
                     /* -------------------------------------------------------*/
                 case ERROR:
                 {
-                    bool b = false;
+                    bool b = true;
+                    uint8_t bufErrorMSG [256];
                     //                    TMR_SetWaitRqstTimeout(0); // declencher le l'interuption logiciel  
 #if defined(UART_DEBUG)
                     printf("ERROR RECEIVE %d\n", receive.Champ.idMsg);
@@ -456,37 +461,49 @@ void MASTER_AppTask() { // machiine a etat general
                     //TODO : traitement d'erreur send ack
                     switch (receive.Champ.idMsg) {
                             //different type d'erreur 
-                        case 1:
+                        case ERROR_NONE:
 #if defined(UART_DEBUG)
-                            printf("transmission de 1\n");
+                            printf("transmission d'une erreur inconnue\n");
 #endif
-                            b = app_SendSMS("une erreur type 1");
-#if defined(UART_DEBUG)
-                            printf("b %d\n", b);
-#endif
+                            sprintf(bufErrorMSG, "OF %d du site %d ERREUR CRITIQUE INCONNUE",
+                                    GET_PUBLIC_ID_SLAVE(slaveSelected), STATION);
                             break;
-                        case 2:
+                        case ERROR_LOW_BATTERY:
 #if defined(UART_DEBUG)
-                            printf("transmission de 2\n");
+                            printf("transmission de niveau de batterie faible\n");
 #endif
-                            b = app_SendSMS("une erreur type 2");
+                            sprintf(bufErrorMSG, "OF %d du site %d niveau de batterie faible",
+                                    GET_PUBLIC_ID_SLAVE(slaveSelected), STATION);
                             break;
-                        case 3:
+                        case ERROR_LOW_FOOD:
 #if defined(UART_DEBUG)
-                            printf("transmission de 3\n");
+                            printf("transmission de niveau de nourriture faible\n");
 #endif
-                            b = app_SendSMS("une erreur type 3");
+                            sprintf(bufErrorMSG, "OF %d du site %d niveau de nourriture faible",
+                                    GET_PUBLIC_ID_SLAVE(slaveSelected), STATION);
                             break;
-                        case 4:
+                        case ERROR_LOW_VBAT:
 #if defined(UART_DEBUG)
-                            printf("transmission de 4\n");
+                            printf("transmission de ERROR_LOW_VBAT\n");
 #endif
-                            b = app_SendSMS("une erreur type 4");
+                            sprintf(bufErrorMSG, "OF %d du site %d niveau de .... faible: ERROR_LOW_VBAT",
+                                    GET_PUBLIC_ID_SLAVE(slaveSelected), STATION);
+                            break;
+                        case ERROR_DOOR_CANT_CLOSE:
+#if defined(UART_DEBUG)
+                            printf("transmission de PORTE OUVERTE\n");
+#endif      
+
+                            sprintf(bufErrorMSG, "OF %d du site %d PORTE OUVERTE",
+                                    GET_PUBLIC_ID_SLAVE(slaveSelected), STATION);
                             break;
                         default:
+#if defined(UART_DEBUG)
+                            printf("Erreur non connue\n");
+#endif
                             break;
                     }
-                    if (b) { // aquitter 
+                    if (b && app_SendSMS(bufErrorMSG)) { // aquitter 
                         MASTER_SendMsgRF(ensSlave[slaveSelected].idSlave,
                                          ACK, receive.Champ.idMsg, 1, "ACK", 3);
                     } else {
@@ -609,12 +626,12 @@ void MASTER_AppTask() { // machiine a etat general
             break;
             /* -------------------------------------------------------------- */
         }
-        case MASTER_STATE_SEND_FROME_GSM:
+        case MASTER_STATE_SEND_FROM_GSM:
         {
             if (state != prevBehavior) {
                 prevBehavior = state;
 #if defined(UART_DEBUG)
-                printf(">MASTER_STATE_SEND_FROME_GSM\n");
+                printf(">MASTER_STATE_SEND_FROM_GSM\n");
 #endif
             }
             int8_t j = 0;
@@ -637,6 +654,25 @@ void MASTER_AppTask() { // machiine a etat general
         case MASTER_STATE_ERROR: // NIVEAU HIGH, etat de traitement des erreur lie au master 
             if (state != prevBehavior) {
                 prevBehavior = state;
+                // deux type d'erreur ici ceux lie au slave, et ceux lie au master lui meme 
+                // erreur liee aux slaves : 
+                //  * connexion interrompu avec un slave apres plusieurs tentative de connexion 
+                //    le master sais que c'est le slave et non lui, car les autre marche slaves 
+                //    communique avec lui 
+                //
+                //  ==> Traitement, envoie d'un sms pour anoncer l'etat du slave
+                //
+                // erreur liee au master :
+                //  * connexion interrompus avec tous les slaves: ils sont en etat d'erreur tous 
+                //    les 4 (8) et aucun ne repond.
+                //
+                //  ==> traitement, envoie d'un sms renseignant de l'etat de connexion entre 
+                //   le master et les slaves, (erreur critique car meme la syncro ne se ferra pas)
+                //  
+                //  * Module GSM non fonctionnel, soit plus de sms, plus de data, impossible a 
+                //    l'allumer, on capte plus de reseau, carte sim infonctionnel 
+                //
+                //  ==> je ne sais pas ce qu'il faut faire dans ce cas (a discuter avec le responsable)
 #if defined(UART_DEBUG)
                 printf(">MASTER STATE ERROR\n");
 #endif
@@ -690,8 +726,20 @@ void MASTER_AppInit() {
         memset(BUFF_COLLECT[i], 0, SIZE_DATA);
     }
 
+    publicSlaveAdress[0] = SLAVE_ID_PUB1;
+    publicSlaveAdress[1] = SLAVE_ID_PUB2;
+    publicSlaveAdress[2] = SLAVE_ID_PUB3;
+    publicSlaveAdress[3] = SLAVE_ID_PUB4;
+    if (NB_SLAVE > 4) {
+        publicSlaveAdress[4] = SLAVE_ID_PUB5;
+        publicSlaveAdress[5] = SLAVE_ID_PUB6;
+        publicSlaveAdress[6] = SLAVE_ID_PUB7;
+        publicSlaveAdress[7] = SLAVE_ID_PUB8;
+    }
+
     MASTER_StoreBehavior(MASTER_STATE_INIT, PRIO_HIGH);
 }
+
 /****************                                         *********************/
 /*************************                     ********************************/
 /******************************************************************************/

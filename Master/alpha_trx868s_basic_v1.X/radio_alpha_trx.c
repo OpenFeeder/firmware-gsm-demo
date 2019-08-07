@@ -3569,16 +3569,19 @@ Frame radioAlphaTRX_GetFrame() {
 
 bool radioAlphaTRX_receive() {
     WORD_VAL_T receiveData;
-    uint8_t i = 0; uint8_t sumCtrl = 0;
+    uint8_t i = 0;
+    uint8_t sumCtrl = 0;
     for (i = 0; i < FRAME_LENGTH; i++) {
         if (0 == radioAlphaTRX_WaitLownIRQ(TIME_OUT_nIRQ)) {
             return false;
         }
         receiveData.word = radioAlphaTRX_Command(0xB000);
         frameReceve.paquet[i] = receiveData.byte.low;
-        if (frameReceve.Champ.dest != MASTER_ID &&
-            frameReceve.Champ.dest != BROADCAST_ID && i == 0) {
-            return false;
+        //frameReceve.Champ.src != MASTER_GetSlaveSelected() : ==> etre sur de recuperer le msg du slave selectionn?
+        if (i == 0) {
+            if (frameReceve.Champ.dest != MASTER_ID ||  
+            frameReceve.Champ.src != MASTER_GetSlaveSelected()) // pour les broadcast, on modifiera la condition
+                return false;
         } else if (receiveData.byte.low == 0) {
             break;
         }

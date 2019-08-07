@@ -83,13 +83,19 @@ int main(void)
     // initialize the device
     SYSTEM_Initialize();
     
-    /* Initialize the application. */
-//    APP_Initialize( );
+    displayBootMessage();
+    bool ok = false;
+    ok = GMS3_ModulePower(true);
     MASTER_AppInit();
-    while (1)
-    {
-        /* Maintain the application's state machine. */
-        MASTER_AppTask( ); /* application specific tasks */
+    while (1) {
+        if (ok) {
+            MASTER_AppTask();
+        } else {
+#if defined(UART_DEBUG)
+            printf("non conncter \n");
+#endif
+            ok = GMS3_ModulePower(true);
+        }
     }
 
         /* Execution should not come here during normal operation. */

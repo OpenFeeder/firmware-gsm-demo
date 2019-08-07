@@ -347,6 +347,152 @@
 #define CMD_3v3_RF_SetDigitalOutput() _TRISB12 = 0
 /**
   @Summary
+    Sets the GPIO pin, RB13, high using LATB13.
+
+  @Description
+    Sets the GPIO pin, RB13, high using LATB13.
+
+  @Preconditions
+    The RB13 must be set to an output.
+
+  @Returns
+    None.
+
+  @Param
+    None.
+
+  @Example
+    <code>
+    // Set RB13 high (1)
+    CMD_VDD_APP_V_USB_SetHigh();
+    </code>
+
+*/
+#define CMD_VDD_APP_V_USB_SetHigh()          _LATB13 = 1
+/**
+  @Summary
+    Sets the GPIO pin, RB13, low using LATB13.
+
+  @Description
+    Sets the GPIO pin, RB13, low using LATB13.
+
+  @Preconditions
+    The RB13 must be set to an output.
+
+  @Returns
+    None.
+
+  @Param
+    None.
+
+  @Example
+    <code>
+    // Set RB13 low (0)
+    CMD_VDD_APP_V_USB_SetLow();
+    </code>
+
+*/
+#define CMD_VDD_APP_V_USB_SetLow()           _LATB13 = 0
+/**
+  @Summary
+    Toggles the GPIO pin, RB13, using LATB13.
+
+  @Description
+    Toggles the GPIO pin, RB13, using LATB13.
+
+  @Preconditions
+    The RB13 must be set to an output.
+
+  @Returns
+    None.
+
+  @Param
+    None.
+
+  @Example
+    <code>
+    // Toggle RB13
+    CMD_VDD_APP_V_USB_Toggle();
+    </code>
+
+*/
+#define CMD_VDD_APP_V_USB_Toggle()           _LATB13 ^= 1
+/**
+  @Summary
+    Reads the value of the GPIO pin, RB13.
+
+  @Description
+    Reads the value of the GPIO pin, RB13.
+
+  @Preconditions
+    None.
+
+  @Returns
+    None.
+
+  @Param
+    None.
+
+  @Example
+    <code>
+    uint16_t portValue;
+
+    // Read RB13
+    postValue = CMD_VDD_APP_V_USB_GetValue();
+    </code>
+
+*/
+#define CMD_VDD_APP_V_USB_GetValue()         _RB13
+/**
+  @Summary
+    Configures the GPIO pin, RB13, as an input.
+
+  @Description
+    Configures the GPIO pin, RB13, as an input.
+
+  @Preconditions
+    None.
+
+  @Returns
+    None.
+
+  @Param
+    None.
+
+  @Example
+    <code>
+    // Sets the RB13 as an input
+    CMD_VDD_APP_V_USB_SetDigitalInput();
+    </code>
+
+*/
+#define CMD_VDD_APP_V_USB_SetDigitalInput()  _TRISB13 = 1
+/**
+  @Summary
+    Configures the GPIO pin, RB13, as an output.
+
+  @Description
+    Configures the GPIO pin, RB13, as an output.
+
+  @Preconditions
+    None.
+
+  @Returns
+    None.
+
+  @Param
+    None.
+
+  @Example
+    <code>
+    // Sets the RB13 as an output
+    CMD_VDD_APP_V_USB_SetDigitalOutput();
+    </code>
+
+*/
+#define CMD_VDD_APP_V_USB_SetDigitalOutput() _TRISB13 = 0
+/**
+  @Summary
     Sets the GPIO pin, RB3, high using LATB3.
 
   @Description
