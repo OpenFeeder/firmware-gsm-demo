@@ -55,12 +55,18 @@ void INTERRUPT_Initialize (void)
     //    RTCI: RTCC - Real-Time Clock and Calendar
     //    Priority: 1
         IPC15bits.RTCIP = 1;
+    //    UERI: U2E - UART2 Error
+    //    Priority: 1
+        IPC16bits.U2ERIP = 1;
+    //    UTXI: U2TX - UART2 Transmitter
+    //    Priority: 1
+        IPC7bits.U2TXIP = 1;
+    //    URXI: U2RX - UART2 Receiver
+    //    Priority: 1
+        IPC7bits.U2RXIP = 1;
     //    CNI: CN -  Change Notification Interrupt
     //    Priority: 1
         IPC4bits.CNIP = 1;
-    //    TI: T3 - Timer3
-    //    Priority: 1
-        IPC2bits.T3IP = 1;
     //    UERI: U1E - UART1 Error
     //    Priority: 1
         IPC16bits.U1ERIP = 1;
@@ -70,6 +76,9 @@ void INTERRUPT_Initialize (void)
     //    URXI: U1RX - UART1 Receiver
     //    Priority: 1
         IPC2bits.U1RXIP = 1;
+    //    TI: T3 - Timer3
+    //    Priority: 1
+        IPC2bits.T3IP = 1;
     //    TI: T1 - Timer1
     //    Priority: 2
         IPC0bits.T1IP = 2;

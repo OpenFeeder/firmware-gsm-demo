@@ -44,6 +44,7 @@ void displayBootMessage(void) {
 
 bool rf_power_status = false;
 int8_t i = 0;
+int8_t j = 0;
 
 //SERIAL_CONTROL APP_SerialDebugTasks( void )
 
@@ -85,12 +86,20 @@ void APP_SerialDebugTasks(void) {
             case 'A':
                 break;
                 /* -------------------------------------------------------------- */
+            case 'j':
+            case 'J':
+                j = (j + 1) % 3;
+                modif(j);
+                break;
+                /* -------------------------------------------------------------- */
             case 'b':
             case 'B':
                 break;
                 /* -------------------------------------------------------------- */
             case 'd':
             case 'D':
+                //debug
+                    display_STATUS_register_from_RF_module();
                 break;
                 /* -------------------------------------------------------------- */
             case 'n':
@@ -99,7 +108,7 @@ void APP_SerialDebugTasks(void) {
 #if defined(UART_DEBUG)
                 printf("demande d'infos\n");
 #endif
-                printf("send %d \n", MASTER_SendMsgRF(1,INFOS, 1, 1, "INFO", 4));
+                printf("send %d \n", MASTER_SendMsgRF(1, INFOS, 1, 1, "INFO", 4));
                 break;
                 /* -------------------------------------------------------------- */
             case 'm':
@@ -108,12 +117,12 @@ void APP_SerialDebugTasks(void) {
 #if defined(UART_DEBUG)
                 printf("demande d'infos\n");
 #endif
-                printf("send %d \n", MASTER_SendMsgRF(2,INFOS, 1, 1, "INFO", 4));
+                printf("send %d \n", MASTER_SendMsgRF(2, INFOS, 1, 1, "INFO", 4));
                 break;
                 /* -------------------------------------------------------------- */
             case 'p':
             case 'P':
-                
+
                 printPointeur(0);
                 break;
                 /* -------------------------------------------------------------- */

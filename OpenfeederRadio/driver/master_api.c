@@ -231,6 +231,7 @@ bool MASTER_GetNextSlave() {
 #if defined(UART_DEBUG)
     printf("slave %d selected\n", slaveSelected + 1);
 #endif
+    return b;
 }
 
 bool MASTER_StoreBehavior(MASTER_STATES state, PRIORITY prio) {

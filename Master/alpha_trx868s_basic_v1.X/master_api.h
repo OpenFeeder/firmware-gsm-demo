@@ -56,10 +56,16 @@
 
 /*****************                                 ****************************/
 
+//______________________________________________________________________________
+//______________________________DEBUG___________________________________________
+void modif(int val);
+void display_STATUS_register_from_RF_module(void);
+//______________________________________________________________________________
+
 typedef enum { // if you want to add a new level, you must be increase MAX_LEVEL_PRIO
     PRIO_HIGH, //00
     PRIO_MEDIUM, //01
-    PRIO_LOW //02
+    PRIO_LOW //10
 } PRIORITY;
 
 typedef enum {
@@ -107,7 +113,7 @@ typedef struct {
     uint8_t nbTimeout; // le nombre consecutif de timeout lorsqu'on attend une reponse de ce slave
     uint8_t nbError; // nombre d'erreurs, survenue pour ce slave
     uint8_t index; // le numero de paquet attendu, lors de la collecte des donnees 
-    uint8_t nbBloc; // nombre de bloc reçu 
+    uint8_t nbBloc; // nombre de bloc re?u 
     SLAVE_STATES state; // etat du slave 
 } SlaveState;
 

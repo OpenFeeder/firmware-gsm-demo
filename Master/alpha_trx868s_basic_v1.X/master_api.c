@@ -26,12 +26,60 @@
 #include "timer.h"
 #include "app.h"
 
+
 /******************************************************************************/
 /******************************************************************************/
 /********************* COUCHE APPLICATION DU MASTER  **************************/
 /***************************                ***********************************/
 /**************************                         ***************************/
 /*****************                                         ********************/
+
+//______________________________________________________________________________
+//______________________________DEBUG___________________________________________
+volatile uint8_t dayTime = 0; // 0 before; 1 during; 2 night
+
+void modif(int val) { // changement de journee ==> selection de slave
+    dayTime = val;
+    MASTER_StoreBehavior(MASTER_STATE_SELECTE_SLAVE, PRIO_MEDIUM);
+#if defined(UART_DEBUG)
+    printPointeur(PRIO_HIGH);
+    printPointeur(PRIO_MEDIUM);
+    printPointeur(PRIO_LOW);
+    printf("moment %d \n", dayTime);
+#endif
+}
+
+void display_STATUS_register_from_RF_module(void) {
+    if (true == CMD_3v3_RF_GetValue()) {
+        /* Read RF module STATUS register */
+        RF_StatusRead.Val = radioAlphaTRX_Command(STATUS_READ_CMD);
+        printf("Read RF STATUS register: 0x%04X\n", RF_StatusRead.Val); // 4.1. ?criture format?e de donn?es --> https://www.ltam.lu/cours-c/prg-c42.htm
+        printf("Bit [ 15 | 14 | 13 | 12 | 11 | 10 |  9 |  8 |  7 |  6 |  5 |  4 |  3 |  2 |  1 |  0 ]\n");
+        printf("    [  %u |  %u |  %u |  %u |  %u |  %u |  %u |  %u |  %u |  %u |  %u |  %u |  %u |  %u |  %u |  %u ]\n", \
+                        RF_StatusRead.bits.b15_RGIT_FFIT, \
+                        RF_StatusRead.bits.b14_POR, \
+                        RF_StatusRead.bits.b13_RGUR_FFOV, \
+                        RF_StatusRead.bits.b12_WKUP, \
+                        RF_StatusRead.bits.b11_EXT, \
+                        RF_StatusRead.bits.b10_LBD, \
+                        RF_StatusRead.bits.b9_FFEM, \
+                        RF_StatusRead.bits.b8_ATSS, \
+                        RF_StatusRead.bits.b7_ATS_RSSI, \
+                        RF_StatusRead.bits.b6_DQD, \
+                        RF_StatusRead.bits.b5_CRL, \
+                        RF_StatusRead.bits.b4_ATGL, \
+                        RF_StatusRead.bits.b3_OFFS_Sign, \
+                        RF_StatusRead.bits.b2_OFFS_b2, \
+                        RF_StatusRead.bits.b1_OFFS_b1, \
+                        RF_StatusRead.bits.b0_OFFS_b0 \
+                        );
+        printf("     FFIT| POR|FFOV|WKUP| EXT| LBD|FFEM|RSSI| DQD| CRL|ATGL|OFFS|OFFS|OFFS|OFFS|OFFS|\n"); // transceiver in receive (RX) mode, bit 'er' is set
+        printf("     RGIT      RGUR                      ATS                 <6>  <3>  <2>  <1>  <0>\n"); // bit 'er' is cleared
+    } else {
+        printf("Can't read status register, RF module is power OFF!\n");
+    }
+}
+//______________________________________________________________________________
 
 /**-------------------------->> V A R I A B L E S <<---------------------------*/
 volatile uint8_t behavior[MAX_LEVEL_PRIO][NB_BEHAVIOR_PER_PRIO]; // tableau des comportement 
@@ -103,15 +151,15 @@ int8_t MASTER_SendMsgRF(uint8_t dest,
     frameToSend.Champ.crc ^= frameToSend.paquet[3];
     for (i = 0; i < frameToSend.Champ.size; i++) {
         frameToSend.Champ.data[i] = data[i];
-        frameToSend.Champ.crc ^= frameToSend.paquet[i + 5]; // penser � changer le 5 en generique 
+        frameToSend.Champ.crc ^= frameToSend.paquet[i + 5]; // penser ? changer le 5 en generique 
     }
 
-    for (i = 0; i < frameToSend.Champ.size + 5; i++) {
-        printf("%d ", frameToSend.paquet[i]);
-    }
-#if defined(UART_DEBUG)
-    printf("\nsize\n");
-#endif
+    //    for (i = 0; i < frameToSend.Champ.size + 5; i++) {
+    //        printf("%d ", frameToSend.paquet[i]);
+    //    }
+    //#if defined(UART_DEBUG)
+    //    printf("\nsize\n");
+    //#endif
 
     //____________________________________________________________________
     //________________________TRANSMSISSION_______________________________
@@ -132,6 +180,12 @@ uint8_t MASTER_SendDateRF() {
     //________UPDATE DATE_________
     // with GSM module 
     //TODO : use GSM function to update date here
+    if (!app_UpdateRtcTimeFromGSM()) {
+#if defined(UART_DEBUG)
+        printf("No update frome GSM\n");
+#endif
+        return 0;
+    }
     //____________________________
     //________GET DATE____________
     if (RTCC_TimeGet(&picDate)) {
@@ -145,6 +199,9 @@ uint8_t MASTER_SendDateRF() {
         d.Format.sec = picDate.tm_sec;
         //____________________________
         //________SEND DATE___________
+#if defined(UART_DEBUG)
+        printf("SEND DATE\n");
+#endif
         return MASTER_SendMsgRF(BROADCAST_ID, HORLOGE, 1, 1, d.date, 5); // visualiser cette valeur 
     }
     return 0;
@@ -175,6 +232,7 @@ bool MASTER_GetNextSlave() {
 #if defined(UART_DEBUG)
     printf("slave %d selected\n", slaveSelected + 1);
 #endif
+    return b;
 }
 
 bool MASTER_StoreBehavior(MASTER_STATES state, PRIORITY prio) {
@@ -184,7 +242,6 @@ bool MASTER_StoreBehavior(MASTER_STATES state, PRIORITY prio) {
         //        SET_0VFF(prio, 1); // overflow
         INCpREAD(prio);
     }
-    LED_STATUS_R_Toggle();
     return true; // 
 }
 
@@ -213,25 +270,12 @@ void MASTER_AppTask() { // machiine a etat general
             if (state != prevBehavior) {
                 prevBehavior = state;
 #if defined (UART_DEBUG)
-                displayBootMessage();
                 printf("> MASTER_STATE_INITIALIZE\n");
 #endif
-                powerRFEnable();
-                // Check the power statut of the RF module
-                if (CMD_3v3_RF_GetValue() == false) {
-#if defined (UART_DEBUG)
-                    printf("RF Module enable. ----> power off\n");
-#endif
-                    radioAlphaTRX_Init();
-                    radioAlphaTRX_ReceivedMode(); // receive mode actived
-                } else {
-                    MASTER_StoreBehavior(MASTER_STATE_ERROR, PRIO_HIGH);
-#if defined (UART_DEBUG)
-                    printf("RF Module disable.----> no power on\n");
-#endif
-                }
-
+                radioAlphaTRX_Init();
+                radioAlphaTRX_ReceivedMode(); // receive mode actived
             }
+            MASTER_StoreBehavior(MASTER_STATE_SELECTE_SLAVE, PRIO_HIGH);
             break;
             /* -------------------------------------------------------------- */
         case MASTER_STATE_IDLE:
@@ -243,7 +287,6 @@ void MASTER_AppTask() { // machiine a etat general
 #endif
             }
             struct tm t;
-            LedsStatusBlink(LED_GREEN, 20, 1980);
 #if defined(UART_DEBUG)
             RTCC_TimeGet(&t);
             if (t.tm_sec % 10 == 0 && noPrint) {
@@ -253,18 +296,24 @@ void MASTER_AppTask() { // machiine a etat general
             } else if (t.tm_sec % 10 != 0 && !noPrint) {
                 noPrint = 1;
             }
-            APP_SerialDebugTasks();
 #endif     
             break;
         }
             /* -------------------------------------------------------------- */
 
         case MASTER_STATE_TIMEOUT: //if an event has occurred with the timer 
+            if (state != prevBehavior) {
+                prevBehavior = state;
+#if defined(UART_DEBUG)
+                printf(">MASTER STATE TIMEOUT\n");
+#endif
+            }
         {
             switch (ensSlave[slaveSelected].state) {
                 case SLAVE_SYNC:
 #if defined(UART_DEBUG)
-                    printf("hundler error phase de synchro\n");
+                    printf("hundler error phase de synchro try to connect%d \n",
+                           ensSlave[slaveSelected].tryToConnect);
 #endif
                     if (--ensSlave[slaveSelected].tryToConnect) {
                         MASTER_SendMsgRF(ensSlave[slaveSelected].idSlave,
@@ -275,7 +324,7 @@ void MASTER_AppTask() { // machiine a etat general
                         TMR_SetWaitRqstTimeout(TIME_OUT_COLLECT_LOG); // active timer 
                     } else { // on ne peut pas se connecter ? ce slave 
                         ensSlave[slaveSelected].nbError--;
-                        if (!ensSlave[slaveSelected].nbError) {
+                        if (ensSlave[slaveSelected].nbError == 0) {
 #if defined(UART_DEBUG)
                             printf("hundler slave %d communication corompu\n ERROR ==> SELECT SLAVE\n",
                                    ensSlave[slaveSelected].idSlave);
@@ -316,7 +365,7 @@ void MASTER_AppTask() { // machiine a etat general
                 case SLAVE_DAYTIME: // j'aurais pu utiliser le neutre
                     ensSlave[slaveSelected].nbTimeout++;
                     if (--ensSlave[slaveSelected].nbTimeout)
-                        MASTER_StoreBehavior(MASTER_STATE_SEND_REQUEST_INFOS, PRIO_MEDIUM);
+                        MASTER_StoreBehavior(MASTER_STATE_SELECTE_SLAVE, PRIO_MEDIUM);
                     else
                         if (!(--ensSlave[slaveSelected].nbError)) {
                         ensSlave[slaveSelected].state = SLAVE_ERROR;
@@ -336,7 +385,6 @@ void MASTER_AppTask() { // machiine a etat general
                 prevBehavior = state;
 #if defined(UART_DEBUG)
                 printf(">MASTER_STATE_MSG_RECEIVE\n");
-                printf("recu %s\n", receive.Champ.data);
 #endif
             }
             ensSlave[slaveSelected].nbError = MAX_ERROR;
@@ -360,13 +408,21 @@ void MASTER_AppTask() { // machiine a etat general
                         strncpy(BUFF_COLLECT[ensSlave[slaveSelected].index - 1],
                                 receive.Champ.data, receive.Champ.size); // save data
 
+                        //#if defined(UART_DEBUG)
+                        //                        printf("date save : %s\n"
+                        //                            "data recev : %s\n"
+                        //                            "size %d\n",BUFF_COLLECT[ensSlave[slaveSelected].index - 1],
+                        //                               receive.Champ.data, receive.Champ.size);
+                        //#endif
                         if (receive.Champ.nbR == MAX_W) {
+                            TMR_SetWaitRqstTimeout(-1);
                             MASTER_StoreBehavior(MASTER_STATE_SEND_FROME_GSM, PRIO_HIGH);
                             ensSlave[slaveSelected].state = SLAVE_COLLECT_END_BLOCK;
 #if defined(UART_DEBUG)
                             printf("END BLOC\n");
 #endif  
                         } else if (receive.Champ.nbR == MAX_W + 1) { // fin de trans
+                            TMR_SetWaitRqstTimeout(-1);
                             MASTER_StoreBehavior(MASTER_STATE_SEND_FROME_GSM, PRIO_HIGH);
                             ensSlave[slaveSelected].state = SLAVE_COLLECT_END;
 #if defined(UART_DEBUG)
@@ -378,7 +434,7 @@ void MASTER_AppTask() { // machiine a etat general
                             if (receive.Champ.nbR > 1) { // je suis plus en attente d'un paquet
                                 TMR_SetWaitRqstTimeout(TIME_OUT_COLLECT_LOG);
                             } else {
-                                TMR_SetWaitRqstTimeout(-1); // deactive timer up to (until) request 
+                                TMR_SetWaitRqstTimeout(0); // deactive timer up to (until) request 
                             }
                         }
                     } else {
@@ -391,15 +447,59 @@ void MASTER_AppTask() { // machiine a etat general
                     break;
                     /* -------------------------------------------------------*/
                 case ERROR:
-                    TMR_SetWaitRqstTimeout(0); // declencher le l'interuption logiciel  
+                {
+                    bool b = false;
+                    //                    TMR_SetWaitRqstTimeout(0); // declencher le l'interuption logiciel  
 #if defined(UART_DEBUG)
                     printf("ERROR RECEIVE %d\n", receive.Champ.idMsg);
 #endif
-                    //TODO : traitement d'erreur send ack 
+                    //TODO : traitement d'erreur send ack
+                    switch (receive.Champ.idMsg) {
+                            //different type d'erreur 
+                        case 1:
+#if defined(UART_DEBUG)
+                            printf("transmission de 1\n");
+#endif
+                            b = app_SendSMS("une erreur type 1");
+#if defined(UART_DEBUG)
+                            printf("b %d\n", b);
+#endif
+                            break;
+                        case 2:
+#if defined(UART_DEBUG)
+                            printf("transmission de 2\n");
+#endif
+                            b = app_SendSMS("une erreur type 2");
+                            break;
+                        case 3:
+#if defined(UART_DEBUG)
+                            printf("transmission de 3\n");
+#endif
+                            b = app_SendSMS("une erreur type 3");
+                            break;
+                        case 4:
+#if defined(UART_DEBUG)
+                            printf("transmission de 4\n");
+#endif
+                            b = app_SendSMS("une erreur type 4");
+                            break;
+                        default:
+                            break;
+                    }
+                    if (b) { // aquitter 
+                        MASTER_SendMsgRF(ensSlave[slaveSelected].idSlave,
+                                         ACK, receive.Champ.idMsg, 1, "ACK", 3);
+                    } else {
+#if defined(UART_DEBUG)
+                        printf("ERROR non transmise \n");
+#endif
+                    }
+                    TMR_SetWaitRqstTimeout(0); // fin timeout
+                }
                     break;
                     /* -------------------------------------------------------*/
                 case NOTHING:
-                    TMR_SetWaitRqstTimeout(0);
+                    //                    TMR_SetWaitRqstTimeout(0); // on laisse le timer se terminer pour les test
 #if defined(UART_DEBUG )
                     printf("Slave %d Nothing to send\n", ensSlave[slaveSelected].idSlave);
 #endif
@@ -410,6 +510,12 @@ void MASTER_AppTask() { // machiine a etat general
         }
             /* -------------------------------------------------------------- */
         case MASTER_STATE_SEND_DATE: // niveau HIGH
+            if (state != prevBehavior) {
+                prevBehavior = state;
+#if defined(UART_DEBUG)
+                printf(">MASTER STATE SEND DATE\n");
+#endif
+            }
 #if defined(UART_DEBUG)
             printf("send date %d \n", MASTER_SendDateRF());
 #else
@@ -419,6 +525,12 @@ void MASTER_AppTask() { // machiine a etat general
             break;
             /* -------------------------------------------------------------- */
         case MASTER_STATE_SEND_REQUEST_INFOS:
+            if (state != prevBehavior) {
+                prevBehavior = state;
+#if defined(UART_DEBUG)
+                printf(">MASTER STATE SEND REQUEST INFOS\n");
+#endif
+            }
             //pour tout transmission RF hors la date, on passe par cet etat: niveau medium
             MASTER_SendMsgRF(ensSlave[slaveSelected].idSlave,
                              INFOS,
@@ -428,6 +540,12 @@ void MASTER_AppTask() { // machiine a etat general
             /* -------------------------------------------------------------- */
 
         case MASTER_STATE_SELECTE_SLAVE:
+            if (state != prevBehavior) {
+                prevBehavior = state;
+#if defined(UART_DEBUG)
+                printf(">MASTER STATE SELECT SLAVE\n");
+#endif
+            }
         {
             int8_t i = (slaveSelected + 1) % NB_SLAVE;
             bool stop = false;
@@ -450,24 +568,38 @@ void MASTER_AppTask() { // machiine a etat general
 #if defined(UART_DEBUG)
                 printf("slave %d selected\n", slaveSelected + 1);
 #endif
+#if defined(UART_DEBUG)
                 //en foction de l'heur de la journee on change d'etat 
-                struct tm t; 
+                if (dayTime == 0) {
+                    ensSlave[i].state = SLAVE_CONFIG;
+                    TMR_SetWaitRqstTimeout(0);
+                } else if (dayTime == 1) {
+                    ensSlave[i].state = SLAVE_DAYTIME;
+                    MASTER_StoreBehavior(MASTER_STATE_SEND_REQUEST_INFOS, PRIO_MEDIUM);
+                } else if (dayTime == 2) {
+                    ensSlave[slaveSelected].tryToConnect = MAX_TRY_TO_SYNC;
+                    ensSlave[i].state = SLAVE_SYNC;
+                    TMR_SetWaitRqstTimeout(0); // declenche une interuption logiciel 
+                }
+#else
+                struct tm t;
                 if (RTCC_TimeGet(&t)) {
                     if (t.tm_hour < TIME_LIMIT_OF_CONFIG) {
                         ensSlave[i].state = SLAVE_CONFIG;
-                    }else if (t.tm_hour < TIME_LIMIT_TO_GET_INFOS) {
+                    } else if (t.tm_hour < TIME_LIMIT_TO_GET_INFOS) {
                         ensSlave[i].state = SLAVE_DAYTIME;
-                    }else {
+                    } else {
                         ensSlave[i].state = SLAVE_SYNC;
                     }
                     TMR_SetWaitRqstTimeout(0); // declenche une interuption logiciel 
-                }else {
+                } else {
 #if defined(UART_DEBUG)
                     printf("La date n'est pas bonne \n");
 #endif
                     MASTER_StoreBehavior(MASTER_STATE_ERROR, PRIO_HIGH); // error 
                 }
-            }else {
+#endif
+            } else {
 #if defined(UART_DEBUG)
                 printf("Aucun slave en selection\n");
 #endif
@@ -477,16 +609,58 @@ void MASTER_AppTask() { // machiine a etat general
             break;
             /* -------------------------------------------------------------- */
         }
-        case MASTER_STATE_ERROR: // NIVEAU HIGH, etat de traitement des erreur lie au master 
+        case MASTER_STATE_SEND_FROME_GSM:
+        {
+            if (state != prevBehavior) {
+                prevBehavior = state;
+#if defined(UART_DEBUG)
+                printf(">MASTER_STATE_SEND_FROME_GSM\n");
+#endif
+            }
+            int8_t j = 0;
+#if defined(UART_DEBUG)
+            printf("ind %d\n", ensSlave[slaveSelected].index);
+#endif
+            for (; j < ensSlave[slaveSelected].index - 1; j++) {
+                printf("[%d]  -> %s\n", j, BUFF_COLLECT[j]);
+            }
+            //TODO : go to select slave 
+            MASTER_StoreBehavior(MASTER_STATE_SELECTE_SLAVE, MEDIUM);
+            // prepare l'attente d'un nouveau bloc ou c'est la fin 
+            if (ensSlave[slaveSelected].state == SLAVE_COLLECT_END_BLOCK) {
+                ensSlave[slaveSelected].index = 1;
+                ensSlave[slaveSelected].nbBloc++;
+            }
+        }
             break;
             /* -------------------------------------------------------------- */
-            
+        case MASTER_STATE_ERROR: // NIVEAU HIGH, etat de traitement des erreur lie au master 
+            if (state != prevBehavior) {
+                prevBehavior = state;
+#if defined(UART_DEBUG)
+                printf(">MASTER STATE ERROR\n");
+#endif
+            }
+            break;
+            /* -------------------------------------------------------------- */
+
         case MASTER_STATE_END:
+            if (state != prevBehavior) {
+                prevBehavior = state;
+#if defined(UART_DEBUG)
+                printf(">MASTER STATE END\n");
+#endif
+            }
             //TODO : gestion de fin
             break;
             /* -------------------------------------------------------------- */
         default:
-
+            if (state != prevBehavior) {
+                prevBehavior = state;
+#if defined(UART_DEBUG)
+                printf(">MASTER STATE DEFAULT\n");
+#endif
+            }
             break;
             /* -------------------------------------------------------------- */
     }
@@ -512,9 +686,12 @@ void MASTER_AppInit() {
         ensSlave[i].tryToConnect = MAX_TRY_TO_SYNC;
     }
 
+    for (i = 0; i < NB_DATA_BUF; i++) {
+        memset(BUFF_COLLECT[i], 0, SIZE_DATA);
+    }
+
     MASTER_StoreBehavior(MASTER_STATE_INIT, PRIO_HIGH);
 }
-
 /****************                                         *********************/
 /*************************                     ********************************/
 /******************************************************************************/
