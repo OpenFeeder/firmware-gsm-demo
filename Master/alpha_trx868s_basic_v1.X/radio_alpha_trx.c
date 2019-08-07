@@ -3579,8 +3579,7 @@ bool radioAlphaTRX_receive() {
         frameReceve.paquet[i] = receiveData.byte.low;
         //frameReceve.Champ.src != MASTER_GetSlaveSelected() : ==> etre sur de recuperer le msg du slave selectionn?
         if (i == 0) {
-            if (frameReceve.Champ.dest != MASTER_ID ||  
-            frameReceve.Champ.src != MASTER_GetSlaveSelected()) // pour les broadcast, on modifiera la condition
+            if (frameReceve.Champ.dest != MASTER_ID ) // || frameReceve.Champ.src != MASTER_GetSlaveSelected()pour les broadcast, on modifiera la condition
                 return false;
         } else if (receiveData.byte.low == 0) {
             break;
@@ -3595,11 +3594,7 @@ void radioAlphaTRX_CaptureFrame() {
         LED_STATUS_B_Toggle();
         // � ce niveau le msg est corectemnt re�u 
         MASTER_StoreBehavior(MASTER_STATE_MSG_RF_RECEIVE, PRIO_HIGH); // c'est une information tr�s importante 
-    } else {
-#if defined(UART_DEBUG)
-        LED_STATUS_R_Toggle();
-#endif
-    }
+    } 
     //on se remet en ecoute 
     radioAlphaTRX_ReceivedMode();
 }

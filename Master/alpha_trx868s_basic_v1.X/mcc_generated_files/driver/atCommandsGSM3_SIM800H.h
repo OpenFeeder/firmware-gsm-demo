@@ -324,7 +324,7 @@
 
 #define SMS_WRITE "AT+CMGW"  //ecrire un sms
 
-#define SMS_SEND_NUM "AT+CMGS=\"0761925644\""
+#define SMS_SEND_NUM "AT+CMGS=\"0785235143\""
 
 #endif	/* AT_COMMANDS_GSM3_SIM800_H */
 

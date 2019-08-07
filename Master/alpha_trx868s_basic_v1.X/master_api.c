@@ -374,10 +374,12 @@ void MASTER_AppTask() { // machiine a etat general
                     /*-----------------------------------------------------------------*/
 
                 case SLAVE_DAYTIME:
-                    if (!(--ensSlave[slaveSelected].nbTimeout))
+                    --ensSlave[slaveSelected].nbTimeout;
+                    if (ensSlave[slaveSelected].nbTimeout > 0) {
                         MASTER_StoreBehavior(MASTER_STATE_SELECTE_SLAVE, PRIO_MEDIUM);
-                    else {
-                        if (!(--ensSlave[slaveSelected].nbError)) {
+                    } else {
+                        --ensSlave[slaveSelected].nbError;
+                        if (ensSlave[slaveSelected].nbError < 0) {
                             ensSlave[slaveSelected].state = SLAVE_ERROR;
                             MASTER_StoreBehavior(MASTER_STATE_ERROR, PRIO_HIGH);
                         }
@@ -499,6 +501,7 @@ void MASTER_AppTask() { // machiine a etat general
                             break;
                         default:
 #if defined(UART_DEBUG)
+                            b = false;
                             printf("Erreur non connue\n");
 #endif
                             break;
