@@ -3186,12 +3186,12 @@ void radioAlphaTRX_Init(void) {
     //    RF_StatusRead.Val = radioAlphaTRX_Command(STATUS_READ_CMD); // intitial SPI transfer added to avoid power-up problem
     /**-------------> Frequency Setting Command @ 433 MHz <--------------------*/
 
-//    do {
+    do {
         RF_StatusRead.Val = radioAlphaTRX_Command(STATUS_READ_CMD); // intitial SPI transfer added to avoid power-up problem
 #if defined(UART_DEBUG)
         printf("A other Wait until RFM12B is out of power-up reset, status: 0x%04X\r\n", RF_StatusRead.Val);
 #endif
-//    } while (RF_StatusRead.bits.b14_POR);
+    } while (RF_StatusRead.bits.b14_POR);
 
 
     /**-------------> Power Management Command(2) <---------------------------*/
