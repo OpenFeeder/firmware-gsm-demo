@@ -1,19 +1,24 @@
-/*******************************************************************************
-  Sample Application Header
+/* *****************************************************************************
+ *  
+ * _____________________________________________________________________________
+ *
+ *                         MASTER API (.h)
+ * _____________________________________________________________________________
+ *
+ * Titre            : Mise en oeuvre de l'api et la machie a etat du master   
+ * Version          : v00
+ * Date de creation : 26/05/2019
+ * Auteur           : MMADI Anzilane 
+ * Contact          : anzilan@hotmail.fr
+ * Web page         : 
+ * Collaborateur    : ...
+ * Processor        : PIC24
+ * Tools used       : MPLAB X IDE v5.15 and MPLAB Code Configurator (MCC) Version: 3.36
+ * Compiler         : Microchip XC16 v1.35
+ * Programmateur    : PICkit 3
+ *******************************************************************************
+ *******************************************************************************/
 
-  File Name:
-    app.h
-
-  Summary:
-    This header file provides prototypes and definitions for the application.
-
-  Description:
-    This header file provides function prototypes and data type definitions for
-    the application.  Some of these are required by the system (such as the
-    "APP_Initialize" and "APP_Tasks" prototypes) and some of them are only used
-    internally by the application (such as the "APP_STATES" definition).  Both
-    are defined here for convenience.
- ******************************************************************************/
 
 #ifndef _APP_HEADER_H
 #define _APP_HEADER_H
@@ -60,6 +65,7 @@
 // *****************************************************************************
 // *****************************************************************************
 
+/**------------------------>> I N C L U D E <<---------------------------------*/
 #include "mcc.h"
 #include "stdio.h"
 
@@ -96,6 +102,11 @@
 
 #include "oc5.h"
 
+/******************************************************************************/
+/******************************************************************************/
+/******************     MASTER APPLICATION CONTROL         ********************/
+/***************************                ***********************************/
+
 // *****************************************************************************
 // *****************************************************************************
 // Section: Constants
@@ -126,37 +137,63 @@
 
 typedef enum {
     /* In this state, the application opens the driver */
-    APP_STATE_INITIALIZE,
+    MASTER_APP_STATE_INITIALIZE,
 
-    APP_STATE_CONFIGURE_SYSTEM,
+    MASTER_APP_STATE_CONFIGURE_SYSTEM,
 
-    APP_STATE_IDLE,
+    MASTER_APP_STATE_IDLE,
 
-    APP_STATE_SERIAL_COMMUNICATION,
+    MASTER_APP_STATE_SERIAL_COMMUNICATION,
 
-    APP_STATE_DATA_LOG,
+    MASTER_APP_STATE_DATA_LOG,
 
-    APP_STATE_STANDBY,
-    APP_STATE_SLEEP,
-    APP_STATE_WAKE_UP,
+    MASTER_APP_STATE_STANDBY,
+    MASTER_APP_STATE_SLEEP,
+    MASTER_APP_STATE_WAKE_UP,
 
-    APP_STATE_FLUSH_DATA_TO_USB,
-    APP_STATE_REMOVE_USB_DEVICE,
+    MASTER_APP_STATE_FLUSH_DATA_TO_USB,
+    MASTER_APP_STATE_REMOVE_USB_DEVICE,
 
-    APP_STATE_FLUSH_DATA_BEFORE_ERROR,
+    MASTER_APP_STATE_FLUSH_DATA_BEFORE_ERROR,
 
 
     //alphaTRX states 
-    APP_STATE_RADIO_SEND_DATA,
-    APP_STATE_RADIO_RECEIVED,
-    APP_STATE_STORE_HOUR,
+    MASTER_APP_STATE_SEND_DATE,
+    MASTER_APP_STATE_SEND_FROM_GSM,
+    MASTER_APP_STATE_SELECTE_SLAVE,
+    MASTER_APP_STATE_MSG_RF_RECEIVE,
+    MASTER_APP_STATE_MSG_GSM_RECEIVE,
+    MASTER_APP_STATE_SEND_REQUEST_INFOS,
 
     /* Application error state */
-    APP_STATE_ERROR
+    MASTER_APP_STATE_ERROR
 
-} APP_STATES;
+} MASTER_APP_STATES;
 
 // *****************************************************************************
+/* Application : 
+
+  Summary:
+   
+
+  Description:
+    This structure ...
+
+  Remarks:
+    ...
+ */
+typedef enum { // if you want to add a new level, you must be increase MAX_LEVEL_PRIO
+    PRIO_HIGH, //00
+    PRIO_MEDIUM, //01
+    PRIO_LOW //10
+} PRIORITY;
+
+typedef enum {
+    PTR_READ, //00
+    PTR_WRITE, //01
+    PTR_OVFF //10
+} PTR;
+
 
 /* Application Data
 
@@ -174,8 +211,8 @@ typedef struct {
     char siteid[5];
 
     /* Application current state */
-    APP_STATES state; /* current state */
-    APP_STATES previous_state; /* save previous state */
+    MASTER_APP_STATES state; /* current state */
+    MASTER_APP_STATES previous_state; /* save previous state */
 
     /* DateTime structure */
     struct tm current_time;
@@ -275,7 +312,7 @@ typedef struct {
     uint16_t vbat_level;
     uint16_t light_level;
 
-    APP_STATES rc_previous_state;
+    MASTER_APP_STATES rc_previous_state;
 
     bool need_to_reconfigure;
 
@@ -293,7 +330,32 @@ typedef struct {
 
     bool punishment_state;
 
-} APP_DATA;
+} MASTER_APP_DATA;
+
+
+/**-------------------------->> S T R U C T -O F- S L A V E - S T A T E <<----*/
+typedef enum {
+    SLAVE_SYNC, // phase de syncronisation 
+    SLAVE_ERROR, // en etat d'erreur 
+    SLAVE_DAYTIME, // on est en journee 
+    SLAVE_CONFIG, // etat de configiration 
+    SLAVE_COLLECT, // Slave en etat de collecte de donnee
+    SLAVE_SLECTED, // Slave selectionner 
+    SLAVE_COLLECT_END, // fin de la collecte
+    SLAVE_COLLECT_END_BLOCK, // fin de recuperation d'un bloc
+    SLAVE_NONE // etat neutre 
+} SLAVE_STATES;
+
+typedef struct {
+    uint8_t idSlave; // l'identifiant du slave 
+    uint8_t tryToConnect; // nb d'essaie de connexion 
+    uint8_t nbTimeout; // le nombre consecutif de timeout lorsqu'on attend une reponse de ce slave
+    uint8_t nbError; // nombre d'erreurs, survenue pour ce slave
+    uint8_t index; // le numero de paquet attendu, lors de la collecte des donnees 
+    uint8_t nbBloc; // nombre de bloc re?u 
+    SLAVE_STATES state; // etat du slave 
+} SlaveState;
+
 
 // *****************************************************************************
 // *****************************************************************************
@@ -301,7 +363,7 @@ typedef struct {
 // *****************************************************************************
 // *****************************************************************************
 
-extern APP_DATA appData; /* Main application data. */
+extern MASTER_APP_DATA appData; /* Main application data. */
 extern APP_ERROR appError; /* Error application data. */
 extern APP_DATA_USB appDataUsb; /* USB host application data. */
 extern APP_DATA_ALARM appDataAlarmSleep;
@@ -322,14 +384,57 @@ extern volatile bool is_bird_detected;
 //#define is_bird_sensor_detected( ) appDataLog.bird_pir_sensor_status /* Return the value of global variable. */
 //#define clear_bird_sensor_detected( ) {appDataLog.bird_pir_sensor_status = 0;} /* Clear the bird detection sensor. */
 
-
-// *****************************************************************************
-// *****************************************************************************
-// Section: Application Callback Routines
-// *****************************************************************************
-// *****************************************************************************
-/* These routines are called by drivers when certain events occur.
+/**-------------------------->> P R O T O T Y P E S <<------------------------*/
+//______________________________________________________________________________
+/**
+ * 
+ * @return 
  */
+uint8_t MASTER_GetSlaveSelected();
+
+/**SIZE_DATA
+ * tramet un ensemble de octets
+ * 
+ * @param dest : le destinataire 0 < dest < 16 
+ * @param typeMsg : ex : DATA, ACK, HORLOGE, ... etc
+ *                  rensegner le bloc de donnee attendu 
+ * @param idMsg : l'identifiant du msg ==> ack, peut etre utiliser pour
+ * @param nbR : nombre de paquet que je souhaite transmettre 
+ * @param data : la donner a transmettre ==> taille < 20
+ * @param sizeData : la taille de la donnee a transmettre 
+ * @return : le nombre d'octe transmis
+ */
+int8_t MASTER_SendMsgRF(uint8_t dest,
+        uint8_t typeMsg,
+        uint8_t idMsg,
+        uint8_t nbR,
+        uint8_t * data,
+        uint8_t sizeData);
+
+
+/**
+ * 
+ * @return : le nombre d'octe transmis
+ */
+uint8_t MASTER_SendDateRF();
+
+/**
+ * enregistre le comportement dans le tableau des comportements,
+ * en fonction sa priorite
+ *  
+ * @param behavior : le comportement a traiter 
+ * @param prio : la priorite du comportement a traiter 
+ * @return :
+ *          true  : le comportement est enregistre avec succes 
+ *          false : on a ecrase un comportement  
+ */
+bool MASTER_StoreBehavior(MASTER_APP_STATES behavior, PRIORITY prio);
+
+/**
+ * 
+ * @return : le prochain comportement a adopter 
+ */
+MASTER_APP_STATES MASTER_GetBehavior();
 
 
 // *****************************************************************************
@@ -367,7 +472,7 @@ extern volatile bool is_bird_detected;
     This routine must be called from the SYS_Initialize function.
  */
 
-void APP_Initialize(void);
+void MASTER_AppInit(void);
 
 
 /*******************************************************************************
@@ -402,11 +507,12 @@ void APP_Initialize(void);
 
 // (en) State machine of the application.
 // (fr) Machine à états de l'application.
-void APP_Tasks(void);
+void MASTER_AppTask(void);
 
-//AlphaTRX modif
-void APP_setMsgReceive(int8_t set);
-
+/****************                                         *********************/
+/*************************                     ********************************/
+/******************************************************************************/
+/******************************************************************************/
 #endif /* _APP_HEADER_H */
 
 

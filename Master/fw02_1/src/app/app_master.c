@@ -37,7 +37,7 @@
     Application strings and buffers are be defined outside this structure.
  */
 
-APP_DATA appData; /* Global application data. */
+MASTER_APP_DATA appData; /* Global application data. */
 APP_ERROR appError; /* Errors application data */
 APP_DATA_USB appDataUsb; /* USB application data */
 APP_DATA_ALARM appDataAlarmSleep; /* Alarm sleep application data */
@@ -53,14 +53,6 @@ struct tm t;
 volatile int8_t msgReceive = 0;
 int8_t noPrint = 0;
 
-int8_t APP_isMsgReceive() {
-    return msgReceive;
-}
-
-void APP_setMsgReceive(int8_t set) {
-    msgReceive = set;
-}
-
 //____________________________________________________________________________
 
 /******************************************************************************
@@ -70,7 +62,7 @@ void APP_setMsgReceive(int8_t set) {
   Remarks:
     See prototype in app.h.
  */
-void APP_Tasks(void) {
+void MASTER_AppTask(void) {
     static bool button_user_state;
     static bool previous_button_user_state = BUTTON_NOT_PRESSED;
     APP_CHECK chk;
@@ -80,7 +72,7 @@ void APP_Tasks(void) {
 
     /* Check the Application State. */
     switch (appData.state) {
-        case APP_STATE_INITIALIZE:
+        case MASTER_APP_STATE_INITIALIZE:
         {
             /*
              * Initializing the application.
@@ -132,12 +124,12 @@ void APP_Tasks(void) {
                 }
             
             /* Go to device configuration state */
-            appData.state = APP_STATE_CONFIGURE_SYSTEM;
+            appData.state = MASTER_APP_STATE_CONFIGURE_SYSTEM;
             break;
         }
             /* -------------------------------------------------------------- */
 
-        case APP_STATE_CONFIGURE_SYSTEM:
+        case MASTER_APP_STATE_CONFIGURE_SYSTEM:
             /*
              * System configuration.
              * 
@@ -178,7 +170,7 @@ void APP_Tasks(void) {
                            "==> ERROR STATE\n");
 #endif
                     appDataUsb.is_device_needed = false;
-                    appData.state = APP_STATE_ERROR;
+                    appData.state = MASTER_APP_STATE_ERROR;
                     break;
                 }
 
@@ -208,7 +200,7 @@ void APP_Tasks(void) {
 #endif
                     /* If mount failed => error */
                     appDataUsb.is_device_needed = false;
-                    appData.state = APP_STATE_ERROR;
+                    appData.state = MASTER_APP_STATE_ERROR;
                     break;
                 }
             }/* Otherwise wait for USB device connection or for timeout to reach */
@@ -224,7 +216,7 @@ void APP_Tasks(void) {
                     appError.current_line_number = __LINE__;
                     sprintf(appError.current_file_name, "%s", __FILE__);
                     appError.number = ERROR_USB_DEVICE_NOT_FOUND;
-                    appData.state = APP_STATE_ERROR;
+                    appData.state = MASTER_APP_STATE_ERROR;
                     break;
                 }
 
@@ -245,7 +237,7 @@ void APP_Tasks(void) {
                            "==> ERROR STATE\n");
 #endif
                     appDataUsb.is_device_needed = false;
-                    appData.state = APP_STATE_ERROR;
+                    appData.state = MASTER_APP_STATE_ERROR;
                     break;
                 }
             }
@@ -268,18 +260,18 @@ void APP_Tasks(void) {
                 chk = checkImportantParameters();
                 switch (chk) {
                     case APP_CHECK_OK:
-                        appData.state = APP_STATE_CONFIGURE_SYSTEM;
+                        appData.state = MASTER_APP_STATE_CONFIGURE_SYSTEM;
                         break;
                     case APP_CHECK_BATTERY_PB:
                     case APP_CHECK_VBAT_PB:
                     case APP_CHECK_FOOD_LEVEL_PB:
                     case APP_CHECK_RFID_FREQ_PB:
-                        appData.state = APP_STATE_FLUSH_DATA_BEFORE_ERROR;
+                        appData.state = MASTER_APP_STATE_FLUSH_DATA_BEFORE_ERROR;
                         break;
                 }
 
                 /* If one of the mandatory parameter failed => error */
-                if (appData.state != APP_STATE_CONFIGURE_SYSTEM) {
+                if (appData.state != MASTER_APP_STATE_CONFIGURE_SYSTEM) {
                     break;
                 }
 
@@ -293,7 +285,7 @@ void APP_Tasks(void) {
                     printf("FLUSH_DATA_ON_USB_DEVICE_SUCCESS != flushDataOnUsbDevice( )\n"
                            "==> ERROR STATE\n");
 #endif
-                    appData.state = APP_STATE_ERROR;
+                    appData.state = MASTER_APP_STATE_ERROR;
                     break;
                 }
 
@@ -349,7 +341,7 @@ void APP_Tasks(void) {
                         appError.current_line_number = __LINE__;
                         sprintf(appError.current_file_name, "%s", __FILE__);
                         appError.number = ERROR_ATTRACTIVE_LED_INIT;
-                        appData.state = APP_STATE_ERROR;
+                        appData.state = MASTER_APP_STATE_ERROR;
                         break;
                     }
 
@@ -372,7 +364,7 @@ void APP_Tasks(void) {
                 rtcc_set_alarm(appDataAlarmWakeup.time.tm_hour, appDataAlarmWakeup.time.tm_min, appDataAlarmWakeup.time.tm_sec, EVERY_SECOND);
                 
                 /* Go to state idle */
-                appData.state = APP_STATE_IDLE;
+                appData.state = MASTER_APP_STATE_IDLE;
             }/* If system configuration failed => error */
             else {
 #if defined  (USE_UART1_SERIAL_INTERFACE )
@@ -380,7 +372,7 @@ void APP_Tasks(void) {
                        "==> ERROR STATE\n");
 #endif
                 appDataUsb.is_device_needed = false;
-                appData.state = APP_STATE_ERROR;
+                appData.state = MASTER_APP_STATE_ERROR;
                 break;
             }
 
@@ -391,14 +383,14 @@ void APP_Tasks(void) {
                        "==> ERROR STATE\n");
 #endif
                 /* If unmount failed => error */
-                appData.state = APP_STATE_ERROR;
+                appData.state = MASTER_APP_STATE_ERROR;
             }
 
             appDataUsb.is_device_needed = false;
             break;
             /* -------------------------------------------------------------- */
 
-        case APP_STATE_IDLE:
+        case MASTER_APP_STATE_IDLE:
 
             /*
              * Idle state.
@@ -438,7 +430,7 @@ void APP_Tasks(void) {
                 }
 
                 appData.need_to_reconfigure = false;
-                appData.state = APP_STATE_CONFIGURE_SYSTEM;
+                appData.state = MASTER_APP_STATE_CONFIGURE_SYSTEM;
                 break;
             }
 
@@ -446,7 +438,7 @@ void APP_Tasks(void) {
             if (true == appDataLog.log_events && appDataEvent.num_events_stored >= MAX_NUM_EVENT_BEFORE_SAVE) {
                 if (FILEIO_RESULT_FAILURE == logEvents()) {
                     appDataUsb.is_device_needed = false;
-                    appData.state = APP_STATE_ERROR;
+                    appData.state = MASTER_APP_STATE_ERROR;
                     break;
                 }
             }
@@ -454,7 +446,7 @@ void APP_Tasks(void) {
             if (RTCC_ALARM_IDLE != appData.rtcc_alarm_action) {
                 manageRtcAction();
 
-                if (APP_STATE_IDLE != appData.state) {
+                if (MASTER_APP_STATE_IDLE != appData.state) {
                     break;
                 }
             }
@@ -475,10 +467,10 @@ void APP_Tasks(void) {
 
                     if (BUTTON_PRESSED == button_user_state) {
                         //                        appData.state = APP_STATE_TEST_RFID;
-                        appData.state = APP_STATE_SERIAL_COMMUNICATION;
+                        appData.state = MASTER_APP_STATE_SERIAL_COMMUNICATION;
                         break;
                     } else {
-                        appData.state = APP_STATE_FLUSH_DATA_TO_USB;
+                        appData.state = MASTER_APP_STATE_FLUSH_DATA_TO_USB;
                         //                        appData.state = APP_STATE_SERIAL_COMMUNICATION;
                         break;
                     }
@@ -510,7 +502,7 @@ void APP_Tasks(void) {
             //#endif
             break;
             /* -------------------------------------------------------------- */
-        case APP_STATE_SERIAL_COMMUNICATION:
+        case MASTER_APP_STATE_SERIAL_COMMUNICATION:
 
             if (appData.state != appData.previous_state) {
                 appData.previous_state = appData.state;
@@ -666,7 +658,7 @@ void APP_Tasks(void) {
 
             }
             /* If the user press "q" to quit serial communication mode */
-            if (APP_STATE_SERIAL_COMMUNICATION != appData.state) {
+            if (MASTER_APP_STATE_SERIAL_COMMUNICATION != appData.state) {
                 //                /* Turn off battery level bar graph */
                 //                I2C1_MESSAGE_STATUS i2c_status = I2C1_MESSAGE_COMPLETE; // the status of write data on I2C bus
                 //                uint8_t writeBuffer[2]; // data to transmit
@@ -699,7 +691,7 @@ void APP_Tasks(void) {
             break;
             /* -------------------------------------------------------------- */
             
-        case APP_STATE_REMOVE_USB_DEVICE:
+        case MASTER_APP_STATE_REMOVE_USB_DEVICE:
 
             /*
              * Remove USB device.
@@ -756,7 +748,7 @@ void APP_Tasks(void) {
             break;
             /* -------------------------------------------------------------- */
 
-        case APP_STATE_FLUSH_DATA_TO_USB:
+        case MASTER_APP_STATE_FLUSH_DATA_TO_USB:
 
             /*
              * Flush data to USB device.
@@ -795,7 +787,7 @@ void APP_Tasks(void) {
                 } else {
 #if defined ( USE_UART1_SERIAL_INTERFACE )  
                     printf("\tNo data to flush.\n");
-                    appData.state = APP_STATE_REMOVE_USB_DEVICE;
+                    appData.state = MASTER_APP_STATE_REMOVE_USB_DEVICE;
                     break;
 #endif
                 }
@@ -806,7 +798,7 @@ void APP_Tasks(void) {
 
             if (appDataUsb.is_device_address_available) {
                 if (FLUSH_DATA_ON_USB_DEVICE_SUCCESS != flushDataOnUsbDevice()) {
-                    appData.state = APP_STATE_ERROR;
+                    appData.state = MASTER_APP_STATE_ERROR;
                     break;
                 }
             } else {
@@ -816,7 +808,7 @@ void APP_Tasks(void) {
                     appError.current_line_number = __LINE__;
                     sprintf(appError.current_file_name, "%s", __FILE__);
                     appError.number = ERROR_USB_DEVICE_NOT_FOUND;
-                    appData.state = APP_STATE_ERROR;
+                    appData.state = MASTER_APP_STATE_ERROR;
                     break;
                 }
                 /* Blue and yellow status LEDs blink as long USB key is required. */
@@ -825,11 +817,11 @@ void APP_Tasks(void) {
             }
 
             appDataUsb.is_device_needed = false;
-            appData.state = APP_STATE_REMOVE_USB_DEVICE;
+            appData.state = MASTER_APP_STATE_REMOVE_USB_DEVICE;
             break;
             /* -------------------------------------------------------------- */
             
-        case APP_STATE_SLEEP:
+        case MASTER_APP_STATE_SLEEP:
             /**
              * Application sleep state.
              *  - mise hors service de l'ensemble des fonctions hormis le capteur PIR
@@ -909,11 +901,11 @@ void APP_Tasks(void) {
 #endif
             Sleep();
 
-            appData.state = APP_STATE_WAKE_UP;
+            appData.state = MASTER_APP_STATE_WAKE_UP;
             break;
             /* -------------------------------------------------------------- */
 
-        case APP_STATE_WAKE_UP:
+        case MASTER_APP_STATE_WAKE_UP:
             if (appData.state != appData.previous_state) {
                 appData.previous_state = appData.state;
 #if defined ( USE_UART1_SERIAL_INTERFACE ) && defined ( DISPLAY_CURRENT_STATE )
@@ -934,11 +926,11 @@ void APP_Tasks(void) {
 
             rtcc_set_alarm(appDataAlarmWakeup.time.tm_hour, appDataAlarmWakeup.time.tm_min, appDataAlarmWakeup.time.tm_sec, EVERY_SECOND);
 
-            APP_Initialize();
+            MASTER_AppInit();
             break;
             /* -------------------------------------------------------------- */
 
-        case APP_STATE_FLUSH_DATA_BEFORE_ERROR:
+        case MASTER_APP_STATE_FLUSH_DATA_BEFORE_ERROR:
             if (appData.state != appData.previous_state) {
                 appData.previous_state = appData.state;
 #if defined ( USE_UART1_SERIAL_INTERFACE ) && defined( DISPLAY_CURRENT_STATE )
@@ -961,7 +953,7 @@ void APP_Tasks(void) {
             if (appDataUsb.is_device_address_available) {
                 if (USB_DRIVE_NOT_MOUNTED == usbMountDrive()) {
                     appDataUsb.is_device_needed = false;
-                    appData.state = APP_STATE_ERROR;
+                    appData.state = MASTER_APP_STATE_ERROR;
                     break;
                 }
 
@@ -970,7 +962,7 @@ void APP_Tasks(void) {
                     setLedsStatusColor(LED_USB_ACCESS);
                     if (FILEIO_RESULT_FAILURE == logBatteryLevel()) {
                         appDataUsb.is_device_needed = false;
-                        appData.state = APP_STATE_ERROR;
+                        appData.state = MASTER_APP_STATE_ERROR;
                         break;
                     }
                 }
@@ -980,7 +972,7 @@ void APP_Tasks(void) {
                     setLedsStatusColor(LED_USB_ACCESS);
                     if (FILEIO_RESULT_FAILURE == logError()) {
                         appDataUsb.is_device_needed = false;
-                        appData.state = APP_STATE_ERROR;
+                        appData.state = MASTER_APP_STATE_ERROR;
                         break;
                     }
                 }
@@ -991,7 +983,7 @@ void APP_Tasks(void) {
                         setLedsStatusColor(LED_USB_ACCESS);
                         if (FILEIO_RESULT_FAILURE == logEvents()) {
                             appDataUsb.is_device_needed = false;
-                            appData.state = APP_STATE_ERROR;
+                            appData.state = MASTER_APP_STATE_ERROR;
                             break;
                         }
                     }
@@ -1001,7 +993,7 @@ void APP_Tasks(void) {
                 if (appDataLog.num_time_calib_stored > 0) {
                     if (FILEIO_RESULT_FAILURE == logCalibration()) {
                         appDataUsb.is_device_needed = false;
-                        appData.state = APP_STATE_ERROR;
+                        appData.state = MASTER_APP_STATE_ERROR;
                         break;
                     }
                 }
@@ -1010,13 +1002,13 @@ void APP_Tasks(void) {
                 if (appDataLog.num_ds3231_temp_stored > 0) {
                     if (FILEIO_RESULT_FAILURE == logDs3231Temp()) {
                         appDataUsb.is_device_needed = false;
-                        appData.state = APP_STATE_ERROR;
+                        appData.state = MASTER_APP_STATE_ERROR;
                         break;
                     }
                 }
 
                 if (USB_DRIVE_MOUNTED == usbUnmountDrive()) {
-                    appData.state = APP_STATE_ERROR;
+                    appData.state = MASTER_APP_STATE_ERROR;
                 }
 
             } else {
@@ -1026,7 +1018,7 @@ void APP_Tasks(void) {
                     appError.current_line_number = __LINE__;
                     sprintf(appError.current_file_name, "%s", __FILE__);
                     appError.number = ERROR_USB_DEVICE_NOT_FOUND;
-                    appData.state = APP_STATE_ERROR;
+                    appData.state = MASTER_APP_STATE_ERROR;
                     break;
                 }
                 /* Blue and yellow status LEDs blink as long USB key is required. */
@@ -1035,11 +1027,11 @@ void APP_Tasks(void) {
             }
 
             setLedsStatusColor(LEDS_OFF);
-            appData.state = APP_STATE_ERROR;
+            appData.state = MASTER_APP_STATE_ERROR;
             break;
             /* -------------------------------------------------------------- */
 
-        case APP_STATE_ERROR:
+        case MASTER_APP_STATE_ERROR:
             if (appData.state != appData.previous_state) {
                 appData.previous_state = appData.state;
 #if defined ( USE_UART1_SERIAL_INTERFACE ) && defined( DISPLAY_CURRENT_STATE )
@@ -1054,7 +1046,7 @@ void APP_Tasks(void) {
                 if (appError.number < ERROR_USB || appError.number > ERROR_USB_SUSPEND_DEVICE) {
                     /* Flush data on USB device if necessary */
                     if (false == appError.is_data_flush_before_error) {
-                        appData.state = APP_STATE_FLUSH_DATA_BEFORE_ERROR;
+                        appData.state = MASTER_APP_STATE_FLUSH_DATA_BEFORE_ERROR;
                         //generation d'une erreure 
                         break;
                     }
@@ -1099,7 +1091,7 @@ void APP_Tasks(void) {
                         printf("\t/!\\ The system reset %u times => Critical error\n", MAX_NUM_RESET);
 #endif                       
                         appError.number = appError.number + ERROR_TOO_MANY_SOFTWARE_RESET;
-                        appData.previous_state = APP_STATE_IDLE;
+                        appData.previous_state = MASTER_APP_STATE_IDLE;
                         break;
                     }
 
@@ -1177,7 +1169,7 @@ void APP_Tasks(void) {
     }
 }
 
-void APP_Initialize(void) {
+void MASTER_AppInit(void) {
     int i;
 
     OC4_Stop();
@@ -1197,8 +1189,8 @@ void APP_Initialize(void) {
     appDataAttractiveLeds.blue[1] = 0;
 
     /* APP state task */
-    appData.state = APP_STATE_INITIALIZE;
-    appData.previous_state = APP_STATE_ERROR;
+    appData.state = MASTER_APP_STATE_INITIALIZE;
+    appData.previous_state = MASTER_APP_STATE_ERROR;
 
     appData.need_to_reconfigure = false;
 

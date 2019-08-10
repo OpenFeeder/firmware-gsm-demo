@@ -114,7 +114,7 @@ int main( void )
     }
 
     /* Initialize the application. */
-    APP_Initialize( );
+    MASTER_AppInit( );
       
     /* If the user button is not pressed => enter normal mode */
     if ( BUTTON_NOT_PRESSED == USER_BUTTON_GetValue( ) )
@@ -137,7 +137,7 @@ int main( void )
             USBTasks( );
 
             /* Maintain the application's state machine. */
-            APP_Tasks( ); /* application specific tasks */  
+            MASTER_AppTask( ); /* application specific tasks */  
         }
     }
     /* If the user button is pressed => enter debug mode */
@@ -186,7 +186,7 @@ int main( void )
             appError.current_line_number = __LINE__;
             sprintf( appError.current_file_name, "%s", __FILE__ );
             appError.number = ERROR_ATTRACTIVE_LED_INIT;
-            appData.state = APP_STATE_ERROR;
+            appData.state = MASTER_APP_STATE_ERROR;
         }
         
         /* Power USB device */

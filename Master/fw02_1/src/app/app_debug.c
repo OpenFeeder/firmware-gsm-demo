@@ -354,7 +354,7 @@ void APP_SerialDebugTasks(void) {
 
                         /* Reconfigure the system by reading the USB key again */
                         appData.need_to_reconfigure = true;
-                        appData.state = APP_STATE_IDLE;
+                        appData.state = MASTER_APP_STATE_IDLE;
                         break;
                     }
 
@@ -415,7 +415,7 @@ void APP_SerialDebugTasks(void) {
             case 'F':
 
                 /* Flush data on USB device */
-                appData.state = APP_STATE_FLUSH_DATA_TO_USB;
+                appData.state = MASTER_APP_STATE_FLUSH_DATA_TO_USB;
                 //                flushDataOnUsbDevice( );
 
                 printf("\r\n\t/!\\ Exit serial communication mode\r\n");
@@ -969,7 +969,7 @@ void APP_SerialDebugTasks(void) {
             case 'Q':
 
                 /* Quit serial communication state => back to idle state */
-                appData.state = APP_STATE_IDLE;
+                appData.state = MASTER_APP_STATE_IDLE;
 
                 printf("\r\n\t/!\\ Exit serial communication mode\r\n");
 

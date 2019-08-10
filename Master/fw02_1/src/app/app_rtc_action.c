@@ -16,14 +16,14 @@ void manageRtcAction(  )
     /* If the OF is awaken => go to sleep mode */
     if ( OPENFEEDER_IS_AWAKEN == appData.openfeeder_state && RTCC_ALARM_SLEEP_OPENFEEDER == appData.rtcc_alarm_action )
     {
-        appData.state = APP_STATE_SLEEP;
+        appData.state = MASTER_APP_STATE_SLEEP;
         return;
     }
 
     /* If the OF is sleeping => wake up */
     if ( OPENFEEDER_IS_SLEEPING == appData.openfeeder_state && RTCC_ALARM_WAKEUP_OPENFEEDER == appData.rtcc_alarm_action )
     {
-        appData.state = APP_STATE_WAKE_UP;
+        appData.state = MASTER_APP_STATE_WAKE_UP;
         return;
     }
 
@@ -257,7 +257,7 @@ void manageRtcAction(  )
 
         if ( false == flag )
         {
-            appData.state = APP_STATE_FLUSH_DATA_BEFORE_ERROR;
+            appData.state = MASTER_APP_STATE_FLUSH_DATA_BEFORE_ERROR;
             return;
         }
     }
