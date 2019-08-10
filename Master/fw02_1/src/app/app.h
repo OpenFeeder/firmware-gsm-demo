@@ -134,11 +134,6 @@ typedef enum {
 
     APP_STATE_SERIAL_COMMUNICATION,
 
-//    APP_STATE_OPENING_DOOR,
-//    APP_STATE_WAITING_CATCH_REWARD,
-//    APP_STATE_CLOSING_DOOR,
-//    APP_STATE_REOPEN_DOOR,
-
     APP_STATE_DATA_LOG,
 
     APP_STATE_STANDBY,
@@ -149,7 +144,6 @@ typedef enum {
     APP_STATE_REMOVE_USB_DEVICE,
 
     APP_STATE_FLUSH_DATA_BEFORE_ERROR,
-    APP_STATE_TEST_RFID,
 
 
     //alphaTRX states 
@@ -177,7 +171,6 @@ typedef enum {
  */
 
 typedef struct {
-    uint8_t scenario_number;
     char siteid[5];
 
     /* Application current state */
@@ -274,16 +267,6 @@ typedef struct {
     /* I2C - Status of Buttons */
     BUTTON button_pressed;
 
-    /* Servomotor structure */
-    uint16_t timeout_standby;
-    uint16_t timeout_pir;
-    uint16_t timeout_taking_reward;
-    uint16_t timeout_guillotine;
-
-    bool bird_is_taking_reward;
-
-    uint8_t reward_enable;
-
     bool openfeeder_state;
     RTCC_ALARM_ACTION rtcc_alarm_action;
 
@@ -292,21 +275,9 @@ typedef struct {
     uint16_t vbat_level;
     uint16_t light_level;
 
-    uint16_t rfid_rdyclk;
-
-    bool rfid_signal_detected;
-
     APP_STATES rc_previous_state;
 
-    uint16_t punishment_delay;
-    uint8_t punishment_proba_thresh;
-
     bool need_to_reconfigure;
-
-    bool pir_sensor_powered;
-    bool servo_powered;
-
-    bool test_rfid;
 
     struct {
         uint8_t family;
@@ -317,12 +288,6 @@ typedef struct {
     struct {
         uint32_t words[5];
     } udid;
-
-    bool chk_food_level;
-
-    bool secu_bird_reward_reopen;
-    bool secu_guillotine;
-    uint16_t secu_guillotine_offset;
 
     float ext_temperature;
 

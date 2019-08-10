@@ -113,17 +113,6 @@ INI_READ_STATE config_read_ini(void) {
         }
     }
 
-    /* Scenario number */
-    read_parameter = ini_getl("scenario", "num", -1, "CONFIG.INI");
-    if (-1 == read_parameter) {
-        return INI_PB_SCENARIO_NUM;
-    } else {
-#if defined (USE_UART1_SERIAL_INTERFACE) && defined (DISPLAY_INI_READ_DATA)
-        printf("\tScenario number... read.\n");
-#endif 
-        appData.scenario_number = (uint8_t) read_parameter;
-    }
-
     /* Site identification. */
     s = ini_gets("siteid", "zone", "XXXX", appData.siteid, sizearray(appData.siteid), "CONFIG.INI");
     for (i = s; i < 4; i++) {
@@ -333,32 +322,6 @@ INI_READ_STATE config_read_ini(void) {
         appDataLog.log_calibration = true;
     }
 
-    /* Reward. */
-    read_parameter = ini_getl("reward", "enable", -1, "CONFIG.INI");
-    if (-1 == read_parameter) {
-        return INI_PB_REWARD_ENABLE;
-    } else {
-        appData.reward_enable = (uint8_t) read_parameter;
-#if defined (USE_UART1_SERIAL_INTERFACE) && defined (DISPLAY_INI_READ_DATA)
-        printf("\tReward enable... read.\n");
-#endif
-    }
-
-    if (1 == appData.reward_enable) {
-        /* Timeout taking reward. */
-        read_parameter = ini_getl("reward", "timeout", -1, "CONFIG.INI");
-        if (-1 == read_parameter) {
-            return INI_PB_REWARD_TIMEOUT;
-        } else {
-            appData.timeout_taking_reward = (uint16_t) read_parameter * 1000;
-#if defined (USE_UART1_SERIAL_INTERFACE) && defined (DISPLAY_INI_READ_DATA)
-            printf("\tReward timeout... read.\n");
-#endif
-        }
-    } else {
-        appData.timeout_taking_reward = 0;
-    }
-
     /* Clear watch-dog timer because INI read take time */
     ClrWdt();
 
@@ -420,13 +383,6 @@ void config_print(void) {
         }
     } else {
         printf("\t\tEvents: disable\n");
-    }
-
-    printf("\tChecks\n");
-    if (true == appData.chk_food_level) {
-        printf("\t\tFood level: enable\n");
-    } else {
-        printf("\t\tFood level: disable\n");
     }
 
     if (true == appData.flags.bit_value.attractive_leds_status) {

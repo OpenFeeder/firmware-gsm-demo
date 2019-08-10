@@ -1297,10 +1297,6 @@ void APP_Initialize(void) {
     appDataEvent.is_txt_file_name_set = false;
     appDataEvent.is_bin_file_name_set = false;
 
-    appData.secu_bird_reward_reopen = true;
-    appData.secu_guillotine = true;
-    appData.secu_guillotine_offset = DEFAULT_GUILLOTINE_TIME_OFFSET;
-
 }
 
 

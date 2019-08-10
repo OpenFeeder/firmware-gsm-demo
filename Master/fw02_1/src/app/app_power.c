@@ -29,13 +29,6 @@ void powerPIREnable( void )
     {
        store_event(OF_POWER_PIR_ON); 
     }
-    
-    if ( false == appData.servo_powered && false == appData.pir_sensor_powered )
-    {
-        // Power on the voltage regulator U7 (MIC39101 - 5.0YM)
-        CMD_VDD_ACC_PIR_SERVO_SetHigh( );
-    }
-    appData.pir_sensor_powered = true;
 }
 
 
@@ -46,13 +39,6 @@ void powerPIRDisable( void )
     {
        store_event(OF_POWER_PIR_OFF); 
     }
-
-    if ( false == appData.servo_powered )
-    {
-        // Power off the voltage regulator U7 (MIC39101 - 5.0YM)
-        CMD_VDD_ACC_PIR_SERVO_SetLow( );
-    }
-    appData.pir_sensor_powered = false;
 }
 
 

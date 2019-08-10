@@ -1294,13 +1294,7 @@ void APP_SerialDebugTasks(void) {
                     case 'g':
                     case 'G':
                     {
-                        appData.secu_guillotine = !appData.secu_guillotine;
-
-                        if (true == appData.secu_guillotine) {
-                            printf("\n\tGuillotine security enable\n");
-                        } else {
-                            printf("\n\tGuillotine security disable\n");
-                        }
+                        //FREE
                         break;
                     }
 
@@ -1321,15 +1315,7 @@ void APP_SerialDebugTasks(void) {
                     case 'r':
                     case 'R':
                     {
-
-                        appData.secu_bird_reward_reopen = !appData.secu_bird_reward_reopen;
-
-                        if (true == appData.secu_bird_reward_reopen) {
-                            printf("\n\tReward reopen security enable\n");
-                        } else {
-                            printf("\n\tReward reopen security disable\n");
-                        }
-
+                        //FREE
                         break;
                     }
                 }
