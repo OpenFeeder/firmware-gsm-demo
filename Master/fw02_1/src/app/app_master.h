@@ -173,6 +173,7 @@ typedef enum {
 } MASTER_APP_STATES;
 
 // *****************************************************************************
+
 /* Application : 
 
   Summary:
@@ -185,9 +186,10 @@ typedef enum {
     ...
  */
 typedef enum { // if you want to add a new level, you must be increase MAX_LEVEL_PRIO
-    PRIO_HIGH, //00
-    PRIO_MEDIUM, //01
-    PRIO_LOW //10
+    PRIO_EXEPTIONNEL, //00 priorite exeptionnelle 
+    PRIO_HIGH, //01
+    PRIO_MEDIUM, //10
+    PRIO_LOW //11
 } PRIORITY;
 
 typedef enum {
@@ -210,7 +212,8 @@ typedef enum {
 } SLAVE_STATES;
 
 typedef struct {
-    uint8_t idSlave; // l'identifiant du slave 
+    uint8_t idSlave; // l'identifiant du slave
+    uint8_t uidSlave; // l'identifiant reel du slave 
     uint8_t tryToConnect; // nb d'essaie de connexion 
     uint8_t nbTimeout; // le nombre consecutif de timeout lorsqu'on attend une reponse de ce slave
     uint8_t nbError; // nombre d'erreurs, survenue pour ce slave
@@ -219,6 +222,12 @@ typedef struct {
     SLAVE_STATES state; // etat du slave 
 } SlaveState;
 
+typedef enum {
+    GOOD_MORNING, //master wake up 
+    GOOD_DAY, // the daytime  
+    GOOD_NIGHT, // end day collect log 
+    SEE_YOU_TOMORROW // master go to sleep
+}STEP_OF_DAY;
 
 /* Application Data
 
@@ -353,7 +362,10 @@ typedef struct {
 
     float ext_temperature;
 
-//    bool punishment_state;
+    //
+    STEP_OF_DAY dayTime;  
+    
+    
     //communication information 
     volatile uint8_t behavior[MAX_LEVEL_PRIO][NB_BEHAVIOR_PER_PRIO];
     volatile uint8_t ptr[MAX_LEVEL_PRIO][3]; //READ - WRITE - OVFF (overflow)
