@@ -23,7 +23,7 @@
 #include <time.h>
 #include "xc.h"
 #include "timer.h"
-#include "app.h"
+#include "app_master.h"
 
 
  /******************************************************************************/

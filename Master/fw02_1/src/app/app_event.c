@@ -6,7 +6,7 @@
  * @revision
  */
 
-#include "app.h"
+#include "app_master.h"
 #include "app_event.h"
 
 void store_event(APP_EVENT ev) 

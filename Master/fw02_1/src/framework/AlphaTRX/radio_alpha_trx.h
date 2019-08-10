@@ -112,7 +112,6 @@
 /**------------------------>> I N C L U D E <<---------------------------------*/
 #include <xc.h> // include processor files - each processor file is guarded.  
 #include "../../../fw02_1.X/mcc_generated_files/pin_manager.h"
-#include "radio_alpha_trx_slave_api.h"
 #include "Services.h"
 /******************************************************************************/
 /******************************************************************************/

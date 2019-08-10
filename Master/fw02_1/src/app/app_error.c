@@ -6,7 +6,7 @@
  * @revision
  */
 
-#include "app.h"
+#include "app_master.h"
 #include "app_error.h"
 
 FILEIO_RESULT logError( void )

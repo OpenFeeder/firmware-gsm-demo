@@ -7,7 +7,7 @@
  * @dependency 
  */
 
-#include "app.h"
+#include "app_master.h"
 #include "app_power.h"
 
 

@@ -12,8 +12,8 @@
 // *****************************************************************************
 // *****************************************************************************
 
-#include "app.h"
-#include "framework/AlphaTRX/radio_alpha_trx_slave_api.h"
+#include "app_master.h"
+
 #define _DEBUG (1)
 
 // *****************************************************************************
@@ -121,11 +121,9 @@ void APP_Tasks(void) {
 #endif
                     radioAlphaTRX_Init();
                     radioAlphaTRX_ReceivedMode(); // receive mode actived
-                    radioAlphaTRX_GetLogFromDisk();
 #if defined  (USE_UART1_SERIAL_INTERFACE ) 
                     printf("RF Module INIT.\n");
 #endif
-                    //                    radioAlphaTRX_GetLogFromDisk();
                 } else {
 #if defined  (USE_UART1_SERIAL_INTERFACE )
                     printf("RF Module disable.\n");
@@ -510,40 +508,6 @@ void APP_Tasks(void) {
             //            /* Modify time value according to sleep values in the CONFIG.INI file */
             //            setDateTime( 17, 9, 21, 22, 59, 55 );
             //#endif
-            break;
-            /* -------------------------------------------------------------- */
-            //alphaTRX modification 
-        case APP_STATE_RADIO_RECEIVED:
-            if (appData.state != appData.previous_state) {
-#if defined (USE_UART1_SERIAL_INTERFACE) && defined (DISPLAY_CURRENT_STATE)
-                printf("> APP_STATE_RADIO_RECEIVED\n");
-#endif
-                appData.previous_state = appData.state;
-            }
-            radioAlphaTRX_SlaveHundlerMsgReceived(radioAlphaTRX_GetFrame());
-            break;
-            /* -------------------------------------------------------------- */
-        case APP_STATE_RADIO_SEND_DATA:
-            if (appData.state != appData.previous_state) {
-#if defined (USE_UART1_SERIAL_INTERFACE) && defined (DISPLAY_CURRENT_STATE)
-                printf("> APP_STATE_RADIO_SEND_DATA\n");
-#endif
-                appData.previous_state = appData.state;
-            }
-            radioAlphaTRX_SlaveSendLog();
-            //apelle la fonction qui s'occupe de transmettre les donnees 
-            break;
-            /* -------------------------------------------------------------- */
-            
-        case APP_STATE_STORE_HOUR:
-            if (appData.state != appData.previous_state) {
-                appData.previous_state = appData.state;
-#if defined ( USE_UART1_SERIAL_INTERFACE ) && defined( DISPLAY_CURRENT_STATE )
-                printf("> APP_STATE_STORE_HOUR\n");
-#endif
-            }
-            radioAlphaTRX_SlaveUpdateDatelog();
-            appData.state = APP_STATE_IDLE;
             break;
             /* -------------------------------------------------------------- */
         case APP_STATE_SERIAL_COMMUNICATION:
@@ -1092,7 +1056,6 @@ void APP_Tasks(void) {
                     if (false == appError.is_data_flush_before_error) {
                         appData.state = APP_STATE_FLUSH_DATA_BEFORE_ERROR;
                         //generation d'une erreure 
-                        radioAlphaTRX_SlaveSaveError(appError.number);
                         break;
                     }
                 }

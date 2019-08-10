@@ -7,7 +7,7 @@
  */
 
 #include <ctype.h>
-#include "app.h"
+#include "app_master.h"
 #include "app_debug.h"
 #include "app_i2c.h"
 #include "app_datetime.h"
@@ -132,22 +132,6 @@ void APP_SerialDebugTasks(void) {
         uint8_t data_from_uart1 = UART1_Read();
 
         switch (data_from_uart1) {
-            case '*':
-                //debug
-                display_STATUS_register_from_RF_module();
-                break;
-                /* -------------------------------------------------------------- */
-
-            case '$':
-                //debug
-#if defined(UART_DEBUG)
-                printf("ERROR DOOR GENERATED\n");
-#endif
-                radioAlphaTRX_SlaveSaveError(4);
-                break;
-                /* -------------------------------------------------------------- */
-
-
             case ',':
             case '?':
 
@@ -265,14 +249,8 @@ void APP_SerialDebugTasks(void) {
                     }
                     case 's':
                     case 'S':
-                    {
-                        //case 'S':
-#if defined(UART_DEBUG)
-                        printf("envoie\n");
-#endif
-                        radioAlphaTRX_SlaveSendNothing();
+                    
                         break;
-                    }
                         /* -------------------------------------------------------------- */
                     case 't':
                     case 'T':

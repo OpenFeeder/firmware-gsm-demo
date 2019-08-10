@@ -7,7 +7,7 @@
  * @dependency tmr3 --> ISR every 20 ms
  */
 
-#include "app.h"
+#include "app_master.h"
 #include "delay.h"
 
 /* Not blocking delay function, can be used with this project. */

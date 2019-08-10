@@ -51,7 +51,7 @@
 #include <xc.h>
 #include "rtcc.h"
 #include <stdio.h>
-#include "app.h"
+#include "app_master.h"
 #include "../../src/framework/AlphaTRX/timer.h"
 
 /**

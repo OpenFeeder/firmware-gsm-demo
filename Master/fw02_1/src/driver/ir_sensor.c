@@ -5,7 +5,7 @@
  * @date 09/09/2016
  */
 
-#include "app.h"
+#include "app_master.h"
 #include "ir_sensor.h"
 
 volatile bool g_flag_ir1_sensor = false;

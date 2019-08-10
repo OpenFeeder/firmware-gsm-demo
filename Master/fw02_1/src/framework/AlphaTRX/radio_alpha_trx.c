@@ -23,7 +23,7 @@
 /**------------------------->> I N C L U D E S <<-----------------------------*/
 #include <stdio.h>
 #include "radio_alpha_trx.h"
-#include "app.h"
+#include "app_master.h"
 /******************************************************************************/
 
 /******************************************************************************/
@@ -45,9 +45,11 @@ AFC_CMD_VAL RF_AfcCmd;
 STATUS_READ_VAL RF_StatusRead; // Status Read Command
 
 
+//
 volatile bool sendMode = false; // O receve mode    1 send mode 
 
 /**-------------------------->> D E F I N I T I O N <<-------------------------*/
+
 
 
 
@@ -3186,12 +3188,12 @@ void radioAlphaTRX_Init(void) {
     //    RF_StatusRead.Val = radioAlphaTRX_Command(STATUS_READ_CMD); // intitial SPI transfer added to avoid power-up problem
     /**-------------> Frequency Setting Command @ 433 MHz <--------------------*/
 
-    //    do {
-    RF_StatusRead.Val = radioAlphaTRX_Command(STATUS_READ_CMD); // intitial SPI transfer added to avoid power-up problem
+//    do {
+        RF_StatusRead.Val = radioAlphaTRX_Command(STATUS_READ_CMD); // intitial SPI transfer added to avoid power-up problem
 #if defined(UART_DEBUG)
-    printf("A other Wait until RFM12B is out of power-up reset, status: 0x%04X\r\n", RF_StatusRead.Val);
+        printf("A other Wait until RFM12B is out of power-up reset, status: 0x%04X\r\n", RF_StatusRead.Val);
 #endif
-    //    } while (RF_StatusRead.bits.b14_POR);
+//    } while (RF_StatusRead.bits.b14_POR);
 
 
     /**-------------> Power Management Command(2) <---------------------------*/
@@ -3356,7 +3358,6 @@ void radioAlphaTRX_Init(void) {
 
 // Initialiser la detection d'une nouvelle donnee
 // le buffer est vide si non erreur on initialise tou les registre et on recomence 
-
 bool radioAlphaTRX_FlushFIFO() {
     bool stop = false;
     int i = 10;
@@ -3370,11 +3371,10 @@ bool radioAlphaTRX_FlushFIFO() {
     } while (!stop && i > 0); // tant que la fifo nest pas vide 
     return !(i == 0); // 
 }
-
 void radioAlphaTRX_ReceivedMode(void) {
     //close TX mode 
     if (!radioAlphaTRX_FlushFIFO()) radioAlphaTRX_Init();
-
+    
     RF_PowerManagement.Val = PWR_MGMT_CMD_POR;
     RF_PowerManagement.bits.b0_dc = 1;
     radioAlphaTRX_Command(RF_PowerManagement.Val); //0x8209
@@ -3477,7 +3477,6 @@ int8_t radioAlphaTRX_SendMode(void) {
     return radioAlphaTRX_WaitLownIRQ(SEND_TIME_OUT); // arbitraire 
 }
 
-
 // Transmission d'une donnee par le module RF
 
 int8_t radioAlphaTRX_SendByte(uint8_t data_send, int8_t timeout) {
@@ -3488,7 +3487,7 @@ int8_t radioAlphaTRX_SendByte(uint8_t data_send, int8_t timeout) {
     return radioAlphaTRX_WaitLownIRQ(timeout);
 }
 
-int8_t radioAlphaTRX_SendData(Frame frameToSned) {
+int8_t radioAlphaTRX_SendData(Frame frameToSend) {
     int i;
 
     //preamble
@@ -3496,22 +3495,18 @@ int8_t radioAlphaTRX_SendData(Frame frameToSned) {
     radioAlphaTRX_SendByte(0xAA, SEND_TIME_OUT);
     radioAlphaTRX_SendByte(0xAA, SEND_TIME_OUT);
 
-    //peut g?n?rer des probleme ? surveiller
     //synchro pattern
     radioAlphaTRX_SendByte(0x2D, SEND_TIME_OUT);
     radioAlphaTRX_SendByte(0xD4, SEND_TIME_OUT);
     //transmission des octet 
-    for (i = 0; i < frameToSned.Champ.size + 5; i++) {
-        if (radioAlphaTRX_SendByte(frameToSned.paquet[i], SEND_TIME_OUT) == 0)
+    for (i = 0; i < frameToSend.Champ.size + 5; i++) {
+        if (radioAlphaTRX_SendByte(frameToSend.paquet[i], SEND_TIME_OUT) == 0)
             break;
     }
 
     //dummy bytes
     radioAlphaTRX_SendByte(0x00, SEND_TIME_OUT);
     radioAlphaTRX_SendByte(0x00, SEND_TIME_OUT);
-    // clear TX
-    //    RF_PowerManagement.Val = 0x8209;
-    //    radioAlphaTRX_Command(RF_PowerManagement.Val);
     return i;
 }
 
@@ -3551,8 +3546,8 @@ int8_t radioAlphaTRX_WaitLownIRQ(int timeout) {
 /******************************************************************************/
 /******************************************************************************/
 // 4 buffer remplie de circulairement 
-volatile Frame frameReceive;
-volatile uint8_t sizeBuf = 0;
+volatile Frame frameReceve;
+volatile uint8_t sizeDate = 0;
 
 bool radioAlphaTRX_IsSendMode() {
     return sendMode;
@@ -3562,12 +3557,13 @@ void radioAlphaTRX_SetSendMode(bool modeRF) {
     sendMode = modeRF;
 }
 
-uint8_t radioAlphaTRX_GetSizeBuf() {
-    return sizeBuf;
+uint8_t radioAlphaTRX_GetSizeData() {
+    return sizeDate;
 }
 
 Frame radioAlphaTRX_GetFrame() {
-    return frameReceive;
+    //    MASTER_SetMsgReceiveRF(false); // a voir 
+    return frameReceve;
 }
 
 bool radioAlphaTRX_receive() {
@@ -3579,40 +3575,28 @@ bool radioAlphaTRX_receive() {
             return false;
         }
         receiveData.word = radioAlphaTRX_Command(0xB000);
-        frameReceive.paquet[i] = receiveData.byte.low;
+        frameReceve.paquet[i] = receiveData.byte.low;
+        //frameReceve.Champ.src != MASTER_GetSlaveSelected() : ==> etre sur de recuperer le msg du slave selectionn?
         if (i == 0) {
-            if (frameReceive.Champ.dest != SLAVE_ID 
-                 && frameReceive.Champ.dest != BROADCAST_ID) {
-//#if defined(UART_DEBUG)
-//                printf("slave id %d vs %d dest\n", SLAVE_ID, frameReceive.Champ.dest);
-//#endif
+            if (frameReceve.Champ.dest != MASTER_ID ) // || frameReceve.Champ.src != MASTER_GetSlaveSelected()pour les broadcast, on modifiera la condition
                 return false;
-            }
         } else if (receiveData.byte.low == 0) {
             break;
         }
-        if (i != 4) sumCtrl ^= receiveData.byte.low;
-        ;
+        if (i != 4) sumCtrl ^= receiveData.byte.low; // c'est l'octet 4 ou se trouve le sum contrle 
     }
-    return sumCtrl == frameReceive.Champ.crc;
+    return sumCtrl == frameReceve.Champ.crc; // test sum controle
 }
 
 void radioAlphaTRX_CaptureFrame() {
     if (radioAlphaTRX_receive()) {
-        if (frameReceive.Champ.typeMsg == HORLOGE) {
-            radioAlphaTRX_SlaveUpdateDate(frameReceive.Champ.data);
-        } else {
-            LED_STATUS_B_Toggle();
-            APP_setMsgReceive(1);
-            TMR_SetMsgRecuTimeout(TIME_OUT_GET_FRAME); // on demare le timer, car le bufer est probablement remplie 
-        }
-    } else {
-        LED_STATUS_R_Toggle();
-    }
+        LED_STATUS_B_Toggle();
+        // ? ce niveau le msg est corectemnt re?u 
+//        MASTER_StoreBehavior(MASTER_STATE_MSG_RF_RECEIVE, PRIO_HIGH); // c'est une information tr?s importante 
+    } 
     //on se remet en ecoute 
     radioAlphaTRX_ReceivedMode();
 }
-
 
 /****************                                         *********************/
 /*************************                     ********************************/

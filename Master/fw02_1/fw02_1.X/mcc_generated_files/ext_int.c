@@ -27,7 +27,7 @@
 #include <xc.h>
 #include "ext_int.h"
 //***User Area Begin->code: Add External Interrupt handler specific headers 
-#include "app.h"
+#include "app_master.h"
 
 volatile uint16_t counter_positive_edge_rdyclk = 0;
 volatile bool is_bird_detected = false;

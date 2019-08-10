@@ -6,7 +6,7 @@
  */
 
 
-#include "app.h"
+#include "app_master.h"
 
 static uint8_t stx = 0xFA;
 static uint8_t etx = 0xFB;

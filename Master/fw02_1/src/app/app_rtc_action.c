@@ -6,7 +6,7 @@
  */
 
 
-#include "app.h"
+#include "app_master.h"
 
 void manageRtcAction(  )
 {

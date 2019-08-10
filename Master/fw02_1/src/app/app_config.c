@@ -5,9 +5,8 @@
  * @date 
  */
 
-#include "app.h"
+#include "app_master.h"
 #include "app_config.h"
-#include "framework/AlphaTRX/radio_alpha_trx_slave_api.h"
 
 #define _DEBUG (1) // à effacer 
 

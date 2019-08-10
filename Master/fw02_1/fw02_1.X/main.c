@@ -31,7 +31,7 @@
 
 
 #include "mcc.h"
-#include "app.h"
+#include "app_master.h"
 
 /*
                          Main application

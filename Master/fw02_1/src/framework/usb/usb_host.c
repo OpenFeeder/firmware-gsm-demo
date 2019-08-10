@@ -27,7 +27,7 @@ please contact mla_licensing@microchip.com
 #include <usb.h>
 #include "usb_host_local.h"
 #include "usb_hal_local.h"
-#include "app.h"
+#include "app_master.h"
 
 #ifndef USB_MALLOC
 #define USB_MALLOC(size) malloc(size)

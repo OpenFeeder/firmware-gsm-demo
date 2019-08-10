@@ -5,7 +5,7 @@
  * Revision history: 1
  */
 
-#include "app.h"
+#include "app_master.h"
 #include "app_usb.h"
 
 /* Interrupt handler for USB host. */

@@ -4,7 +4,7 @@
  * Created on 31 octobre 2015
  */
 
-#include "app.h"
+#include "app_master.h"
 #include "mcp23017.h"
 // C Routine for Hex to ASCII with simple lookup array :
 const char hex2digit[] = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' };

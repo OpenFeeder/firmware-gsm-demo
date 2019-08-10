@@ -5,7 +5,7 @@
  * @date 08/09/2016
  */
 
-#include "app.h"
+#include "app_master.h"
 #include "app_data_logger.h"
 
 #include  "ctype.h"

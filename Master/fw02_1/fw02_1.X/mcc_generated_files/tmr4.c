@@ -49,7 +49,7 @@
 
 #include <xc.h>
 #include "tmr4.h"
-#include "app.h"
+#include "app_master.h"
 
 /**
   Section: Data Type Definitions

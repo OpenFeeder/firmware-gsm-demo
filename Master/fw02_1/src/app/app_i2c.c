@@ -5,7 +5,7 @@
  * @date 06/11/2015
  */
 
-#include "app.h"
+#include "app_master.h"
 #include <string.h>
 #include "app_i2c.h"
 

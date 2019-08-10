@@ -53,7 +53,6 @@
 #include <stdbool.h>
 #include "../../../fw02_1.X/mcc_generated_files/pin_manager.h"
 #include "timer.h"
-#include "temps.h"
 /**------------------------>> D E F I N I T I O N S - G L O B A L <<-----------*/
 
 /*******************************************************************************/

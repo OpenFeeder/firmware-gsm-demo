@@ -19,7 +19,7 @@
 
 #include <xc.h>
 #include <stdio.h>
-#include "app.h"
+#include "app_master.h"
 #include "ds3231.h"
 
 /* control register 0Eh/8Eh
