@@ -151,7 +151,7 @@ typedef union {
 
     struct {
         unsigned yy : 6;
-        unsigned mm : 4;
+        unsigned mon : 4;
         unsigned day : 5;
         unsigned h : 5;
         unsigned min : 6;

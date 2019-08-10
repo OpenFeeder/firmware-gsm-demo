@@ -8,7 +8,7 @@
  * Titre            : Mise en oeuvre de l'api et la machie a etat du master   
  * Version          : v00
  * Date de creation : 26/05/2019
- * Auteur           : MMADI Anzilane 
+ * Auteur           : OpenFeeder Team <https://github.com/orgs/OpenFeeder/people> 
  * Contact          : anzilan@hotmail.fr
  * Web page         : 
  * Collaborateur    : ...
@@ -117,6 +117,8 @@
 #define OPENFEEDER_IS_AWAKEN    1
 #define OPENFEEDER_IS_SLEEPING  0
 #define MAX_NUM_REWARD_TIMEOUT 5
+#define MAX_LEVEL_PRIO 3
+#define NB_BEHAVIOR_PER_PRIO 5
 // *****************************************************************************
 // *****************************************************************************
 // Section: Type Definitions
@@ -193,6 +195,29 @@ typedef enum {
     PTR_WRITE, //01
     PTR_OVFF //10
 } PTR;
+
+/**-------------------------->> S T R U C T -O F- S L A V E - S T A T E <<----*/
+typedef enum {
+    SLAVE_SYNC, // phase de syncronisation 
+    SLAVE_ERROR, // en etat d'erreur 
+    SLAVE_DAYTIME, // on est en journee 
+    SLAVE_CONFIG, // etat de configiration 
+    SLAVE_COLLECT, // Slave en etat de collecte de donnee
+    SLAVE_SLECTED, // Slave selectionner 
+    SLAVE_COLLECT_END, // fin de la collecte
+    SLAVE_COLLECT_END_BLOCK, // fin de recuperation d'un bloc
+    SLAVE_NONE // etat neutre 
+} SLAVE_STATES;
+
+typedef struct {
+    uint8_t idSlave; // l'identifiant du slave 
+    uint8_t tryToConnect; // nb d'essaie de connexion 
+    uint8_t nbTimeout; // le nombre consecutif de timeout lorsqu'on attend une reponse de ce slave
+    uint8_t nbError; // nombre d'erreurs, survenue pour ce slave
+    uint8_t index; // le numero de paquet attendu, lors de la collecte des donnees 
+    uint8_t nbBloc; // nombre de bloc re?u 
+    SLAVE_STATES state; // etat du slave 
+} SlaveState;
 
 
 /* Application Data
@@ -328,34 +353,16 @@ typedef struct {
 
     float ext_temperature;
 
-    bool punishment_state;
+//    bool punishment_state;
+    //communication information 
+    volatile uint8_t behavior[MAX_LEVEL_PRIO][NB_BEHAVIOR_PER_PRIO];
+    volatile uint8_t ptr[MAX_LEVEL_PRIO][3]; //READ - WRITE - OVFF (overflow)
+    uint8_t BUFF_COLLECT[NB_DATA_BUF][SIZE_DATA];
+    int8_t nbSlaveOnSite;
+    SlaveState ensSlave[8]; // max of on site
+    int8_t slaveSelected;
 
 } MASTER_APP_DATA;
-
-
-/**-------------------------->> S T R U C T -O F- S L A V E - S T A T E <<----*/
-typedef enum {
-    SLAVE_SYNC, // phase de syncronisation 
-    SLAVE_ERROR, // en etat d'erreur 
-    SLAVE_DAYTIME, // on est en journee 
-    SLAVE_CONFIG, // etat de configiration 
-    SLAVE_COLLECT, // Slave en etat de collecte de donnee
-    SLAVE_SLECTED, // Slave selectionner 
-    SLAVE_COLLECT_END, // fin de la collecte
-    SLAVE_COLLECT_END_BLOCK, // fin de recuperation d'un bloc
-    SLAVE_NONE // etat neutre 
-} SLAVE_STATES;
-
-typedef struct {
-    uint8_t idSlave; // l'identifiant du slave 
-    uint8_t tryToConnect; // nb d'essaie de connexion 
-    uint8_t nbTimeout; // le nombre consecutif de timeout lorsqu'on attend une reponse de ce slave
-    uint8_t nbError; // nombre d'erreurs, survenue pour ce slave
-    uint8_t index; // le numero de paquet attendu, lors de la collecte des donnees 
-    uint8_t nbBloc; // nombre de bloc re?u 
-    SLAVE_STATES state; // etat du slave 
-} SlaveState;
-
 
 // *****************************************************************************
 // *****************************************************************************

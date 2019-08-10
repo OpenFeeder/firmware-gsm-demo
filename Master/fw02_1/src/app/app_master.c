@@ -1,20 +1,43 @@
 /** 
- * File: app.c
+ * File: app_master.c
  * Author: OpenFeeder Team <https://github.com/orgs/OpenFeeder/people> 
  * Comments:
  * Revision history:
  */
 
+/* *****************************************************************************
+ * 
+ * _____________________________________________________________________________
+ *
+ *                            MASTER API  (.c)
+ * _____________________________________________________________________________
+ *
+ * Titre            : Mise en oeuvre de l'api et la machie a etat du master   
+ * Version          : v00
+ * Date de creation : 26/05/2019
+ * Auteur           : OpenFeeder Team <https://github.com/orgs/OpenFeeder/people> 
+ * Contact          : anzilan@hotmail.fr
+ * Web page         : 
+ * Collaborateur    : ...
+ * Processor        : PIC24
+ * Tools used       : MPLAB X IDE v5.15 and MPLAB Code Configurator (MCC) Version: 3.36
+ * Compiler         : Microchip XC16 v1.35
+ * Programmateur    : PICkit 3
+ *******************************************************************************
+ *******************************************************************************/
 
-// *****************************************************************************
-// *****************************************************************************
-// Section: Included Files 
-// *****************************************************************************
-// *****************************************************************************
+/**------------------------>> I N C L U D E <<---------------------------------*/
 
 #include "app_master.h"
 
 #define _DEBUG (1)
+
+/******************************************************************************/
+/******************************************************************************/
+/********************* COUCHE APPLICATION DU MASTER  **************************/
+/***************************                ***********************************/
+/**************************                         ***************************/
+/*****************                                         ********************/
 
 // *****************************************************************************
 // *****************************************************************************
@@ -47,17 +70,148 @@ APP_DATA_LOG appDataLog; /* Datalogger application data */
 APP_DATA_RC appDataRc; /* Remote control application data */
 APP_DATA_EVENT appDataEvent; /* Events application data */
 
-
 //AlphaTRX modifcation 
 struct tm t;
 volatile int8_t msgReceive = 0;
 int8_t noPrint = 0;
 
-//____________________________________________________________________________
+
+
+/**-------------------------->> M A C R O S <<--------------------------------*/
+#define GETpREAD(prio) appData.ptr[prio][PTR_READ] // recupere le ponteur de lecture
+#define GETpWRITE(prio) appData.ptr[prio][PTR_WRITE] // recupere le pointeur d'ecriture
+#define GET_OVFF(prio)  appData.ptr[prio][PTR_OVFF] // recipere le pointeur d'overFlow
+
+#define INCpREAD(prio) (appData.ptr[prio][PTR_READ] = (appData.ptr[prio][PTR_READ]+1) % NB_BEHAVIOR_PER_PRIO)
+#define INCpWRITE(prio) (appData.ptr[prio][PTR_WRITE] = (appData.ptr[prio][PTR_WRITE]+1) % NB_BEHAVIOR_PER_PRIO)
+#define SET_0VFF(prio, set) (appData.ptr[prio][PTR_OVFF] = set)
+
+#define GET_PUBLIC_ID_SLAVE(localIdSlave) (publicSlaveAdress[localIdSlave])
+
+/**-------------------------->> D E B U G <<----------------------------------*/
+void printPointeur(PRIORITY prio) {
+    printf("prio %d : \npREAD %d\nWRITE %d\n", prio, GETpREAD(prio), GETpWRITE(prio));
+}
+//______________________________________________________________________________
+
+
+
+/**-------------------------->> L O C A L -- F O N C T I O N S <<--------------*/
+
+//_______________________________ IMPLEMENTATION________________________________
+
+int8_t MASTER_SendMsgRF(uint8_t dest,
+                        uint8_t typeMsg,
+                        uint8_t idMsg,
+                        uint8_t nbR,
+                        uint8_t * data,
+                        uint8_t sizeData) {
+    Frame frameToSend;
+    memset(frameToSend.paquet, 0, FRAME_LENGTH);
+    //_____________CREATE FRAME____________________________________________
+    int8_t ret = 0;
+    // en tete 
+    frameToSend.Champ.dest = dest;
+    frameToSend.Champ.src = MASTER_ID;
+    frameToSend.Champ.crc ^= frameToSend.paquet[0];
+    frameToSend.Champ.nbR = nbR;
+    frameToSend.Champ.typeMsg = typeMsg;
+    frameToSend.Champ.crc ^= frameToSend.paquet[1];
+    frameToSend.Champ.idMsg = idMsg;
+    frameToSend.Champ.crc ^= frameToSend.paquet[2];
+    // data
+    int8_t i;
+    frameToSend.Champ.size = sizeData;
+    frameToSend.Champ.crc ^= frameToSend.paquet[3];
+    for (i = 0; i < frameToSend.Champ.size; i++) {
+        frameToSend.Champ.data[i] = data[i];
+        frameToSend.Champ.crc ^= frameToSend.paquet[i + 5]; // penser ? changer le 5 en generique 
+    }
+    //____________________________________________________________________
+    //________________________TRANSMSISSION_______________________________
+    if (radioAlphaTRX_SendMode()) {
+        ret = radioAlphaTRX_SendData(frameToSend);
+    } else {
+#if defined(UART_DEBUG)
+        printf("non Envoye\n");
+#endif
+    }
+    radioAlphaTRX_ReceivedMode(); // je me remets en attente d'un msg
+    return ret;
+}
+
+uint8_t MASTER_SendDateRF() {
+    struct tm picDate;
+    //____________________________
+    //________UPDATE DATE_________
+    // with GSM module 
+    //TODO : use GSM function to update date here
+    //    if (!app_UpdateRtcTimeFromGSM()) {
+    //#if defined(UART_DEBUG)
+    //        printf("No update from GSM\n");
+    //#endif
+    //        return 0;
+    //    }
+    //____________________________
+    //________GET DATE____________
+    if (RTCC_TimeGet(&picDate)) {
+        Date d;
+        d.dateVal = 0;
+        d.Format.yy = picDate.tm_year;
+        d.Format.mon = picDate.tm_mon;
+        d.Format.day = picDate.tm_mday;
+        d.Format.h = picDate.tm_hour;
+        d.Format.min = picDate.tm_min;
+        d.Format.sec = picDate.tm_sec;
+        //____________________________
+        //________SEND DATE___________
+#if defined(UART_DEBUG)
+        printf("SEND DATE\n");
+#endif
+        return MASTER_SendMsgRF(BROADCAST_ID, HORLOGE, 1, 1, d.date, 5); // visualiser cette valeur 
+    }
+    return 0;
+}
+
+//______________________________________________________________________________
+//______________________________________________________________________________
+//________________________________STATE MACHINE FUNCTION________________________
+
+uint8_t MASTER_GetSlaveSelected() {
+    return (appData.ensSlave[appData.slaveSelected].idSlave);
+}
+
+bool MASTER_StoreBehavior(MASTER_APP_STATES state, PRIORITY prio) {
+    appData.behavior[prio][GETpWRITE(prio)] = state; // on ecrit le comportement 
+    INCpWRITE(prio);
+    if (GETpREAD(prio) == GETpWRITE(prio)) { // Je viens d'ecraser un comportement 
+        //        SET_0VFF(prio, 1); // overflow
+        INCpREAD(prio);
+    }
+    return true; // 
+}
+
+MASTER_APP_STATES MASTER_GetBehavior() {
+    // on cmmence par chercher un comportement de prio eleve
+    MASTER_APP_STATES state = MASTER_APP_STATE_IDLE;
+    // l'ordre des condition est important car on respect la priorite
+    if (GETpREAD(PRIO_HIGH) != GETpWRITE(PRIO_HIGH)) {
+        // on ne peut avoir l'egalite et a voir un comportement present 
+        state = appData.behavior[PRIO_HIGH][GETpREAD(PRIO_HIGH)];
+        INCpREAD(PRIO_HIGH);
+    } else if (GETpREAD(PRIO_MEDIUM) != GETpWRITE(PRIO_MEDIUM)) {
+        state = appData.behavior[PRIO_MEDIUM][GETpREAD(PRIO_MEDIUM)];
+        INCpREAD(PRIO_MEDIUM);
+    } else if (GETpREAD(PRIO_LOW) != GETpWRITE(PRIO_LOW)) {
+        state = appData.behavior[PRIO_LOW][GETpREAD(PRIO_LOW)];
+        INCpREAD(PRIO_LOW);
+    }
+    return state;
+}
 
 /******************************************************************************
   Function:
-    void APP_Tasks( void )
+    void MASTER_APP_Tasks( void )
 
   Remarks:
     See prototype in app.h.
@@ -68,8 +222,8 @@ void MASTER_AppTask(void) {
     APP_CHECK chk;
     int i;
     static bool enter_default_state = false;
-    static int num_timeout_reward;
 
+    appData.state = MASTER_GetBehavior();
     /* Check the Application State. */
     switch (appData.state) {
         case MASTER_APP_STATE_INITIALIZE:
@@ -103,28 +257,29 @@ void MASTER_AppTask(void) {
 
             /* Power PIR sensor early in the code because of starting delay before usable */
             powerPIREnable();
-            
+
             //alphaTRX modification : juste pour les test, il faut mieux structurer 
-                powerRFEnable();
-                // Check the power statut of the RF module
-                if (CMD_3V3_RF_GetValue() == false) {
+            powerRFEnable();
+            // Check the power statut of the RF module
+            if (CMD_3V3_RF_GetValue() == false) {
 #if defined  (USE_UART1_SERIAL_INTERFACE )
-                    printf("RF Module Enable.\n");
+                printf("RF Module Enable.\n");
 #endif
-                    radioAlphaTRX_Init();
-                    radioAlphaTRX_ReceivedMode(); // receive mode actived
+                radioAlphaTRX_Init();
+                radioAlphaTRX_ReceivedMode(); // receive mode actived
 #if defined  (USE_UART1_SERIAL_INTERFACE ) 
-                    printf("RF Module INIT.\n");
+                printf("RF Module INIT.\n");
 #endif
-                } else {
+            } else {
 #if defined  (USE_UART1_SERIAL_INTERFACE )
-                    printf("RF Module disable.\n");
-                    printf("Send 'T' to change power state of radio module.\n");
+                printf("RF Module disable.\n");
+                printf("Send 'T' to change power state of radio module.\n");
 #endif
-                }
-            
+            }
+
             /* Go to device configuration state */
-            appData.state = MASTER_APP_STATE_CONFIGURE_SYSTEM;
+            MASTER_StoreBehavior(MASTER_APP_STATE_CONFIGURE_SYSTEM, PRIO_HIGH);
+            //            appData.state = MASTER_APP_STATE_CONFIGURE_SYSTEM;
             break;
         }
             /* -------------------------------------------------------------- */
@@ -170,7 +325,8 @@ void MASTER_AppTask(void) {
                            "==> ERROR STATE\n");
 #endif
                     appDataUsb.is_device_needed = false;
-                    appData.state = MASTER_APP_STATE_ERROR;
+                    MASTER_StoreBehavior(MASTER_APP_STATE_ERROR, PRIO_HIGH);
+//                    appData.state = MASTER_APP_STATE_ERROR;
                     break;
                 }
 
@@ -200,7 +356,8 @@ void MASTER_AppTask(void) {
 #endif
                     /* If mount failed => error */
                     appDataUsb.is_device_needed = false;
-                    appData.state = MASTER_APP_STATE_ERROR;
+                    MASTER_StoreBehavior(MASTER_APP_STATE_ERROR, PRIO_HIGH);
+//                    appData.state = MASTER_APP_STATE_ERROR;
                     break;
                 }
             }/* Otherwise wait for USB device connection or for timeout to reach */
@@ -216,7 +373,8 @@ void MASTER_AppTask(void) {
                     appError.current_line_number = __LINE__;
                     sprintf(appError.current_file_name, "%s", __FILE__);
                     appError.number = ERROR_USB_DEVICE_NOT_FOUND;
-                    appData.state = MASTER_APP_STATE_ERROR;
+                    MASTER_StoreBehavior(MASTER_APP_STATE_ERROR, PRIO_HIGH);
+//                    appData.state = MASTER_APP_STATE_ERROR;
                     break;
                 }
 
@@ -237,7 +395,8 @@ void MASTER_AppTask(void) {
                            "==> ERROR STATE\n");
 #endif
                     appDataUsb.is_device_needed = false;
-                    appData.state = MASTER_APP_STATE_ERROR;
+                    MASTER_StoreBehavior(MASTER_APP_STATE_ERROR, PRIO_HIGH);
+//                    appData.state = MASTER_APP_STATE_ERROR;
                     break;
                 }
             }
@@ -260,13 +419,15 @@ void MASTER_AppTask(void) {
                 chk = checkImportantParameters();
                 switch (chk) {
                     case APP_CHECK_OK:
-                        appData.state = MASTER_APP_STATE_CONFIGURE_SYSTEM;
+                        MASTER_StoreBehavior(MASTER_APP_STATE_CONFIGURE_SYSTEM, PRIO_HIGH);
+//                        appData.state = MASTER_APP_STATE_CONFIGURE_SYSTEM;
                         break;
                     case APP_CHECK_BATTERY_PB:
                     case APP_CHECK_VBAT_PB:
                     case APP_CHECK_FOOD_LEVEL_PB:
                     case APP_CHECK_RFID_FREQ_PB:
-                        appData.state = MASTER_APP_STATE_FLUSH_DATA_BEFORE_ERROR;
+                        MASTER_StoreBehavior(MASTER_APP_STATE_FLUSH_DATA_BEFORE_ERROR, PRIO_HIGH);
+//                        appData.state = MASTER_APP_STATE_FLUSH_DATA_BEFORE_ERROR;
                         break;
                 }
 
@@ -285,7 +446,8 @@ void MASTER_AppTask(void) {
                     printf("FLUSH_DATA_ON_USB_DEVICE_SUCCESS != flushDataOnUsbDevice( )\n"
                            "==> ERROR STATE\n");
 #endif
-                    appData.state = MASTER_APP_STATE_ERROR;
+                    MASTER_StoreBehavior(MASTER_APP_STATE_ERROR, PRIO_HIGH);
+//                    appData.state = MASTER_APP_STATE_ERROR;
                     break;
                 }
 
@@ -341,7 +503,8 @@ void MASTER_AppTask(void) {
                         appError.current_line_number = __LINE__;
                         sprintf(appError.current_file_name, "%s", __FILE__);
                         appError.number = ERROR_ATTRACTIVE_LED_INIT;
-                        appData.state = MASTER_APP_STATE_ERROR;
+                        MASTER_StoreBehavior(MASTER_APP_STATE_ERROR, PRIO_HIGH);
+//                        appData.state = MASTER_APP_STATE_ERROR;
                         break;
                     }
 
@@ -362,9 +525,9 @@ void MASTER_AppTask(void) {
 
                 /* Set RTC alarm to raise every second */
                 rtcc_set_alarm(appDataAlarmWakeup.time.tm_hour, appDataAlarmWakeup.time.tm_min, appDataAlarmWakeup.time.tm_sec, EVERY_SECOND);
-                
+
                 /* Go to state idle */
-                appData.state = MASTER_APP_STATE_IDLE;
+//                appData.state = MASTER_APP_STATE_IDLE;
             }/* If system configuration failed => error */
             else {
 #if defined  (USE_UART1_SERIAL_INTERFACE )
@@ -372,7 +535,8 @@ void MASTER_AppTask(void) {
                        "==> ERROR STATE\n");
 #endif
                 appDataUsb.is_device_needed = false;
-                appData.state = MASTER_APP_STATE_ERROR;
+                MASTER_StoreBehavior(MASTER_APP_STATE_ERROR, PRIO_HIGH);
+//                appData.state = MASTER_APP_STATE_ERROR;
                 break;
             }
 
@@ -383,7 +547,8 @@ void MASTER_AppTask(void) {
                        "==> ERROR STATE\n");
 #endif
                 /* If unmount failed => error */
-                appData.state = MASTER_APP_STATE_ERROR;
+                MASTER_StoreBehavior(MASTER_APP_STATE_ERROR, PRIO_HIGH);
+//                appData.state = MASTER_APP_STATE_ERROR;
             }
 
             appDataUsb.is_device_needed = false;
@@ -409,10 +574,10 @@ void MASTER_AppTask(void) {
 #if defined ( USE_UART1_SERIAL_INTERFACE ) && defined ( DISPLAY_CURRENT_STATE )
                 printf("> APP_STATE_IDLE\n");
 #endif              
-//#if defined ( USE_UART1_SERIAL_INTERFACE )
-//                printf("\tUser button pressed briefly => flush data and eject USB device\n");
-//                printf("\tUser button pressed longer => activate serial communication mode\n");
-//#endif   
+                //#if defined ( USE_UART1_SERIAL_INTERFACE )
+                //                printf("\tUser button pressed briefly => flush data and eject USB device\n");
+                //                printf("\tUser button pressed longer => activate serial communication mode\n");
+                //#endif   
                 /* Log event if required */
                 if (true == appDataLog.log_events) {
                     store_event(OF_STATE_IDLE);
@@ -430,7 +595,8 @@ void MASTER_AppTask(void) {
                 }
 
                 appData.need_to_reconfigure = false;
-                appData.state = MASTER_APP_STATE_CONFIGURE_SYSTEM;
+                MASTER_StoreBehavior(MASTER_APP_STATE_CONFIGURE_SYSTEM, PRIO_HIGH);
+//                appData.state = MASTER_APP_STATE_CONFIGURE_SYSTEM;
                 break;
             }
 
@@ -438,7 +604,8 @@ void MASTER_AppTask(void) {
             if (true == appDataLog.log_events && appDataEvent.num_events_stored >= MAX_NUM_EVENT_BEFORE_SAVE) {
                 if (FILEIO_RESULT_FAILURE == logEvents()) {
                     appDataUsb.is_device_needed = false;
-                    appData.state = MASTER_APP_STATE_ERROR;
+                    MASTER_StoreBehavior(MASTER_APP_STATE_ERROR, PRIO_HIGH);
+//                    appData.state = MASTER_APP_STATE_ERROR;
                     break;
                 }
             }
@@ -467,10 +634,12 @@ void MASTER_AppTask(void) {
 
                     if (BUTTON_PRESSED == button_user_state) {
                         //                        appData.state = APP_STATE_TEST_RFID;
-                        appData.state = MASTER_APP_STATE_SERIAL_COMMUNICATION;
+                        MASTER_StoreBehavior(MASTER_APP_STATE_SERIAL_COMMUNICATION, PRIO_LOW);
+//                        appData.state = MASTER_APP_STATE_SERIAL_COMMUNICATION;
                         break;
                     } else {
-                        appData.state = MASTER_APP_STATE_FLUSH_DATA_TO_USB;
+                        MASTER_StoreBehavior(MASTER_APP_STATE_FLUSH_DATA_TO_USB, PRIO_MEDIUM);
+//                        appData.state = MASTER_APP_STATE_FLUSH_DATA_TO_USB;
                         //                        appData.state = APP_STATE_SERIAL_COMMUNICATION;
                         break;
                     }
@@ -690,7 +859,7 @@ void MASTER_AppTask(void) {
 
             break;
             /* -------------------------------------------------------------- */
-            
+
         case MASTER_APP_STATE_REMOVE_USB_DEVICE:
 
             /*
@@ -787,7 +956,8 @@ void MASTER_AppTask(void) {
                 } else {
 #if defined ( USE_UART1_SERIAL_INTERFACE )  
                     printf("\tNo data to flush.\n");
-                    appData.state = MASTER_APP_STATE_REMOVE_USB_DEVICE;
+                    MASTER_StoreBehavior(MASTER_APP_STATE_REMOVE_USB_DEVICE, PRIO_HIGH);
+//                    appData.state = MASTER_APP_STATE_REMOVE_USB_DEVICE;
                     break;
 #endif
                 }
@@ -798,7 +968,8 @@ void MASTER_AppTask(void) {
 
             if (appDataUsb.is_device_address_available) {
                 if (FLUSH_DATA_ON_USB_DEVICE_SUCCESS != flushDataOnUsbDevice()) {
-                    appData.state = MASTER_APP_STATE_ERROR;
+                    MASTER_StoreBehavior(MASTER_APP_STATE_ERROR, PRIO_HIGH);
+//                    appData.state = MASTER_APP_STATE_ERROR;
                     break;
                 }
             } else {
@@ -808,7 +979,8 @@ void MASTER_AppTask(void) {
                     appError.current_line_number = __LINE__;
                     sprintf(appError.current_file_name, "%s", __FILE__);
                     appError.number = ERROR_USB_DEVICE_NOT_FOUND;
-                    appData.state = MASTER_APP_STATE_ERROR;
+                    MASTER_StoreBehavior(MASTER_APP_STATE_ERROR, PRIO_HIGH);
+//                    appData.state = MASTER_APP_STATE_ERROR;
                     break;
                 }
                 /* Blue and yellow status LEDs blink as long USB key is required. */
@@ -817,10 +989,11 @@ void MASTER_AppTask(void) {
             }
 
             appDataUsb.is_device_needed = false;
-            appData.state = MASTER_APP_STATE_REMOVE_USB_DEVICE;
+            MASTER_StoreBehavior(MASTER_APP_STATE_REMOVE_USB_DEVICE, PRIO_HIGH);
+//            appData.state = MASTER_APP_STATE_REMOVE_USB_DEVICE;
             break;
             /* -------------------------------------------------------------- */
-            
+
         case MASTER_APP_STATE_SLEEP:
             /**
              * Application sleep state.
@@ -842,7 +1015,7 @@ void MASTER_AppTask(void) {
 
                 /* Stop RTCC interuption during shutdown process */
                 rtcc_stop_alarm();
-                
+
                 /* Log data on USB device */
                 appDataUsb.is_device_needed = true;
 
@@ -900,8 +1073,8 @@ void MASTER_AppTask(void) {
             DSCONbits.DSEN = 1;
 #endif
             Sleep();
-
-            appData.state = MASTER_APP_STATE_WAKE_UP;
+            MASTER_StoreBehavior(MASTER_APP_STATE_WAKE_UP, PRIO_HIGH);
+//            appData.state = MASTER_APP_STATE_WAKE_UP;
             break;
             /* -------------------------------------------------------------- */
 
@@ -953,7 +1126,8 @@ void MASTER_AppTask(void) {
             if (appDataUsb.is_device_address_available) {
                 if (USB_DRIVE_NOT_MOUNTED == usbMountDrive()) {
                     appDataUsb.is_device_needed = false;
-                    appData.state = MASTER_APP_STATE_ERROR;
+                    MASTER_StoreBehavior(MASTER_APP_STATE_ERROR, PRIO_HIGH);
+//                    appData.state = MASTER_APP_STATE_ERROR;
                     break;
                 }
 
@@ -962,7 +1136,8 @@ void MASTER_AppTask(void) {
                     setLedsStatusColor(LED_USB_ACCESS);
                     if (FILEIO_RESULT_FAILURE == logBatteryLevel()) {
                         appDataUsb.is_device_needed = false;
-                        appData.state = MASTER_APP_STATE_ERROR;
+                        MASTER_StoreBehavior(MASTER_APP_STATE_ERROR, PRIO_HIGH);
+//                        appData.state = MASTER_APP_STATE_ERROR;
                         break;
                     }
                 }
@@ -972,7 +1147,8 @@ void MASTER_AppTask(void) {
                     setLedsStatusColor(LED_USB_ACCESS);
                     if (FILEIO_RESULT_FAILURE == logError()) {
                         appDataUsb.is_device_needed = false;
-                        appData.state = MASTER_APP_STATE_ERROR;
+                        MASTER_StoreBehavior(MASTER_APP_STATE_ERROR, PRIO_HIGH);
+//                        appData.state = MASTER_APP_STATE_ERROR;
                         break;
                     }
                 }
@@ -983,7 +1159,8 @@ void MASTER_AppTask(void) {
                         setLedsStatusColor(LED_USB_ACCESS);
                         if (FILEIO_RESULT_FAILURE == logEvents()) {
                             appDataUsb.is_device_needed = false;
-                            appData.state = MASTER_APP_STATE_ERROR;
+                            MASTER_StoreBehavior(MASTER_APP_STATE_ERROR, PRIO_HIGH);
+//                            appData.state = MASTER_APP_STATE_ERROR;
                             break;
                         }
                     }
@@ -993,7 +1170,8 @@ void MASTER_AppTask(void) {
                 if (appDataLog.num_time_calib_stored > 0) {
                     if (FILEIO_RESULT_FAILURE == logCalibration()) {
                         appDataUsb.is_device_needed = false;
-                        appData.state = MASTER_APP_STATE_ERROR;
+                        MASTER_StoreBehavior(MASTER_APP_STATE_ERROR, PRIO_HIGH);
+//                        appData.state = MASTER_APP_STATE_ERROR;
                         break;
                     }
                 }
@@ -1002,13 +1180,15 @@ void MASTER_AppTask(void) {
                 if (appDataLog.num_ds3231_temp_stored > 0) {
                     if (FILEIO_RESULT_FAILURE == logDs3231Temp()) {
                         appDataUsb.is_device_needed = false;
-                        appData.state = MASTER_APP_STATE_ERROR;
+                        MASTER_StoreBehavior(MASTER_APP_STATE_ERROR, PRIO_HIGH);
+//                        appData.state = MASTER_APP_STATE_ERROR;
                         break;
                     }
                 }
 
                 if (USB_DRIVE_MOUNTED == usbUnmountDrive()) {
-                    appData.state = MASTER_APP_STATE_ERROR;
+                    MASTER_StoreBehavior(MASTER_APP_STATE_ERROR, PRIO_HIGH);
+//                    appData.state = MASTER_APP_STATE_ERROR;
                 }
 
             } else {
@@ -1018,7 +1198,8 @@ void MASTER_AppTask(void) {
                     appError.current_line_number = __LINE__;
                     sprintf(appError.current_file_name, "%s", __FILE__);
                     appError.number = ERROR_USB_DEVICE_NOT_FOUND;
-                    appData.state = MASTER_APP_STATE_ERROR;
+                    MASTER_StoreBehavior(MASTER_APP_STATE_ERROR, PRIO_HIGH);
+//                    appData.state = MASTER_APP_STATE_ERROR;
                     break;
                 }
                 /* Blue and yellow status LEDs blink as long USB key is required. */
@@ -1027,7 +1208,8 @@ void MASTER_AppTask(void) {
             }
 
             setLedsStatusColor(LEDS_OFF);
-            appData.state = MASTER_APP_STATE_ERROR;
+            MASTER_StoreBehavior(MASTER_APP_STATE_ERROR, PRIO_HIGH);
+//            appData.state = MASTER_APP_STATE_ERROR;
             break;
             /* -------------------------------------------------------------- */
 
@@ -1046,7 +1228,8 @@ void MASTER_AppTask(void) {
                 if (appError.number < ERROR_USB || appError.number > ERROR_USB_SUSPEND_DEVICE) {
                     /* Flush data on USB device if necessary */
                     if (false == appError.is_data_flush_before_error) {
-                        appData.state = MASTER_APP_STATE_FLUSH_DATA_BEFORE_ERROR;
+                        MASTER_StoreBehavior(MASTER_APP_STATE_FLUSH_DATA_BEFORE_ERROR, PRIO_HIGH);
+//                        appData.state = MASTER_APP_STATE_FLUSH_DATA_BEFORE_ERROR;
                         //generation d'une erreure 
                         break;
                     }
@@ -1189,7 +1372,8 @@ void MASTER_AppInit(void) {
     appDataAttractiveLeds.blue[1] = 0;
 
     /* APP state task */
-    appData.state = MASTER_APP_STATE_INITIALIZE;
+    MASTER_StoreBehavior(MASTER_APP_STATE_INITIALIZE, PRIO_HIGH);
+//    appData.state = MASTER_APP_STATE_INITIALIZE;
     appData.previous_state = MASTER_APP_STATE_ERROR;
 
     appData.need_to_reconfigure = false;
