@@ -488,53 +488,11 @@ void __attribute__ ( ( interrupt, no_auto_psv ) ) _ISR _RTCCInterrupt( void )
                     return;
                 }
                 
-                /* Alternate videos */
-                if ( appDataStimuli.enable )
-                {
-                    if ( appDataStimuli.alt_sec_elapsed == appDataStimuli.alt_delay - 1 )
-                    {
-                        appData.rtcc_alarm_action = RTCC_ALARM_STIMULI_ALT;
-                        appDataStimuli.alt_sec_elapsed = 0;
-                        IFS3bits.RTCIF = false;
-                        return;
-                    }
-                    else
-                    {
-                        ++appDataStimuli.alt_sec_elapsed;
-                    }
-                }
                 
                 /* Alternate LEDs color */
                 if ( ATTRACTIVE_LEDS_ON == appDataAttractiveLeds.status )
                 {
-                    if ( COLOR_ASSOCIATIVE_LEARNING == appData.scenario_number )
-                    {
-                        if ( appDataAttractiveLeds.alt_sec_elapsed == appDataAttractiveLeds.alt_delay - 1 )
-                        {
-                            appData.rtcc_alarm_action = RTCC_ALARM_ALT_ATTRACTIVE_LEDS_COLOR;
-                            appDataAttractiveLeds.alt_sec_elapsed = 0;
-                            IFS3bits.RTCIF = false;
-                            return;
-                        }
-                        else
-                        {
-                            ++appDataAttractiveLeds.alt_sec_elapsed;
-                        }
-                    }
-                    else if ( GO_NO_GO == appData.scenario_number )                        
-                    {
-                        if ( appDataAttractiveLeds.alt_sec_elapsed == appDataAttractiveLeds.alt_delay - 1 )
-                        {
-                            appData.rtcc_alarm_action = RTCC_ALARM_ALT_ATTRACTIVE_LEDS_PATTERN;
-                            appDataAttractiveLeds.alt_sec_elapsed = 0;
-                            IFS3bits.RTCIF = false;
-                            return;
-                        }
-                        else
-                        {
-                            ++appDataAttractiveLeds.alt_sec_elapsed;
-                        }
-                    }
+                    //TODO : 
                 }
                 
                 /* Attractive LEDs on/off */
@@ -559,38 +517,6 @@ void __attribute__ ( ( interrupt, no_auto_psv ) ) _ISR _RTCCInterrupt( void )
                         appData.rtcc_alarm_action = RTCC_ALARM_SET_ATTRACTIVE_LEDS_OFF;
                         IFS3bits.RTCIF = false;
                         return;
-                    }
-                }
-
-                /* Door open/close */
-                if ( 1 == appDataDoor.remain_open )
-                {
-
-                    if ( ( appData.current_time.tm_hour * 60 + appData.current_time.tm_min ) >= ( appDataDoor.open_time.tm_hour * 60 + appDataDoor.open_time.tm_min ) &&
-                         ( appData.current_time.tm_hour * 60 + appData.current_time.tm_min )< ( appDataDoor.close_time.tm_hour * 60 + appDataDoor.close_time.tm_min ) )
-
-                    {
-                        if ( DOOR_OPENED != appDataDoor.reward_door_status )
-                        {
-#if defined (USE_UART1_SERIAL_INTERFACE) && defined (DISPLAY_ISR_RTCC)
-                            printf( "- Door open\n" );
-#endif 
-                            appData.rtcc_alarm_action = RTCC_ALARM_OPEN_DOOR;
-                            IFS3bits.RTCIF = false;
-                            return;
-                        }
-                    }
-                    else
-                    {
-                        if ( DOOR_CLOSED != appDataDoor.reward_door_status )
-                        {
-#if defined (USE_UART1_SERIAL_INTERFACE) && defined (DISPLAY_ISR_RTCC)
-                            printf( "- Door close\n" );
-#endif 
-                            appData.rtcc_alarm_action = RTCC_ALARM_CLOSE_DOOR;
-                            IFS3bits.RTCIF = false;
-                            return;
-                        }
                     }
                 }
             }

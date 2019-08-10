@@ -53,12 +53,11 @@ FILEIO_RESULT logError( void )
 
     memset( buf, '\0', sizeof( buf ) );
     
-    flag = sprintf( buf, "%c%c,OF%c%c,%u,%02d/%02d/%04d,%02d:%02d:%02d,%u,\"%s\",%s,%u\n",
+    flag = sprintf( buf, "%c%c,OF%c%c,%02d/%02d/%04d,%02d:%02d:%02d,%u,\"%s\",%s,%u\n",
                     appData.siteid[0],
                     appData.siteid[1],
                     appData.siteid[2],
                     appData.siteid[3],
-                    getCompletScenarioNumber(),
                     appData.current_time.tm_mday,
                     appData.current_time.tm_mon,
                     2000 + appData.current_time.tm_year,

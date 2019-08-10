@@ -22,12 +22,6 @@ void powerRFDisable( void )
 }
 
 
-bool isPowerServoEnable( void )
-{
-    return appDataServo.cmd_vcc_servo_state;
-}
-
-
 void powerPIREnable( void )
 {
     /* Log event if required */

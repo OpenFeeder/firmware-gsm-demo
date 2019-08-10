@@ -91,7 +91,7 @@ typedef struct
 
 } APP_DATA_LOG;
 
-bool dataLog( bool );
+//bool dataLog( bool );
 bool setLogFileName( void );
 void GetTimestamp( FILEIO_TIMESTAMP * );
 
@@ -105,7 +105,7 @@ int flushDataOnUsbDevice( void );
 
 FILEIO_RESULT logFirmware( void );
 FILEIO_RESULT logBatteryLevel( void );
-FILEIO_RESULT logRfidFreq( void );
+//FILEIO_RESULT logRfidFreq( void );
 FILEIO_RESULT logDs3231Temp( void );
 FILEIO_RESULT logCalibration( void );
 FILEIO_RESULT logUdid(void);

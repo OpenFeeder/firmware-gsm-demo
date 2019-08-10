@@ -26,263 +26,6 @@ static bool populateLogBuffer( void )
     {
         store_event( OF_POPULATE_LOG_BUFFER );
     }
-
-    /* If false bird detection => no reward and door did not open */
-    if ( 0 == strcmp( appDataLog.bird_pit_tag_str, "XXXXXXXXXX" ) )
-    {
-        appDataLog.is_reward_taken = false;
-        appDataLog.did_door_open = false;
-    }
-
-    /* If PIT tag denied => no reward and door did not open */
-    if ( true == appDataLog.is_pit_tag_denied )
-    {
-        appDataLog.is_reward_taken = false;
-        appDataLog.did_door_open = false;
-    }
-
-    /* If reward is taken => compute bird landing time in seconds */
-    if ( true == appDataLog.is_reward_taken )
-    {
-        delayS = ( appDataLog.bird_quit_time.tm_hour - appDataLog.bird_arrived_time.tm_hour )*60 * 60 +
-            ( appDataLog.bird_quit_time.tm_min - appDataLog.bird_arrived_time.tm_min )*60 +
-            appDataLog.bird_quit_time.tm_sec - appDataLog.bird_arrived_time.tm_sec;
-    }
-    else
-    {
-        delayS = 0;
-    }
-    
-    /* If scenario 3 => get attractive LEDs pattern */
-    if ( GO_NO_GO == appData.scenario_number )
-    {
-        /* If scenario 33 */
-        if ( ONE_LED == appDataAttractiveLeds.pattern_number )
-        {
-            if ( 0 == appDataAttractiveLeds.pattern_one_led_current )
-            {
-                leds_pattern = '1';
-            }
-            else if ( 1 == appDataAttractiveLeds.pattern_one_led_current )
-            {
-                leds_pattern = '2';
-            }
-            else if ( 2 == appDataAttractiveLeds.pattern_one_led_current )
-            {
-                leds_pattern = '3';
-            }
-            else if ( 3 == appDataAttractiveLeds.pattern_one_led_current )
-            {
-                leds_pattern = '4';
-            }
-        }
-        /* If scenario 30 */
-        else if (ALL_LEDS == appDataAttractiveLeds.pattern_number)
-        {
-            if ( 0 == appDataAttractiveLeds.pattern_idx )
-            {
-                leds_pattern = '0';
-            }
-            else 
-            {
-                leds_pattern = '1';
-            }
-        }
-        /* If scenario 31 */
-        else if (LEFT_RIGHT_LEDS == appDataAttractiveLeds.pattern_number)
-        {
-            if ( 0 == appDataAttractiveLeds.pattern_idx )
-            {
-                leds_pattern = 'L';
-            }
-            else 
-            {
-                leds_pattern = 'R';
-            }
-        }
-        /* If scenario 32 */
-        else if (TOP_BOTTOM_LEDS == appDataAttractiveLeds.pattern_number)
-        {
-            if ( 0 == appDataAttractiveLeds.pattern_idx )
-            {
-                leds_pattern = 'T';
-            }
-            else 
-            {
-                leds_pattern = 'B';
-            }
-        }
-    }
-    else
-    {
-        leds_pattern = '0';
-    }
-
-    if ( false == appDataStimuli.enable )
-    {
-        nChar = sprintf( line, "%02d/%02d/%02d%s%02d:%02d:%02d%s"
-                /* siteid               */ "%c%c"
-                /* separator            */ "%s"
-                /* OF                   */ "OF%c%c"
-                /* separator            */ "%s"
-                /* scenario_number      */ "%u"
-                /* separator            */ "%s"
-                /* bird_pit_tag_str     */ "%s"
-                /* separator            */ "%s"
-                /* is_pit_tag_denied    */ "%u"
-                /* separator            */ "%s"
-                /* is_reward_taken      */ "%u"
-                /* separator            */ "%s"
-                /* attractive LED red   */ "%d"
-                /* separator            */ "%s"
-                /* attractive LED green */ "%d"
-                /* separator            */ "%s"
-                /* attractive LED blue           */ "%d"
-                /* separator                     */ "%s"
-                /* door_status_when_bird_arrived */ "%d"
-                /* separator                     */ "%s"
-                /* did_door_open                 */ "%d"
-                /* separator                     */ "%s"
-                /* leds_pattern                  */ "%c"
-                /* separator                     */ "%s"
-                /* delayS                        */ "%lu\n",
-                appDataLog.bird_arrived_time.tm_mday,
-                appDataLog.bird_arrived_time.tm_mon,
-                appDataLog.bird_arrived_time.tm_year,
-                appDataLog.separator,
-                appDataLog.bird_arrived_time.tm_hour,
-                appDataLog.bird_arrived_time.tm_min,
-                appDataLog.bird_arrived_time.tm_sec,
-                appDataLog.separator,
-                appData.siteid[0],
-                appData.siteid[1],
-                appDataLog.separator,
-                appData.siteid[2],
-                appData.siteid[3],
-                appDataLog.separator,
-                getCompletScenarioNumber( ),
-                appDataLog.separator,
-                appDataLog.bird_pit_tag_str,
-                appDataLog.separator,
-                appDataLog.is_pit_tag_denied,
-                appDataLog.separator,
-                appDataLog.is_reward_taken,
-                appDataLog.separator,
-                appDataAttractiveLeds.red[appDataLog.attractive_leds_current_color_index],
-                appDataLog.separator,
-                appDataAttractiveLeds.green[appDataLog.attractive_leds_current_color_index],
-                appDataLog.separator,
-                appDataAttractiveLeds.blue[appDataLog.attractive_leds_current_color_index],
-                appDataLog.separator,
-                appDataLog.door_status_when_bird_arrived,
-                appDataLog.separator,
-                appDataLog.did_door_open,
-                appDataLog.separator,
-                leds_pattern,
-                appDataLog.separator,
-                delayS );
-    }
-    else
-    {
-        nChar = sprintf( line, "%02d/%02d/%02d%s%02d:%02d:%02d%s"
-                /* siteid               */ "%c%c"
-                /* separator            */ "%s"
-                /* OF                   */ "OF%c%c"
-                /* separator            */ "%s"
-                /* scenario_number      */ "%u"
-                /* separator            */ "%s"
-                /* bird_pit_tag_str     */ "%s"
-                /* separator            */ "%s"
-                /* is_pit_tag_denied    */ "%u"
-                /* separator            */ "%s"
-                /* is_reward_taken      */ "%u"
-                /* separator            */ "%s"
-                /* attractive LED red   */ "%d"
-                /* separator            */ "%s"
-                /* attractive LED green */ "%d"
-                /* separator            */ "%s"
-                /* attractive LED blue           */ "%d"
-                /* separator                     */ "%s"
-                /* door_status_when_bird_arrived */ "%d"
-                /* separator                     */ "%s"
-                /* did_door_open                 */ "%d"
-                /* separator                     */ "%s"
-                /* leds_pattern                  */ "%c"
-                /* separator                     */ "%s"
-                /* currznt_stimuli               */ "%u"
-                /* separator                     */ "%s"
-                /* delayS                        */ "%lu\n",
-                appDataLog.bird_arrived_time.tm_mday,
-                appDataLog.bird_arrived_time.tm_mon,
-                appDataLog.bird_arrived_time.tm_year,
-                appDataLog.separator,
-                appDataLog.bird_arrived_time.tm_hour,
-                appDataLog.bird_arrived_time.tm_min,
-                appDataLog.bird_arrived_time.tm_sec,
-                appDataLog.separator,
-                appData.siteid[0],
-                appData.siteid[1],
-                appDataLog.separator,
-                appData.siteid[2],
-                appData.siteid[3],
-                appDataLog.separator,
-                getCompletScenarioNumber( ),
-                appDataLog.separator,
-                appDataLog.bird_pit_tag_str,
-                appDataLog.separator,
-                appDataLog.is_pit_tag_denied,
-                appDataLog.separator,
-                appDataLog.is_reward_taken,
-                appDataLog.separator,
-                appDataAttractiveLeds.red[appDataLog.attractive_leds_current_color_index],
-                appDataLog.separator,
-                appDataAttractiveLeds.green[appDataLog.attractive_leds_current_color_index],
-                appDataLog.separator,
-                appDataAttractiveLeds.blue[appDataLog.attractive_leds_current_color_index],
-                appDataLog.separator,
-                appDataLog.door_status_when_bird_arrived,
-                appDataLog.separator,
-                appDataLog.did_door_open,
-                appDataLog.separator,
-                leds_pattern,
-                appDataLog.separator,
-                appDataStimuli.current_stimuli,
-                appDataLog.separator,
-                delayS );
-    }
-
-    /* If sprintf success*/
-    if ( nChar > 0 )
-    {
-        appDataLog.num_char_buffer += nChar;
-        
-        /* If data buffer not overflow */
-        if ( appDataLog.num_char_buffer < (MAX_CHAR_PER_LINE * MAX_NUM_DATA_TO_STORE - 1 ) )
-        {
-            /* Concatenation de chaines de caracteres dans le buffer. */
-            strcat( appDataLog.buffer, line );
-            ++appDataLog.num_data_stored;
-        }
-        /* If data buffer overflow */
-        else
-        {
-            sprintf( appError.message, "Overflow log buffer" );
-            appError.current_line_number = __LINE__;
-            sprintf( appError.current_file_name, "%s", __FILE__ );
-            appError.number = ERROR_OVERFLOW_DATA_BUFFER;
-            
-            nChar = -1;
-        }
-    }
-    /* If sprintf failed*/
-    else
-    {
-        sprintf( appError.message, "Unable to populate log buffer" );
-        appError.current_line_number = __LINE__;
-        sprintf( appError.current_file_name, "%s", __FILE__ );
-        appError.number = ERROR_POPULATE_DATA_BUFFER;
-    }
-
     return nChar > 0;
 }
 
@@ -348,78 +91,82 @@ static int writeLogFile( void )
 }
 
 
-bool dataLog( bool newData )
-{
-//    unsigned int nChar = 0;
-    bool needToUnmount;
-
-    /* Check if new data need to be added to the log buffer */
-    if ( true == newData )
-    {
-
-//        nChar = populateLogBuffer( );
+/*
+ DATA LOG
+ */
 //
-//        if ( nChar < 0 )
-        if ( false == populateLogBuffer( ) )    
-        {
-//            sprintf( appError.message, "Unable to populate log buffer" );
-//            appError.current_line_number = __LINE__;
-//            sprintf( appError.current_file_name, "%s", __FILE__ );
-//            appError.number = ERROR_POPULATE_DATA_BUFFER;
-            return false;
-        }
-        else
-        {
-//            appDataLog.num_char_buffer += nChar;
-//            appDataLog.num_data_stored += 1;
-#if defined (USE_UART1_SERIAL_INTERFACE) && defined (DISPLAY_LOG_INFO )
-            printf( "\tPopulate data to buffer (%u/%u)\n", appDataLog.num_data_stored, MAX_NUM_DATA_TO_STORE );
-#endif 
-        }
-
-    }
-
-    /* If buffer is full then write log file on the USB device */
-    if ( appDataLog.num_data_stored == MAX_NUM_DATA_TO_STORE )
-    {
-        setLedsStatusColor( LED_USB_ACCESS );
-
-        if ( USB_DRIVE_MOUNTED == appDataUsb.usb_drive_status )
-        {
-            needToUnmount = false;
-        }
-        else
-        {
-            if ( USB_DRIVE_NOT_MOUNTED == usbMountDrive( ) )
-            {
-                return FILEIO_RESULT_FAILURE;
-            }
-            needToUnmount = true;
-        }
-
-        /* Ecriture fichier LOG. */
-        if ( FILEIO_RESULT_FAILURE == writeLogFile( ) )
-        {
-            //            usbUnmountDrive();
-            //            CMD_VDD_APP_V_USB_SetLow( );
-            return false;
-        }
-
-        appDataLog.num_data_stored = 0;
-
-        if ( true == needToUnmount )
-        {
-            if ( USB_DRIVE_MOUNTED == usbUnmountDrive( ) )
-            {
-                return FILEIO_RESULT_FAILURE;
-            }
-        }
-        //        CMD_VDD_APP_V_USB_SetLow( );
-        setLedsStatusColor( LEDS_OFF );
-    }
-
-    return true;
-}
+//bool dataLog( bool newData )
+//{
+////    unsigned int nChar = 0;
+//    bool needToUnmount;
+//
+//    /* Check if new data need to be added to the log buffer */
+//    if ( true == newData )
+//    {
+//
+////        nChar = populateLogBuffer( );
+////
+////        if ( nChar < 0 )
+//        if ( false == populateLogBuffer( ) )    
+//        {
+////            sprintf( appError.message, "Unable to populate log buffer" );
+////            appError.current_line_number = __LINE__;
+////            sprintf( appError.current_file_name, "%s", __FILE__ );
+////            appError.number = ERROR_POPULATE_DATA_BUFFER;
+//            return false;
+//        }
+//        else
+//        {
+////            appDataLog.num_char_buffer += nChar;
+////            appDataLog.num_data_stored += 1;
+//#if defined (USE_UART1_SERIAL_INTERFACE) && defined (DISPLAY_LOG_INFO )
+//            printf( "\tPopulate data to buffer (%u/%u)\n", appDataLog.num_data_stored, MAX_NUM_DATA_TO_STORE );
+//#endif 
+//        }
+//
+//    }
+//
+//    /* If buffer is full then write log file on the USB device */
+//    if ( appDataLog.num_data_stored == MAX_NUM_DATA_TO_STORE )
+//    {
+//        setLedsStatusColor( LED_USB_ACCESS );
+//
+//        if ( USB_DRIVE_MOUNTED == appDataUsb.usb_drive_status )
+//        {
+//            needToUnmount = false;
+//        }
+//        else
+//        {
+//            if ( USB_DRIVE_NOT_MOUNTED == usbMountDrive( ) )
+//            {
+//                return FILEIO_RESULT_FAILURE;
+//            }
+//            needToUnmount = true;
+//        }
+//
+//        /* Ecriture fichier LOG. */
+//        if ( FILEIO_RESULT_FAILURE == writeLogFile( ) )
+//        {
+//            //            usbUnmountDrive();
+//            //            CMD_VDD_APP_V_USB_SetLow( );
+//            return false;
+//        }
+//
+//        appDataLog.num_data_stored = 0;
+//
+//        if ( true == needToUnmount )
+//        {
+//            if ( USB_DRIVE_MOUNTED == usbUnmountDrive( ) )
+//            {
+//                return FILEIO_RESULT_FAILURE;
+//            }
+//        }
+//        //        CMD_VDD_APP_V_USB_SetLow( );
+//        setLedsStatusColor( LEDS_OFF );
+//    }
+//
+//    return true;
+//}
 
 
 void clearLogBuffer( void )
@@ -577,12 +324,11 @@ FILEIO_RESULT logBatteryLevel( void )
 
     for ( i = 0; i < appDataLog.num_battery_level_stored; i++ )
     {
-        flag = sprintf( buf, "%c%c,OF%c%c,%u,%02d/%02d/%04d,%02d:00,%2.3f\n",
+        flag = sprintf( buf, "%c%c,OF%c%c,%02d/%02d/%04d,%02d:00,%2.3f\n",
                         appData.siteid[0],
                         appData.siteid[1],
                         appData.siteid[2],
                         appData.siteid[3],
-                        getCompletScenarioNumber( ),
                         appData.current_time.tm_mday,
                         appData.current_time.tm_mon,
                         2000 + appData.current_time.tm_year,
@@ -824,115 +570,6 @@ FILEIO_RESULT logFirmware( void )
 
 }
 
-FILEIO_RESULT logRfidFreq( void )
-{
-    FILEIO_OBJECT file;
-    FILEIO_ERROR_TYPE errF;
-    char buf[35];
-    int flag, i;
-    size_t numDataWritten;
-    bool needToUnmount;
-
-    getDateTime( );
-
-    if ( USB_DRIVE_MOUNTED == appDataUsb.usb_drive_status )
-    {
-        needToUnmount = false;
-        /* Log event if required */
-        if ( true == appDataLog.log_events )
-        {
-           store_event(OF_ALREADY_MOUNTED_USB_DRIVE); 
-        }
-    }
-    else
-    {
-        if ( USB_DRIVE_NOT_MOUNTED == usbMountDrive( ) )
-        {
-            return FILEIO_RESULT_FAILURE;
-        }
-        needToUnmount = true;
-    }
-
-    /* Log event if required */
-    if ( true == appDataLog.log_events )
-    {
-        store_event( OF_WRITE_RFID_LOG );
-    }
-
-    if ( FILEIO_RESULT_FAILURE == FILEIO_Open( &file, RFID_LOG_FILE, FILEIO_OPEN_WRITE | FILEIO_OPEN_CREATE | FILEIO_OPEN_APPEND ) )
-    {
-        errF = FILEIO_ErrorGet( 'A' );
-        sprintf( appError.message, "Unable to open RFID log file (%u)", errF );
-        appError.current_line_number = __LINE__;
-        sprintf( appError.current_file_name, "%s", __FILE__ );
-        FILEIO_ErrorClear( 'A' );
-        appError.number = ERROR_RFID_FILE_OPEN;
-        return FILEIO_RESULT_FAILURE;
-    }
-
-    memset( buf, '\0', sizeof ( buf ) );
-
-    for ( i = 0; i < appDataLog.num_rfid_freq_stored; i++ )
-    {
-        flag = sprintf( buf, "%c%c,OF%c%c,%u,%02d/%02d/%04d,%02d:%02d,%ld\n",
-                        appData.siteid[0],
-                        appData.siteid[1],
-                        appData.siteid[2],
-                        appData.siteid[3],
-                        getCompletScenarioNumber( ),
-                        appData.current_time.tm_mday,
-                        appData.current_time.tm_mon,
-                        2000 + appData.current_time.tm_year,
-                        appDataLog.rfid_freq[i][0],
-                        appDataLog.rfid_freq[i][1],
-                        ( long ) appDataLog.rfid_freq[i][2]*10 );
-
-
-        if ( flag > 0 )
-        {
-            numDataWritten = FILEIO_Write( buf, 1, flag, &file );
-
-            if ( numDataWritten < flag )
-            {
-                errF = FILEIO_ErrorGet( 'A' );
-                sprintf( appError.message, "Unable to write RFID frequency in log file (%u)", errF );
-                appError.current_line_number = __LINE__;
-                sprintf( appError.current_file_name, "%s", __FILE__ );
-                FILEIO_ErrorClear( 'A' );
-                appError.number = ERROR_RFID_FILE_WRITE;
-                return FILEIO_RESULT_FAILURE;
-            }
-        }
-    }
-
-    if ( FILEIO_RESULT_FAILURE == FILEIO_Close( &file ) )
-    {
-        errF = FILEIO_ErrorGet( 'A' );
-        sprintf( appError.message, "Unable to close RFID log file (%u)", errF );
-        appError.current_line_number = __LINE__;
-        sprintf( appError.current_file_name, "%s", __FILE__ );
-        FILEIO_ErrorClear( 'A' );
-        appError.number = ERROR_RFID_FILE_CLOSE;
-        return FILEIO_RESULT_FAILURE;
-    }
-
-    if ( true == needToUnmount )
-    {
-        if ( USB_DRIVE_MOUNTED == usbUnmountDrive( ) )
-        {
-            return FILEIO_RESULT_FAILURE;
-        }
-    }
-
-#if defined (USE_UART1_SERIAL_INTERFACE) && defined (DISPLAY_LOG_INFO)
-    printf( "\tWrite RFID frequency to file success\n" );
-#endif 
-
-    clearRfidFreqBuffer( );
-
-    return FILEIO_RESULT_SUCCESS;
-}
-
 
 FILEIO_RESULT logDs3231Temp( void )
 {
@@ -984,12 +621,11 @@ FILEIO_RESULT logDs3231Temp( void )
 
     for ( i = 0; i < appDataLog.num_ds3231_temp_stored; i++ )
     {
-        flag = sprintf( buf, "%c%c,OF%c%c,%u,%02d/%02d/%04d,%02d:%02d,%5.2f\n",
+        flag = sprintf( buf, "%c%c,OF%c%c,%02d/%02d/%04d,%02d:%02d,%5.2f\n",
                         appData.siteid[0],
                         appData.siteid[1],
                         appData.siteid[2],
                         appData.siteid[3],
-                        getCompletScenarioNumber( ),
                         appData.current_time.tm_mday,
                         appData.current_time.tm_mon,
                         2000 + appData.current_time.tm_year,
@@ -1093,12 +729,11 @@ FILEIO_RESULT logCalibration( void )
 
     for ( i = 0; i < appDataLog.num_time_calib_stored; i++ )
     {
-        flag = sprintf( buf, "%c%c,OF%c%c,%u,%02d/%02d/%04d,%02d:%02d,%.0f\n",
+        flag = sprintf( buf, "%c%c,OF%c%c,%02d/%02d/%04d,%02d:%02d,%.0f\n",
                         appData.siteid[0],
                         appData.siteid[1],
                         appData.siteid[2],
                         appData.siteid[3],
-                        getCompletScenarioNumber( ),
                         appData.current_time.tm_mday,
                         appData.current_time.tm_mon,
                         2000 + appData.current_time.tm_year,
@@ -1189,20 +824,7 @@ int flushDataOnUsbDevice( )
 //        return FLUSH_DATA_ON_USB_DEVICE_FAIL;
 //    }
 
-    /* Bird data */
-    if ( appDataLog.num_data_stored > 0 )
-    {
-#if defined (USE_UART1_SERIAL_INTERFACE) 
-        printf( "\tFlush birds data.\n" );
-#endif
-        /* Force data to be written on the USB device */
-        appDataLog.num_data_stored = MAX_NUM_DATA_TO_STORE;
-        if ( false == dataLog( false ) )
-        {
-            appDataUsb.is_device_needed = false;
-            return FLUSH_DATA_ON_USB_DEVICE_FAIL;
-        }
-    }
+   
 
     setLedsStatusColor( LED_USB_ACCESS );
 
@@ -1218,22 +840,6 @@ int flushDataOnUsbDevice( )
             return FLUSH_DATA_ON_USB_DEVICE_FAIL;
         }
     }
-
-    setLedsStatusColor( LED_USB_ACCESS );
-
-    /* RFID frequency */
-    if ( true == appDataLog.log_rfid && appDataLog.num_rfid_freq_stored > 0 )
-    {
-#if defined (USE_UART1_SERIAL_INTERFACE) 
-        printf( "\tFlush RFID data.\n" );
-#endif
-        if ( FILEIO_RESULT_FAILURE == logRfidFreq( ) )
-        {
-            appDataUsb.is_device_needed = false;
-            return FLUSH_DATA_ON_USB_DEVICE_FAIL;
-        }
-    }
-
     setLedsStatusColor( LED_USB_ACCESS );
 
     /* Date and time calibration */

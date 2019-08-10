@@ -39,26 +39,14 @@
 //#define DISPLAY_LEDS_STATUS
 //#define DISPLAY_PCA9622_STATUS
 //#define DISPLAY_ISR_RTCC          // uncomment to display interruption event
-//#define DISPLAY_ISR_IR              // uncomment to display interruption event
-//#define DISPLAY_ISR_PIR           // uncomment to display interruption event
-//#define DISPLAY_ISR_RFID          // uncomment to display interruption event
 //#define DISPLAY_ISR_I2C           // uncomment to display interruption event
 //#define DISPLAY_USB_ISR_INFO      // in USB_HostInterruptHandler( )
 
-//#define DISPLAY_RFID_STATE        // uncomment to display the current state
-//#define DISPLAY_PIT_TAG_INFO 
-//#define DEBUG_RFID_WORKING_ON_LED_STATUS // uncomment to display hardware trace in RFID decoding routine
-
 #define DISPLAY_RESET_INFORMATION
-
-#define DISPLAY_REWARD_PROBABILITY
 
 //#define DISPLAY_REMOTE_CONTROL_INFO 
 
 #define DISPLAY_RESET_REGISTERS
-
-#define DISPLAY_SERVO_INFO
-//#define DISPLAY_SERVO_POSITION
 
 //#define TEST_RTCC_SLEEP_WAKEUP
 
@@ -76,14 +64,12 @@
 #include "stdio.h"
 
 #include "delay.h"
-#include "em4095.h"
 #include "mcp23017.h"
 #include "pca9622.h"
 #include "digits.h"
 #include "buttons.h"
 #include "led_status.h"
 #include "ir_sensor.h"
-#include "servomotor.h"
 
 #include "app_alarm.h"
 #include "app_attractive_leds.h"
@@ -99,14 +85,11 @@
 #include "app_i2c.h"
 #include "app_power.h"
 #include "app_remote.h"
-#include "app_rfid.h"
 #include "app_timers_callback.h"
 #include "app_usb.h"
 #include "app_fileio.h"
-#include "app_scenario.h"
 #include "app_rtc_action.h"
 #include "app_version.h"
-#include "app_stimuli.h"
 
 
 #include "../framework/AlphaTRX/Services.h"
@@ -151,12 +134,10 @@ typedef enum {
 
     APP_STATE_SERIAL_COMMUNICATION,
 
-    APP_STATE_RFID_READING_PIT_TAG,
-
-    APP_STATE_OPENING_DOOR,
-    APP_STATE_WAITING_CATCH_REWARD,
-    APP_STATE_CLOSING_DOOR,
-    APP_STATE_REOPEN_DOOR,
+//    APP_STATE_OPENING_DOOR,
+//    APP_STATE_WAITING_CATCH_REWARD,
+//    APP_STATE_CLOSING_DOOR,
+//    APP_STATE_REOPEN_DOOR,
 
     APP_STATE_DATA_LOG,
 
@@ -180,19 +161,6 @@ typedef enum {
     APP_STATE_ERROR
 
 } APP_STATES;
-
-typedef enum {
-    NO_SCENARIO,
-    OPEN_BAR,
-    DOOR_HABITUATION,
-    GO_NO_GO,
-    LONG_TERM_SPATIAL_MEMORY,
-    WORKING_SPATIAL_MEMORY,
-    COLOR_ASSOCIATIVE_LEARNING,
-    RISK_AVERSION,
-    PATCH_PROBABILITY
-
-} SCENARIO;
 
 // *****************************************************************************
 
@@ -369,18 +337,14 @@ typedef struct {
 // *****************************************************************************
 
 extern APP_DATA appData; /* Main application data. */
-extern APP_DATA_PIT_TAG appDataPitTag; /* Pit tag application data. */
 extern APP_ERROR appError; /* Error application data. */
 extern APP_DATA_USB appDataUsb; /* USB host application data. */
 extern APP_DATA_ALARM appDataAlarmSleep;
 extern APP_DATA_ALARM appDataAlarmWakeup;
 extern APP_DATA_LEDS appDataAttractiveLeds; /* Error application data. */
 extern APP_DATA_LOG appDataLog;
-extern APP_DATA_SERVO appDataServo; /* Servomotor application data. */
 extern APP_DATA_RC appDataRc; /* Remote control application data. */
 extern APP_DATA_EVENT appDataEvent;
-extern APP_DATA_DOOR appDataDoor;
-extern APP_DATA_STIMULI appDataStimuli; /* Stimuli application data */
 
 extern volatile bool is_bird_detected;
 

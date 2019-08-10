@@ -1307,22 +1307,14 @@ void APP_SerialDebugTasks(void) {
                     case 'o':
                     case 'O':
                     {
-                        /* Read uint16_t from terminal. */
-                        appData.secu_guillotine_offset = readIntFromUart1();
-                        appData.timeout_guillotine = (appDataServo.ton_max - appDataServo.ton_min) / appDataServo.closing_speed * (PR3 / 1000) + appData.secu_guillotine_offset;
-
-                        printf("\n\tGuillotine offset set to: %dms\n", appData.secu_guillotine_offset);
-                        printf("\tGuillotine timeout set to: %dms\n", appData.timeout_guillotine);
+                        //FREE
                         break;
                     }
 
                     case 'p':
                     case 'P':
                     {
-                        /* Read uint16_t from terminal. */
-                        appDataDoor.max_pos_offset = readIntFromUart1();
-
-                        printf("\n\tMax position offset set to: %d\n", appDataDoor.max_pos_offset);
+                        //FREE
                         break;
                     }
 
@@ -1372,14 +1364,6 @@ void APP_SerialDebugTasks(void) {
                 break;
         }
     } /* end of if ( UART1_TRANSFER_STATUS_RX_DATA_PRESENT & UART1_TransferStatusGet( ) ) */
-}
-
-uint8_t getCompletScenarioNumber(void) {
-    if (GO_NO_GO != appData.scenario_number) {
-        return appData.scenario_number;
-    } else {
-        return (30 + appDataAttractiveLeds.pattern_number);
-    }
 }
 
 void getDeviceId(void) {

@@ -591,40 +591,6 @@ void getCurrentMenuValue( void )
             strncpy( currentMenuValue, appDataRc.digitBuffer, 5 );
             break;
 
-        case N4_PIR_DETECT:
-
-//            if ( true == appDataLog.bird_pir_sensor_status )
-            if ( true == is_bird_detected )
-            {
-                strncpy( currentMenuValue, "truE ", 5 );
-            }
-            else
-            {
-                strncpy( currentMenuValue, "nonE ", 5 );
-            }
-            //            strncpy( currentMenuValue, pirDetect, 5 );
-            break;
-
-        case N4_RFID_DETECT:
-            strncpy( currentMenuValue, rfidDetect, 5 );
-            break;
-
-        case N4_DOOR_STATUS:
-
-            if ( DOOR_OPENED == appDataDoor.reward_door_status )
-            {
-                strncpy( currentMenuValue, "OPEn ", 5 );
-            }
-            else
-            {
-                strncpy( currentMenuValue, "cLSE ", 5 );
-            }
-            break;
-
-        case N4_IR_DETECT:
-            strncpy( currentMenuValue, irDetect, 5 );
-            break;
-
         case N4_LEDS_R:
             sprintf( appDataRc.digitBuffer, "r%03u ", appDataAttractiveLeds.red[appDataAttractiveLeds.current_color_index] );
             strncpy( currentMenuValue, appDataRc.digitBuffer, 5 );

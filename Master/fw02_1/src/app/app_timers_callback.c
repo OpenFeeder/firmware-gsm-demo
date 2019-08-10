@@ -76,9 +76,6 @@ void TMR3_CallBack( void )
     static volatile uint16_t capture_positive_edge_counter_in_10ms = 0; // variable for capture the number of positive edge counter in 10 ms
     static volatile uint16_t previous_positive_edge_counter_in_10ms = 0; // and this to check if there is a new value
 
-    capture_positive_edge_counter_in_10ms = counter_positive_edge_rdyclk; // MikroElektronika "RFid Reader Board": 0x0483 <=> 1155 (dec) --> 115,5 kHz
-    counter_positive_edge_rdyclk = 0; // reset RDY/CLK pulse counter
-
     /* This is for delay routine in app.c file
      * if timeout x20ms counter == 0 do nothing.
      */

@@ -38,18 +38,14 @@
  */
 
 APP_DATA appData; /* Global application data. */
-APP_DATA_PIT_TAG appDataPitTag; /* PIT tags application data */
 APP_ERROR appError; /* Errors application data */
 APP_DATA_USB appDataUsb; /* USB application data */
 APP_DATA_ALARM appDataAlarmSleep; /* Alarm sleep application data */
 APP_DATA_ALARM appDataAlarmWakeup; /* Alarm wake-up application data */
 APP_DATA_LEDS appDataAttractiveLeds; /* Atractive LEDs application data */
 APP_DATA_LOG appDataLog; /* Datalogger application data */
-APP_DATA_SERVO appDataServo; /* Servomotor application data */
 APP_DATA_RC appDataRc; /* Remote control application data */
 APP_DATA_EVENT appDataEvent; /* Events application data */
-APP_DATA_DOOR appDataDoor; /* Door application data */
-APP_DATA_STIMULI appDataStimuli; /* Stimuli application data */
 
 
 //AlphaTRX modifcation 
@@ -1005,32 +1001,10 @@ void APP_Tasks(void) {
                     break;
                 }
 
-                /* Bird data */
-                if (appDataLog.num_data_stored > 0 && true == appDataLog.is_file_name_set) {
-                    setLedsStatusColor(LED_USB_ACCESS);
-                    /* Force data to be written on the USB device */
-                    appDataLog.num_data_stored = MAX_NUM_DATA_TO_STORE;
-                    if (false == dataLog(false)) {
-                        appDataUsb.is_device_needed = false;
-                        appData.state = APP_STATE_ERROR;
-                        break;
-                    }
-                }
-
                 /* Battery level */
                 if (appDataLog.num_battery_level_stored > 0) {
                     setLedsStatusColor(LED_USB_ACCESS);
                     if (FILEIO_RESULT_FAILURE == logBatteryLevel()) {
-                        appDataUsb.is_device_needed = false;
-                        appData.state = APP_STATE_ERROR;
-                        break;
-                    }
-                }
-
-                /* RFID frequency */
-                if (appDataLog.num_rfid_freq_stored > 0) {
-                    setLedsStatusColor(LED_USB_ACCESS);
-                    if (FILEIO_RESULT_FAILURE == logRfidFreq()) {
                         appDataUsb.is_device_needed = false;
                         appData.state = APP_STATE_ERROR;
                         break;
