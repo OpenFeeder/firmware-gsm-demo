@@ -71,8 +71,6 @@ APP_DATA_RC appDataRc; /* Remote control application data */
 APP_DATA_EVENT appDataEvent; /* Events application data */
 
 //AlphaTRX modifcation 
-struct tm t;
-volatile int8_t msgReceive = 0;
 bool print = false;
 
 
@@ -199,7 +197,7 @@ MASTER_APP_STATES MASTER_GetBehavior() {
         // on ne peut avoir l'egalite et a voir un comportement present 
         state = appData.behavior[PRIO_EXEPTIONNEL][GETpREAD(PRIO_EXEPTIONNEL)];
         INCpREAD(PRIO_EXEPTIONNEL);
-    }else if (GETpREAD(PRIO_HIGH) != GETpWRITE(PRIO_HIGH)) {
+    } else if (GETpREAD(PRIO_HIGH) != GETpWRITE(PRIO_HIGH)) {
         // on ne peut avoir l'egalite et a voir un comportement present 
         state = appData.behavior[PRIO_HIGH][GETpREAD(PRIO_HIGH)];
         INCpREAD(PRIO_HIGH);
@@ -259,27 +257,47 @@ void MASTER_AppTask(void) {
             /* Date & time calibration using external RTC module */
             calibrateDateTime();
 
-            /* Power PIR sensor early in the code because of starting delay before usable */
-            powerPIREnable();
+            /*
+             * Power on and Init radio Alpha TRX module 
+             * default mode is receive mode. 
+             * we try to power and init 10 repetition 
+             */
+            uint8_t i = 0;
+            do {
+                if (CMD_3V3_RF_GetValue() == false) {
+                    if (radioAlphaTRX_Init()) {
+#if defined  (USE_UART1_SERIAL_INTERFACE )
+                        printf("RF Module Enable And INIT\n");
+#endif
+                        radioAlphaTRX_ReceivedMode(); // receive mode actived
+                        appData.RfModuleInit = true;
+                        //______________________________________________________________
+                        /* Log event if required */
+                        if (true == appDataLog.log_events) {
+                            store_event(OF_ALPHA_TRX_MODULE_INIT_OK);
+                        }
+                    } else
+                        i++;
+                } else {
+                    powerRFEnable();
+                    i++;
+#if defined  (USE_UART1_SERIAL_INTERFACE )
+                    printf("RF Module disable.\n");
+#endif
+                }
+            } while (i < 10 && !appData.RfModuleInit);
 
-            //alphaTRX modification : juste pour les test, il faut mieux structurer 
-            powerRFEnable();
-            // Check the power statut of the RF module
-            if (CMD_3V3_RF_GetValue() == false) {
-#if defined  (USE_UART1_SERIAL_INTERFACE )
-                printf("RF Module Enable.\n");
-#endif
-                radioAlphaTRX_Init();
-                radioAlphaTRX_ReceivedMode(); // receive mode actived
-#if defined  (USE_UART1_SERIAL_INTERFACE ) 
-                printf("RF Module INIT.\n");
-#endif
-            } else {
-#if defined  (USE_UART1_SERIAL_INTERFACE )
-                printf("RF Module disable.\n");
-                printf("Send 'T' to change power state of radio module.\n");
-#endif
+            if (i >= 10) { // module n
+#if defined(USE_UART1_SERIAL_INTERFACE)
+                printf("RF module not power on \n");
+#endif  
+                //______________________________________________________________
+                /* Log event if required */
+                if (true == appDataLog.log_events) {
+                    store_event(OF_ALPHA_TRX_MODULE_FAIL);
+                }
             }
+
 
             /* Go to device configuration state */
             MASTER_StoreBehavior(MASTER_APP_STATE_CONFIGURE_SYSTEM, PRIO_HIGH);
@@ -466,9 +484,6 @@ void MASTER_AppTask(void) {
                     logUdid();
                 }
 
-                /* Turn on LEDs status while servo is moved */
-                setLedsStatusColor(LED_SERVO);
-
 #if defined (USE_UART1_SERIAL_INTERFACE)
                 printf("\t=========================================\n");
 #endif  
@@ -578,9 +593,9 @@ void MASTER_AppTask(void) {
 
 #if defined ( USE_UART1_SERIAL_INTERFACE )
             if (getDateTime()) {
-                if (appData.current_time.tm_sec%10 == 0 && (print == true)) {
+                if (appData.current_time.tm_sec % 10 == 0 && (print == true)) {
                     print = false;
-                    printf("[heure ==> %02d:%02d:%02d]\n", appData.current_time.tm_hour, 
+                    printf("[heure ==> %02d:%02d:%02d]\n", appData.current_time.tm_hour,
                            appData.current_time.tm_min, appData.current_time.tm_sec);
 
                 } else if (appData.current_time.tm_sec % 10 != 0 && (print == false)) {
@@ -1352,7 +1367,55 @@ void MASTER_AppTask(void) {
             }
             break;
             /* -------------------------------------------------------------- */
+        case MASTER_APP_STATE_BATTERY_LEVEL_CHECK:
+        {
+            bool flag = isPowerBatteryGood();
 
+            if (appDataLog.num_battery_level_stored < NUM_BATTERY_LEVEL_TO_LOG) {
+                appDataLog.battery_level[appDataLog.num_battery_level_stored][0] = appData.current_time.tm_hour;
+                appDataLog.battery_level[appDataLog.num_battery_level_stored][1] = appData.battery_level;
+                ++appDataLog.num_battery_level_stored;
+            } else {
+                /* Log event if required */
+                if (true == appDataLog.log_events) {
+                    store_event(OF_BATTERY_LEVEL_OVERFLOW);
+                }
+            }
+
+            if (false == flag) {
+                MASTER_StoreBehavior(MASTER_APP_STATE_FLUSH_DATA_BEFORE_ERROR, PRIO_HIGH);
+                appData.state = MASTER_APP_STATE_FLUSH_DATA_BEFORE_ERROR;
+                return;
+            }
+        }
+            break;
+            /* -------------------------------------------------------------- */
+        case MASTER_APP_STATE_GET_EMPERATURE:
+        {
+            if (0 < APP_I2CMasterSeeksSlaveDevice(DS3231_I2C_ADDR, DS3231_I2C_ADDR)) {
+                /* Log event if required */
+                if (true == appDataLog.log_events) {
+                    store_event(OF_DS3231_GET_TEMPERATURE);
+                }
+
+                getDateTime();
+                getDS3231Temperature();
+
+                if (appDataLog.num_ds3231_temp_stored < NUM_DS3231_TEMP_TO_LOG) {
+                    appDataLog.ds3231_temp[appDataLog.num_ds3231_temp_stored][0] = (float) appData.current_time.tm_hour;
+                    appDataLog.ds3231_temp[appDataLog.num_ds3231_temp_stored][1] = (float) appData.current_time.tm_min;
+                    appDataLog.ds3231_temp[appDataLog.num_ds3231_temp_stored][2] = appData.ext_temperature;
+                    ++appDataLog.num_ds3231_temp_stored;
+                } else {
+                    /* Log event if required */
+                    if (true == appDataLog.log_events) {
+                        store_event(OF_DS3231_TEMP_OVERFLOW);
+                    }
+                }
+            }
+        }
+            break;
+            /* -------------------------------------------------------------- */
         default:
             if (false == enter_default_state) {
 #if defined ( USE_UART1_SERIAL_INTERFACE ) && defined( DISPLAY_CURRENT_STATE )
@@ -1432,7 +1495,8 @@ void MASTER_AppInit(void) {
     appDataUsb.is_device_address_available = false;
     appDataUsb.is_device_needed = false;
 
-    CMD_3V3_RF_SetLow();
+    //power on and init raio module 
+    powerRFEnable();
 
 
     for (i = 0; i < 4; i++) {

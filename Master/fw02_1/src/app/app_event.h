@@ -142,7 +142,9 @@ typedef enum {
     OF_WRITE_FIRMWARE_LOG,
             
     //modif anzilane
-    OF_UPDATE_DATE_LOG_FAIL
+    OF_UPDATE_DATE_LOG_FAIL,
+    OF_ALPHA_TRX_MODULE_INIT_OK,
+    OF_ALPHA_TRX_MODULE_FAIL        
 
 } APP_EVENT;
 

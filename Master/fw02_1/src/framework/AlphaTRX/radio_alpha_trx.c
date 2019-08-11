@@ -3182,18 +3182,19 @@ unsigned int radioAlphaTRX_TransceiverConfigFq(unsigned char freqSelected) {
 
 } // end of FSK_Transceiver_ConfigFq()
 
-void radioAlphaTRX_Init(void) {
+bool radioAlphaTRX_Init(void) {
     //
     RF_StatusRead.Val = 0;
     //    RF_StatusRead.Val = radioAlphaTRX_Command(STATUS_READ_CMD); // intitial SPI transfer added to avoid power-up problem
     /**-------------> Frequency Setting Command @ 433 MHz <--------------------*/
 
-//    do {
-        RF_StatusRead.Val = radioAlphaTRX_Command(STATUS_READ_CMD); // intitial SPI transfer added to avoid power-up problem
+    RF_StatusRead.Val = radioAlphaTRX_Command(STATUS_READ_CMD); // intitial SPI transfer added to avoid power-up problem
 #if defined(UART_DEBUG)
-        printf("A other Wait until RFM12B is out of power-up reset, status: 0x%04X\r\n", RF_StatusRead.Val);
+    printf("A other Wait until RFM12B is out of power-up reset, status: 0x%04X\r\n", RF_StatusRead.Val);
 #endif
-//    } while (RF_StatusRead.bits.b14_POR);
+    if (RF_StatusRead.bits.b14_POR != 0) {
+        return false;
+    }
 
 
     /**-------------> Power Management Command(2) <---------------------------*/
@@ -3354,10 +3355,12 @@ void radioAlphaTRX_Init(void) {
     // Clock Divider    = 1 Mhz
     radioAlphaTRX_Command(0xC009); // CLK OUTPUT = 1 MHz
     __delay32(SLEEP_AFTER_INIT);
+    return true;
 }
 
 // Initialiser la detection d'une nouvelle donnee
 // le buffer est vide si non erreur on initialise tou les registre et on recomence 
+
 bool radioAlphaTRX_FlushFIFO() {
     bool stop = false;
     int i = 10;
@@ -3371,10 +3374,11 @@ bool radioAlphaTRX_FlushFIFO() {
     } while (!stop && i > 0); // tant que la fifo nest pas vide 
     return !(i == 0); // 
 }
+
 void radioAlphaTRX_ReceivedMode(void) {
     //close TX mode 
     if (!radioAlphaTRX_FlushFIFO()) radioAlphaTRX_Init();
-    
+
     RF_PowerManagement.Val = PWR_MGMT_CMD_POR;
     RF_PowerManagement.bits.b0_dc = 1;
     radioAlphaTRX_Command(RF_PowerManagement.Val); //0x8209
@@ -3578,7 +3582,7 @@ bool radioAlphaTRX_receive() {
         frameReceve.paquet[i] = receiveData.byte.low;
         //frameReceve.Champ.src != MASTER_GetSlaveSelected() : ==> etre sur de recuperer le msg du slave selectionn?
         if (i == 0) {
-            if (frameReceve.Champ.dest != MASTER_ID ) // || frameReceve.Champ.src != MASTER_GetSlaveSelected()pour les broadcast, on modifiera la condition
+            if (frameReceve.Champ.dest != MASTER_ID) // || frameReceve.Champ.src != MASTER_GetSlaveSelected()pour les broadcast, on modifiera la condition
                 return false;
         } else if (receiveData.byte.low == 0) {
             break;
@@ -3592,8 +3596,8 @@ void radioAlphaTRX_CaptureFrame() {
     if (radioAlphaTRX_receive()) {
         LED_STATUS_B_Toggle();
         // ? ce niveau le msg est corectemnt re?u 
-//        MASTER_StoreBehavior(MASTER_STATE_MSG_RF_RECEIVE, PRIO_HIGH); // c'est une information tr?s importante 
-    } 
+        //        MASTER_StoreBehavior(MASTER_STATE_MSG_RF_RECEIVE, PRIO_HIGH); // c'est une information tr?s importante 
+    }
     //on se remet en ecoute 
     radioAlphaTRX_ReceivedMode();
 }

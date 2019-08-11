@@ -23,6 +23,11 @@ typedef enum
 } APP_CHECK;
 
 APP_CHECK checkImportantParameters( void );
+
+/**
+ * check battery level
+ * @return : in same time return true if battery is good, false is not
+ */
 bool isPowerBatteryGood( void );
 bool isPowerVbatGood( void );
 bool isEnoughFood( void );

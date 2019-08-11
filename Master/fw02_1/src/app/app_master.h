@@ -145,6 +145,9 @@ typedef enum {
 
     MASTER_APP_STATE_IDLE,
 
+    MASTER_APP_STATE_BATTERY_LEVEL_CHECK,
+            MASTER_APP_STATE_GET_EMPERATURE,
+            
     MASTER_APP_STATE_SERIAL_COMMUNICATION,
 
     MASTER_APP_STATE_DATA_LOG,
@@ -227,7 +230,7 @@ typedef enum {
     GOOD_DAY, // the daytime  
     GOOD_NIGHT, // end day collect log 
     SEE_YOU_TOMORROW // master go to sleep
-}STEP_OF_DAY;
+} STEP_OF_DAY;
 
 /* Application Data
 
@@ -363,10 +366,13 @@ typedef struct {
     float ext_temperature;
 
     //
-    STEP_OF_DAY dayTime;  
-    
-    
-    //communication information 
+    STEP_OF_DAY dayTime;
+
+
+    /*communication information */
+    //init module 
+    bool RfModuleInit;
+
     volatile uint8_t behavior[MAX_LEVEL_PRIO][NB_BEHAVIOR_PER_PRIO];
     volatile uint8_t ptr[MAX_LEVEL_PRIO][3]; //READ - WRITE - OVFF (overflow)
     uint8_t BUFF_COLLECT[NB_DATA_BUF][SIZE_DATA];

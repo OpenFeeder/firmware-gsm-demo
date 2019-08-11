@@ -68,31 +68,29 @@ static uint8_t ConvertBCDToHex(uint8_t bcdvalue);
 // Section: Driver Interface Function Definitions
  */
 
-void RTCC_Initialize(void)
-{
+void RTCC_Initialize(void) {
 
-   RTCCON1Lbits.RTCEN = 0; // Disable RTCC
-   
+    RTCCON1Lbits.RTCEN = 0; // Disable RTCC
+
     __builtin_write_RTCC_WRLOCK(); // Clear WRLOCK to modify RTCC as needed
-    
 
-   if(!RTCCTimeInitialized())
-    {
-//#if defined (USE_UART1_SERIAL_INTERFACE)
-//        printf( "RTCCTimeInitialized\n" );
-//#endif
 
-//        // set 2017-02-06 22-22-37
-//       DATEH = 0x1702;    // Year/Month
-//       DATEL = 0x601;    // Date/Wday
-//       TIMEH = 0x2222;    // hours/minutes
-//       TIMEL = 0x3700;    // seconds
+    if (!RTCCTimeInitialized()) {
+        //#if defined (USE_UART1_SERIAL_INTERFACE)
+        //        printf( "RTCCTimeInitialized\n" );
+        //#endif
+
+        //        // set 2017-02-06 22-22-37
+        //       DATEH = 0x1702;    // Year/Month
+        //       DATEL = 0x601;    // Date/Wday
+        //       TIMEH = 0x2222;    // hours/minutes
+        //       TIMEL = 0x3700;    // seconds
     }
     // set 2017-02-06 22-23-31
-    ALMDATEH = 0x1702;    // Year/Month
-    ALMDATEL = 0x601;    // Date/Wday
-    ALMTIMEH = 0x2223;    // hours/minutes
-    ALMTIMEL = 0x3100;    // seconds
+    ALMDATEH = 0x1702; // Year/Month
+    ALMDATEL = 0x601; // Date/Wday
+    ALMTIMEH = 0x2223; // hours/minutes
+    ALMTIMEL = 0x3100; // seconds
     // AMASK Every Day; ALMRPT 0; CHIME disabled; ALRMEN enabled; 
     RTCCON1H = 0x8600;
 
@@ -103,18 +101,17 @@ void RTCC_Initialize(void)
     // PWCSTAB 0; PWCSAMP 0; 
     RTCCON3L = 0x0000;
 
-   // RTCEN enabled; OUTSEL Seconds Clock; PWCPOE disabled; TSBEN disabled; PWCEN disabled; WRLOCK enabled; PWCPOL disabled; TSAEN enabled; RTCOE enabled; 
-   RTCCON1L = 0x8B91; 
-    
-   // Enable RTCC, clear RTCWREN 
-   RTCCON1Lbits.RTCEN = 1;
-   RTCC_Lock();
+    // RTCEN enabled; OUTSEL Seconds Clock; PWCPOE disabled; TSBEN disabled; PWCEN disabled; WRLOCK enabled; PWCPOL disabled; TSAEN enabled; RTCOE enabled; 
+    RTCCON1L = 0x8B91;
 
-   IEC3bits.RTCIE = 1;
+    // Enable RTCC, clear RTCWREN 
+    RTCCON1Lbits.RTCEN = 1;
+    RTCC_Lock();
+
+    IEC3bits.RTCIE = 1;
 }
 
-static void RTCC_Lock(void)
-{
+static void RTCC_Lock(void) {
     asm volatile("DISI #6");
     asm volatile("MOV #NVMKEY, W1");
     asm volatile("MOV #0x55, W2");
@@ -124,10 +121,9 @@ static void RTCC_Lock(void)
     asm volatile("BSET RTCCON1L, #11");
 }
 
-bool RTCC_TimeGet(struct tm *currentTime)
-{
+bool RTCC_TimeGet(struct tm *currentTime) {
     uint16_t register_value;
-    if(RTCSTATLbits.SYNC){
+    if (RTCSTATLbits.SYNC) {
         return false;
     }
 
@@ -149,8 +145,7 @@ bool RTCC_TimeGet(struct tm *currentTime)
     return true;
 }
 
-void RTCC_TimeSet(struct tm *initialTime)
-{
+void RTCC_TimeSet(struct tm *initialTime) {
 
     // Clear WRLOCK to modify RTCC as needed
     __builtin_write_RTCC_WRLOCK();
@@ -162,30 +157,29 @@ void RTCC_TimeSet(struct tm *initialTime)
     IFS3bits.RTCIF = false;
     IEC3bits.RTCIE = 0;
 
-   // set RTCC initial time
-    DATEH = (ConvertHexToBCD(initialTime->tm_year) << 8) | ConvertHexToBCD(initialTime->tm_mon) ;  // YEAR/MONTH-1
-    DATEL = (ConvertHexToBCD(initialTime->tm_mday) << 8) | ConvertHexToBCD(initialTime->tm_wday) ;  // /DAY-1/WEEKDAY
-    TIMEH = (ConvertHexToBCD(initialTime->tm_hour) << 8)  | ConvertHexToBCD(initialTime->tm_min); // /HOURS/MINUTES
-    TIMEL = (ConvertHexToBCD(initialTime->tm_sec) << 8) ;   // SECOND
+    // set RTCC initial time
+    DATEH = (ConvertHexToBCD(initialTime->tm_year) << 8) | ConvertHexToBCD(initialTime->tm_mon); // YEAR/MONTH-1
+    DATEL = (ConvertHexToBCD(initialTime->tm_mday) << 8) | ConvertHexToBCD(initialTime->tm_wday); // /DAY-1/WEEKDAY
+    TIMEH = (ConvertHexToBCD(initialTime->tm_hour) << 8) | ConvertHexToBCD(initialTime->tm_min); // /HOURS/MINUTES
+    TIMEL = (ConvertHexToBCD(initialTime->tm_sec) << 8); // SECOND
 
-   // Enable RTCC, clear RTCWREN         
+    // Enable RTCC, clear RTCWREN         
     RTCCON1Lbits.RTCEN = 1;
 
     // Lock the RTCC registers
     //RTCCON1Lbits.WRLOCK = 1; 
     RTCC_Lock();
-    
-   //Enable RTCC interrupt
-   IEC3bits.RTCIE = 1;
+
+    //Enable RTCC interrupt
+    IEC3bits.RTCIE = 1;
 }
 
-bool RTCC_BCDTimeGet(bcdTime_t *currentTime)
-{
+bool RTCC_BCDTimeGet(bcdTime_t *currentTime) {
     uint16_t register_value;
-    if(RTCSTATLbits.SYNC){
+    if (RTCSTATLbits.SYNC) {
         return false;
     }
-   
+
     register_value = DATEH;
     currentTime->tm_year = (register_value & 0xFF00) >> 8;
     currentTime->tm_mon = register_value & 0x00FF;
@@ -204,10 +198,9 @@ bool RTCC_BCDTimeGet(bcdTime_t *currentTime)
     return true;
 }
 
-void RTCC_BCDTimeSet(bcdTime_t *initialTime)
-{
+void RTCC_BCDTimeSet(bcdTime_t *initialTime) {
 
-   __builtin_write_RTCC_WRLOCK();
+    __builtin_write_RTCC_WRLOCK();
 
     RTCCON1Lbits.RTCEN = 0;
 
@@ -215,14 +208,14 @@ void RTCC_BCDTimeSet(bcdTime_t *initialTime)
     IEC3bits.RTCIE = 0;
 
     // set RTCC initial time
-   DATEH = (initialTime->tm_year << 8) | (initialTime->tm_mon) ;  // YEAR/MONTH-1
-   DATEL = (initialTime->tm_mday << 8) | (initialTime->tm_wday) ;  // /DAY-1/WEEKDAY
-   TIMEH = (initialTime->tm_hour << 8) | (initialTime->tm_min); // /HOURS/MINUTES
-   TIMEL = (initialTime->tm_sec << 8);   // SECONDS   
+    DATEH = (initialTime->tm_year << 8) | (initialTime->tm_mon); // YEAR/MONTH-1
+    DATEL = (initialTime->tm_mday << 8) | (initialTime->tm_wday); // /DAY-1/WEEKDAY
+    TIMEH = (initialTime->tm_hour << 8) | (initialTime->tm_min); // /HOURS/MINUTES
+    TIMEL = (initialTime->tm_sec << 8); // SECONDS   
 
     // Enable RTCC, clear RTCWREN         
     RTCCON1Lbits.RTCEN = 1;
-   RTCC_Lock();
+    RTCC_Lock();
 
     //Enable RTCC interrupt
     IEC3bits.RTCIE = 1;
@@ -232,25 +225,21 @@ void RTCC_BCDTimeSet(bcdTime_t *initialTime)
  This function implements RTCC_TimeReset.This function is used to
  used by application to reset the RTCC value and reinitialize RTCC value.
  */
-void RTCC_TimeReset(bool reset)
-{
+void RTCC_TimeReset(bool reset) {
     rtccTimeInitialized = reset;
 }
 
-static bool RTCCTimeInitialized(void)
-{
-    return(rtccTimeInitialized);
+static bool RTCCTimeInitialized(void) {
+    return (rtccTimeInitialized);
 }
 
-void RTCC_TimestampAEventManualSet(void)
-{
+void RTCC_TimestampAEventManualSet(void) {
     RTCSTATLbits.TSAEVT = 1;
 }
 
-bool RTCC_TimestampADataGet(struct tm *currentTime)
-{
+bool RTCC_TimestampADataGet(struct tm *currentTime) {
     uint16_t register_value;
-    if(!RTCSTATLbits.TSAEVT){
+    if (!RTCSTATLbits.TSAEVT) {
         return false;
     }
 
@@ -274,12 +263,9 @@ bool RTCC_TimestampADataGet(struct tm *currentTime)
     return true;
 }
 
-
-
-bool RTCC_TimestampA_BCDDataGet(bcdTime_t *currentTime)
-{
+bool RTCC_TimestampA_BCDDataGet(bcdTime_t *currentTime) {
     uint16_t register_value;
-    if(!RTCSTATLbits.TSAEVT){
+    if (!RTCSTATLbits.TSAEVT) {
         return false;
     }
 
@@ -303,15 +289,13 @@ bool RTCC_TimestampA_BCDDataGet(bcdTime_t *currentTime)
     return true;
 }
 
-void RTCC_TimestampBEventManualSet(void)
-{
+void RTCC_TimestampBEventManualSet(void) {
     RTCSTATLbits.TSBEVT = 1;
 }
 
-bool RTCC_TimestampBDataGet(struct tm *currentTime)
-{
+bool RTCC_TimestampBDataGet(struct tm *currentTime) {
     uint16_t register_value;
-    if(!RTCSTATLbits.TSBEVT){
+    if (!RTCSTATLbits.TSBEVT) {
         return false;
     }
 
@@ -335,10 +319,9 @@ bool RTCC_TimestampBDataGet(struct tm *currentTime)
     return true;
 }
 
-bool RTCC_TimestampB_BCDDataGet(bcdTime_t *currentTime)
-{
+bool RTCC_TimestampB_BCDDataGet(bcdTime_t *currentTime) {
     uint16_t register_value;
-    if(!RTCSTATLbits.TSBEVT){
+    if (!RTCSTATLbits.TSBEVT) {
         return false;
     }
 
@@ -362,24 +345,18 @@ bool RTCC_TimestampB_BCDDataGet(bcdTime_t *currentTime)
     return true;
 }
 
-
-
-
-static uint8_t ConvertHexToBCD(uint8_t hexvalue)
-{
+static uint8_t ConvertHexToBCD(uint8_t hexvalue) {
     uint8_t bcdvalue;
     bcdvalue = (hexvalue / 10) << 4;
     bcdvalue = bcdvalue | (hexvalue % 10);
     return (bcdvalue);
 }
 
-static uint8_t ConvertBCDToHex(uint8_t bcdvalue)
-{
+static uint8_t ConvertBCDToHex(uint8_t bcdvalue) {
     uint8_t hexvalue;
     hexvalue = (((bcdvalue & 0xF0) >> 4)* 10) + (bcdvalue & 0x0F);
     return hexvalue;
 }
-
 
 /* Function:
   void __attribute__ ( ( interrupt, no_auto_psv ) ) _ISR _RTCCInterrupt( void )
@@ -391,129 +368,92 @@ static uint8_t ConvertBCDToHex(uint8_t bcdvalue)
     This is the interrupt service routine for the RTCC peripheral. Add in code if 
     required in the ISR. 
  */
-void __attribute__ ( ( interrupt, no_auto_psv ) ) _ISR _RTCCInterrupt( void )
-{
-    if ( true == appData.flags.bit_value.system_init )
-    {
+void __attribute__((interrupt, no_auto_psv)) _ISR _RTCCInterrupt(void) {
+    if (true == appData.flags.bit_value.system_init) {
 #if defined (USE_UART1_SERIAL_INTERFACE) && defined (DISPLAY_ISR_RTCC)
-        printf( "_RTCCInterrupt() " );
+        printf("_RTCCInterrupt() ");
 #endif 
 
         appData.rtcc_alarm_action = RTCC_ALARM_IDLE;
 
-        if ( appData.openfeeder_state == OPENFEEDER_IS_SLEEPING )
-        {
+        if (appData.openfeeder_state == OPENFEEDER_IS_SLEEPING) {
 #if defined (USE_UART1_SERIAL_INTERFACE) && defined (DISPLAY_ISR_RTCC)
-            printf( "- Wakeup\n" );
+            printf("- Wakeup\n");
 #endif 
-            appData.rtcc_alarm_action = RTCC_ALARM_WAKEUP_OPENFEEDER;
-        }
-        else
-        {
+            //            appData.rtcc_alarm_action = RTCC_ALARM_WAKEUP_OPENFEEDER;
+            MASTER_StoreBehavior(MASTER_APP_STATE_WAKE_UP, PRIO_EXEPTIONNEL);
 
-            getDateTime( );
+        } else {
 
-            if ( appData.current_time.tm_hour >= appDataAlarmSleep.time.tm_hour &&
-                 appData.current_time.tm_min >= appDataAlarmSleep.time.tm_min )
-            {
+            getDateTime();
+            
+            if (appData.current_time.tm_hour >= appDataAlarmSleep.time.tm_hour &&
+                appData.current_time.tm_min >= appDataAlarmSleep.time.tm_min) {
+                // default time to sleep
 #if defined (USE_UART1_SERIAL_INTERFACE) && defined (DISPLAY_ISR_RTCC)
-                printf( "- Sleep\n" );
+                printf("- Sleep\n");
 #endif 
-                appData.rtcc_alarm_action = RTCC_ALARM_SLEEP_OPENFEEDER;
-            }
-            else
-            {
+                MASTER_StoreBehavior(MASTER_APP_STATE_SLEEP, PRIO_EXEPTIONNEL);
+//                appData.rtcc_alarm_action = RTCC_ALARM_SLEEP_OPENFEEDER;
+            } else {
 
                 /* Battery level */
-                if ( appData.current_time.tm_min == 0 && appData.current_time.tm_sec == 30 )
-                {
+                if (appData.current_time.tm_min == 0 && appData.current_time.tm_sec == 30) {
 #if defined (USE_UART1_SERIAL_INTERFACE) && defined (DISPLAY_ISR_RTCC)
-                    printf( "- Battery check\n" );
+                    printf("- Battery check\n");
 #endif 
                     appData.rtcc_alarm_action = RTCC_BATTERY_LEVEL_CHECK;
                     IFS3bits.RTCIF = false;
                     return;
                 }
-                
-                /* Food level */
-                if ( appData.current_time.tm_min == 5 && appData.current_time.tm_sec == 30 )
-                {
-#if defined (USE_UART1_SERIAL_INTERFACE) && defined (DISPLAY_ISR_RTCC)
-                    printf( "- Food check\n" );
-#endif 
-                    appData.rtcc_alarm_action = RTCC_FOOD_LEVEL_CHECK;
-                    IFS3bits.RTCIF = false;
-                    return;
-                }
-                
-                /* RFID frequency */
-                if (( appData.current_time.tm_min == 0 || 
-                     appData.current_time.tm_min == 15 || 
-                     appData.current_time.tm_min == 30 || 
-                     appData.current_time.tm_min == 45) && appData.current_time.tm_sec == 45 )
-                {
-#if defined (USE_UART1_SERIAL_INTERFACE) && defined (DISPLAY_ISR_RTCC)
-                    printf( "- RFID check\n" );
-#endif 
-                    appData.rtcc_alarm_action = RTCC_RFID_FREQ_CHECK;
-                    IFS3bits.RTCIF = false;
-                    return;
-                }
-                
                 /* DS3231 temperature */
-                if (( appData.current_time.tm_min == 4 || 
-                     appData.current_time.tm_min == 19 || 
-                     appData.current_time.tm_min == 34 || 
-                     appData.current_time.tm_min == 49) && appData.current_time.tm_sec == 15 )
-                {
+                if ((appData.current_time.tm_min == 4 ||
+                    appData.current_time.tm_min == 19 ||
+                    appData.current_time.tm_min == 34 ||
+                    appData.current_time.tm_min == 49) && appData.current_time.tm_sec == 15) {
 #if defined (USE_UART1_SERIAL_INTERFACE) && defined (DISPLAY_ISR_RTCC)
-                    printf( "- DS3231 temperature\n" );
+                    printf("- DS3231 temperature\n");
 #endif 
-                    appData.rtcc_alarm_action = RTCC_DS3231_TEMPERATURE;
+                    MASTER_StoreBehavior(MASTER_APP_STATE_GET_EMPERATURE, PRIO_MEDIUM);
+//                    appData.rtcc_alarm_action = RTCC_DS3231_TEMPERATURE;
                     IFS3bits.RTCIF = false;
                     return;
                 }
-                
+
                 /* RTC calibration */
-                if (( appData.current_time.tm_min == 2 || 
-                     appData.current_time.tm_min == 17 || 
-                     appData.current_time.tm_min == 32 || 
-                     appData.current_time.tm_min == 47) && appData.current_time.tm_sec == 15 )
-                {
+                if ((appData.current_time.tm_min == 2 ||
+                    appData.current_time.tm_min == 17 ||
+                    appData.current_time.tm_min == 32 ||
+                    appData.current_time.tm_min == 47) && appData.current_time.tm_sec == 15) {
 #if defined (USE_UART1_SERIAL_INTERFACE) && defined (DISPLAY_ISR_RTCC)
-                    printf( "- RTC calibration\n" );
+                    printf("- RTC calibration\n");
 #endif 
                     appData.rtcc_alarm_action = RTCC_RTC_CALIBRATION;
                     IFS3bits.RTCIF = false;
                     return;
                 }
-                
-                
+
+
                 /* Alternate LEDs color */
-                if ( ATTRACTIVE_LEDS_ON == appDataAttractiveLeds.status )
-                {
+                if (ATTRACTIVE_LEDS_ON == appDataAttractiveLeds.status) {
                     //TODO : 
                 }
-                
-                /* Attractive LEDs on/off */
-                if (true == appData.flags.bit_value.attractive_leds_status)
-                {
-                    if ( ( appData.current_time.tm_hour * 60 + appData.current_time.tm_min ) >= ( appDataAttractiveLeds.wake_up_time.tm_hour * 60 + appDataAttractiveLeds.wake_up_time.tm_min ) &&
-                         ( appData.current_time.tm_hour * 60 + appData.current_time.tm_min )< ( appDataAttractiveLeds.sleep_time.tm_hour * 60 + appDataAttractiveLeds.sleep_time.tm_min ) )
 
-                    {
-    #if defined (USE_UART1_SERIAL_INTERFACE) && defined (DISPLAY_ISR_RTCC)
-                        printf( "- LEDs on\n" );
-    #endif 
+                /* Attractive LEDs on/off */
+                if (true == appData.flags.bit_value.attractive_leds_status) {
+                    if ((appData.current_time.tm_hour * 60 + appData.current_time.tm_min) >= (appDataAttractiveLeds.wake_up_time.tm_hour * 60 + appDataAttractiveLeds.wake_up_time.tm_min) &&
+                        (appData.current_time.tm_hour * 60 + appData.current_time.tm_min)< (appDataAttractiveLeds.sleep_time.tm_hour * 60 + appDataAttractiveLeds.sleep_time.tm_min))
+ {
+#if defined (USE_UART1_SERIAL_INTERFACE) && defined (DISPLAY_ISR_RTCC)
+                        printf("- LEDs on\n");
+#endif 
                         appData.rtcc_alarm_action = RTCC_ALARM_SET_ATTRACTIVE_LEDS_ON;
                         IFS3bits.RTCIF = false;
                         return;
-                    }
-                    else
-                    {
-    #if defined (USE_UART1_SERIAL_INTERFACE) && defined (DISPLAY_ISR_RTCC)
-                        printf( "- LEDs off\n" );
-    #endif 
+                    } else {
+#if defined (USE_UART1_SERIAL_INTERFACE) && defined (DISPLAY_ISR_RTCC)
+                        printf("- LEDs off\n");
+#endif 
                         appData.rtcc_alarm_action = RTCC_ALARM_SET_ATTRACTIVE_LEDS_OFF;
                         IFS3bits.RTCIF = false;
                         return;
@@ -522,10 +462,10 @@ void __attribute__ ( ( interrupt, no_auto_psv ) ) _ISR _RTCCInterrupt( void )
             }
         }
 #if defined (USE_UART1_SERIAL_INTERFACE) && defined (DISPLAY_ISR_RTCC)
-        printf( "- None\n" );
+        printf("- None\n");
 #endif 
     }
-//    TMR_RtcCallBack();
+    //    TMR_RtcCallBack();
     IFS3bits.RTCIF = false; /* Clear interrupt flag. */
 }
 /**
