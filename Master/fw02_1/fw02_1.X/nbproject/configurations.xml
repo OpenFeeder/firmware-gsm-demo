@@ -21,7 +21,6 @@
         <itemPath>../src/app/app_usb.h</itemPath>
         <itemPath>../src/app/app_version.h</itemPath>
         <itemPath>../src/app/app_fileio.h</itemPath>
-        <itemPath>../src/app/app_rtc_action.h</itemPath>
         <itemPath>../src/app/app_master.h</itemPath>
       </logicalFolder>
       <logicalFolder name="driver" displayName="driver" projectFiles="true">
@@ -110,7 +109,6 @@
         <itemPath>../src/app/app_timers_callback.c</itemPath>
         <itemPath>../src/app/app_usb.c</itemPath>
         <itemPath>../src/app/app_fileio.c</itemPath>
-        <itemPath>../src/app/app_rtc_action.c</itemPath>
         <itemPath>../src/app/app_master.c</itemPath>
       </logicalFolder>
       <logicalFolder name="driver" displayName="driver" projectFiles="true">
@@ -493,6 +491,7 @@
         <property key="UART 6" value="true"/>
         <property key="USB" value="true"/>
         <property key="debugoptions.useswbreakpoints" value="false"/>
+        <property key="firmware.download.all" value="false"/>
         <property key="hwtoolclock.frcindebug" value="false"/>
         <property key="memories.aux" value="false"/>
         <property key="memories.bootflash" value="true"/>

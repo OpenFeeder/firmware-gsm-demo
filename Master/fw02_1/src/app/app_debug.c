@@ -13,6 +13,7 @@
 #include "app_datetime.h"
 #include "../../src/framework/AlphaTRX/radio_alpha_trx.h"
 #include "../../fw02_1.X/mcc_generated_files/pin_manager.h"
+
 #if defined (USE_UART1_SERIAL_INTERFACE)
 
 /* Current date to a C string (page 244)) */
@@ -40,7 +41,7 @@ void displayKeyMapping(void) {
     printf("\t   - r or R: toggle remain open parameter\n");
     printf("\t e or E: check status LEDs\n");
     printf("\t f or F: flush data on USB device\n");
-    //                printf( "\t g or G: NOT USED\n" );
+    printf("\t g or G: OF state mode : sleep or wakeup\n");
     printf("\t h or H: firmware & hardware information\n");
     printf("\t i or I: IR barriers\n");
     printf("\t   - p or P: toggle IR barriers power\n");
@@ -249,7 +250,7 @@ void APP_SerialDebugTasks(void) {
                     }
                     case 's':
                     case 'S':
-                    
+
                         break;
                         /* -------------------------------------------------------------- */
                     case 't':
@@ -423,10 +424,34 @@ void APP_SerialDebugTasks(void) {
                 break;
                 /* -------------------------------------------------------------- */
 
-                //            case 'g':
-                //            case 'G':
-                //                /* Not used. */
-                //                break;
+            case 'g':
+            case 'G':
+            {
+                uint8_t user_choice;
+
+                setDelayMsReadFromUart(MAX_READ_FROM_UART_DELAY);
+
+                while (false == (UART1_TRANSFER_STATUS_RX_DATA_PRESENT & UART1_TransferStatusGet()) && false == isDelayMsEndingReadFromUart());
+                if (true == isDelayMsEndingReadFromUart()) {
+                    printf("\n\tToo slow entering value => command aborted\n");
+                    break;
+                }
+                user_choice = UART1_Read();
+                
+                switch (user_choice) {
+                    case 's':
+                    case 'S':
+                        printf("GO TO SLEEP\n");
+                        MASTER_StoreBehavior(MASTER_APP_STATE_SLEEP, PRIO_EXEPTIONNEL);
+                        break;
+                    case 'w':
+                    case 'W':
+                        printf("OF WAKEUP\n");
+                        MASTER_StoreBehavior(MASTER_APP_STATE_WAKE_UP, PRIO_EXEPTIONNEL);
+                        break;
+                }
+            }
+                break;
                 /* -------------------------------------------------------------- */
 
             case 'h':
