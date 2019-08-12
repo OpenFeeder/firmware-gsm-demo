@@ -117,7 +117,7 @@
 #define OPENFEEDER_IS_AWAKEN    1
 #define OPENFEEDER_IS_SLEEPING  0
 #define MAX_NUM_REWARD_TIMEOUT 5
-#define MAX_LEVEL_PRIO 3
+#define MAX_LEVEL_PRIO 4
 #define NB_BEHAVIOR_PER_PRIO 5
 // *****************************************************************************
 // *****************************************************************************
@@ -371,14 +371,18 @@ typedef struct {
 
     /*communication information */
     //init module 
+    int8_t timeToSynchronizeHologe;
+    bool synchronizeTime; 
     bool RfModuleInit;
 
     volatile uint8_t behavior[MAX_LEVEL_PRIO][NB_BEHAVIOR_PER_PRIO];
     volatile uint8_t ptr[MAX_LEVEL_PRIO][3]; //READ - WRITE - OVFF (overflow)
-    uint8_t BUFF_COLLECT[NB_DATA_BUF][SIZE_DATA];
+    uint8_t BUFF_COLLECT[NB_BLOCK][SIZE_DATA];
     int8_t nbSlaveOnSite;
     SlaveState ensSlave[8]; // max of on site
     int8_t slaveSelected;
+    int8_t station;
+    int8_t masterId;
 
 } MASTER_APP_DATA;
 

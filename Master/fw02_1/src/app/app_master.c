@@ -1455,6 +1455,15 @@ void MASTER_AppInit(void) {
     appDataAttractiveLeds.blue[1] = 0;
 
     /* APP state task */
+    appData.ptr[PRIO_EXEPTIONNEL][READ] = 0;
+    appData.ptr[PRIO_EXEPTIONNEL][WRITE] = 0;
+    appData.ptr[PRIO_HIGH][READ] = 0;
+    appData.ptr[PRIO_HIGH][WRITE] = 0;
+    appData.ptr[PRIO_MEDIUM][READ] = 0;
+    appData.ptr[PRIO_MEDIUM][WRITE] = 0;
+    appData.ptr[PRIO_LOW][READ] = 0;
+    appData.ptr[PRIO_LOW][WRITE] = 0;
+    
     MASTER_StoreBehavior(MASTER_APP_STATE_INITIALIZE, PRIO_HIGH);
     //    appData.state = MASTER_APP_STATE_INITIALIZE;
     appData.previous_state = MASTER_APP_STATE_ERROR;
@@ -1478,6 +1487,24 @@ void MASTER_AppInit(void) {
 
     appData.button_pressed = BUTTON_READ; /* initialized button status */
 
+    
+    /* communication */
+    for (i = 0; i < NB_BLOCK; i++)
+        memset(appData.BUFF_COLLECT[i], '\0', SIZE_DATA);
+    
+    for (i = 0; i < 8; i++) {
+        appData.ensSlave[i].idSlave = i + 1;
+        appData.ensSlave[i].index = 1;
+        appData.ensSlave[i].nbBloc = 1;
+        appData.ensSlave[i].state = SLAVE_NONE;
+        appData.ensSlave[i].nbError = MAX_ERROR;
+        appData.ensSlave[i].nbTimeout = MAX_TIMEOUT;
+        appData.ensSlave[i].tryToConnect = MAX_TRY_TO_SYNC;
+    }
+      
+    appData.dayTime = GOOD_MORNING; // a voir 
+    appData.synchronizeTime = true;
+    
     /* Data logger */
     appDataLog.is_file_name_set = false;
     appDataLog.num_char_buffer = 0;
