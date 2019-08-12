@@ -645,13 +645,13 @@ void MASTER_AppTask(void) {
                 }
             }
 
-            if (RTCC_ALARM_IDLE != appData.rtcc_alarm_action) {
-                manageRtcAction();
-
-                if (MASTER_APP_STATE_IDLE != appData.state) {
-                    break;
-                }
-            }
+//            if (RTCC_ALARM_IDLE != appData.rtcc_alarm_action) {
+////                manageRtcAction();
+//
+//                if (MASTER_APP_STATE_IDLE != appData.state) {
+//                    break;
+//                }
+//            }
 
             /* Check USER BUTTON detected. */
             button_user_state = USER_BUTTON_GetValue();
@@ -1108,7 +1108,7 @@ void MASTER_AppTask(void) {
             DSCONbits.DSEN = 1;
 #endif
             Sleep();
-            MASTER_StoreBehavior(MASTER_APP_STATE_WAKE_UP, PRIO_HIGH);
+            MASTER_StoreBehavior(MASTER_APP_STATE_WAKE_UP, PRIO_EXEPTIONNEL);
             //            appData.state = MASTER_APP_STATE_WAKE_UP;
             break;
             /* -------------------------------------------------------------- */
@@ -1384,7 +1384,7 @@ void MASTER_AppTask(void) {
 
             if (false == flag) {
                 MASTER_StoreBehavior(MASTER_APP_STATE_FLUSH_DATA_BEFORE_ERROR, PRIO_HIGH);
-                appData.state = MASTER_APP_STATE_FLUSH_DATA_BEFORE_ERROR;
+//                appData.state = MASTER_APP_STATE_FLUSH_DATA_BEFORE_ERROR;
                 return;
             }
         }

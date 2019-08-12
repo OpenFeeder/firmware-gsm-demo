@@ -146,7 +146,8 @@ typedef enum {
     MASTER_APP_STATE_IDLE,
 
     MASTER_APP_STATE_BATTERY_LEVEL_CHECK,
-            MASTER_APP_STATE_GET_EMPERATURE,
+    MASTER_APP_STATE_GET_EMPERATURE,
+    MASTER_APP_STATE_RTC_CALIBRATION,
             
     MASTER_APP_STATE_SERIAL_COMMUNICATION,
 
@@ -372,7 +373,7 @@ typedef struct {
     /*communication information */
     //init module 
     int8_t timeToSynchronizeHologe;
-    bool synchronizeTime; 
+    bool synchronizeTime;
     bool RfModuleInit;
 
     volatile uint8_t behavior[MAX_LEVEL_PRIO][NB_BEHAVIOR_PER_PRIO];

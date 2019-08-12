@@ -126,15 +126,15 @@ INI_READ_STATE config_read_ini(void) {
 #endif     
         }
 
-//        read_parameter = ini_getl("siteid", "master_id", -1, "CONFIG.INI");
-//        if (read_parameter == -1) {
-//            return INI_PB_SITEID_ZONE;
-//        } else {
-//            appData.masterId = (int) read_parameter;
-//#if defined (USE_UART1_SERIAL_INTERFACE) && defined (DISPLAY_INI_READ_DATA)
-//            printf("\tMaster id ... read.\n");
-//#endif     
-//        }
+        read_parameter = ini_getl("siteid", "master_id", -1, "CONFIG.INI");
+        if (read_parameter == -1) {
+            return INI_PB_SITEID_ZONE;
+        } else {
+            appData.masterId = (int) read_parameter;
+#if defined (USE_UART1_SERIAL_INTERFACE) && defined (DISPLAY_INI_READ_DATA)
+            printf("\tMaster id ... read.\n");
+#endif     
+        }
 
     }
 
