@@ -11,8 +11,13 @@
     <memory name="program">
       <units>bytes</units>
       <length>263616</length>
+<<<<<<< HEAD
       <used>165660</used>
       <free>97956</free>
+=======
+      <used>166509</used>
+      <free>97107</free>
+>>>>>>> recuperation_35
     </memory>
   </executable>
 </project>

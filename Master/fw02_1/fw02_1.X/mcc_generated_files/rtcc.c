@@ -375,14 +375,14 @@ void __attribute__((interrupt, no_auto_psv)) _ISR _RTCCInterrupt(void) {
 #endif 
 
         appData.rtcc_alarm_action = RTCC_ALARM_IDLE;
-
         if (appData.openfeeder_state == OPENFEEDER_IS_SLEEPING) {
 #if defined (USE_UART1_SERIAL_INTERFACE) && defined (DISPLAY_ISR_RTCC)
             printf("- Wakeup\n");
 #endif 
+            LED_STATUS_B_Toggle();
             //            appData.rtcc_alarm_action = RTCC_ALARM_WAKEUP_OPENFEEDER;
             MASTER_StoreBehavior(MASTER_APP_STATE_WAKE_UP, PRIO_EXEPTIONNEL);
-
+            
         } else {
 
             getDateTime();
@@ -391,14 +391,24 @@ void __attribute__((interrupt, no_auto_psv)) _ISR _RTCCInterrupt(void) {
                 appData.current_time.tm_min >= appDataAlarmSleep.time.tm_min) {
                 // default time to sleep
 #if defined (USE_UART1_SERIAL_INTERFACE) && defined (DISPLAY_ISR_RTCC)
-                printf("- Sleep\n");
+                printf("- Sleep %d %d  vs %d %d \n", 
+                       appDataAlarmSleep.time.tm_hour, 
+                       appDataAlarmSleep.time.tm_min, 
+                       appData.current_time.tm_hour,
+                       appData.current_time.tm_min);
 #endif 
                 MASTER_StoreBehavior(MASTER_APP_STATE_SLEEP, PRIO_EXEPTIONNEL);
 //                appData.rtcc_alarm_action = RTCC_ALARM_SLEEP_OPENFEEDER;
+<<<<<<< HEAD
             } else {
 
                 /* Battery level : evry hour and 30 sec*/
                 if (appData.current_time.tm_min == 0 && appData.current_time.tm_sec == 30) {
+=======
+            } else if (appData.openfeeder_state == OPENFEEDER_IS_AWAKEN) {
+                /* Battery level : evry hour and 30 sec*/
+                if (appData.current_time.tm_min == 0 && appData.current_time.tm_sec == 0) {
+>>>>>>> recuperation_35
 #if defined (USE_UART1_SERIAL_INTERFACE) && defined (DISPLAY_ISR_RTCC)
                     printf("- Battery check\n");
 #endif 
@@ -435,15 +445,10 @@ void __attribute__((interrupt, no_auto_psv)) _ISR _RTCCInterrupt(void) {
                     IFS3bits.RTCIF = false;
                     return;
                 }
-                
+//                
                 /* Horloge synchronize : ervry 5 min */
-                if ((appData.current_time.tm_min%appData.timeToSynchronizeHologe == 0) && 
-                    appData.synchronizeTime) {
-                    appData.synchronizeTime = false;
+                if ((appData.current_time.tm_min%appData.timeToSynchronizeHologe == 0)) {
                     MASTER_StoreBehavior(MASTER_APP_STATE_SEND_DATE, PRIO_EXEPTIONNEL);
-                }else if (appData.current_time.tm_min%appData.timeToSynchronizeHologe == 0
-                    && !appData.synchronizeTime) {
-                    appData.synchronizeTime = true;
                 }
             }
         }

@@ -292,8 +292,6 @@ void MASTER_AppTask(void) {
                     store_event(OF_ALPHA_TRX_MODULE_FAIL);
                 }
             }
-
-
             /* Go to device configuration state */
             MASTER_StoreBehavior(MASTER_APP_STATE_CONFIGURE_SYSTEM, PRIO_HIGH);
             //            appData.state = MASTER_APP_STATE_CONFIGURE_SYSTEM;
@@ -394,6 +392,7 @@ void MASTER_AppTask(void) {
                     //                    appData.state = MASTER_APP_STATE_ERROR;
                     break;
                 }
+
                 MASTER_StoreBehavior(MASTER_APP_STATE_CONFIGURE_SYSTEM, PRIO_HIGH);
                 /* Blue and yellow status LEDs blink as long USB key is required. */
                 LedsStatusBlink(LED_USB_ACCESS, LED_YELLOW, 500, 500);
@@ -417,7 +416,6 @@ void MASTER_AppTask(void) {
                     break;
                 }
             }
-
             /* Configure the system with the CONFIG.INI file */
             appData.flags.bit_value.system_init = config_set();
 
@@ -436,6 +434,9 @@ void MASTER_AppTask(void) {
                 chk = checkImportantParameters();
                 switch (chk) {
                     case APP_CHECK_OK:
+
+                        appData.openfeeder_state = OPENFEEDER_IS_AWAKEN;
+                        appData.ptr[PRIO_HIGH][PTR_READ] = appData.ptr[PRIO_HIGH][PTR_WRITE];
                         //                        MASTER_StoreBehavior(MASTER_APP_STATE_CONFIGURE_SYSTEM, PRIO_HIGH);
                         //                        appData.state = MASTER_APP_STATE_CONFIGURE_SYSTEM;
                         break;
@@ -595,25 +596,18 @@ void MASTER_AppTask(void) {
                 if (true == appDataLog.log_events) {
                     store_event(OF_STATE_IDLE);
                 }
-                /* Enable RTC alarm */
-                rtcc_start_alarm();
-                printf("je suis la \n");
             }
 
 #if defined ( USE_UART1_SERIAL_INTERFACE )
             if (getDateTime()) {
                 if (appData.current_time.tm_sec % 10 == 0 && (print == true)) {
                     print = false;
-                    printf("[heure ==> %02d:%02d:%02d]\n", appData.current_time.tm_hour,
-                           appData.current_time.tm_min, appData.current_time.tm_sec);
-
+                    printDateTime(appData.current_time);
                 } else if (appData.current_time.tm_sec % 10 != 0 && (print == false)) {
                     print = true;
                 }
             }
-            printf("je suis la 1\n");
             APP_SerialDebugTasks();
-            printf("je suis la 2\n");
 #endif
 
             /* If the user ask for reconfiguration via serial communication */
@@ -622,7 +616,6 @@ void MASTER_AppTask(void) {
                 if (true == appDataLog.log_events) {
                     store_event(OF_RECONFIGURE_SYSTEM);
                 }
-
                 appData.need_to_reconfigure = false;
                 MASTER_StoreBehavior(MASTER_APP_STATE_CONFIGURE_SYSTEM, PRIO_HIGH);
                 //                appData.state = MASTER_APP_STATE_CONFIGURE_SYSTEM;
@@ -639,13 +632,13 @@ void MASTER_AppTask(void) {
                 }
             }
 
-            if (RTCC_ALARM_IDLE != appData.rtcc_alarm_action) {
-                //                manageRtcAction();
-
-                if (MASTER_APP_STATE_IDLE != appData.state) {
-                    break;
-                }
-            }
+            //            if (RTCC_ALARM_IDLE != appData.rtcc_alarm_action) {
+            ////                manageRtcAction();
+            //
+            //                if (MASTER_APP_STATE_IDLE != appData.state) {
+            //                    break;
+            //                }
+            //            }
 
             /* Check USER BUTTON detected. */
             button_user_state = USER_BUTTON_GetValue();
@@ -1037,6 +1030,9 @@ void MASTER_AppTask(void) {
 
             }
 
+            //of state 
+            appData.openfeeder_state = OPENFEEDER_IS_SLEEPING;
+
             if (true == appDataUsb.is_device_needed) {
                 if (appDataUsb.is_device_address_available) {
                     if (FLUSH_DATA_ON_USB_DEVICE_SUCCESS != flushDataOnUsbDevice()) {
@@ -1060,7 +1056,15 @@ void MASTER_AppTask(void) {
             /* Next line for debugging sleep/wakeup only */
             /* Should be commented in normal mode */
             /* Modify time value according to wake up values in the CONFIG.INI file */
-            setDateTime(19, 6, 12, 5, 59, 50);
+            setDateTime(19, 8, 12, 5, 59, 50);
+#endif
+#if defined(_DEBUG)
+            getDateTime();
+            printf("%d %d vs %d %d\n",
+                   appDataAlarmWakeup.time.tm_hour,
+                   appDataAlarmWakeup.time.tm_min,
+                   appData.current_time.tm_hour,
+                   appData.current_time.tm_min);
 #endif
             /* Set alarm for wake up time */
             rtcc_set_alarm(appDataAlarmWakeup.time.tm_hour, appDataAlarmWakeup.time.tm_min, appDataAlarmWakeup.time.tm_sec, EVERY_DAY);
@@ -1084,12 +1088,12 @@ void MASTER_AppTask(void) {
             DSGPR1 = appData.dsgpr1.reg;
             DSGPR1 = appData.dsgpr1.reg;
 
-#if defined ( ENABLE_DEEP_SLEEP )
-            DSCONbits.DSEN = 1;
-            DSCONbits.DSEN = 1;
-#endif
+            //#if defined ( ENABLE_DEEP_SLEEP )
+            //            DSCONbits.DSEN = 1;
+            //            DSCONbits.DSEN = 1;
+            //#endif
             Sleep();
-            MASTER_StoreBehavior(MASTER_APP_STATE_WAKE_UP, PRIO_HIGH);
+            //            MASTER_StoreBehavior(MASTER_APP_STATE_WAKE_UP, PRIO_EXEPTIONNEL);
             //            appData.state = MASTER_APP_STATE_WAKE_UP;
             break;
             /* -------------------------------------------------------------- */
@@ -1106,12 +1110,12 @@ void MASTER_AppTask(void) {
                 }
             }
 
-#if defined ( TEST_RTCC_SLEEP_WAKEUP )
+            //#if defined ( TEST_RTCC_SLEEP_WAKEUP )
             /* Next line for debugging sleep/wakeup only */
             /* Should be commented in normal mode */
             /* Modify time value according to sleep values in the CONFIG.INI file */
-            setDateTime(17, 9, 21, 22, 59, 50);
-#endif
+            //            setDateTime(17, 9, 21, 22, 59, 50);
+            //#endif
 
             rtcc_set_alarm(appDataAlarmWakeup.time.tm_hour, appDataAlarmWakeup.time.tm_min, appDataAlarmWakeup.time.tm_sec, EVERY_SECOND);
 
@@ -1367,12 +1371,11 @@ void MASTER_AppTask(void) {
                         store_event(OF_BATTERY_LEVEL_OVERFLOW);
                     }
                 }
-#if defined( USE_UART1_SERIAL_INTERFACE )
-                printf("level battery %d\n", appData.battery_level);
-#endif
+
                 if (false == flag) {
                     MASTER_StoreBehavior(MASTER_APP_STATE_FLUSH_DATA_BEFORE_ERROR, PRIO_HIGH);
-                    //                    appData.state = MASTER_APP_STATE_FLUSH_DATA_BEFORE_ERROR;
+                    //                appData.state = MASTER_APP_STATE_FLUSH_DATA_BEFORE_ERROR;
+                    return;
                 }
             }
         }
@@ -1411,7 +1414,7 @@ void MASTER_AppTask(void) {
         }
             break;
             /* -------------------------------------------------------------- */
-
+            
         case MASTER_APP_STATE_RTC_CALIBRATION:
         {
             if (appData.state != appData.previous_state) {
@@ -1420,6 +1423,18 @@ void MASTER_AppTask(void) {
                 printf("> MASTER_APP_STATE_RTC_CALIBRATION\n");
 #endif
                 calibrateDateTime();
+            }
+        }
+            break;
+            /* -------------------------------------------------------------- */
+
+        case MASTER_APP_STATE_SEND_DATE:
+        {
+            if (appData.state != appData.previous_state) {
+                appData.previous_state = appData.state;
+#if defined ( USE_UART1_SERIAL_INTERFACE ) && defined( DISPLAY_CURRENT_STATE )
+                printf("> MASTER_APP_STATE_SEND_DATE\n");
+#endif
             }
         }
             break;
@@ -1464,24 +1479,20 @@ void MASTER_AppInit(void) {
     appDataAttractiveLeds.blue[1] = 0;
 
     /* APP state task */
-    appData.ptr[PRIO_EXEPTIONNEL][PTR_READ] = 0;
-    appData.ptr[PRIO_EXEPTIONNEL][PTR_WRITE] = 0;
-    appData.ptr[PRIO_HIGH][PTR_READ] = 0;
-    appData.ptr[PRIO_HIGH][PTR_WRITE] = 0;
-    appData.ptr[PRIO_MEDIUM][PTR_READ] = 0;
-    appData.ptr[PRIO_MEDIUM][PTR_WRITE] = 0;
-    appData.ptr[PRIO_LOW][PTR_READ] = 0;
-    appData.ptr[PRIO_LOW][PTR_WRITE] = 0;
-    
-    
+    appData.ptr[PRIO_EXEPTIONNEL][READ] = 0;
+    appData.ptr[PRIO_EXEPTIONNEL][WRITE] = 0;
+    appData.ptr[PRIO_HIGH][READ] = 0;
+    appData.ptr[PRIO_HIGH][WRITE] = 0;
+    appData.ptr[PRIO_MEDIUM][READ] = 0;
+    appData.ptr[PRIO_MEDIUM][WRITE] = 0;
+    appData.ptr[PRIO_LOW][READ] = 0;
+    appData.ptr[PRIO_LOW][WRITE] = 0;
+
     MASTER_StoreBehavior(MASTER_APP_STATE_INITIALIZE, PRIO_HIGH);
     //    appData.state = MASTER_APP_STATE_INITIALIZE;
     appData.previous_state = MASTER_APP_STATE_ERROR;
 
     appData.need_to_reconfigure = false;
-
-    appData.openfeeder_state = OPENFEEDER_IS_AWAKEN;
-    appData.rtcc_alarm_action = RTCC_ALARM_WAKEUP_OPENFEEDER;
 
     /* Initialize all flags */
     appData.flags.reg = 0;
@@ -1513,6 +1524,25 @@ void MASTER_AppInit(void) {
       
     appData.dayTime = GOOD_MORNING; // a voir 
     appData.synchronizeTime = true;
+
+
+    /* communication */
+    for (i = 0; i < NB_BLOCK; i++)
+        memset(appData.BUFF_COLLECT[i], '\0', SIZE_DATA);
+
+    for (i = 0; i < 8; i++) {
+        appData.ensSlave[i].idSlave = i + 1;
+        appData.ensSlave[i].index = 1;
+        appData.ensSlave[i].nbBloc = 1;
+        appData.ensSlave[i].state = SLAVE_NONE;
+        appData.ensSlave[i].nbError = MAX_ERROR;
+        appData.ensSlave[i].nbTimeout = MAX_TIMEOUT;
+        appData.ensSlave[i].tryToConnect = MAX_TRY_TO_SYNC;
+    }
+
+    appData.dayTime = GOOD_MORNING; // a voir 
+    appData.synchronizeTime = true;
+    appData.timeToSynchronizeHologe = 3;
 
     /* Data logger */
     appDataLog.is_file_name_set = false;

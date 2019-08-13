@@ -77,11 +77,19 @@
 #define NB_ERR_BUF                   10 // nombre d'errerur possible 
 #define NB_BLOCK                  20 // pour l'instat on dit qye c'est 20 ==>
 #define MAX_W                        10 // nombre MAX de paquet a transmettre avant d'attendre un ack 
+<<<<<<< HEAD
 #define NB_SLAVE                      3
 #define MAX_TIMEOUT                  20 // nombre de timeout avant de decider que la liaison avec le slave est couper 
 #define MAX_ERROR                    10 // nombre du quel on considere que la communication est interompue entre le slave est le master
 #define MAX_TRY_TO_SYNC               5 // le nombre d'essaie avant de decider qu'on est pas connecte
 #define MAX_LEVEL_PRIO                3 // 3 niveau de priorite, si l'on veut en ajouter il suiffit de modifier 
+=======
+#define NB_SLAVE                      2
+#define MAX_TIMEOUT                  20 // nombre de timeout avant de decider que la liaison avec le slave est couper 
+#define MAX_ERROR                    10 // nombre du quel on considere que la communication est interompue entre le slave est le master
+#define MAX_TRY_TO_SYNC               5 // le nombre d'essaie avant de decider qu'on est pas connecte
+#define MAX_LEVEL_PRIO                4 // 3 niveau de priorite, si l'on veut en ajouter il suiffit de modifier 
+>>>>>>> recuperation_35
 #define NB_BEHAVIOR_PER_PRIO          3
 #define TIME_LIMIT_OF_CONFIG          6 // avant 6h
 #define TIME_LIMIT_TO_GET_INFOS      19 // avant 19h

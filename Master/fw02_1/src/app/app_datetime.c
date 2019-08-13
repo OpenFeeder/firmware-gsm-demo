@@ -183,7 +183,7 @@ void printDateTime( struct tm time )
 {
     // Print date and time on serial terminal (PC)
     
-        printf( "%02u/%02u/%04u %02u:%02u:%02u",
+        printf( "%02u/%02u/%04u %02u:%02u:%02u\n",
             time.tm_mday,
             time.tm_mon,
             2000 + time.tm_year,
