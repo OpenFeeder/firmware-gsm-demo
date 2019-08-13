@@ -48,6 +48,7 @@ typedef struct
 {
     struct tm time;
 
+    uint8_t alarmSendHorloge
 } APP_DATA_ALARM;
 
 unsigned char ConvertHexToBCD_A( unsigned char );

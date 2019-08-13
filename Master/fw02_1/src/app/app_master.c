@@ -164,7 +164,7 @@ uint8_t MASTER_SendDateRF() {
 #if defined(UART_DEBUG)
         printf("SEND DATE\n");
 #endif
-        return MASTER_SendMsgRF(BROADCAST_ID, HORLOGE, 1, 1, d.date, 5); // visualiser cette valeur 
+        return MASTER_SendMsgRF(appData.broadCastId, HORLOGE, 1, 1, d.date, 5); // visualiser cette valeur 
     }
     return 0;
 }
@@ -173,14 +173,14 @@ uint8_t MASTER_SendDateRF() {
 //______________________________________________________________________________
 //________________________________STATE MACHINE FUNCTION________________________
 
-bool MASTER_StoreBehavior(MASTER_APP_STATES state, PRIORITY prio) { 
+bool MASTER_StoreBehavior(MASTER_APP_STATES state, PRIORITY prio) {
     appData.behavior[prio][GETpWRITE(prio)] = state; // on ecrit le comportement 
     INCpWRITE(prio);
     if (GETpREAD(prio) == GETpWRITE(prio)) { // Je viens d'ecraser un comportement 
         //        SET_0VFF(prio, 1); // overflow
         INCpREAD(prio);
     }
-   
+
     return true; // 
 }
 
@@ -1017,6 +1017,7 @@ void MASTER_AppTask(void) {
 #if defined ( USE_UART1_SERIAL_INTERFACE ) && defined ( DISPLAY_CURRENT_STATE )
                 printf("> APP_STATE_SLEEP\n");
 #endif
+                appData.dayTime = SEE_YOU_TOMORROW;
                 /* Log event if required */
                 if (true == appDataLog.log_events) {
                     store_event(OF_STATE_SLEEP);
@@ -1029,7 +1030,7 @@ void MASTER_AppTask(void) {
                 appDataUsb.is_device_needed = true;
 
             }
-            
+
             //of state 
             appData.openfeeder_state = OPENFEEDER_IS_SLEEPING;
 
@@ -1048,13 +1049,13 @@ void MASTER_AppTask(void) {
                     break;
                 }
             }
-            
+
             /* power off radio module */
             if (appData.RfModuleInit) {
                 appData.RfModuleInit = false;
                 powerRFDisable();
             }
-            
+
             /* Turn status LED off */
             setLedsStatusColor(LEDS_OFF);
 
@@ -1114,7 +1115,8 @@ void MASTER_AppTask(void) {
             /* Modify time value according to sleep values in the CONFIG.INI file */
             //            setDateTime(17, 9, 21, 22, 59, 50);
             //#endif
-
+            appData.dayTime = GOOD_MORNING;
+            //penser a bouger cet apel
             rtcc_set_alarm(appDataAlarmWakeup.time.tm_hour, appDataAlarmWakeup.time.tm_min, appDataAlarmWakeup.time.tm_sec, EVERY_SECOND);
 
             MASTER_AppInit();
@@ -1412,7 +1414,7 @@ void MASTER_AppTask(void) {
         }
             break;
             /* -------------------------------------------------------------- */
-            
+
         case MASTER_APP_STATE_RTC_CALIBRATION:
         {
             if (appData.state != appData.previous_state) {
@@ -1433,11 +1435,109 @@ void MASTER_AppTask(void) {
 #if defined ( USE_UART1_SERIAL_INTERFACE ) && defined( DISPLAY_CURRENT_STATE )
                 printf("> MASTER_APP_STATE_SEND_DATE\n");
 #endif
+#if defined(UART_DEBUG)
+                printf("send date %d \n", MASTER_SendDateRF());
+#else
+                MASTER_SendDateRF();
+#endif
             }
         }
             break;
             /* -------------------------------------------------------------- */
 
+        case MASTER_APP_STATE_SEND_REQUEST_INFOS:
+            if (appData.state != appData.previous_state) {
+#if defined ( USE_UART1_SERIAL_INTERFACE ) && defined( DISPLAY_CURRENT_STATE )
+                printf(">MASTER STATE SEND REQUEST INFOS\n");
+#endif
+            }
+            //pour tout transmission RF hors la date, on passe par cet etat: niveau medium
+            MASTER_SendMsgRF(appData.ensSlave[appData.slaveSelected].idSlave,
+                             INFOS,
+                             1, 1, (uint8_t *) ("INFOS"), 5); // demande du paquet attendu 
+            TMR_SetWaitRqstTimeout(TIME_OUT_WAIT_RQST); // on demare le timer 
+            break;
+            /* -------------------------------------------------------------- */
+        case MASTER_APP_STATE_SELECTE_SLAVE:
+        {
+            if (appData.state != appData.previous_state) {
+                appData.previous_state = appData.state;
+#if defined ( USE_UART1_SERIAL_INTERFACE ) && defined( DISPLAY_CURRENT_STATE )
+                printf(">MASTER STATE SELECT SLAVE\n");
+#endif
+            }
+
+            int8_t i = (appData.slaveSelected + 1) % appData.nbSlaveOnSite;
+            bool stop = false;
+            bool b = false;
+            do {
+                if (appData.ensSlave[i].state == SLAVE_ERROR ||
+                    appData.ensSlave[i].state == SLAVE_COLLECT_END) {
+                    i = (i + 1) % appData.nbSlaveOnSite;
+                    if (i == appData.slaveSelected) {
+                        stop = true; // pas de slave operationel  
+                    }
+                } else {
+                    stop = true; // on a trouve un slave
+                    appData.slaveSelected = i;
+                    b = true;
+                }
+            } while (!stop);
+
+            if (b) {
+#if defined(UART_DEBUG)
+                printf("slave %d selected indice %d\n",
+                       appData.ensSlave[appData.slaveSelected].idSlave,
+                       appData.slaveSelected);
+#endif
+                //en foction de l'heur de la journee on change d'etat 
+                switch (appData.dayTime) {
+                    case GOOD_MORNING:
+                    {
+                        appData.ensSlave[appData.slaveSelected].state = SLAVE_CONFIG;
+                        TMR_SetWaitRqstTimeout(0);
+                    }
+                        break;
+                    case GOOD_DAY:
+                    {
+                        appData.ensSlave[appData.slaveSelected].state = SLAVE_DAYTIME;
+                        MASTER_StoreBehavior(MASTER_APP_STATE_SEND_REQUEST_INFOS, PRIO_MEDIUM);
+                    }
+                        break;
+                    case GOOD_NIGHT:
+                    {
+                        appData.ensSlave[appData.slaveSelected].tryToConnect = MAX_TRY_TO_SYNC;
+                        appData.ensSlave[appData.slaveSelected].state = SLAVE_SYNC;
+                        TMR_SetWaitRqstTimeout(0); // declenche une interuption logiciel 
+                    }
+                        break;
+                    default:
+                        break;
+                }
+            } else {
+#if defined(UART_DEBUG)
+                printf("Aucun slave en selection\n");
+#endif
+                MASTER_StoreBehavior(MASTER_APP_STATE_END, PRIO_HIGH);
+            }
+        }
+            break;
+            /* -------------------------------------------------------------- */
+
+        case MASTER_APP_STATE_MSG_RF_RECEIVE:
+        {
+            Frame receive = radioAlphaTRX_GetFrame();
+            if (appData.state != appData.previous_state) {
+                appData.previous_state = appData.state;
+#if defined ( USE_UART1_SERIAL_INTERFACE ) && defined( DISPLAY_CURRENT_STATE )
+                printf(">MASTER_STATE_MSG_RECEIVE\n");
+#endif
+            }
+#if defined( USE_UART1_SERIAL_INTERFACE )
+            printf("recu %s\n", receive.Champ.data);
+#endif
+        }
+            break;
         default:
             if (false == enter_default_state) {
 #if defined ( USE_UART1_SERIAL_INTERFACE ) && defined( DISPLAY_CURRENT_STATE )
@@ -1477,14 +1577,17 @@ void MASTER_AppInit(void) {
     appDataAttractiveLeds.blue[1] = 0;
 
     /* APP state task */
-    appData.ptr[PRIO_EXEPTIONNEL][READ] = 0;
-    appData.ptr[PRIO_EXEPTIONNEL][WRITE] = 0;
-    appData.ptr[PRIO_HIGH][READ] = 0;
-    appData.ptr[PRIO_HIGH][WRITE] = 0;
-    appData.ptr[PRIO_MEDIUM][READ] = 0;
-    appData.ptr[PRIO_MEDIUM][WRITE] = 0;
-    appData.ptr[PRIO_LOW][READ] = 0;
-    appData.ptr[PRIO_LOW][WRITE] = 0;
+    for (i = 0; i < NB_BEHAVIOR_PER_PRIO; i++) {
+        memset(appData.ptr[i], 0, 3);
+    }
+    //    appData.ptr[PRIO_EXEPTIONNEL][READ] = 0;
+    //    appData.ptr[PRIO_EXEPTIONNEL][WRITE] = 0;
+    //    appData.ptr[PRIO_HIGH][READ] = 0;
+    //    appData.ptr[PRIO_HIGH][WRITE] = 0;
+    //    appData.ptr[PRIO_MEDIUM][READ] = 0;
+    //    appData.ptr[PRIO_MEDIUM][WRITE] = 0;
+    //    appData.ptr[PRIO_LOW][READ] = 0;
+    //    appData.ptr[PRIO_LOW][WRITE] = 0;
 
     MASTER_StoreBehavior(MASTER_APP_STATE_INITIALIZE, PRIO_HIGH);
     //    appData.state = MASTER_APP_STATE_INITIALIZE;
@@ -1505,11 +1608,11 @@ void MASTER_AppInit(void) {
     appData.digit[3] = 0xFF;
 
     appData.button_pressed = BUTTON_READ; /* initialized button status */
-    
+
     /* communication */
     for (i = 0; i < NB_BLOCK; i++)
         memset(appData.BUFF_COLLECT[i], '\0', SIZE_DATA);
-    
+
     for (i = 0; i < 8; i++) {
         appData.ensSlave[i].idSlave = i + 1;
         appData.ensSlave[i].index = 1;
@@ -1519,12 +1622,14 @@ void MASTER_AppInit(void) {
         appData.ensSlave[i].nbTimeout = MAX_TIMEOUT;
         appData.ensSlave[i].tryToConnect = MAX_TRY_TO_SYNC;
     }
-      
+
     appData.dayTime = GOOD_MORNING; // a voir 
     appData.synchronizeTime = true;
 
 
     /* communication */
+    appData.broadCastId = 15;
+
     for (i = 0; i < NB_BLOCK; i++)
         memset(appData.BUFF_COLLECT[i], '\0', SIZE_DATA);
 
@@ -1583,7 +1688,7 @@ void MASTER_AppInit(void) {
 
     appDataEvent.is_txt_file_name_set = false;
     appDataEvent.is_bin_file_name_set = false;
-    
+
 }
 
 

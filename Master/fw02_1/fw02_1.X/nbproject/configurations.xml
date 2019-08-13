@@ -21,6 +21,7 @@
         <itemPath>../src/app/app_usb.h</itemPath>
         <itemPath>../src/app/app_version.h</itemPath>
         <itemPath>../src/app/app_fileio.h</itemPath>
+        <itemPath>../src/app/app_rtc_action.h</itemPath>
         <itemPath>../src/app/app_master.h</itemPath>
       </logicalFolder>
       <logicalFolder name="driver" displayName="driver" projectFiles="true">
@@ -122,7 +123,6 @@
       </logicalFolder>
       <logicalFolder name="framework" displayName="framework" projectFiles="true">
         <logicalFolder name="f1" displayName="AlphaTRX" projectFiles="true">
-          <itemPath>../src/framework/AlphaTRX/Services.c</itemPath>
           <itemPath>../src/framework/AlphaTRX/radio_alpha_trx.c</itemPath>
           <itemPath>../src/framework/AlphaTRX/timer.c</itemPath>
         </logicalFolder>
@@ -491,7 +491,6 @@
         <property key="UART 6" value="true"/>
         <property key="USB" value="true"/>
         <property key="debugoptions.useswbreakpoints" value="false"/>
-        <property key="firmware.download.all" value="false"/>
         <property key="hwtoolclock.frcindebug" value="false"/>
         <property key="memories.aux" value="false"/>
         <property key="memories.bootflash" value="true"/>

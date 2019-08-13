@@ -86,7 +86,8 @@ int main(void)
     
     displayBootMessage();
     bool ok = false;
-    ok = GMS3_ModulePower(true);
+    ok = true;
+//    ok = GMS3_ModulePower(true);
     MASTER_AppInit();
     while (1) {
         if (ok) {

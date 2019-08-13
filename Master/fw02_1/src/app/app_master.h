@@ -99,7 +99,7 @@
 
 
 #include "../framework/AlphaTRX/Services.h"
-
+#include "../framework/AlphaTRX/radio_alpha_trx.h"
 #include "oc5.h"
 
 /******************************************************************************/
@@ -117,8 +117,7 @@
 #define OPENFEEDER_IS_AWAKEN    1
 #define OPENFEEDER_IS_SLEEPING  0
 #define MAX_NUM_REWARD_TIMEOUT 5
-#define MAX_LEVEL_PRIO 4
-#define NB_BEHAVIOR_PER_PRIO 5
+
 // *****************************************************************************
 // *****************************************************************************
 // Section: Type Definitions
@@ -170,6 +169,7 @@ typedef enum {
     MASTER_APP_STATE_MSG_RF_RECEIVE,
     MASTER_APP_STATE_MSG_GSM_RECEIVE,
     MASTER_APP_STATE_SEND_REQUEST_INFOS,
+    MASTER_APP_STATE_END,
 
     /* Application error state */
     MASTER_APP_STATE_ERROR
@@ -384,6 +384,7 @@ typedef struct {
     int8_t slaveSelected;
     int8_t station;
     int8_t masterId;
+    int8_t broadCastId;
 
 } MASTER_APP_DATA;
 

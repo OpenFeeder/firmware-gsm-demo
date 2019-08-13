@@ -437,8 +437,35 @@ void APP_SerialDebugTasks(void) {
                     break;
                 }
                 user_choice = UART1_Read();
-                
+
                 switch (user_choice) {
+                    case 'a':
+                    case 'A':
+                    {
+                        appData.dayTime = GOOD_DAY;
+                    }
+                        break;
+                    case 'd':
+                    case 'D':
+                        printf("envoie : %d\n", MASTER_SendDateRF());
+                        break;
+                    case 'i':
+                    case 'I':
+                        display_STATUS_register_from_RF_module();
+                        break;
+                    case 'm':
+                    case 'M':
+                    {
+                        appData.dayTime = GOOD_MORNING;
+                    }
+                        break;
+                    case 'n':
+                    case 'N':
+                    {
+                        appData.dayTime = GOOD_NIGHT;
+
+                    }
+                        break;
                     case 'p':
                     case 'P':
                         printPointeur(PRIO_EXEPTIONNEL);
@@ -448,8 +475,11 @@ void APP_SerialDebugTasks(void) {
                         break;
                     case 's':
                     case 'S':
+                    {
+                        appData.dayTime = SEE_YOU_TOMORROW;
                         printf("GO TO SLEEP\n");
                         MASTER_StoreBehavior(MASTER_APP_STATE_SLEEP, PRIO_EXEPTIONNEL);
+                    }
                         break;
                     case 'w':
                     case 'W':

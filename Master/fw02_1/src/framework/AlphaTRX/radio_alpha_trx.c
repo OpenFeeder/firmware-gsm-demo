@@ -3193,6 +3193,9 @@ bool radioAlphaTRX_Init(void) {
     printf("A other Wait until RFM12B is out of power-up reset, status: 0x%04X\r\n", RF_StatusRead.Val);
 #endif
     if (RF_StatusRead.bits.b14_POR != 0) {
+#if defined(UART_DEBUG)
+        printf("je suis la \n");
+#endif
         return false;
     }
 
@@ -3582,7 +3585,7 @@ bool radioAlphaTRX_receive() {
         frameReceve.paquet[i] = receiveData.byte.low;
         //frameReceve.Champ.src != MASTER_GetSlaveSelected() : ==> etre sur de recuperer le msg du slave selectionn?
         if (i == 0) {
-            if (frameReceve.Champ.dest != MASTER_ID) // || frameReceve.Champ.src != MASTER_GetSlaveSelected()pour les broadcast, on modifiera la condition
+            if (frameReceve.Champ.dest != appData.masterId) // || frameReceve.Champ.src != MASTER_GetSlaveSelected()pour les broadcast, on modifiera la condition
                 return false;
         } else if (receiveData.byte.low == 0) {
             break;
@@ -3595,8 +3598,7 @@ bool radioAlphaTRX_receive() {
 void radioAlphaTRX_CaptureFrame() {
     if (radioAlphaTRX_receive()) {
         LED_STATUS_B_Toggle();
-        // ? ce niveau le msg est corectemnt re?u 
-        //        MASTER_StoreBehavior(MASTER_STATE_MSG_RF_RECEIVE, PRIO_HIGH); // c'est une information tr?s importante 
+        MASTER_StoreBehavior(MASTER_APP_STATE_MSG_RF_RECEIVE, PRIO_HIGH); // c'est une information tr?s importante 
     }
     //on se remet en ecoute 
     radioAlphaTRX_ReceivedMode();

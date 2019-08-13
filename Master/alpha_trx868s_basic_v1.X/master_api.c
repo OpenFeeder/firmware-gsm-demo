@@ -184,12 +184,12 @@ uint8_t MASTER_SendDateRF() {
     //________UPDATE DATE_________
     // with GSM module 
     //TODO : use GSM function to update date here
-    if (!app_UpdateRtcTimeFromGSM()) {
-#if defined(UART_DEBUG)
-        printf("No update from GSM\n");
-#endif
-        return 0;
-    }
+//    if (!app_UpdateRtcTimeFromGSM()) {
+//#if defined(UART_DEBUG)
+//        printf("No update from GSM\n");
+//#endif
+//        return 0;
+//    }
     //____________________________
     //________GET DATE____________
     if (RTCC_TimeGet(&picDate)) {
