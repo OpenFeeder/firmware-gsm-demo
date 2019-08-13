@@ -1494,20 +1494,26 @@ void MASTER_AppTask(void) {
                     case GOOD_MORNING:
                     {
 #if defined( USE_UART1_SERIAL_INTERFACE )
-                        printf("\n");
+                        printf("morning\n");
 #endif
                         appData.ensSlave[appData.slaveSelected].state = SLAVE_CONFIG;
-//                        TMR_SetWaitRqstTimeout(0);
+                        //                        TMR_SetWaitRqstTimeout(0);
                     }
                         break;
                     case GOOD_DAY:
                     {
+#if defined( USE_UART1_SERIAL_INTERFACE )
+                        printf("daytime\n");
+#endif
                         appData.ensSlave[appData.slaveSelected].state = SLAVE_DAYTIME;
                         MASTER_StoreBehavior(MASTER_APP_STATE_SEND_REQUEST_INFOS, PRIO_MEDIUM);
                     }
                         break;
                     case GOOD_NIGHT:
                     {
+#if defined( USE_UART1_SERIAL_INTERFACE )
+                        printf("night\n");
+#endif
                         appData.ensSlave[appData.slaveSelected].tryToConnect = MAX_TRY_TO_SYNC;
                         appData.ensSlave[appData.slaveSelected].state = SLAVE_SYNC;
                         TMR_SetWaitRqstTimeout(0); // declenche une interuption logiciel 
@@ -1682,9 +1688,9 @@ void MASTER_AppTask(void) {
             switch (appData.ensSlave[appData.slaveSelected].state) {
                 case SLAVE_CONFIG:
 #if defined( USE_UART1_SERIAL_INTERFACE )
-                        printf("Config slave with rf and gsm communication\n");
+                    printf("Config slave with rf and gsm communication\n");
 #endif
-                        
+
                 case SLAVE_SYNC:
 #if defined(UART_DEBUG)
                     printf("hundler error phase de synchro try to connect%d \n",

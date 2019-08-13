@@ -3226,6 +3226,7 @@ void radioAlphaTRX_Init(void) {
     // 1600d --> 0x640
     //    ALPHA_TRX433S_Control(0xA640); // Set operation frequency: Fc= 430+F*0.0025 , soit 430+1600*0.0025= 434 MHz avec 0x640 --> 110 0100 0000
     RF_FrequencySet.Val = FQ_SET_CMD_POR;
+    RF_FrequencySet.Val = radioAlphaTRX_TransceiverConfigFq(FQ_119);
     //    RF_FrequencySet.REGbits.SetOperationFrequency_H = 0x6;
     //    RF_FrequencySet.REGbits.SetOperationFrequency_L = 0x40;
     radioAlphaTRX_Command(RF_FrequencySet.Val); // Set operation frequency: Fc= 430+F*0.0025 , soit 430+1600*0.0025= 434 MHz avec 0x640 --> 110 0100 0000
@@ -3324,7 +3325,7 @@ void radioAlphaTRX_Init(void) {
     RF_AfcCmd.REGbits.en = 0;
     RF_AfcCmd.REGbits.range_limit = PLUS_3_TO_MOINS_4;
     RF_AfcCmd.REGbits.SetCommandeOfAFC = KEEP_Fosette_VALUE_INDEP;
-    radioAlphaTRX_Command(RF_AfcCmd.Val); //0xC4F6
+    radioAlphaTRX_Command(0xC4F6); //0xC4F6
 
 
     /**-------------> PLL Setting Command (12) <------------------------------*/

@@ -3583,11 +3583,10 @@ bool radioAlphaTRX_receive() {
         }
         receiveData.word = radioAlphaTRX_Command(0xB000);
         frameReceve.paquet[i] = receiveData.byte.low;
-        //frameReceve.Champ.src != MASTER_GetSlaveSelected() : ==> etre sur de recuperer le msg du slave selectionn?
         if (i == 0) {
             if (frameReceve.Champ.dest != appData.masterId) 
                 return false;
-        } else if (receiveData.byte.low == 0) {
+        } else if (i > 4 && i == frameReceve.Champ.size+5) {
             break;
         }
         if (i != 4) sumCtrl ^= receiveData.byte.low; // c'est l'octet 4 ou se trouve le sum contrle 
