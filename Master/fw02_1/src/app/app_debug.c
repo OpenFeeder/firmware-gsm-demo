@@ -443,6 +443,7 @@ void APP_SerialDebugTasks(void) {
                     case 'A':
                     {
                         appData.dayTime = GOOD_DAY;
+                        MASTER_StoreBehavior(MASTER_APP_STATE_SELECTE_SLAVE, PRIO_MEDIUM);
                     }
                         break;
                     case 'd':
@@ -457,12 +458,14 @@ void APP_SerialDebugTasks(void) {
                     case 'M':
                     {
                         appData.dayTime = GOOD_MORNING;
+                        MASTER_StoreBehavior(MASTER_APP_STATE_SELECTE_SLAVE, PRIO_MEDIUM);
                     }
                         break;
                     case 'n':
                     case 'N':
                     {
                         appData.dayTime = GOOD_NIGHT;
+                        MASTER_StoreBehavior(MASTER_APP_STATE_SELECTE_SLAVE, PRIO_MEDIUM);
 
                     }
                         break;

@@ -152,6 +152,7 @@ uint8_t MASTER_SendDateRF() {
     //________GET DATE____________
     if (RTCC_TimeGet(&picDate)) {
         Date d;
+        memset(d.date, 0, 5);
         d.dateVal = 0;
         d.Format.yy = picDate.tm_year;
         d.Format.mon = picDate.tm_mon;
@@ -437,6 +438,7 @@ void MASTER_AppTask(void) {
 
                         appData.openfeeder_state = OPENFEEDER_IS_AWAKEN;
                         appData.ptr[PRIO_HIGH][PTR_READ] = appData.ptr[PRIO_HIGH][PTR_WRITE];
+                        MASTER_StoreBehavior(MASTER_APP_STATE_SELECTE_SLAVE, PRIO_HIGH);
                         //                        MASTER_StoreBehavior(MASTER_APP_STATE_CONFIGURE_SYSTEM, PRIO_HIGH);
                         //                        appData.state = MASTER_APP_STATE_CONFIGURE_SYSTEM;
                         break;
@@ -1491,8 +1493,11 @@ void MASTER_AppTask(void) {
                 switch (appData.dayTime) {
                     case GOOD_MORNING:
                     {
+#if defined( USE_UART1_SERIAL_INTERFACE )
+                        printf("\n");
+#endif
                         appData.ensSlave[appData.slaveSelected].state = SLAVE_CONFIG;
-                        TMR_SetWaitRqstTimeout(0);
+//                        TMR_SetWaitRqstTimeout(0);
                     }
                         break;
                     case GOOD_DAY:
@@ -1529,12 +1534,264 @@ void MASTER_AppTask(void) {
 #if defined ( USE_UART1_SERIAL_INTERFACE ) && defined( DISPLAY_CURRENT_STATE )
                 printf(">MASTER_STATE_MSG_RECEIVE\n");
 #endif
-            }
-#if defined( USE_UART1_SERIAL_INTERFACE )
-            printf("recu %s\n", receive.Champ.data);
+
+                appData.ensSlave[appData.slaveSelected].nbError = MAX_ERROR;
+                appData.ensSlave[appData.slaveSelected].nbTimeout = MAX_TIMEOUT;
+
+                switch (receive.Champ.typeMsg) {
+                    case DATA:
+                        if (appData.ensSlave[appData.slaveSelected].state == SLAVE_SYNC) {
+#if defined(UART_DEBUG)
+                            printf("Slave %d connect\n", appData.ensSlave[appData.slaveSelected].idSlave);
 #endif
+                            appData.ensSlave[appData.slaveSelected].tryToConnect = MAX_TRY_TO_SYNC; // on reset le nombre de demande de connxion 
+                            appData.ensSlave[appData.slaveSelected].state = SLAVE_COLLECT; //changement d'etat
+                        }
+
+                        if (receive.Champ.idMsg == appData.ensSlave[appData.slaveSelected].index) {
+                            appData.ensSlave[appData.slaveSelected].state = SLAVE_COLLECT;
+                            strncpy(appData.BUFF_COLLECT[appData.ensSlave[appData.slaveSelected].index - 1],
+                                    receive.Champ.data, receive.Champ.size); // save data
+                            if (receive.Champ.nbR == MAX_W) {
+                                TMR_SetWaitRqstTimeout(-1);
+                                MASTER_StoreBehavior(MASTER_APP_STATE_SEND_FROM_GSM, PRIO_HIGH);
+                                appData.ensSlave[appData.slaveSelected].state = SLAVE_COLLECT_END_BLOCK;
+#if defined(UART_DEBUG)
+                                printf("END BLOC\n");
+#endif  
+                            } else if (receive.Champ.nbR == MAX_W + 1) { // fin de trans
+                                TMR_SetWaitRqstTimeout(-1);
+                                MASTER_StoreBehavior(MASTER_APP_STATE_SEND_FROM_GSM, PRIO_HIGH);
+                                appData.ensSlave[appData.slaveSelected].state = SLAVE_COLLECT_END;
+#if defined(UART_DEBUG)
+                                printf("END BLOC Trans\n");
+#endif
+                            } else {
+                                appData.ensSlave[appData.slaveSelected].index += 1;
+                                // on demarre le timeout
+                                if (receive.Champ.nbR > 1) { // je suis plus en attente d'un paquet
+                                    TMR_SetWaitRqstTimeout(TIME_OUT_COLLECT_LOG);
+                                } else {
+                                    TMR_SetWaitRqstTimeout(0); // deactive timer up to (until) request 
+                                }
+                            }
+                        } else {
+#if defined(UART_DEBUG)
+                            printf("numSeq attendu %d vs %d recu \n",
+                                   appData.ensSlave[appData.slaveSelected].index, receive.Champ.idMsg);
+                            TMR_SetWaitRqstTimeout(0);
+#endif
+                        }
+                        break;
+                        /* -------------------------------------------------------*/
+                    case ERROR:
+                    {
+                        bool b = true;
+                        uint8_t bufErrorMSG [256];
+                        //                    TMR_SetWaitRqstTimeout(0); // declencher le l'interuption logiciel  
+#if defined(UART_DEBUG)
+                        printf("ERROR RECEIVE %d\n", receive.Champ.idMsg);
+#endif
+                        //TODO : traitement d'erreur send ack
+                        switch (receive.Champ.idMsg) {
+                                //different type d'erreur 
+                            case ERROR_NONE:
+#if defined(UART_DEBUG)
+                                printf("transmission d'une erreur inconnue\n");
+#endif
+                                sprintf(bufErrorMSG, "OF %d du site %d ERREUR CRITIQUE INCONNUE",
+                                        appData.udid, appData.station);
+                                break;
+                            case ERROR_LOW_BATTERY:
+#if defined(UART_DEBUG)
+                                printf("transmission de niveau de batterie faible\n");
+#endif
+                                sprintf(bufErrorMSG, "OF %d du site %d niveau de batterie faible",
+                                        appData.udid, appData.station);
+                                break;
+                            case ERROR_LOW_FOOD:
+#if defined(UART_DEBUG)
+                                printf("transmission de niveau de nourriture faible\n");
+#endif
+                                sprintf(bufErrorMSG, "OF %d du site %d niveau de nourriture faible",
+                                        appData.udid, appData.station);
+                                break;
+                            case ERROR_LOW_VBAT:
+#if defined(UART_DEBUG)
+                                printf("transmission de ERROR_LOW_VBAT\n");
+#endif
+                                sprintf(bufErrorMSG, "OF %d du site %d niveau de .... faible: ERROR_LOW_VBAT",
+                                        appData.udid, appData.station);
+                                break;
+                            case ERROR_DOOR_CANT_CLOSE:
+#if defined(UART_DEBUG)
+                                printf("transmission de PORTE OUVERTE\n");
+#endif      
+
+                                sprintf(bufErrorMSG, "OF %d du site %d PORTE OUVERTE",
+                                        appData.udid, appData.station);
+                                b = true;
+                                break;
+                            default:
+#if defined(UART_DEBUG)
+                                b = false;
+                                printf("Erreur non connue\n");
+#endif
+                                break;
+                        }
+                        if (b) { // aquitter 
+                            //                            if (app_SendSMS(bufErrorMSG)) {
+                            //                                MASTER_SendMsgRF(ensSlave[slaveSelected].idSlave,
+                            //                                                 ACK, receive.Champ.idMsg, 1, "ACK", 3);
+                            //                            } else {
+                            //#if defined(UART_DEBUG)
+                            //                                printf("ERROR non transmisi\n");
+                            //#endif
+                            //                                }
+                        } else {
+#if defined(UART_DEBUG)
+                            printf("ERROR non reconuue \n");
+#endif
+                        }
+                        TMR_SetWaitRqstTimeout(0); // fin timeout
+                    }
+                        break;
+                        /* -------------------------------------------------------*/
+                    case NOTHING:
+                        //                    TMR_SetWaitRqstTimeout(0); // on laisse le timer se terminer pour les test
+#if defined( USE_UART1_SERIAL_INTERFACE )
+                        printf("Slave %d Nothing to send\n", appData.ensSlave[appData.slaveSelected].idSlave);
+#endif
+                        break;
+                        /* ----------------------------------------------------*/
+                        /* -------------------------------------------------------*/
+                }
+                break;
+            }
         }
             break;
+            /*-----------------------------------------------------------------*/
+        case MASTER_APP_STATE_TIMEOUT: //if an event has occurred with the timer 
+            if (appData.state != appData.previous_state) {
+                appData.previous_state = appData.state;
+#if defined( USE_UART1_SERIAL_INTERFACE ) && defined( DISPLAY_CURRENT_STATE )
+                printf(">MASTER STATE TIMEOUT\n");
+#endif
+            }
+        {
+            switch (appData.ensSlave[appData.slaveSelected].state) {
+                case SLAVE_CONFIG:
+#if defined( USE_UART1_SERIAL_INTERFACE )
+                        printf("Config slave with rf and gsm communication\n");
+#endif
+                        
+                case SLAVE_SYNC:
+#if defined(UART_DEBUG)
+                    printf("hundler error phase de synchro try to connect%d \n",
+                           appData.ensSlave[appData.slaveSelected].tryToConnect);
+#endif
+                    if (--appData.ensSlave[appData.slaveSelected].tryToConnect) {
+                        MASTER_SendMsgRF(appData.ensSlave[appData.slaveSelected].idSlave,
+                                         DATA,
+                                         appData.ensSlave[appData.slaveSelected].nbBloc, 1,
+                                         (uint8_t *) ("DATA"),
+                                         4); // attention a changer
+                        TMR_SetWaitRqstTimeout(TIME_OUT_COLLECT_LOG); // active timer 
+                    } else { // on ne peut pas se connecter ? ce slave 
+                        appData.ensSlave[appData.slaveSelected].nbError--;
+                        if (appData.ensSlave[appData.slaveSelected].nbError == 0) {
+#if defined(UART_DEBUG)
+                            printf("hundler slave %d communication corompu\n ERROR ==> SELECT SLAVE\n",
+                                   appData.ensSlave[appData.slaveSelected].idSlave);
+#endif
+                            appData.ensSlave[appData.slaveSelected].state = SLAVE_ERROR;
+                            MASTER_StoreBehavior(MASTER_APP_STATE_ERROR, PRIO_HIGH); // traitement de l'erreur 
+                        } else {
+                            MASTER_StoreBehavior(MASTER_APP_STATE_SELECTE_SLAVE, PRIO_MEDIUM);
+                        }
+                    }
+                    break;
+                    /*-----------------------------------------------------------------*/
+                case SLAVE_COLLECT:
+#if defined(UART_DEBUG)
+                    printf("hundler error phase de collect\n");
+#endif
+                    if (--appData.ensSlave[appData.slaveSelected].nbTimeout) {
+#if defined(UART_DEBUG)
+                        printf("envoit d'ack N %d \n", appData.ensSlave[appData.slaveSelected].index);
+#endif
+                        MASTER_SendMsgRF(appData.ensSlave[appData.slaveSelected].idSlave,
+                                         ACK,
+                                         appData.ensSlave[appData.slaveSelected].index, 1,
+                                         (uint8_t *) ("ACK"), 3); // demande du paquet attendu 
+                        TMR_SetWaitRqstTimeout(TIME_OUT_COLLECT_LOG);
+                    } else { // on une interuption dans la collect
+                        appData.ensSlave[appData.slaveSelected].nbError--;
+                        if (!appData.ensSlave[appData.slaveSelected].nbError) {
+#if defined(UART_DEBUG)
+                            printf("slave %d communication corompu\n",
+                                   appData.ensSlave[appData.slaveSelected].idSlave);
+#endif
+                            appData.ensSlave[appData.slaveSelected].state = SLAVE_ERROR; // informer le master 
+                            MASTER_StoreBehavior(MASTER_APP_STATE_ERROR, PRIO_HIGH);
+                        }
+                    }
+                    break;
+                    /*-----------------------------------------------------------------*/
+
+                case SLAVE_DAYTIME:
+                    --appData.ensSlave[appData.slaveSelected].nbTimeout;
+                    if (appData.ensSlave[appData.slaveSelected].nbTimeout > 0) {
+                        MASTER_StoreBehavior(MASTER_APP_STATE_SELECTE_SLAVE, PRIO_MEDIUM);
+                    } else {
+                        --appData.ensSlave[appData.slaveSelected].nbError;
+                        if (appData.ensSlave[appData.slaveSelected].nbError < 0) {
+                            appData.ensSlave[appData.slaveSelected].state = SLAVE_ERROR;
+                            MASTER_StoreBehavior(MASTER_APP_STATE_ERROR, PRIO_HIGH);
+                        }
+                    }
+                    break;
+                default:
+                    break;
+            }
+        }
+            break;
+            /* -------------------------------------------------------------- */
+        case MASTER_APP_STATE_SEND_FROM_GSM:
+        {
+            if (appData.state != appData.previous_state) {
+                appData.previous_state = appData.state;
+#if defined( USE_UART1_SERIAL_INTERFACE ) && defined( DISPLAY_CURRENT_STATE )
+                printf(">MASTER_STATE_SEND_FROM_GSM\n");
+#endif
+            }
+            int8_t j = 0;
+#if defined(UART_DEBUG)
+            printf("ind %d\n", appData.ensSlave[appData.slaveSelected].index);
+#endif
+            for (; j < appData.ensSlave[appData.slaveSelected].index - 1; j++) {
+                printf("[%d]  -> %s\n", j, appData.BUFF_COLLECT[j]);
+            }
+            //TODO : go to select slave 
+            MASTER_StoreBehavior(MASTER_APP_STATE_SELECTE_SLAVE, MEDIUM);
+            // prepare l'attente d'un nouveau bloc ou c'est la fin 
+            if (appData.ensSlave[appData.slaveSelected].state == SLAVE_COLLECT_END_BLOCK) {
+                appData.ensSlave[appData.slaveSelected].index = 1;
+                appData.ensSlave[appData.slaveSelected].nbBloc++;
+            }
+        }
+            break;
+            /* -------------------------------------------------------------- */
+        case MASTER_APP_STATE_END:
+            if (appData.state != appData.previous_state) {
+                appData.previous_state = appData.state;
+#if defined( USE_UART1_SERIAL_INTERFACE ) && defined( DISPLAY_CURRENT_STATE )
+                printf(">MASTER STATE END\n");
+#endif
+            }
+            //TODO : gestion de fin
+            break;
+            /* -------------------------------------------------------------- */
         default:
             if (false == enter_default_state) {
 #if defined ( USE_UART1_SERIAL_INTERFACE ) && defined( DISPLAY_CURRENT_STATE )
@@ -1544,11 +1801,8 @@ void MASTER_AppTask(void) {
                 getDateTime();
                 printDateTime(appData.current_time);
 #endif
-
                 enter_default_state = true;
-
             }
-
             setLedsStatusColor(LED_RED);
             break;
     }
@@ -1642,7 +1896,7 @@ void MASTER_AppInit(void) {
 
     appData.dayTime = GOOD_MORNING; // a voir 
     appData.synchronizeTime = true;
-    appData.timeToSynchronizeHologe = 3;
+    appData.timeToSynchronizeHologe = 3; // a lire depuis le fichier ini
 
     /* Data logger */
     appDataLog.is_file_name_set = false;

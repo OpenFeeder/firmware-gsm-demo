@@ -3371,7 +3371,7 @@ bool radioAlphaTRX_FlushFIFO() {
     int i = 10;
     do { //attention risque de boocle infii 
         RF_StatusRead.Val = radioAlphaTRX_Command(STATUS_READ_CMD); // verifier
-        if ((!RF_StatusRead.bits.b9_FFEM && RF_StatusRead.bits.b6_DQD) || RF_StatusRead.bits.b6_DQD)
+        if ((!RF_StatusRead.bits.b9_FFEM && RF_StatusRead.bits.b6_DQD))
             radioAlphaTRX_Command(RX_FIFO_READ_CMD_POR); // vide la fifo
         else
             stop = true;
@@ -3585,7 +3585,7 @@ bool radioAlphaTRX_receive() {
         frameReceve.paquet[i] = receiveData.byte.low;
         //frameReceve.Champ.src != MASTER_GetSlaveSelected() : ==> etre sur de recuperer le msg du slave selectionn?
         if (i == 0) {
-            if (frameReceve.Champ.dest != appData.masterId) // || frameReceve.Champ.src != MASTER_GetSlaveSelected()pour les broadcast, on modifiera la condition
+            if (frameReceve.Champ.dest != appData.masterId) 
                 return false;
         } else if (receiveData.byte.low == 0) {
             break;
@@ -3596,6 +3596,7 @@ bool radioAlphaTRX_receive() {
 }
 
 void radioAlphaTRX_CaptureFrame() {
+    memset(frameReceve.paquet, 0, FRAME_LENGTH);
     if (radioAlphaTRX_receive()) {
         LED_STATUS_B_Toggle();
         MASTER_StoreBehavior(MASTER_APP_STATE_MSG_RF_RECEIVE, PRIO_HIGH); // c'est une information tr?s importante 
