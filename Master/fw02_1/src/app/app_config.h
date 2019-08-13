@@ -19,8 +19,6 @@
 typedef enum {
     INI_READ_OK = 0,
 
-    INI_PB_SCENARIO_NUM,
-
     INI_PB_SITEID_ZONE,
 
     INI_PB_TIME_WAKEUP_HOUR,
@@ -49,12 +47,10 @@ typedef enum {
 
     INI_PB_ATTRACTIVE_LEDS_PATTERN_PERCENT,
 
-    INI_PB_LOGS_BIRDS,
     INI_PB_LOGS_UDID,
     INI_PB_LOGS_EVENTS,
     INI_PB_LOGS_ERRORS,
     INI_PB_LOGS_BATTERY,
-    INI_PB_LOGS_RFID,
 
 
     //anzilane modif
@@ -68,8 +64,6 @@ FILEIO_RESULT config_find_ini(void);
 INI_READ_STATE config_read_ini(void);
 void config_print(void);
 void getIniPbChar(INI_READ_STATE, char *, uint8_t);
-FILEIO_RESULT read_PIT_tags(void);
-FILEIO_RESULT read_reward_probabilities(void);
 
 #endif /* _APP_CONFIG_HEADER_H */
 

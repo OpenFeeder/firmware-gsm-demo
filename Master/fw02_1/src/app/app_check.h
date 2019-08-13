@@ -8,17 +8,12 @@
 #ifndef _APP_CHECK_HEADER_H
 #define _APP_CHECK_HEADER_H
 
-#define MAX_MEASURE_ATTEMPTS 3
-#define MIN_RDYCLK_FREQ 12500 // (x10Hz)
-
 typedef enum
 {
     APP_CHECK_OK,
 
     APP_CHECK_BATTERY_PB,
-    APP_CHECK_VBAT_PB,
-    APP_CHECK_FOOD_LEVEL_PB,
-    APP_CHECK_RFID_FREQ_PB
+    APP_CHECK_VBAT_PB
 
 } APP_CHECK;
 
@@ -30,8 +25,6 @@ APP_CHECK checkImportantParameters( void );
  */
 bool isPowerBatteryGood( void );
 bool isPowerVbatGood( void );
-bool isEnoughFood( void );
-bool isRfidFreqGood( void );
 
 #endif /* _APP_CHECK_HEADER_H */
 

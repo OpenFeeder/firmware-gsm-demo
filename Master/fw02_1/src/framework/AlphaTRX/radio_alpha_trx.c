@@ -3187,15 +3187,15 @@ bool radioAlphaTRX_Init(void) {
     RF_StatusRead.Val = 0;
     //    RF_StatusRead.Val = radioAlphaTRX_Command(STATUS_READ_CMD); // intitial SPI transfer added to avoid power-up problem
     /**-------------> Frequency Setting Command @ 433 MHz <--------------------*/
-
-    RF_StatusRead.Val = radioAlphaTRX_Command(STATUS_READ_CMD); // intitial SPI transfer added to avoid power-up problem
+    int8_t i = 0;
+    do {
+        RF_StatusRead.Val = radioAlphaTRX_Command(STATUS_READ_CMD); // intitial SPI transfer added to avoid power-up problem
 #if defined(UART_DEBUG)
-    printf("A other Wait until RFM12B is out of power-up reset, status: 0x%04X\r\n", RF_StatusRead.Val);
+        printf("A other Wait until RFM12B is out of power-up reset, status: 0x%04X\r\n", RF_StatusRead.Val);
 #endif
-    if (RF_StatusRead.bits.b14_POR != 0) {
-#if defined(UART_DEBUG)
-        printf("je suis la \n");
-#endif
+        i++;
+    } while (RF_StatusRead.bits.b14_POR != 0 && i < 10);
+    if (i >= 10) {
         return false;
     }
 
@@ -3232,6 +3232,7 @@ bool radioAlphaTRX_Init(void) {
     // 1600d --> 0x640
     //    ALPHA_TRX433S_Control(0xA640); // Set operation frequency: Fc= 430+F*0.0025 , soit 430+1600*0.0025= 434 MHz avec 0x640 --> 110 0100 0000
     RF_FrequencySet.Val = FQ_SET_CMD_POR;
+    RF_FrequencySet.Val = radioAlphaTRX_TransceiverConfigFq(FQ_119);
     //    RF_FrequencySet.REGbits.SetOperationFrequency_H = 0x6;
     //    RF_FrequencySet.REGbits.SetOperationFrequency_L = 0x40;
     radioAlphaTRX_Command(RF_FrequencySet.Val); // Set operation frequency: Fc= 430+F*0.0025 , soit 430+1600*0.0025= 434 MHz avec 0x640 --> 110 0100 0000
@@ -3330,7 +3331,8 @@ bool radioAlphaTRX_Init(void) {
     RF_AfcCmd.REGbits.en = 0;
     RF_AfcCmd.REGbits.range_limit = PLUS_3_TO_MOINS_4;
     RF_AfcCmd.REGbits.SetCommandeOfAFC = KEEP_Fosette_VALUE_INDEP;
-    radioAlphaTRX_Command(RF_AfcCmd.Val); //0xC4F6
+    // verifier cette valeur 
+    radioAlphaTRX_Command(0xC4F6); //0xC4F6
 
 
     /**-------------> PLL Setting Command (12) <------------------------------*/
@@ -3368,8 +3370,8 @@ bool radioAlphaTRX_FlushFIFO() {
     bool stop = false;
     int i = 10;
     do { //attention risque de boocle infii 
-        RF_StatusRead.Val = radioAlphaTRX_Command(STATUS_READ_CMD);
-        if (!RF_StatusRead.bits.b9_FFEM && RF_StatusRead.bits.b6_DQD)
+        RF_StatusRead.Val = radioAlphaTRX_Command(STATUS_READ_CMD); // verifier
+        if ((!RF_StatusRead.bits.b9_FFEM && RF_StatusRead.bits.b6_DQD) || RF_StatusRead.bits.b6_DQD)
             radioAlphaTRX_Command(RX_FIFO_READ_CMD_POR); // vide la fifo
         else
             stop = true;
@@ -3417,9 +3419,7 @@ void radioAlphaTRX_ReceivedMode(void) {
 
     RF_FIFOandResetMode.bits.b1_ff = 1; // FIFO fill will be enabled after synchronize pattern reception
     RF_StatusRead.Val = radioAlphaTRX_Command(RF_FIFOandResetMode.Val); // --> 0xCA83
-    //#if defined(UART_DEBUG)
-    //        printf("status 0x%04X\n", RF_StatusRead.Val);
-    //#endif
+
     sendMode = false; // on n'est plus en mode emission
 }
 

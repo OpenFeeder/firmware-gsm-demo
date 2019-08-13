@@ -39,9 +39,6 @@ void powerRFEnable( void );
 void powerRFDisable( void );
 
 
-bool isPowerServoEnable( void );
-void powerPIREnable( void );
-void powerPIRDisable( void );
 void powerUsbRfidEnable( void );
 void powerUsbRfidDisable( void );
 uint16_t getADC1value( ADC1_CHANNEL channel );

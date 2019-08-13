@@ -447,7 +447,7 @@ void APP_SerialDebugTasks(void) {
                         break;
                     case 'd':
                     case 'D':
-                        printf("envoie : %d\n", MASTER_SendDateRF());
+                        MASTER_StoreBehavior(MASTER_APP_STATE_SEND_DATE, PRIO_EXEPTIONNEL);
                         break;
                     case 'i':
                     case 'I':
@@ -1319,46 +1319,49 @@ void APP_SerialDebugTasks(void) {
             case 'x':
             case 'X':
             {
-                uint8_t user_choice;
-
-                setDelayMsReadFromUart(MAX_READ_FROM_UART_DELAY);
-
-                while (false == (UART1_TRANSFER_STATUS_RX_DATA_PRESENT & UART1_TransferStatusGet()) && false == isDelayMsEndingReadFromUart());
-                if (true == isDelayMsEndingReadFromUart()) {
-                    printf("\n\tToo slow entering value => command aborted\n");
-                    break;
-                }
-                user_choice = UART1_Read();
-
-                switch (user_choice) {
-                    case 'g':
-                    case 'G':
-                    {
-                        //FREE
-                        break;
-                    }
-
-                    case 'o':
-                    case 'O':
-                    {
-                        //FREE
-                        break;
-                    }
-
-                    case 'p':
-                    case 'P':
-                    {
-                        //FREE
-                        break;
-                    }
-
-                    case 'r':
-                    case 'R':
-                    {
-                        //FREE
-                        break;
-                    }
-                }
+                MASTER_SendMsgRF(1,
+                             INFOS,
+                             1, 1, (uint8_t *) ("INFOS"), 5); // demande du paquet attendu
+//                uint8_t user_choice;
+//
+//                setDelayMsReadFromUart(MAX_READ_FROM_UART_DELAY);
+//
+//                while (false == (UART1_TRANSFER_STATUS_RX_DATA_PRESENT & UART1_TransferStatusGet()) && false == isDelayMsEndingReadFromUart());
+//                if (true == isDelayMsEndingReadFromUart()) {
+//                    printf("\n\tToo slow entering value => command aborted\n");
+//                    break;
+//                }
+//                user_choice = UART1_Read();
+//
+//                switch (user_choice) {
+//                    case 'g':
+//                    case 'G':
+//                    {
+//                        //FREE
+//                        break;
+//                    }
+//
+//                    case 'o':
+//                    case 'O':
+//                    {
+//                        //FREE
+//                        break;
+//                    }
+//
+//                    case 'p':
+//                    case 'P':
+//                    {
+//                        //FREE
+//                        break;
+//                    }
+//
+//                    case 'r':
+//                    case 'R':
+//                    {
+//                        //FREE
+//                        break;
+//                    }
+//                }
 
                 break;
             }

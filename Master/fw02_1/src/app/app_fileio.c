@@ -195,7 +195,6 @@ void exportAllFiles( )
     exportFile( FIRMWARE_LOG_FILE, 'T' );
     exportFile( BATTERY_LOG_FILE, 'T' );
     exportFile( ERRORS_LOG_FILE, 'T' );
-    exportFile( RFID_LOG_FILE, 'T' );
     exportFile( CALIBRATION_LOG_FILE, 'T' );
     exportFile( UDID_LOG_FILE, 'T' );
     exportFile( EXT_TEMP_LOG_FILE, 'T' );
@@ -244,7 +243,6 @@ void deleteLogFiles( )
     deleteFile( FIRMWARE_LOG_FILE );
     deleteFile( BATTERY_LOG_FILE );
     deleteFile( ERRORS_LOG_FILE );
-    deleteFile( RFID_LOG_FILE );
     deleteFile( CALIBRATION_LOG_FILE );
     deleteFile( UDID_LOG_FILE );
     deleteFile( EXT_TEMP_LOG_FILE );
@@ -279,7 +277,6 @@ void deleteAllFiles( )
     deleteFile( FIRMWARE_LOG_FILE );
     deleteFile( BATTERY_LOG_FILE );
     deleteFile( ERRORS_LOG_FILE );
-    deleteFile( RFID_LOG_FILE );
     deleteFile( CALIBRATION_LOG_FILE );
     deleteFile( UDID_LOG_FILE );
     deleteFile( EXT_TEMP_LOG_FILE );

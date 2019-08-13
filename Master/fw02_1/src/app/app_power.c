@@ -22,25 +22,6 @@ void powerRFDisable( void )
 }
 
 
-void powerPIREnable( void )
-{
-    /* Log event if required */
-    if ( true == appDataLog.log_events )
-    {
-       store_event(OF_POWER_PIR_ON); 
-    }
-}
-
-
-void powerPIRDisable( void )
-{
-    /* Log event if required */
-    if ( true == appDataLog.log_events )
-    {
-       store_event(OF_POWER_PIR_OFF); 
-    }
-}
-
 
 /* VDD_APP Enable function */
 void powerUsbRfidEnable( void )

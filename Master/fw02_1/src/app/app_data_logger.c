@@ -177,13 +177,6 @@ void clearLogBuffer( void )
 
 }
 
-
-void clearRfidFreqBuffer( void )
-{
-    appDataLog.num_rfid_freq_stored = 0;
-}
-
-
 void clearExtTemperatureBuffer( void )
 {
     appDataLog.num_ds3231_temp_stored = 0;

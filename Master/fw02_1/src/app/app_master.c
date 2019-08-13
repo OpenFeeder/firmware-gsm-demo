@@ -442,8 +442,6 @@ void MASTER_AppTask(void) {
                         break;
                     case APP_CHECK_BATTERY_PB:
                     case APP_CHECK_VBAT_PB:
-                    case APP_CHECK_FOOD_LEVEL_PB:
-                    case APP_CHECK_RFID_FREQ_PB:
                         MASTER_StoreBehavior(MASTER_APP_STATE_FLUSH_DATA_BEFORE_ERROR, PRIO_HIGH);
                         //                        appData.state = MASTER_APP_STATE_FLUSH_DATA_BEFORE_ERROR;
                         break;
@@ -956,7 +954,6 @@ void MASTER_AppTask(void) {
 
                 if (appDataLog.num_data_stored > 0 ||
                     appDataLog.num_battery_level_stored > 0 ||
-                    appDataLog.num_rfid_freq_stored > 0 ||
                     appDataEvent.num_events_stored > 0 ||
                     appDataLog.num_ds3231_temp_stored > 0) {
                     /* Log data on USB device */
@@ -1063,7 +1060,7 @@ void MASTER_AppTask(void) {
             /* Next line for debugging sleep/wakeup only */
             /* Should be commented in normal mode */
             /* Modify time value according to wake up values in the CONFIG.INI file */
-            setDateTime(19, 8, 12, 5, 59, 50);
+            setDateTime(19, 8, 12, 4, 59, 50);
 #endif
             /* Set alarm for wake up time */
             rtcc_set_alarm(appDataAlarmWakeup.time.tm_hour, appDataAlarmWakeup.time.tm_min, appDataAlarmWakeup.time.tm_sec, EVERY_DAY);

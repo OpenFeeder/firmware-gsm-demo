@@ -358,13 +358,11 @@ INI_READ_STATE config_read_ini(void) {
 
     } else {
         /* Data separator in the log file. */
-        ini_gets("logfile", "separator", DEFAULT_LOG_SEPARATOR, appDataLog.separator, sizearray(appDataLog.separator), "CONFIG.INI");
-        appDataLog.log_birds = true;
+        ini_gets("logfile", "separator", DEFAULT_LOG_SEPARATOR, appDataLog.separator, sizearray(appDataLog.separator), "CONFIG.INI");;
         appDataLog.log_udid = true;
         appDataLog.log_events = true;
         appDataLog.log_errors = true;
         appDataLog.log_battery = true;
-        appDataLog.log_rfid = true;
         appDataLog.log_temp = true;
         appDataLog.log_calibration = true;
     }
@@ -456,9 +454,6 @@ void getIniPbChar(INI_READ_STATE state, char *buf, uint8_t n) {
     switch (state) {
         case INI_PB_LOCAL_ID_SLAVE_NO_SET : 
             sprintf(buf, n, "slave local id");
-        case INI_PB_SCENARIO_NUM:
-            snprintf(buf, n, "Scenario: number");
-            break;
         case INI_PB_SITEID_ZONE:
             snprintf(buf, n, "Site ID: zone");
             break;
@@ -474,9 +469,6 @@ void getIniPbChar(INI_READ_STATE state, char *buf, uint8_t n) {
         case INI_PB_TIME_SLEEP_MINUTE:
             snprintf(buf, n, "Sleep: minute");
             break;
-        case INI_PB_LOGS_BIRDS:
-            snprintf(buf, n, "Logs: birds");
-            break;
         case INI_PB_LOGS_UDID:
             snprintf(buf, n, "Logs: udid");
             break;
@@ -488,9 +480,6 @@ void getIniPbChar(INI_READ_STATE state, char *buf, uint8_t n) {
             break;
         case INI_PB_LOGS_BATTERY:
             snprintf(buf, n, "Logs: battery");
-            break;
-        case INI_PB_LOGS_RFID:
-            snprintf(buf, n, "Logs: rfid");
             break;
         case INI_PB_ATTRACTIVE_LEDS_RED_A:
             snprintf(buf, n, "Attractive LEDs: red A");
