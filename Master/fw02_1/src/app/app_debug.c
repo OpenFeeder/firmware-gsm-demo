@@ -249,7 +249,7 @@ void APP_SerialDebugTasks(void) {
                     }
                     case 's':
                     case 'S':
-                    
+
                         break;
                         /* -------------------------------------------------------------- */
                     case 't':
@@ -423,10 +423,41 @@ void APP_SerialDebugTasks(void) {
                 break;
                 /* -------------------------------------------------------------- */
 
-                //            case 'g':
-                //            case 'G':
-                //                /* Not used. */
-                //                break;
+            case 'g':
+            case 'G':
+            {
+                uint8_t user_choice;
+
+                setDelayMsReadFromUart(MAX_READ_FROM_UART_DELAY);
+
+                while (false == (UART1_TRANSFER_STATUS_RX_DATA_PRESENT & UART1_TransferStatusGet()) && false == isDelayMsEndingReadFromUart());
+                if (true == isDelayMsEndingReadFromUart()) {
+                    printf("\n\tToo slow entering value => command aborted\n");
+                    break;
+                }
+                user_choice = UART1_Read();
+
+                switch (user_choice) {
+                    case 'p':
+                    case 'P':
+                        printPointeur(PRIO_EXEPTIONNEL);
+                        printPointeur(PRIO_HIGH);
+                        printPointeur(PRIO_MEDIUM);
+                        printPointeur(PRIO_LOW);
+                        break;
+                    case 's':
+                    case 'S':
+                        printf("GO TO SLEEP\n");
+                        MASTER_StoreBehavior(MASTER_APP_STATE_SLEEP, PRIO_EXEPTIONNEL);
+                        break;
+                    case 'w':
+                    case 'W':
+                        printf("OF WAKEUP\n");
+                        MASTER_StoreBehavior(MASTER_APP_STATE_WAKE_UP, PRIO_EXEPTIONNEL);
+                        break;
+                }
+            }
+                break;
                 /* -------------------------------------------------------------- */
 
             case 'h':

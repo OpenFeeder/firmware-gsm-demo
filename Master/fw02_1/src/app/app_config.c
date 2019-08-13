@@ -113,7 +113,7 @@ INI_READ_STATE config_read_ini(void) {
             appData.siteid[i] = 'X';
         }
 #if defined (USE_UART1_SERIAL_INTERFACE) && defined (DISPLAY_INI_READ_DATA)
-        printf("\tSite ID... read.\n");
+        printf("\tSite ID : %s ... read.\n", appData.siteid);
 #endif 
         /* local site */
         read_parameter = ini_getl("siteid", "local_site", -1, "CONFIG.INI");
@@ -122,7 +122,7 @@ INI_READ_STATE config_read_ini(void) {
         } else {
             appData.station = (int) read_parameter;
 #if defined (USE_UART1_SERIAL_INTERFACE) && defined (DISPLAY_INI_READ_DATA)
-            printf("\tStation id ... read.\n");
+            printf("\tStation id : %d ... read.\n", appData.station);
 #endif     
         }
 
@@ -132,7 +132,7 @@ INI_READ_STATE config_read_ini(void) {
         } else {
             appData.masterId = (int) read_parameter;
 #if defined (USE_UART1_SERIAL_INTERFACE) && defined (DISPLAY_INI_READ_DATA)
-            printf("\tMaster id ... read.\n");
+            printf("\tMaster id : %d ... read.\n", appData.masterId);
 #endif     
         }
 
@@ -148,7 +148,7 @@ INI_READ_STATE config_read_ini(void) {
     } else {
         appDataAlarmWakeup.time.tm_hour = (int) read_parameter;
 #if defined (USE_UART1_SERIAL_INTERFACE) && defined (DISPLAY_INI_READ_DATA)
-        printf("\tTime Wakeup hour... read.\n");
+        printf("\tTime Wakeup hour : %d ... read.\n", appDataAlarmWakeup.time.tm_hour);
 #endif     
     }
     read_parameter = ini_getl("time", "wakeup_minute", -1, "CONFIG.INI");
@@ -157,7 +157,7 @@ INI_READ_STATE config_read_ini(void) {
     } else {
         appDataAlarmWakeup.time.tm_min = (int) read_parameter;
 #if defined (USE_UART1_SERIAL_INTERFACE) && defined (DISPLAY_INI_READ_DATA)
-        printf("\tTime Wakeup minute... read.\n");
+        printf("\tTime Wakeup minute : %d ... read.\n", appDataAlarmWakeup.time.tm_min);
 #endif
     }
     appDataAlarmWakeup.time.tm_sec = 0;
@@ -169,7 +169,7 @@ INI_READ_STATE config_read_ini(void) {
     } else {
         appDataAlarmSleep.time.tm_hour = (int) read_parameter;
 #if defined (USE_UART1_SERIAL_INTERFACE) && defined (DISPLAY_INI_READ_DATA)
-        printf("\tTime sleep hour... read.\n");
+        printf("\tTime sleep hour : %d ... read.\n", appDataAlarmSleep.time.tm_hour);
 #endif
     }
     read_parameter = ini_getl("time", "sleep_minute", -1, "CONFIG.INI");
@@ -178,7 +178,7 @@ INI_READ_STATE config_read_ini(void) {
     } else {
         appDataAlarmSleep.time.tm_min = (int) read_parameter;
 #if defined (USE_UART1_SERIAL_INTERFACE) && defined (DISPLAY_INI_READ_DATA)
-        printf("\tTime sleep minute... read.\n");
+        printf("\tTime sleep minute : %d ... read.\n", appDataAlarmSleep.time.tm_min);
 #endif
     }
     appDataAlarmSleep.time.tm_sec = 0;
@@ -194,7 +194,7 @@ INI_READ_STATE config_read_ini(void) {
         } else {
             appData.nbSlaveOnSite = (int) read_parameter;
 #if defined (USE_UART1_SERIAL_INTERFACE) && defined (DISPLAY_INI_READ_DATA)
-            printf("\tNumber of slave on site... read.\n");
+            printf("\tNumber of slave on site %d ... read.\n", appData.nbSlaveOnSite);
 #endif
         }
 
@@ -202,9 +202,6 @@ INI_READ_STATE config_read_ini(void) {
         uint8_t buf[12];
         for (; i < appData.nbSlaveOnSite; i++) {
             sprintf(buf, "slave_id%d", i+1);
-#if defined( USE_UART1_SERIAL_INTERFACE )
-            printf("buf %s\n", buf);
-#endif
             read_parameter = ini_getl("slave", buf, -1, "CONFIG.INI");
             if (-1 == read_parameter) {
                 return INI_PB_LOCAL_ID_SLAVE_NO_SET;

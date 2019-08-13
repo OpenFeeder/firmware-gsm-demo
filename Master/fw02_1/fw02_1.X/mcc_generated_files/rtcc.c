@@ -375,14 +375,14 @@ void __attribute__((interrupt, no_auto_psv)) _ISR _RTCCInterrupt(void) {
 #endif 
 
         appData.rtcc_alarm_action = RTCC_ALARM_IDLE;
-
         if (appData.openfeeder_state == OPENFEEDER_IS_SLEEPING) {
 #if defined (USE_UART1_SERIAL_INTERFACE) && defined (DISPLAY_ISR_RTCC)
             printf("- Wakeup\n");
 #endif 
+            LED_STATUS_B_Toggle();
             //            appData.rtcc_alarm_action = RTCC_ALARM_WAKEUP_OPENFEEDER;
             MASTER_StoreBehavior(MASTER_APP_STATE_WAKE_UP, PRIO_EXEPTIONNEL);
-
+            
         } else {
 
             getDateTime();
@@ -399,10 +399,9 @@ void __attribute__((interrupt, no_auto_psv)) _ISR _RTCCInterrupt(void) {
 #endif 
                 MASTER_StoreBehavior(MASTER_APP_STATE_SLEEP, PRIO_EXEPTIONNEL);
 //                appData.rtcc_alarm_action = RTCC_ALARM_SLEEP_OPENFEEDER;
-            } else {
-
+            } else if (appData.openfeeder_state == OPENFEEDER_IS_AWAKEN) {
                 /* Battery level : evry hour and 30 sec*/
-                if (appData.current_time.tm_min == 0 && appData.current_time.tm_sec == 30) {
+                if (appData.current_time.tm_min == 0 && appData.current_time.tm_sec == 0) {
 #if defined (USE_UART1_SERIAL_INTERFACE) && defined (DISPLAY_ISR_RTCC)
                     printf("- Battery check\n");
 #endif 
@@ -412,43 +411,38 @@ void __attribute__((interrupt, no_auto_psv)) _ISR _RTCCInterrupt(void) {
                     return;
                 }
                 
-//                /* DS3231 temperature : for one jour, we have four sampling*/
-//                if ((appData.current_time.tm_min == 4 ||
-//                    appData.current_time.tm_min == 19 ||
-//                    appData.current_time.tm_min == 34 ||
-//                    appData.current_time.tm_min == 49) && appData.current_time.tm_sec == 15) {
-//#if defined (USE_UART1_SERIAL_INTERFACE) && defined (DISPLAY_ISR_RTCC)
-//                    printf("- DS3231 temperature\n");
-//#endif 
-//                    MASTER_StoreBehavior(MASTER_APP_STATE_GET_EMPERATURE, PRIO_LOW);
-////                    appData.rtcc_alarm_action = RTCC_DS3231_TEMPERATURE;
-//                    IFS3bits.RTCIF = false;
-//                    return;
-//                }
-//
-//                /* RTC calibration */
-//                if ((appData.current_time.tm_min == 2 ||
-//                    appData.current_time.tm_min == 17 ||
-//                    appData.current_time.tm_min == 32 ||
-//                    appData.current_time.tm_min == 47) && appData.current_time.tm_sec == 15) {
-//#if defined (USE_UART1_SERIAL_INTERFACE) && defined (DISPLAY_ISR_RTCC)
-//                    printf("- RTC calibration\n");
-//#endif 
-//                    MASTER_StoreBehavior(MASTER_APP_STATE_RTC_CALIBRATION, PRIO_LOW);
-//                    appData.rtcc_alarm_action = RTCC_RTC_CALIBRATION;
-//                    IFS3bits.RTCIF = false;
-//                    return;
-//                }
+                /* DS3231 temperature : for one jour, we have four sampling*/
+                if ((appData.current_time.tm_min == 4 ||
+                    appData.current_time.tm_min == 19 ||
+                    appData.current_time.tm_min == 34 ||
+                    appData.current_time.tm_min == 49) && appData.current_time.tm_sec == 15) {
+#if defined (USE_UART1_SERIAL_INTERFACE) && defined (DISPLAY_ISR_RTCC)
+                    printf("- DS3231 temperature\n");
+#endif 
+                    MASTER_StoreBehavior(MASTER_APP_STATE_GET_EMPERATURE, PRIO_LOW);
+//                    appData.rtcc_alarm_action = RTCC_DS3231_TEMPERATURE;
+                    IFS3bits.RTCIF = false;
+                    return;
+                }
+
+                /* RTC calibration */
+                if ((appData.current_time.tm_min == 2 ||
+                    appData.current_time.tm_min == 17 ||
+                    appData.current_time.tm_min == 32 ||
+                    appData.current_time.tm_min == 47) && appData.current_time.tm_sec == 15) {
+#if defined (USE_UART1_SERIAL_INTERFACE) && defined (DISPLAY_ISR_RTCC)
+                    printf("- RTC calibration\n");
+#endif 
+                    MASTER_StoreBehavior(MASTER_APP_STATE_RTC_CALIBRATION, PRIO_LOW);
+                    appData.rtcc_alarm_action = RTCC_RTC_CALIBRATION;
+                    IFS3bits.RTCIF = false;
+                    return;
+                }
 //                
-//                /* Horloge synchronize : ervry 5 min */
-//                if ((appData.current_time.tm_min%appData.timeToSynchronizeHologe == 0) && 
-//                    appData.synchronizeTime) {
-//                    appData.synchronizeTime = false;
-//                    MASTER_StoreBehavior(MASTER_APP_STATE_SEND_DATE, PRIO_EXEPTIONNEL);
-//                }else if (appData.current_time.tm_min%appData.timeToSynchronizeHologe == 0
-//                    && !appData.synchronizeTime) {
-//                    appData.synchronizeTime = true;
-//                }
+                /* Horloge synchronize : ervry 5 min */
+                if ((appData.current_time.tm_min%appData.timeToSynchronizeHologe == 0)) {
+                    MASTER_StoreBehavior(MASTER_APP_STATE_SEND_DATE, PRIO_EXEPTIONNEL);
+                }
             }
         }
 #if defined (USE_UART1_SERIAL_INTERFACE) && defined (DISPLAY_ISR_RTCC)
