@@ -379,6 +379,7 @@ void __attribute__((interrupt, no_auto_psv)) _ISR _RTCCInterrupt(void) {
 #if defined (USE_UART1_SERIAL_INTERFACE) && defined (DISPLAY_ISR_RTCC)
             printf("- Wakeup\n");
 #endif 
+            appData.openfeeder_state = OPENFEEDER_IS_AWAKEN;
             LED_STATUS_B_Toggle();
             //            appData.rtcc_alarm_action = RTCC_ALARM_WAKEUP_OPENFEEDER;
             MASTER_StoreBehavior(MASTER_APP_STATE_WAKE_UP, PRIO_EXEPTIONNEL);
