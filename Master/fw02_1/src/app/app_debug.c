@@ -481,7 +481,8 @@ void APP_SerialDebugTasks(void) {
                     {
                         appData.dayTime = SEE_YOU_TOMORROW;
                         printf("GO TO SLEEP\n");
-                        MASTER_StoreBehavior(MASTER_APP_STATE_SLEEP, PRIO_EXEPTIONNEL);
+                        setDateTime( 19, 8, 12, 23, 58, 50);
+//                        MASTER_StoreBehavior(MASTER_APP_STATE_SLEEP, PRIO_EXEPTIONNEL);
                     }
                         break;
                     case 'w':

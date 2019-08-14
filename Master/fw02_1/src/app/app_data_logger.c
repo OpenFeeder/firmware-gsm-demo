@@ -17,10 +17,6 @@
 static bool populateLogBuffer( void )
 {
     int nChar;
-    char line[MAX_CHAR_PER_LINE];
-    unsigned long delayS;
-    char leds_pattern;
-
     /* Log event if required */
     if ( true == appDataLog.log_events )
     {

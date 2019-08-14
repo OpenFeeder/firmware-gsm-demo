@@ -301,7 +301,7 @@ void MASTER_AppTask(void) {
         }
             /* -------------------------------------------------------------- */
 
-        case MASTER_APP_STATE_CONFIGURE_SYSTEM:
+        case MASTER_APP_STATE_CONFIGURE_SYSTEM: 
             /*
              * System configuration.
              * 
@@ -313,15 +313,13 @@ void MASTER_AppTask(void) {
              *  - Check important parameters:
              *      - battery level (mandatory)
              *      - VBat level (mandatory)
-             *      - RFID frequency (mandatory)
-             *      - Food level 
              *  - Log Unique Device ID (UDID)
              *  - Test servomotor
              *  - Test I2C interface
              *  - Initialize attractive LEDs (if needed)
              *  
              * Next state: 
-             *  - if configuration succeed => APP_STATE_IDLE
+             *  - if configuration succeed => APP_STATE_SELECTE_SLAVE
              *  - if configuration failed => APP_STATE_ERROR
              */
 
@@ -343,7 +341,6 @@ void MASTER_AppTask(void) {
 #endif
                     appDataUsb.is_device_needed = false;
                     MASTER_StoreBehavior(MASTER_APP_STATE_ERROR, PRIO_HIGH);
-                    //                    appData.state = MASTER_APP_STATE_ERROR;
                     break;
                 }
 
@@ -374,7 +371,6 @@ void MASTER_AppTask(void) {
                     /* If mount failed => error */
                     appDataUsb.is_device_needed = false;
                     MASTER_StoreBehavior(MASTER_APP_STATE_ERROR, PRIO_HIGH);
-                    //                    appData.state = MASTER_APP_STATE_ERROR;
                     break;
                 }
             }/* Otherwise wait for USB device connection or for timeout to reach */
@@ -391,7 +387,6 @@ void MASTER_AppTask(void) {
                     sprintf(appError.current_file_name, "%s", __FILE__);
                     appError.number = ERROR_USB_DEVICE_NOT_FOUND;
                     MASTER_StoreBehavior(MASTER_APP_STATE_ERROR, PRIO_HIGH);
-                    //                    appData.state = MASTER_APP_STATE_ERROR;
                     break;
                 }
 
@@ -414,7 +409,6 @@ void MASTER_AppTask(void) {
 #endif
                     appDataUsb.is_device_needed = false;
                     MASTER_StoreBehavior(MASTER_APP_STATE_ERROR, PRIO_HIGH);
-                    //                    appData.state = MASTER_APP_STATE_ERROR;
                     break;
                 }
             }
@@ -466,7 +460,6 @@ void MASTER_AppTask(void) {
                            "==> ERROR STATE\n");
 #endif
                     MASTER_StoreBehavior(MASTER_APP_STATE_ERROR, PRIO_HIGH);
-                    //                    appData.state = MASTER_APP_STATE_ERROR;
                     break;
                 }
 
@@ -628,18 +621,9 @@ void MASTER_AppTask(void) {
                 if (FILEIO_RESULT_FAILURE == logEvents()) {
                     appDataUsb.is_device_needed = false;
                     MASTER_StoreBehavior(MASTER_APP_STATE_ERROR, PRIO_HIGH);
-                    //                    appData.state = MASTER_APP_STATE_ERROR;
                     break;
                 }
             }
-
-            //            if (RTCC_ALARM_IDLE != appData.rtcc_alarm_action) {
-            ////                manageRtcAction();
-            //
-            //                if (MASTER_APP_STATE_IDLE != appData.state) {
-            //                    break;
-            //                }
-            //            }
 
             /* Check USER BUTTON detected. */
             button_user_state = USER_BUTTON_GetValue();
@@ -656,14 +640,10 @@ void MASTER_AppTask(void) {
                     setLedsStatusColor(LEDS_OFF);
 
                     if (BUTTON_PRESSED == button_user_state) {
-                        //                        appData.state = APP_STATE_TEST_RFID;
                         MASTER_StoreBehavior(MASTER_APP_STATE_SERIAL_COMMUNICATION, PRIO_LOW);
-                        //                        appData.state = MASTER_APP_STATE_SERIAL_COMMUNICATION;
                         break;
                     } else {
                         MASTER_StoreBehavior(MASTER_APP_STATE_FLUSH_DATA_TO_USB, PRIO_MEDIUM);
-                        //                        appData.state = MASTER_APP_STATE_FLUSH_DATA_TO_USB;
-                        //                        appData.state = APP_STATE_SERIAL_COMMUNICATION;
                         break;
                     }
                 }
@@ -671,14 +651,6 @@ void MASTER_AppTask(void) {
 
             /* Green status LED blinks in idle mode. */
             LedsStatusBlink(LED_GREEN, LEDS_OFF, 25, 4975);
-
-
-            //#if defined (TEST_RTCC_SLEEP_WAKEUP)
-            //            /* Next line for debugging sleep/wakeup only */
-            //            /* Should be commented in normal mode */
-            //            /* Modify time value according to sleep values in the CONFIG.INI file */
-            //            setDateTime( 17, 9, 21, 22, 59, 55 );
-            //#endif
             break;
             /* -------------------------------------------------------------- */
         case MASTER_APP_STATE_SERIAL_COMMUNICATION:
@@ -736,62 +708,6 @@ void MASTER_AppTask(void) {
                     store_event(OF_STATE_SERIAL_COMMUNICATION);
                 }
 
-                //                /* Display battery level using 4 LEDs bar graph */
-                //                I2C1_MESSAGE_STATUS i2c_status = I2C1_MESSAGE_COMPLETE; // the status of write data on I2C bus
-                //                uint8_t writeBuffer[2]; // data to transmit
-                //
-                //                getBatteryLevel( );
-                //                
-                //                uint16_t step = (uint16_t)(HIGH_BATTERY_LEVEL-LOW_BATTERY_LEVEL)/4;
-                //
-                //                if ( 1 == PCA9622_OE_GetValue() )
-                //                {
-                //                    /* Enable PCA9622 device in Normal mode */
-                //                    PCA9622_OE_SetLow( ); // output enable pin is active LOW
-                //                }                
-                //    
-                //                writeBuffer[0] = CTRLREG_LEDOUT3;
-                //                writeBuffer[1] = 0b10101010; // CTRLREG PWM on all output for LEDOUT3
-                //                i2c_status = I2C1_MasterWritePCA9622( PCA9622_ADDRESS, writeBuffer, 2 );
-                //
-                //                writeBuffer[0] = CTRLREG_PWM12;
-                //                writeBuffer[1] = 0; // PWM0 Individual Duty Cycle for LED_RGB1_R
-                //                i2c_status = I2C1_MasterWritePCA9622(PCA9622_ADDRESS, writeBuffer, 2);
-                //                writeBuffer[0] = CTRLREG_PWM13;
-                //                writeBuffer[1] = 0; // PWM0 Individual Duty Cycle for LED_RGB1_R
-                //                i2c_status = I2C1_MasterWritePCA9622(PCA9622_ADDRESS, writeBuffer, 2);
-                //                writeBuffer[0] = CTRLREG_PWM14;
-                //                writeBuffer[1] = 0; // PWM0 Individual Duty Cycle for LED_RGB1_R
-                //                i2c_status = I2C1_MasterWritePCA9622(PCA9622_ADDRESS, writeBuffer, 2);
-                //                writeBuffer[0] = CTRLREG_PWM15;
-                //                writeBuffer[1] = 0; // PWM0 Individual Duty Cycle for LED_RGB1_R
-                //                i2c_status = I2C1_MasterWritePCA9622(PCA9622_ADDRESS, writeBuffer, 2);
-                //                    
-                //                if ( appData.battery_level > LOW_BATTERY_LEVEL )
-                //                {
-                //                    writeBuffer[0] = CTRLREG_PWM12;
-                //                    writeBuffer[1] = 25; // PWM0 Individual Duty Cycle for LED_RGB1_R
-                //                    i2c_status = I2C1_MasterWritePCA9622(PCA9622_ADDRESS, writeBuffer, 2);
-                //                }
-                //                if ( appData.battery_level > ( LOW_BATTERY_LEVEL + step ) )
-                //                {
-                //                    writeBuffer[0] = CTRLREG_PWM13;
-                //                    writeBuffer[1] = 25; // PWM0 Individual Duty Cycle for LED_RGB1_R
-                //                    i2c_status = I2C1_MasterWritePCA9622(PCA9622_ADDRESS, writeBuffer, 2);
-                //                }
-                //                if ( appData.battery_level > ( LOW_BATTERY_LEVEL + 2*step ) )
-                //                {
-                //                    writeBuffer[0] = CTRLREG_PWM14;
-                //                    writeBuffer[1] = 25; // PWM0 Individual Duty Cycle for LED_RGB1_R
-                //                    i2c_status = I2C1_MasterWritePCA9622(PCA9622_ADDRESS, writeBuffer, 2);
-                //                }
-                //                if ( appData.battery_level > ( LOW_BATTERY_LEVEL + 3*step ) )
-                //                {
-                //                    writeBuffer[0] = CTRLREG_PWM15;
-                //                    writeBuffer[1] = 25; // PWM0 Individual Duty Cycle for LED_RGB1_R
-                //                    i2c_status = I2C1_MasterWritePCA9622(PCA9622_ADDRESS, writeBuffer, 2);
-                //                }
-                //                
                 /* Empty UART RX buffer to avoid garbage value */
                 while (UART1_TRANSFER_STATUS_RX_DATA_PRESENT & UART1_TransferStatusGet()) {
                     UART1_Read();
@@ -836,35 +752,10 @@ void MASTER_AppTask(void) {
                 __asm__ volatile ( "reset");
 
             }
+            
             /* If the user press "q" to quit serial communication mode */
             if (MASTER_APP_STATE_SERIAL_COMMUNICATION != appData.state) {
-                //                /* Turn off battery level bar graph */
-                //                I2C1_MESSAGE_STATUS i2c_status = I2C1_MESSAGE_COMPLETE; // the status of write data on I2C bus
-                //                uint8_t writeBuffer[2]; // data to transmit
-                //                
-                //                writeBuffer[0] = CTRLREG_LEDOUT3;
-                //                writeBuffer[1] = 0b00000000; // CTRLREG PWM on all output for LEDOUT3
-                //                i2c_status = I2C1_MasterWritePCA9622( PCA9622_ADDRESS, writeBuffer, 2 );
-                //                
-                //                writeBuffer[0] = CTRLREG_PWM12;
-                //                writeBuffer[1] = 0; // PWM0 Individual Duty Cycle for LED_RGB1_R
-                //                i2c_status = I2C1_MasterWritePCA9622(PCA9622_ADDRESS, writeBuffer, 2);
-                //                writeBuffer[0] = CTRLREG_PWM13;
-                //                writeBuffer[1] = 0; // PWM0 Individual Duty Cycle for LED_RGB1_R
-                //                i2c_status = I2C1_MasterWritePCA9622(PCA9622_ADDRESS, writeBuffer, 2);
-                //                writeBuffer[0] = CTRLREG_PWM14;
-                //                writeBuffer[1] = 0; // PWM0 Individual Duty Cycle for LED_RGB1_R
-                //                i2c_status = I2C1_MasterWritePCA9622(PCA9622_ADDRESS, writeBuffer, 2);
-                //                writeBuffer[0] = CTRLREG_PWM15;
-                //                writeBuffer[1] = 0; // PWM0 Individual Duty Cycle for LED_RGB1_R
-                //                i2c_status = I2C1_MasterWritePCA9622(PCA9622_ADDRESS, writeBuffer, 2);
-                //                
-                //                /* Deactivate PCA9622 if attractive LEDs not used */
-                //                if ( false == appData.flags.bit_value.attractive_leds_status )
-                //                {
-                //                    /* Disable PCA9622 device */
-                //                    PCA9622_OE_SetHigh( );
-                //                }
+                
             }
 
             break;
@@ -966,7 +857,6 @@ void MASTER_AppTask(void) {
 #if defined ( USE_UART1_SERIAL_INTERFACE )  
                     printf("\tNo data to flush.\n");
                     MASTER_StoreBehavior(MASTER_APP_STATE_REMOVE_USB_DEVICE, PRIO_HIGH);
-                    //                    appData.state = MASTER_APP_STATE_REMOVE_USB_DEVICE;
                     break;
 #endif
                 }
@@ -978,7 +868,6 @@ void MASTER_AppTask(void) {
             if (appDataUsb.is_device_address_available) {
                 if (FLUSH_DATA_ON_USB_DEVICE_SUCCESS != flushDataOnUsbDevice()) {
                     MASTER_StoreBehavior(MASTER_APP_STATE_ERROR, PRIO_HIGH);
-                    //                    appData.state = MASTER_APP_STATE_ERROR;
                     break;
                 }
             } else {
@@ -989,7 +878,6 @@ void MASTER_AppTask(void) {
                     sprintf(appError.current_file_name, "%s", __FILE__);
                     appError.number = ERROR_USB_DEVICE_NOT_FOUND;
                     MASTER_StoreBehavior(MASTER_APP_STATE_ERROR, PRIO_HIGH);
-                    //                    appData.state = MASTER_APP_STATE_ERROR;
                     break;
                 }
                 /* Blue and yellow status LEDs blink as long USB key is required. */
@@ -1087,10 +975,10 @@ void MASTER_AppTask(void) {
             DSGPR1 = appData.dsgpr1.reg;
             DSGPR1 = appData.dsgpr1.reg;
 
-            //#if defined ( ENABLE_DEEP_SLEEP )
-            //            DSCONbits.DSEN = 1;
-            //            DSCONbits.DSEN = 1;
-            //#endif
+            #if defined ( ENABLE_DEEP_SLEEP )
+                        DSCONbits.DSEN = 1;
+                        DSCONbits.DSEN = 1;
+            #endif
             Sleep();
             //            MASTER_StoreBehavior(MASTER_APP_STATE_WAKE_UP, PRIO_EXEPTIONNEL);
             //            appData.state = MASTER_APP_STATE_WAKE_UP;
@@ -1147,7 +1035,6 @@ void MASTER_AppTask(void) {
                 if (USB_DRIVE_NOT_MOUNTED == usbMountDrive()) {
                     appDataUsb.is_device_needed = false;
                     MASTER_StoreBehavior(MASTER_APP_STATE_ERROR, PRIO_HIGH);
-                    //                    appData.state = MASTER_APP_STATE_ERROR;
                     break;
                 }
 
@@ -1157,7 +1044,6 @@ void MASTER_AppTask(void) {
                     if (FILEIO_RESULT_FAILURE == logBatteryLevel()) {
                         appDataUsb.is_device_needed = false;
                         MASTER_StoreBehavior(MASTER_APP_STATE_ERROR, PRIO_HIGH);
-                        //                        appData.state = MASTER_APP_STATE_ERROR;
                         break;
                     }
                 }
@@ -1168,7 +1054,6 @@ void MASTER_AppTask(void) {
                     if (FILEIO_RESULT_FAILURE == logError()) {
                         appDataUsb.is_device_needed = false;
                         MASTER_StoreBehavior(MASTER_APP_STATE_ERROR, PRIO_HIGH);
-                        //                        appData.state = MASTER_APP_STATE_ERROR;
                         break;
                     }
                 }
@@ -1208,7 +1093,6 @@ void MASTER_AppTask(void) {
 
                 if (USB_DRIVE_MOUNTED == usbUnmountDrive()) {
                     MASTER_StoreBehavior(MASTER_APP_STATE_ERROR, PRIO_HIGH);
-                    //                    appData.state = MASTER_APP_STATE_ERROR;
                 }
 
             } else {
@@ -1219,7 +1103,6 @@ void MASTER_AppTask(void) {
                     sprintf(appError.current_file_name, "%s", __FILE__);
                     appError.number = ERROR_USB_DEVICE_NOT_FOUND;
                     MASTER_StoreBehavior(MASTER_APP_STATE_ERROR, PRIO_HIGH);
-                    //                    appData.state = MASTER_APP_STATE_ERROR;
                     break;
                 }
                 /* Blue and yellow status LEDs blink as long USB key is required. */
@@ -1229,7 +1112,6 @@ void MASTER_AppTask(void) {
 
             setLedsStatusColor(LEDS_OFF);
             MASTER_StoreBehavior(MASTER_APP_STATE_ERROR, PRIO_HIGH);
-            //            appData.state = MASTER_APP_STATE_ERROR;
             break;
             /* -------------------------------------------------------------- */
 
@@ -1547,54 +1429,56 @@ void MASTER_AppTask(void) {
 
                 switch (receive.Champ.typeMsg) {
                     case DATA:
-                        if (appData.ensSlave[appData.slaveSelected].state == SLAVE_SYNC) {
+                        if (appData.dayTime == GOOD_NIGHT) {
+                            if (appData.ensSlave[appData.slaveSelected].state == SLAVE_SYNC) {
 #if defined(UART_DEBUG)
-                            printf("Slave %d connect\n", appData.ensSlave[appData.slaveSelected].idSlave);
+                                printf("Slave %d connect\n", appData.ensSlave[appData.slaveSelected].idSlave);
 #endif
-                            appData.ensSlave[appData.slaveSelected].tryToConnect = MAX_TRY_TO_SYNC; // on reset le nombre de demande de connxion 
-                            appData.ensSlave[appData.slaveSelected].state = SLAVE_COLLECT; //changement d'etat
-                        }
-
-                        if (receive.Champ.idMsg == appData.ensSlave[appData.slaveSelected].index) {
-                            appData.ensSlave[appData.slaveSelected].state = SLAVE_COLLECT;
-                            strncpy(appData.BUFF_COLLECT[appData.ensSlave[appData.slaveSelected].index - 1],
-                                    receive.Champ.data, receive.Champ.size); // save data
-                            if (receive.Champ.nbR == MAX_W) {
-                                TMR_SetWaitRqstTimeout(-1);
-                                MASTER_StoreBehavior(MASTER_APP_STATE_SEND_FROM_GSM, PRIO_HIGH);
-                                appData.ensSlave[appData.slaveSelected].state = SLAVE_COLLECT_END_BLOCK;
-#if defined(UART_DEBUG)
-                                printf("END BLOC\n");
-#endif  
-                            } else if (receive.Champ.nbR == MAX_W + 1) { // fin de trans
-                                TMR_SetWaitRqstTimeout(-1);
-                                MASTER_StoreBehavior(MASTER_APP_STATE_SEND_FROM_GSM, PRIO_HIGH);
-                                appData.ensSlave[appData.slaveSelected].state = SLAVE_COLLECT_END;
-#if defined(UART_DEBUG)
-                                printf("END BLOC Trans\n");
-#endif
-                            } else {
-                                appData.ensSlave[appData.slaveSelected].index += 1;
-                                // on demarre le timeout
-                                if (receive.Champ.nbR > 1) { // je suis plus en attente d'un paquet
-                                    TMR_SetWaitRqstTimeout(TIME_OUT_COLLECT_LOG);
-                                } else {
-                                    TMR_SetWaitRqstTimeout(0); // deactive timer up to (until) request 
-                                }
+                                appData.ensSlave[appData.slaveSelected].tryToConnect = MAX_TRY_TO_SYNC; // on reset le nombre de demande de connxion 
+                                appData.ensSlave[appData.slaveSelected].state = SLAVE_COLLECT; //changement d'etat
                             }
-                        } else {
+
+                            if (receive.Champ.idMsg == appData.ensSlave[appData.slaveSelected].index) {
+                                appData.ensSlave[appData.slaveSelected].state = SLAVE_COLLECT;
+                                strncpy(appData.BUFF_COLLECT[appData.ensSlave[appData.slaveSelected].index - 1],
+                                        receive.Champ.data, receive.Champ.size); // save data
+                                if (receive.Champ.nbR == MAX_W) {
+                                    TMR_SetWaitRqstTimeout(-1);
+                                    MASTER_StoreBehavior(MASTER_APP_STATE_SEND_FROM_GSM, PRIO_HIGH);
+                                    appData.ensSlave[appData.slaveSelected].state = SLAVE_COLLECT_END_BLOCK;
 #if defined(UART_DEBUG)
-                            printf("numSeq attendu %d vs %d recu \n",
-                                   appData.ensSlave[appData.slaveSelected].index, receive.Champ.idMsg);
-                            TMR_SetWaitRqstTimeout(0);
+                                    printf("END BLOC\n");
+#endif  
+                                } else if (receive.Champ.nbR == MAX_W + 1) { // fin de trans
+                                    TMR_SetWaitRqstTimeout(-1);
+                                    MASTER_StoreBehavior(MASTER_APP_STATE_SEND_FROM_GSM, PRIO_HIGH);
+                                    appData.ensSlave[appData.slaveSelected].state = SLAVE_COLLECT_END;
+#if defined(UART_DEBUG)
+                                    printf("END BLOC Trans\n");
 #endif
+                                } else {
+                                    appData.ensSlave[appData.slaveSelected].index += 1;
+                                    // on demarre le timeout
+                                    if (receive.Champ.nbR > 1) { // je suis plus en attente d'un paquet
+                                        TMR_SetWaitRqstTimeout(TIME_OUT_COLLECT_LOG);
+                                    } else {
+                                        TMR_SetWaitRqstTimeout(0); // deactive timer up to (until) request 
+                                    }
+                                }
+                            } else {
+#if defined(UART_DEBUG)
+                                printf("numSeq attendu %d vs %d recu \n",
+                                       appData.ensSlave[appData.slaveSelected].index, receive.Champ.idMsg);
+                                TMR_SetWaitRqstTimeout(0);
+#endif
+                            }
                         }
                         break;
                         /* -------------------------------------------------------*/
                     case ERROR:
                     {
                         bool b = true;
-                        uint8_t bufErrorMSG [256];
+                        uint8_t bufErrorMSG [128];
                         //                    TMR_SetWaitRqstTimeout(0); // declencher le l'interuption logiciel  
 #if defined(UART_DEBUG)
                         printf("ERROR RECEIVE %d\n", receive.Champ.idMsg);
@@ -1923,7 +1807,7 @@ void MASTER_AppInit(void) {
     appDataUsb.is_device_needed = false;
 
     //power on and init raio module 
-//    powerRFEnable();
+    //    powerRFEnable();
 
 
     for (i = 0; i < 4; i++) {

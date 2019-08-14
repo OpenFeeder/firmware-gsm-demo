@@ -63,7 +63,7 @@
 
 /*******************************************************************************/
 //_________________________Radio Alpha TRX Infos_______________________________*/
-#define TIME_OUT_WAIT_RQST        30000
+#define TIME_OUT_WAIT_RQST        10000
 #define TIME_OUT_COLLECT_LOG        500
 #define FRAME_LENGTH                 40 // Longueur total d'une trame en octet
 #define ERROR_LENGTH                  8
