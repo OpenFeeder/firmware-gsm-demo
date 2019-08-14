@@ -3584,7 +3584,9 @@ bool radioAlphaTRX_receive() {
         receiveData.word = radioAlphaTRX_Command(0xB000);
         frameReceve.paquet[i] = receiveData.byte.low;
         if (i == 0) {
-            if (frameReceve.Champ.dest != appData.masterId) {
+            if ((frameReceve.Champ.dest != appData.masterId || 
+                frameReceve.Champ.src != appData.ensSlave[appData.slaveSelected].idSlave) && 
+                frameReceve.Champ.dest != appData.broadCastId) {
                 return false;
             }
         } else if (i > 4 && i >= frameReceve.Champ.size + 5) {

@@ -276,6 +276,7 @@ void MASTER_AppTask(void) {
                         i++;
                 } else {
                     powerRFEnable();
+                    TMR_Delay(1000);
                     i++;
 #if defined  (USE_UART1_SERIAL_INTERFACE )
                     printf("RF Module disable.\n");
@@ -1922,7 +1923,7 @@ void MASTER_AppInit(void) {
     appDataUsb.is_device_needed = false;
 
     //power on and init raio module 
-    powerRFEnable();
+//    powerRFEnable();
 
 
     for (i = 0; i < 4; i++) {
