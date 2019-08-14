@@ -64,10 +64,10 @@
 /*******************************************************************************/
 //_________________________Radio Alpha TRX Infos_______________________________*/
 #define TIME_OUT_WAIT_RQST        30000
-#define TIME_OUT_COLLECT_LOG       3000
-#define FRAME_LENGTH                 25 // Longueur total d'une trame en octet
+#define TIME_OUT_COLLECT_LOG        500
+#define FRAME_LENGTH                 40 // Longueur total d'une trame en octet
 #define ERROR_LENGTH                  8
-#define SIZE_DATA                    20
+#define SIZE_DATA                    35
 #define TIME_OUT_nIRQ                10 // en ms
 #define LAPS                         50 // on attend X ms avant de transmettre un nouveau msg 
 #define SEND_HORLOG_TIMEOUT           4 // en +1 min
@@ -75,7 +75,7 @@
 #define TIME_OUT_GET_FRAME         1500 // temps max, pour que le msg recu soit encore exploitable
 // au dela le mster ne m'ecoute pas donc cela ne sert ? rien 
 #define NB_ERR_BUF                   10 // nombre d'errerur possible 
-#define NB_BLOCK                  20 // pour l'instat on dit qye c'est 20 ==>
+#define NB_BLOCK                     20 // pour l'instat on dit qye c'est 20 ==>
 #define MAX_W                        10 // nombre MAX de paquet a transmettre avant d'attendre un ack 
 
 #define NB_SLAVE                      2

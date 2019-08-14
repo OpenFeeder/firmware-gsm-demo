@@ -3584,9 +3584,10 @@ bool radioAlphaTRX_receive() {
         receiveData.word = radioAlphaTRX_Command(0xB000);
         frameReceve.paquet[i] = receiveData.byte.low;
         if (i == 0) {
-            if (frameReceve.Champ.dest != appData.masterId) 
+            if (frameReceve.Champ.dest != appData.masterId) {
                 return false;
-        } else if (i > 4 && i == frameReceve.Champ.size+5) {
+            }
+        } else if (i > 4 && i >= frameReceve.Champ.size + 5) {
             break;
         }
         if (i != 4) sumCtrl ^= receiveData.byte.low; // c'est l'octet 4 ou se trouve le sum contrle 
@@ -3599,6 +3600,8 @@ void radioAlphaTRX_CaptureFrame() {
     if (radioAlphaTRX_receive()) {
         LED_STATUS_B_Toggle();
         MASTER_StoreBehavior(MASTER_APP_STATE_MSG_RF_RECEIVE, PRIO_HIGH); // c'est une information tr?s importante 
+    } else {
+        LED_STATUS_R_Toggle();
     }
     //on se remet en ecoute 
     radioAlphaTRX_ReceivedMode();

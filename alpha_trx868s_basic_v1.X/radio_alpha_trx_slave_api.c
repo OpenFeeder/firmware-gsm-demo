@@ -114,6 +114,12 @@ int8_t radioAlphaTRX_SlaveSendMsgRF(uint8_t typeMsg,
         frameToSend.Champ.data[i] = data[i];
         frameToSend.Champ.crc ^= frameToSend.paquet[i + 5]; // penser à changer le 5 en generique 
     }
+#if defined( USE_UART1_SERIAL_INTERFACE )
+    for (i = 0; i < frameToSend.Champ.size+5; i++) {
+        printf("%d ", frameToSend.paquet[i]);
+    }
+    printf("\n");
+#endif
     //____________________________________________________________________
     //________________________TRANSMSISSION_______________________________
     if (radioAlphaTRX_SendMode()) {
