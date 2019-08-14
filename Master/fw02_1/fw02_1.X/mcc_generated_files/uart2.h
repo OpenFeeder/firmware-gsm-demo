@@ -8,12 +8,12 @@
     uart2.h
 
   @Summary
-    This is the generated header file for the UART2 driver using MPLAB(c) Code Configurator
+    This is the generated header file for the UART2 driver using PIC24 / dsPIC33 / PIC32MM MCUs
 
   @Description
     This header file provides APIs for driver for UART2. 
     Generation Information : 
-        Product Revision  :  MPLAB(c) Code Configurator - pic24-dspic-pic32mm : v1.35
+        Product Revision  :  PIC24 / dsPIC33 / PIC32MM MCUs - pic24-dspic-pic32mm : v1.35
         Device            :  PIC24FJ256GB406
     The generated drivers are tested against the following:
         Compiler          :  XC16 1.31
@@ -145,6 +145,7 @@ typedef enum
 } UART2_TRANSFER_STATUS;
 
 
+
 /**
   Section: UART2 Driver Routines
 */
@@ -190,8 +191,13 @@ typedef enum
 void UART2_Initialize(void);
 
 
+//debug
 
+void UART2_SetTxInterruptHandler(void* handler);
+void UART2_Transmit_ISR(void);
 
+void UART2_SetRxInterruptHandler(void* handler);
+void UART2_Receive_ISR(void);
 
 
 /**
@@ -291,7 +297,7 @@ uint8_t UART2_Read( void);
     </code>
 */
 
-unsigned int UART2_ReadBuffer( uint8_t *buffer ,  const unsigned int numbytes);
+unsigned int UART2_ReadBuffer( uint8_t *buffer ,  unsigned int numbytes);
 
 
 /**
@@ -332,7 +338,7 @@ unsigned int UART2_ReadBuffer( uint8_t *buffer ,  const unsigned int numbytes);
     </code>
 */
 
-void UART2_Write( const uint8_t byte);
+void UART2_Write( uint8_t byte);
 
 
 
@@ -382,7 +388,7 @@ void UART2_Write( const uint8_t byte);
     </code>
 */
 
-unsigned int UART2_WriteBuffer( const uint8_t *buffer , const unsigned int numbytes );
+unsigned int UART2_WriteBuffer( uint8_t *buffer , unsigned int numbytes );
 
 
 
@@ -433,7 +439,7 @@ UART2_TRANSFER_STATUS UART2_TransferStatusGet (void );
     
   @Example 
     <code>
-    const uint8_t readBuffer[5];
+    uint8_t readBuffer[5];
     unsigned int data, numBytes = 0;
     unsigned int readbufferLen = sizeof(readBuffer);
     UART2_Initializer();
@@ -476,21 +482,21 @@ uint8_t UART2_Peek(uint16_t offset);
     
   @Example 
     <code>
-    const uint8_t readBuffer[5];
-    unsigned int size, numBytes = 0;
+    uint8_t readBuffer[5];
+    uint8_t size, numBytes = 0;
     unsigned int readbufferLen = sizeof(readBuffer);
     UART2__Initializer();
     
     while(size < readbufferLen)
 	{
 	    UART2_TasksReceive ( );
-	    size = UART2_ReceiveBufferSizeGet();
+	    size = UART2_is_rx_ready();
 	}
     numBytes = UART2_ReadBuffer ( readBuffer , readbufferLen ) ;
     </code>
  
 */
-unsigned int UART2_ReceiveBufferSizeGet(void);
+uint8_t UART2_is_rx_ready(void);
 
 
 /**
@@ -509,7 +515,7 @@ unsigned int UART2_ReceiveBufferSizeGet(void);
  @Example
     Refer to UART2_Initializer(); for example.
 */
-unsigned int UART2_TransmitBufferSizeGet(void);
+uint8_t UART2_is_tx_ready(void);
 
 
 
@@ -621,7 +627,24 @@ bool UART2_TransmitBufferIsFull (void);
 
 UART2_STATUS UART2_StatusGet (void );
 
+/**
+  @Summary
+    Returns the status of the TRMT bit
 
+  @Description
+    This routine returns if the transmit shift register is full or not.
+
+ @Param
+    None.
+ 
+ @Returns
+    True if the transmit TXREG is empty
+    False if the transmit is in progress
+
+ @Example
+ 
+*/
+bool UART2_is_tx_done(void);
 
 #ifdef __cplusplus  // Provide C++ Compatibility
 

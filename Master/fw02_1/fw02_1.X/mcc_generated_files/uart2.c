@@ -104,8 +104,8 @@ static UART_OBJECT uart2_obj ;
 
 */
 
-#define UART2_CONFIG_TX_BYTEQ_LENGTH 12
-#define UART2_CONFIG_RX_BYTEQ_LENGTH 12
+#define UART2_CONFIG_TX_BYTEQ_LENGTH 48
+#define UART2_CONFIG_RX_BYTEQ_LENGTH 48
 
 
 /** UART Driver Queue
@@ -117,6 +117,10 @@ static UART_OBJECT uart2_obj ;
 
 static uint8_t uart2_txByteQ[UART2_CONFIG_TX_BYTEQ_LENGTH] ;
 static uint8_t uart2_rxByteQ[UART2_CONFIG_RX_BYTEQ_LENGTH] ;
+
+void (*UART2_TxDefaultInterruptHandler)(void);
+void (*UART2_RxDefaultInterruptHandler)(void);
+
 
 
 /**
@@ -130,8 +134,8 @@ void UART2_Initialize (void)
    U2MODE = (0x8008 & ~(1<<15));  // disabling UARTEN bit   
    // UTXISEL0 TX_ONE_CHAR; UTXINV disabled; OERR NO_ERROR_cleared; URXISEL RX_ONE_CHAR; UTXBRK COMPLETED; UTXEN disabled; ADDEN disabled; 
    U2STA = 0x0000;
-   // BaudRate = 115200; Frequency = 8000000 Hz; U2BRG 16; 
-   U2BRG = 0x0010;
+   // BaudRate = 38400; Frequency = 8000000 Hz; U2BRG 51; 
+   U2BRG = 0x0033;
    // ADMADDR 0; ADMMASK 0; 
    U2ADMD = 0x0000;
    // T0PD 1 ETU; PTRCL T0; TXRPT Retransmits the error byte once; CONV Direct; SCEN disabled; 
@@ -146,7 +150,9 @@ void UART2_Initialize (void)
    U2WTCH = 0x0000;
 
    IEC1bits.U2RXIE = 1;
-
+   UART2_SetRxInterruptHandler(UART2_Receive_ISR);
+   UART2_SetTxInterruptHandler(UART2_Transmit_ISR);
+   
     //Make sure to set LAT bit corresponding to TxPin as high before UART initialization
    U2MODEbits.UARTEN = 1;  // enabling UART ON bit
    U2STAbits.UTXEN = 1;
@@ -165,11 +171,19 @@ void UART2_Initialize (void)
 
 
 
-
 /**
     Maintains the driver's transmitter state machine and implements its ISR
 */
+void UART2_SetTxInterruptHandler(void* handler){
+    UART2_TxDefaultInterruptHandler = handler;
+}
+
 void __attribute__ ( ( interrupt, no_auto_psv ) ) _U2TXInterrupt ( void )
+{
+    (*UART2_TxDefaultInterruptHandler)();
+}
+
+void UART2_Transmit_ISR(void)
 { 
     if(uart2_obj.txStatus.s.empty)
     {
@@ -201,7 +215,16 @@ void __attribute__ ( ( interrupt, no_auto_psv ) ) _U2TXInterrupt ( void )
     }
 }
 
+void UART2_SetRxInterruptHandler(void* handler){
+    UART2_RxDefaultInterruptHandler = handler;
+}
+
 void __attribute__ ( ( interrupt, no_auto_psv ) ) _U2RXInterrupt( void )
+{
+    (*UART2_RxDefaultInterruptHandler)();
+}
+
+void UART2_Receive_ISR(void)
 {
 
 
@@ -271,7 +294,7 @@ uint8_t UART2_Read( void)
 }
 
 
-unsigned int UART2_ReadBuffer( uint8_t *buffer, const unsigned int bufLen)
+unsigned int UART2_ReadBuffer( uint8_t *buffer, unsigned int bufLen)
 {
     unsigned int numBytesRead = 0 ;
     while ( numBytesRead < ( bufLen ))
@@ -291,7 +314,7 @@ unsigned int UART2_ReadBuffer( uint8_t *buffer, const unsigned int bufLen)
 
 
 
-void UART2_Write( const uint8_t byte)
+void UART2_Write( uint8_t byte)
 {
     IEC1bits.U2TXIE = false;
     
@@ -316,7 +339,7 @@ void UART2_Write( const uint8_t byte)
 }
 
 
-unsigned int UART2_WriteBuffer( const uint8_t *buffer , const unsigned int bufLen )
+unsigned int UART2_WriteBuffer( uint8_t *buffer , unsigned int bufLen )
 {
     unsigned int numBytesWritten = 0 ;
 
@@ -381,7 +404,7 @@ uint8_t UART2_Peek(uint16_t offset)
 }
 
 
-unsigned int UART2_ReceiveBufferSizeGet(void)
+uint8_t UART2_is_rx_ready(void)
 {
     if(!uart2_obj.rxStatus.s.full)
     {
@@ -398,7 +421,7 @@ unsigned int UART2_ReceiveBufferSizeGet(void)
 }
 
 
-unsigned int UART2_TransmitBufferSizeGet(void)
+uint8_t UART2_is_tx_ready(void)
 {
     if(!uart2_obj.txStatus.s.full)
     { 
@@ -432,6 +455,10 @@ UART2_STATUS UART2_StatusGet (void)
     return U2STA;
 }
 
+bool UART2_is_tx_done(void)
+{
+    return U2STAbits.TRMT;
+}
 
 
 /**

@@ -23,6 +23,7 @@
         <itemPath>../src/app/app_fileio.h</itemPath>
         <itemPath>../src/app/app_rtc_action.h</itemPath>
         <itemPath>../src/app/app_master.h</itemPath>
+        <itemPath>../src/app/appGSM/appGSM3_SIM800.h</itemPath>
       </logicalFolder>
       <logicalFolder name="driver" displayName="driver" projectFiles="true">
         <itemPath>../src/driver/buttons.h</itemPath>
@@ -68,6 +69,13 @@
       <logicalFolder name="MCC Generated Files"
                      displayName="MCC Generated Files"
                      projectFiles="true">
+        <logicalFolder name="f1" displayName="driver_gsm" projectFiles="true">
+          <itemPath>mcc_generated_files/driver/atCommandsGSM3_SIM800H.h</itemPath>
+          <itemPath>mcc_generated_files/driver/driverGSM3_SIM800.h</itemPath>
+        </logicalFolder>
+        <logicalFolder name="f2" displayName="driver_uart" projectFiles="true">
+          <itemPath>mcc_generated_files/driver_uart/uart.h</itemPath>
+        </logicalFolder>
         <itemPath>mcc_generated_files/mcc.h</itemPath>
         <itemPath>mcc_generated_files/interrupt_manager.h</itemPath>
         <itemPath>mcc_generated_files/tmr2.h</itemPath>
@@ -111,6 +119,7 @@
         <itemPath>../src/app/app_usb.c</itemPath>
         <itemPath>../src/app/app_fileio.c</itemPath>
         <itemPath>../src/app/app_master.c</itemPath>
+        <itemPath>../src/app/appGSM/appGSM3_SIM800.c</itemPath>
       </logicalFolder>
       <logicalFolder name="driver" displayName="driver" projectFiles="true">
         <itemPath>../src/driver/delay.c</itemPath>
@@ -144,6 +153,12 @@
       <logicalFolder name="MCC Generated Files"
                      displayName="MCC Generated Files"
                      projectFiles="true">
+        <logicalFolder name="f1" displayName="driver_gsm" projectFiles="true">
+          <itemPath>mcc_generated_files/driver/driverGSM3_SIM800.c</itemPath>
+        </logicalFolder>
+        <logicalFolder name="f2" displayName="driver_uart" projectFiles="true">
+          <itemPath>mcc_generated_files/driver_uart/uart.c</itemPath>
+        </logicalFolder>
         <itemPath>mcc_generated_files/traps.c</itemPath>
         <itemPath>mcc_generated_files/tmr2.c</itemPath>
         <itemPath>mcc_generated_files/mcc.c</itemPath>
@@ -491,6 +506,7 @@
         <property key="UART 6" value="true"/>
         <property key="USB" value="true"/>
         <property key="debugoptions.useswbreakpoints" value="false"/>
+        <property key="firmware.download.all" value="false"/>
         <property key="hwtoolclock.frcindebug" value="false"/>
         <property key="memories.aux" value="false"/>
         <property key="memories.bootflash" value="true"/>

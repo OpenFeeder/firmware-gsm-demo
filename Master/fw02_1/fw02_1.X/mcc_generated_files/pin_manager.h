@@ -72,11 +72,11 @@
   @Example
     <code>
     // Set RB10 high (1)
-    EXT_INT_SetHigh();
+    EXT_INT_RST_SetHigh();
     </code>
 
 */
-#define EXT_INT_SetHigh()          _LATB10 = 1
+#define EXT_INT_RST_SetHigh()          _LATB10 = 1
 /**
   @Summary
     Sets the GPIO pin, RB10, low using LATB10.
@@ -96,11 +96,11 @@
   @Example
     <code>
     // Set RB10 low (0)
-    EXT_INT_SetLow();
+    EXT_INT_RST_SetLow();
     </code>
 
 */
-#define EXT_INT_SetLow()           _LATB10 = 0
+#define EXT_INT_RST_SetLow()           _LATB10 = 0
 /**
   @Summary
     Toggles the GPIO pin, RB10, using LATB10.
@@ -120,11 +120,11 @@
   @Example
     <code>
     // Toggle RB10
-    EXT_INT_Toggle();
+    EXT_INT_RST_Toggle();
     </code>
 
 */
-#define EXT_INT_Toggle()           _LATB10 ^= 1
+#define EXT_INT_RST_Toggle()           _LATB10 ^= 1
 /**
   @Summary
     Reads the value of the GPIO pin, RB10.
@@ -146,11 +146,11 @@
     uint16_t portValue;
 
     // Read RB10
-    postValue = EXT_INT_GetValue();
+    postValue = EXT_INT_RST_GetValue();
     </code>
 
 */
-#define EXT_INT_GetValue()         _RB10
+#define EXT_INT_RST_GetValue()         _RB10
 /**
   @Summary
     Configures the GPIO pin, RB10, as an input.
@@ -170,11 +170,11 @@
   @Example
     <code>
     // Sets the RB10 as an input
-    EXT_INT_SetDigitalInput();
+    EXT_INT_RST_SetDigitalInput();
     </code>
 
 */
-#define EXT_INT_SetDigitalInput()  _TRISB10 = 1
+#define EXT_INT_RST_SetDigitalInput()  _TRISB10 = 1
 /**
   @Summary
     Configures the GPIO pin, RB10, as an output.
@@ -194,11 +194,11 @@
   @Example
     <code>
     // Sets the RB10 as an output
-    EXT_INT_SetDigitalOutput();
+    EXT_INT_RST_SetDigitalOutput();
     </code>
 
 */
-#define EXT_INT_SetDigitalOutput() _TRISB10 = 0
+#define EXT_INT_RST_SetDigitalOutput() _TRISB10 = 0
 /**
   @Summary
     Sets the GPIO pin, RB11, high using LATB11.
@@ -783,6 +783,298 @@
 
 */
 #define channel_MA_12V_SetDigitalOutput() _TRISB2 = 0
+/**
+  @Summary
+    Sets the GPIO pin, RB3, high using LATB3.
+
+  @Description
+    Sets the GPIO pin, RB3, high using LATB3.
+
+  @Preconditions
+    The RB3 must be set to an output.
+
+  @Returns
+    None.
+
+  @Param
+    None.
+
+  @Example
+    <code>
+    // Set RB3 high (1)
+    STAT_SetHigh();
+    </code>
+
+*/
+#define STAT_SetHigh()          _LATB3 = 1
+/**
+  @Summary
+    Sets the GPIO pin, RB3, low using LATB3.
+
+  @Description
+    Sets the GPIO pin, RB3, low using LATB3.
+
+  @Preconditions
+    The RB3 must be set to an output.
+
+  @Returns
+    None.
+
+  @Param
+    None.
+
+  @Example
+    <code>
+    // Set RB3 low (0)
+    STAT_SetLow();
+    </code>
+
+*/
+#define STAT_SetLow()           _LATB3 = 0
+/**
+  @Summary
+    Toggles the GPIO pin, RB3, using LATB3.
+
+  @Description
+    Toggles the GPIO pin, RB3, using LATB3.
+
+  @Preconditions
+    The RB3 must be set to an output.
+
+  @Returns
+    None.
+
+  @Param
+    None.
+
+  @Example
+    <code>
+    // Toggle RB3
+    STAT_Toggle();
+    </code>
+
+*/
+#define STAT_Toggle()           _LATB3 ^= 1
+/**
+  @Summary
+    Reads the value of the GPIO pin, RB3.
+
+  @Description
+    Reads the value of the GPIO pin, RB3.
+
+  @Preconditions
+    None.
+
+  @Returns
+    None.
+
+  @Param
+    None.
+
+  @Example
+    <code>
+    uint16_t portValue;
+
+    // Read RB3
+    postValue = STAT_GetValue();
+    </code>
+
+*/
+#define STAT_GetValue()         _RB3
+/**
+  @Summary
+    Configures the GPIO pin, RB3, as an input.
+
+  @Description
+    Configures the GPIO pin, RB3, as an input.
+
+  @Preconditions
+    None.
+
+  @Returns
+    None.
+
+  @Param
+    None.
+
+  @Example
+    <code>
+    // Sets the RB3 as an input
+    STAT_SetDigitalInput();
+    </code>
+
+*/
+#define STAT_SetDigitalInput()  _TRISB3 = 1
+/**
+  @Summary
+    Configures the GPIO pin, RB3, as an output.
+
+  @Description
+    Configures the GPIO pin, RB3, as an output.
+
+  @Preconditions
+    None.
+
+  @Returns
+    None.
+
+  @Param
+    None.
+
+  @Example
+    <code>
+    // Sets the RB3 as an output
+    STAT_SetDigitalOutput();
+    </code>
+
+*/
+#define STAT_SetDigitalOutput() _TRISB3 = 0
+/**
+  @Summary
+    Sets the GPIO pin, RB4, high using LATB4.
+
+  @Description
+    Sets the GPIO pin, RB4, high using LATB4.
+
+  @Preconditions
+    The RB4 must be set to an output.
+
+  @Returns
+    None.
+
+  @Param
+    None.
+
+  @Example
+    <code>
+    // Set RB4 high (1)
+    PWK_SetHigh();
+    </code>
+
+*/
+#define PWK_SetHigh()          _LATB4 = 1
+/**
+  @Summary
+    Sets the GPIO pin, RB4, low using LATB4.
+
+  @Description
+    Sets the GPIO pin, RB4, low using LATB4.
+
+  @Preconditions
+    The RB4 must be set to an output.
+
+  @Returns
+    None.
+
+  @Param
+    None.
+
+  @Example
+    <code>
+    // Set RB4 low (0)
+    PWK_SetLow();
+    </code>
+
+*/
+#define PWK_SetLow()           _LATB4 = 0
+/**
+  @Summary
+    Toggles the GPIO pin, RB4, using LATB4.
+
+  @Description
+    Toggles the GPIO pin, RB4, using LATB4.
+
+  @Preconditions
+    The RB4 must be set to an output.
+
+  @Returns
+    None.
+
+  @Param
+    None.
+
+  @Example
+    <code>
+    // Toggle RB4
+    PWK_Toggle();
+    </code>
+
+*/
+#define PWK_Toggle()           _LATB4 ^= 1
+/**
+  @Summary
+    Reads the value of the GPIO pin, RB4.
+
+  @Description
+    Reads the value of the GPIO pin, RB4.
+
+  @Preconditions
+    None.
+
+  @Returns
+    None.
+
+  @Param
+    None.
+
+  @Example
+    <code>
+    uint16_t portValue;
+
+    // Read RB4
+    postValue = PWK_GetValue();
+    </code>
+
+*/
+#define PWK_GetValue()         _RB4
+/**
+  @Summary
+    Configures the GPIO pin, RB4, as an input.
+
+  @Description
+    Configures the GPIO pin, RB4, as an input.
+
+  @Preconditions
+    None.
+
+  @Returns
+    None.
+
+  @Param
+    None.
+
+  @Example
+    <code>
+    // Sets the RB4 as an input
+    PWK_SetDigitalInput();
+    </code>
+
+*/
+#define PWK_SetDigitalInput()  _TRISB4 = 1
+/**
+  @Summary
+    Configures the GPIO pin, RB4, as an output.
+
+  @Description
+    Configures the GPIO pin, RB4, as an output.
+
+  @Preconditions
+    None.
+
+  @Returns
+    None.
+
+  @Param
+    None.
+
+  @Example
+    <code>
+    // Sets the RB4 as an output
+    PWK_SetDigitalOutput();
+    </code>
+
+*/
+#define PWK_SetDigitalOutput() _TRISB4 = 0
 /**
   @Summary
     Sets the GPIO pin, RB5, high using LATB5.
