@@ -119,6 +119,7 @@ bool app_NetWorkQuality() {
     printf("resp : %s\n", GSM3_GetResponse());
 #endif
 }
+
 bool app_SetPhoneFunctionality(int8_t cfun) {
     if (cfun != 1 || cfun != 0 || cfun != 4) return false;
     //a surveiller et tester 
@@ -219,13 +220,11 @@ int8_t app_GetBatteryLevel() {
 bool app_SetPinCode(int16_t pincode) {
     uint8_t buf[20];
     sprintf(buf, "AT+CPIN=\"%d\"", pincode);
-#if defined(_DEBUG)
-    printf("%s\n", buf);
-#endif
     GSM3_ReadyReceiveBuffer();
     GSM3_TransmitCommand(buf);
     TMR_Delay(1000);
-    return GSM3_findStringInResponse("READY", GSM3_GetResponse());
+    uint8_t resp = GSM3_GetResponse();
+    return GSM3_findStringInResponse("READY", resp);
 }
 
 bool app_ChangePinCode(int16_t lastPinCode, int16_t newPinCode) {

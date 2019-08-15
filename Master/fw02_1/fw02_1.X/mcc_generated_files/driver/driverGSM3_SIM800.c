@@ -174,7 +174,7 @@ void GSM3_TransmitString(uint8_t * string, uint8_t delimiter) {
 bool GMS3_ModulePower(bool powerState) {
     if (powerState) {
 #if defined(_DEBUG)
-        printf("MODULE POWER ON \n");
+        printf("GMS MODULE POWER ON...\n");
 #endif
         GSM3_SetRxInterruptHandler(GSM3_CaptureReceiveMsg);
         GSM3_SetPWK(true);
@@ -189,9 +189,6 @@ bool GMS3_ModulePower(bool powerState) {
             GSM3_TransmitCommand((uint8_t*) "AT");
             TMR_Delay(1000);
             read = GSM3_GetResponse(); // Read 'OK' String from Buffer
-#if defined(_DEBUG)
-            printf("rsp : %s\n", read);
-#endif
             if (tryToConnect++ > GSM_TRY_TO_CON_MAX) {
                 return false;
             }
@@ -201,27 +198,32 @@ bool GMS3_ModulePower(bool powerState) {
         if (!GSM3_findStringInResponse("READY", read)) {
             if (app_SetPinCode(PIN_INPUT) == false) {
 #if defined(_DEBUG)
-                printf("No PIN in module\n");
+                printf("PIN CODE ERROR !!!!\n");
 #endif
                 return false;
             }
         }
-        TMR_Delay(12000); // 12 seconde 
-//        if (!app_UpdateRtcTimeFromGSM()) {
-//#if defined(_DEBUG)
-//            printf("TIME NO UPDATE \n");
-//#endif
-//        }
 #if defined(_DEBUG)
         printf("PIN OK ==> REDY \n");
+#endif
+        
+        TMR_Delay(12000); // 12 seconde 
+        if (!app_UpdateRtcTimeFromGSM()) {
+#if defined(_DEBUG)
+            printf("TIME NO UPDATE \n");
+#endif
+        }
+#if defined(_DEBUG)
+            printf("TIME UPDATED \n");
 #endif
         GSM3_ReadyReceiveBuffer(); // Prepare for next message
         //            sprintf(buf, "AT%c",TERMINATION_CHAR);
         GSM3_TransmitCommand("AT+CMGF=1");
         TMR_Delay(1000);
-#if defined(_DEBUG)
-            printf("res %s\n", GSM3_GetResponse());
-#endif
+        read = GSM3_GetResponse();
+        if (!GSM3_findStringInResponse("OK", read)) {
+            return false;
+        }
     }
     return true;
 }
