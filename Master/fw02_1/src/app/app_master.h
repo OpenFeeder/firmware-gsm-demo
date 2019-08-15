@@ -369,10 +369,14 @@ typedef struct {
 
     //
     STEP_OF_DAY dayTime;
+    
+    
 
-
-    /*communication information */
-    //init module 
+    /* communication information */
+    //gsm module 
+    bool gsmInit;
+    
+    //init rf module module 
     int8_t timeToSynchronizeHologe;
     bool synchronizeTime;
     bool RfModuleInit;

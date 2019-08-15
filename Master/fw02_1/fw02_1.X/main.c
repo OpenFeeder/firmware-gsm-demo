@@ -190,7 +190,7 @@ int main( void )
         }
         
         /* Power USB device */
-        powerUsbRfidEnable( );
+        powerUsbGSMEnable( );
         printf( "\tUSB power enable\n" );
         /* Ask for the device */
         appDataUsb.is_device_needed = true;

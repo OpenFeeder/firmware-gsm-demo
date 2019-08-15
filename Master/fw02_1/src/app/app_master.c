@@ -254,11 +254,43 @@ void MASTER_AppTask(void) {
             calibrateDateTime();
 
             /*
+             * Power on and Init GSM module 
+             * default sms send mode. 
+             * we try to power and init 10 repetition 
+             */
+            uint8_t i = 0;
+            while (i < 10 && !appData.gsmInit) {
+                i++;
+                if (CMD_VDD_APP_V_USB_GetValue()) {
+                    appData.gsmInit = GMS3_ModulePower(true); // try to power on module 
+#if defined( USE_UART1_SERIAL_INTERFACE )
+                    printf("%d \n", appData.gsmInit);
+#endif
+                } else {
+                    powerUsbGSMEnable();
+                }
+            }
+
+            if (i >= 10) { // module n
+#if defined(USE_UART1_SERIAL_INTERFACE)
+                printf("GSM module not power on \n");
+#endif  
+                MASTER_StoreBehavior(MASTER_APP_STATE_ERROR, PRIO_HIGH);
+                //______________________________________________________________
+                /* Log event if required */
+                if (true == appDataLog.log_events) {
+                    store_event(OF_ALPHA_TRX_MODULE_FAIL);
+                }
+                break;
+            }
+
+
+            /*
              * Power on and Init radio Alpha TRX module 
              * default mode is receive mode. 
              * we try to power and init 10 repetition 
              */
-            uint8_t i = 0;
+            i = 0;
             while (i < 10 && !appData.RfModuleInit) {
                 if (CMD_3V3_RF_GetValue() == false) {
                     if (radioAlphaTRX_Init()) {
@@ -288,20 +320,23 @@ void MASTER_AppTask(void) {
 #if defined(USE_UART1_SERIAL_INTERFACE)
                 printf("RF module not power on \n");
 #endif  
+                MASTER_StoreBehavior(MASTER_APP_STATE_ERROR, PRIO_HIGH);
                 //______________________________________________________________
                 /* Log event if required */
                 if (true == appDataLog.log_events) {
                     store_event(OF_ALPHA_TRX_MODULE_FAIL);
                 }
+                break;
             }
+
+
             /* Go to device configuration state */
             MASTER_StoreBehavior(MASTER_APP_STATE_CONFIGURE_SYSTEM, PRIO_HIGH);
-            //            appData.state = MASTER_APP_STATE_CONFIGURE_SYSTEM;
             break;
         }
             /* -------------------------------------------------------------- */
 
-        case MASTER_APP_STATE_CONFIGURE_SYSTEM: 
+        case MASTER_APP_STATE_CONFIGURE_SYSTEM:
             /*
              * System configuration.
              * 
@@ -345,7 +380,7 @@ void MASTER_AppTask(void) {
                 }
 
                 /* Power USB device */
-                powerUsbRfidEnable();
+                powerUsbGSMEnable();
                 /* Ask for the device */
                 appDataUsb.is_device_needed = true;
 
@@ -580,7 +615,7 @@ void MASTER_AppTask(void) {
             if (appData.state != appData.previous_state) {
                 appData.previous_state = appData.state;
 #if defined ( USE_UART1_SERIAL_INTERFACE ) && defined ( DISPLAY_CURRENT_STATE )
-                printf("> APP_STATE_IDLE\n");
+                printf("> MASTER_APP_STATE_IDLE\n");
 #endif              
                 //#if defined ( USE_UART1_SERIAL_INTERFACE )
                 //                printf("\tUser button pressed briefly => flush data and eject USB device\n");
@@ -752,10 +787,10 @@ void MASTER_AppTask(void) {
                 __asm__ volatile ( "reset");
 
             }
-            
+
             /* If the user press "q" to quit serial communication mode */
             if (MASTER_APP_STATE_SERIAL_COMMUNICATION != appData.state) {
-                
+
             }
 
             break;
@@ -795,7 +830,7 @@ void MASTER_AppTask(void) {
                 setDelayMs(2000);
                 while (0 == isDelayMsEnding());
 
-                powerUsbRfidDisable();
+                powerUsbGSMDisable();
 
                 setLedsStatusColor(LED_GREEN);
 #if defined ( USE_UART1_SERIAL_INTERFACE )
@@ -852,7 +887,7 @@ void MASTER_AppTask(void) {
                     appDataLog.num_ds3231_temp_stored > 0) {
                     /* Log data on USB device */
                     appDataUsb.is_device_needed = true;
-                    powerUsbRfidEnable();
+                    powerUsbGSMEnable();
                 } else {
 #if defined ( USE_UART1_SERIAL_INTERFACE )  
                     printf("\tNo data to flush.\n");
@@ -932,7 +967,7 @@ void MASTER_AppTask(void) {
                     }
 
                     USBHostShutdown();
-                    powerUsbRfidDisable();
+                    powerUsbGSMDisable();
                 } else {
                     break;
                 }
@@ -975,10 +1010,10 @@ void MASTER_AppTask(void) {
             DSGPR1 = appData.dsgpr1.reg;
             DSGPR1 = appData.dsgpr1.reg;
 
-            #if defined ( ENABLE_DEEP_SLEEP )
-                        DSCONbits.DSEN = 1;
-                        DSCONbits.DSEN = 1;
-            #endif
+#if defined ( ENABLE_DEEP_SLEEP )
+            DSCONbits.DSEN = 1;
+            DSCONbits.DSEN = 1;
+#endif
             Sleep();
             //            MASTER_StoreBehavior(MASTER_APP_STATE_WAKE_UP, PRIO_EXEPTIONNEL);
             //            appData.state = MASTER_APP_STATE_WAKE_UP;
@@ -1026,7 +1061,7 @@ void MASTER_AppTask(void) {
 
                 appDataUsb.is_device_needed = true;
                 /* Log data on USB device */
-                powerUsbRfidEnable();
+                powerUsbGSMEnable();
 
                 setDelayMs(MAX_DELAY_TO_DETECT_USB_DEVICE);
             }
@@ -1167,7 +1202,7 @@ void MASTER_AppTask(void) {
                     usbUnmountDrive();
                 }
                 USBHostShutdown();
-                powerUsbRfidDisable();
+                powerUsbGSMDisable();
 
                 /* Reset the system after DELAY_BEFORE_RESET milli-seconds if non critical error occurred */
                 if (appError.number > ERROR_CRITICAL && appError.number < ERROR_TOO_MANY_SOFTWARE_RESET) {
@@ -1752,6 +1787,9 @@ void MASTER_AppInit(void) {
     appData.button_pressed = BUTTON_READ; /* initialized button status */
 
     /* communication */
+    // gsm module
+    appData.gsmInit = false;
+    // rf module 
     for (i = 0; i < NB_BLOCK; i++)
         memset(appData.BUFF_COLLECT[i], '\0', SIZE_DATA);
 

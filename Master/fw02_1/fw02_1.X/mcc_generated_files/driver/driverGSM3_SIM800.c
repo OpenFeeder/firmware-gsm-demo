@@ -189,6 +189,9 @@ bool GMS3_ModulePower(bool powerState) {
             GSM3_TransmitCommand((uint8_t*) "AT");
             TMR_Delay(1000);
             read = GSM3_GetResponse(); // Read 'OK' String from Buffer
+#if defined(_DEBUG)
+            printf("rsp : %s\n", read);
+#endif
             if (tryToConnect++ > GSM_TRY_TO_CON_MAX) {
                 return false;
             }
@@ -204,11 +207,11 @@ bool GMS3_ModulePower(bool powerState) {
             }
         }
         TMR_Delay(12000); // 12 seconde 
-        if (!app_UpdateRtcTimeFromGSM()) {
-#if defined(_DEBUG)
-            printf("TIME NO UPDATE \n");
-#endif
-        }
+//        if (!app_UpdateRtcTimeFromGSM()) {
+//#if defined(_DEBUG)
+//            printf("TIME NO UPDATE \n");
+//#endif
+//        }
 #if defined(_DEBUG)
         printf("PIN OK ==> REDY \n");
 #endif

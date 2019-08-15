@@ -24,7 +24,7 @@ void powerRFDisable( void )
 
 
 /* VDD_APP Enable function */
-void powerUsbRfidEnable( void )
+void powerUsbGSMEnable( void )
 {
     /* Log event if required */
     if ( true == appDataLog.log_events )
@@ -41,7 +41,7 @@ void powerUsbRfidEnable( void )
 
 
 /* VDD_APP Disable function */
-void powerUsbRfidDisable( void )
+void powerUsbGSMDisable( void )
 {
     /* Log event if required */
     if ( true == appDataLog.log_events )

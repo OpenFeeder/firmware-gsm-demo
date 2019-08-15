@@ -13,6 +13,8 @@
 #include "app_datetime.h"
 #include "../../src/framework/AlphaTRX/radio_alpha_trx.h"
 #include "../../fw02_1.X/mcc_generated_files/pin_manager.h"
+#include "appGSM/appGSM3_SIM800.h"
+#include "../../fw02_1.X/mcc_generated_files/rtcc.h"
 
 #if defined (USE_UART1_SERIAL_INTERFACE)
 
@@ -476,13 +478,28 @@ void APP_SerialDebugTasks(void) {
                         printPointeur(PRIO_MEDIUM);
                         printPointeur(PRIO_LOW);
                         break;
+                    case 'r':
+                    case 'R':
+                        app_NetWorkQuality();
+                        break;
                     case 's':
                     case 'S':
                     {
                         appData.dayTime = SEE_YOU_TOMORROW;
                         printf("GO TO SLEEP\n");
-                        setDateTime( 19, 8, 12, 23, 58, 50);
-//                        MASTER_StoreBehavior(MASTER_APP_STATE_SLEEP, PRIO_EXEPTIONNEL);
+                        setDateTime(19, 8, 12, 23, 58, 50);
+                        //                        MASTER_StoreBehavior(MASTER_APP_STATE_SLEEP, PRIO_EXEPTIONNEL);
+                    }
+                        break;
+                    case 'u':
+                    case 'U':
+                    {
+                        RTCC_TimeGet(&appData.current_time);
+                        //                        if (getDateTime()) {
+                        printDateTime(appData.current_time);
+                        //                        app_UpdateRtcTimeFromGSM();
+                        //                        }else{
+                        //                            printf("on ne peut pas afficher la date\n");
                     }
                         break;
                     case 'w':
@@ -1324,48 +1341,48 @@ void APP_SerialDebugTasks(void) {
             case 'X':
             {
                 MASTER_SendMsgRF(1,
-                             INFOS,
-                             1, 1, (uint8_t *) ("INFOS"), 5); // demande du paquet attendu
-//                uint8_t user_choice;
-//
-//                setDelayMsReadFromUart(MAX_READ_FROM_UART_DELAY);
-//
-//                while (false == (UART1_TRANSFER_STATUS_RX_DATA_PRESENT & UART1_TransferStatusGet()) && false == isDelayMsEndingReadFromUart());
-//                if (true == isDelayMsEndingReadFromUart()) {
-//                    printf("\n\tToo slow entering value => command aborted\n");
-//                    break;
-//                }
-//                user_choice = UART1_Read();
-//
-//                switch (user_choice) {
-//                    case 'g':
-//                    case 'G':
-//                    {
-//                        //FREE
-//                        break;
-//                    }
-//
-//                    case 'o':
-//                    case 'O':
-//                    {
-//                        //FREE
-//                        break;
-//                    }
-//
-//                    case 'p':
-//                    case 'P':
-//                    {
-//                        //FREE
-//                        break;
-//                    }
-//
-//                    case 'r':
-//                    case 'R':
-//                    {
-//                        //FREE
-//                        break;
-//                    }
-//                }
+                                 INFOS,
+                                 1, 1, (uint8_t *) ("INFOS"), 5); // demande du paquet attendu
+                //                uint8_t user_choice;
+                //
+                //                setDelayMsReadFromUart(MAX_READ_FROM_UART_DELAY);
+                //
+                //                while (false == (UART1_TRANSFER_STATUS_RX_DATA_PRESENT & UART1_TransferStatusGet()) && false == isDelayMsEndingReadFromUart());
+                //                if (true == isDelayMsEndingReadFromUart()) {
+                //                    printf("\n\tToo slow entering value => command aborted\n");
+                //                    break;
+                //                }
+                //                user_choice = UART1_Read();
+                //
+                //                switch (user_choice) {
+                //                    case 'g':
+                //                    case 'G':
+                //                    {
+                //                        //FREE
+                //                        break;
+                //                    }
+                //
+                //                    case 'o':
+                //                    case 'O':
+                //                    {
+                //                        //FREE
+                //                        break;
+                //                    }
+                //
+                //                    case 'p':
+                //                    case 'P':
+                //                    {
+                //                        //FREE
+                //                        break;
+                //                    }
+                //
+                //                    case 'r':
+                //                    case 'R':
+                //                    {
+                //                        //FREE
+                //                        break;
+                //                    }
+                //                }
 
                 break;
             }

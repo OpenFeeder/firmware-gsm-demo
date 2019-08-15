@@ -131,6 +131,12 @@ bool app_NetWorkRegistration();
 
 /**
  * 
+ * @return 
+ */
+bool app_NetWorkQuality();
+
+/**
+ * 
  * @param cfun
  * @return 
  */

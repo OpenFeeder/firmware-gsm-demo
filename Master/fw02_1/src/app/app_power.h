@@ -39,8 +39,8 @@ void powerRFEnable( void );
 void powerRFDisable( void );
 
 
-void powerUsbRfidEnable( void );
-void powerUsbRfidDisable( void );
+void powerUsbGSMEnable( void );
+void powerUsbGSMDisable( void );
 uint16_t getADC1value( ADC1_CHANNEL channel );
 void getVBatLevel( void );
 void printVBatLevel( void );

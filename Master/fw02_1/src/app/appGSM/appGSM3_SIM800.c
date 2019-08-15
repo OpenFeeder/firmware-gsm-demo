@@ -111,6 +111,14 @@ bool app_NetWorkRegistration() {
         GSM3_findStringInResponse("0,5", GSM3_GetResponse());
 }
 
+bool app_NetWorkQuality() {
+    GSM3_ReadyReceiveBuffer();
+    GSM3_TransmitCommand("AT+CSQ");
+    TMR_Delay(1000);
+#if defined(_DEBUG)
+    printf("resp : %s\n", GSM3_GetResponse());
+#endif
+}
 bool app_SetPhoneFunctionality(int8_t cfun) {
     if (cfun != 1 || cfun != 0 || cfun != 4) return false;
     //a surveiller et tester 
