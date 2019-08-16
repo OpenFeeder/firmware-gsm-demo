@@ -259,30 +259,30 @@ void MASTER_AppTask(void) {
              * we try to power and init 10 repetition 
              */
             uint8_t i = 0;
-            while (i < 10 && !appData.gsmInit) {
-                i++;
-                if (CMD_VDD_APP_V_USB_GetValue()) {
-                    appData.gsmInit = GMS3_ModulePower(true); // try to power on module 
-#if defined( USE_UART1_SERIAL_INTERFACE )
-                    printf("%d \n", appData.gsmInit);
-#endif
-                } else {
-                    powerUsbGSMEnable();
-                }
-            }
-
-            if (i >= 10) { // module n
-#if defined(USE_UART1_SERIAL_INTERFACE)
-                printf("GSM module not power on \n");
-#endif  
-                MASTER_StoreBehavior(MASTER_APP_STATE_ERROR, PRIO_HIGH);
-                //______________________________________________________________
-                /* Log event if required */
-                if (true == appDataLog.log_events) {
-                    store_event(OF_ALPHA_TRX_MODULE_FAIL);
-                }
-                break;
-            }
+//            while (i < 10 && !appData.gsmInit) {
+//                i++;
+//                if (CMD_VDD_APP_V_USB_GetValue()) {
+//                    appData.gsmInit = GMS3_ModulePower(true); // try to power on module 
+//#if defined( USE_UART1_SERIAL_INTERFACE )
+//                    printf("%d \n", appData.gsmInit);
+//#endif
+//                } else {
+//                    powerUsbGSMEnable();
+//                }
+//            }
+//
+//            if (i >= 10) { // module n
+//#if defined(USE_UART1_SERIAL_INTERFACE)
+//                printf("GSM module not power on \n");
+//#endif  
+//                MASTER_StoreBehavior(MASTER_APP_STATE_ERROR, PRIO_HIGH);
+//                //______________________________________________________________
+//                /* Log event if required */
+//                if (true == appDataLog.log_events) {
+//                    store_event(OF_ALPHA_TRX_MODULE_FAIL);
+//                }
+//                break;
+//            }
 
 
             /*
@@ -1567,8 +1567,8 @@ void MASTER_AppTask(void) {
                         }
                         if (b) { // aquitter 
                             //                            if (app_SendSMS(bufErrorMSG)) {
-                            //                                MASTER_SendMsgRF(ensSlave[slaveSelected].idSlave,
-                            //                                                 ACK, receive.Champ.idMsg, 1, "ACK", 3);
+                                                            MASTER_SendMsgRF(appData.ensSlave[appData.slaveSelected].idSlave,
+                                                                             ACK, receive.Champ.idMsg, 1, "ACK", 3);
                             //                            } else {
                             //#if defined(UART_DEBUG)
                             //                                printf("ERROR non transmisi\n");
