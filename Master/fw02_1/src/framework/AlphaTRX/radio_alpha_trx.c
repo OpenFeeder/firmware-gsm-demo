@@ -3505,8 +3505,8 @@ int8_t radioAlphaTRX_SendData(Frame frameToSend) {
     //synchro pattern
     radioAlphaTRX_SendByte(0x2D, SEND_TIME_OUT);
     radioAlphaTRX_SendByte(0xD4, SEND_TIME_OUT);
-    //transmission des octet 
-    for (i = 0; i < frameToSend.Champ.size + 5; i++) {
+    //transmission des octets 
+    for (i = 0; i < frameToSend.Champ.size + 6; i++) {
         if (radioAlphaTRX_SendByte(frameToSend.paquet[i], SEND_TIME_OUT) == 0)
             break;
     }
@@ -3583,16 +3583,25 @@ bool radioAlphaTRX_receive() {
         }
         receiveData.word = radioAlphaTRX_Command(0xB000);
         frameReceve.paquet[i] = receiveData.byte.low;
-        if (i == 0) {
-            if ((frameReceve.Champ.dest != appData.masterId || 
-                frameReceve.Champ.src != appData.ensSlave[appData.slaveSelected].idSlave) && 
-                frameReceve.Champ.dest != appData.broadCastId) {
+        if (i == 1) {
+            if (frameReceve.Champ.dest != appData.masterId ||
+                frameReceve.Champ.src != appData.ensSlave[appData.slaveSelected].idSlave ||
+                frameReceve.Champ.station != appData.station) {
+#if defined( USE_UART1_SERIAL_INTERFACE )
+                printf("je suis la d %d--%d   s %d--%d   s %d--%d\n",
+                       frameReceve.Champ.dest,
+                       appData.masterId,
+                       frameReceve.Champ.src,
+                       appData.ensSlave[appData.slaveSelected].idSlave,
+                       frameReceve.Champ.station,
+                       appData.station);
+#endif
                 return false;
             }
-        } else if (i > 4 && i >= frameReceve.Champ.size + 5) {
+        } else if (i > 5 && i >= frameReceve.Champ.size + 6) {
             break;
         }
-        if (i != 4) sumCtrl ^= receiveData.byte.low; // c'est l'octet 4 ou se trouve le sum contrle 
+        if (i != 5) sumCtrl ^= receiveData.byte.low; // c'est l'octet 4 ou se trouve le sum contrle 
     }
     return sumCtrl == frameReceve.Champ.crc; // test sum controle
 }

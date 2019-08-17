@@ -65,9 +65,9 @@
 //_________________________Radio Alpha TRX Infos_______________________________*/
 #define TIME_OUT_WAIT_RQST        10000
 #define TIME_OUT_COLLECT_LOG        500
-#define FRAME_LENGTH                 40 // Longueur total d'une trame en octet
+#define FRAME_LENGTH                 42 // Longueur total d'une trame en octet
 #define ERROR_LENGTH                  8
-#define SIZE_DATA                    35
+#define SIZE_DATA                    36
 #define TIME_OUT_nIRQ                10 // en ms
 #define LAPS                         50 // on attend X ms avant de transmettre un nouveau msg 
 #define SEND_HORLOG_TIMEOUT           4 // en +1 min
@@ -122,10 +122,10 @@
 
 /**------------------------>> S T R U C T U R E - P A Q U E T <<---------------*/
 /* Structure d'une trame d'un message RF:
- *      +------+------+---------+------+-------+-------+------+--------+
- *      | DEST | SRC  | TypeMsg | nbRI | idMsg | size  |  crc |  Data  |
- *      +------+------+---------+------+-------+-------+------+--------+
- *        4bits+4bits +    4bits+4bits + 8bits + 8bist + 8bits  80bits = 25 octets
+ *      +------+------+---------+---------+-------+-------+-------+-------+--------+
+ *      | DEST | SRC  | N?Site  | TypeMsg |  nbRI | idMsg | size  |  crc  |  Data  |
+ *      +------+------+---------+---------+-------+-------+-------+-------+--------+
+ *        4bits+4bits +  8 bits +    4bits+4bits  + 8bits + 8bits + 8bits + ?? bits = 
  * 
  * TAILLE EN TETE = 1+1+1+1 = 4 oct
  *
@@ -147,6 +147,7 @@ typedef union {
     struct {
         unsigned dest    : 4;   //-----
         unsigned src     : 4;   //    |
+        uint8_t station;        //    |
         unsigned typeMsg : 4;   //    |  
         unsigned nbR     : 4;   //     }==> l'en tete  
         uint8_t idMsg;          //    |
@@ -155,6 +156,7 @@ typedef union {
         uint8_t data[SIZE_DATA];
     } Champ;
 } Frame;
+
 
 
 /**------------------------>> D A T E  F O R M A T <<-------------------------*/

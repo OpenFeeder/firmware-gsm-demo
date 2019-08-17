@@ -108,20 +108,22 @@ int8_t MASTER_SendMsgRF(uint8_t dest,
     int8_t ret = 0;
     // en tete 
     frameToSend.Champ.dest = dest;
-    frameToSend.Champ.src = MASTER_ID;
+    frameToSend.Champ.src = appData.masterId;
     frameToSend.Champ.crc ^= frameToSend.paquet[0];
+    frameToSend.Champ.station = appData.station;
+    frameToSend.Champ.crc ^= frameToSend.paquet[1];
     frameToSend.Champ.nbR = nbR;
     frameToSend.Champ.typeMsg = typeMsg;
-    frameToSend.Champ.crc ^= frameToSend.paquet[1];
-    frameToSend.Champ.idMsg = idMsg;
     frameToSend.Champ.crc ^= frameToSend.paquet[2];
+    frameToSend.Champ.idMsg = idMsg;
+    frameToSend.Champ.crc ^= frameToSend.paquet[3];
     // data
     int8_t i;
     frameToSend.Champ.size = sizeData;
-    frameToSend.Champ.crc ^= frameToSend.paquet[3];
+    frameToSend.Champ.crc ^= frameToSend.paquet[4];
     for (i = 0; i < frameToSend.Champ.size; i++) {
         frameToSend.Champ.data[i] = data[i];
-        frameToSend.Champ.crc ^= frameToSend.paquet[i + 5]; // penser ? changer le 5 en generique 
+        frameToSend.Champ.crc ^= frameToSend.paquet[i + 6]; // penser ? changer le 6 en generique 
     }
     //____________________________________________________________________
     //________________________TRANSMSISSION_______________________________
@@ -259,30 +261,30 @@ void MASTER_AppTask(void) {
              * we try to power and init 10 repetition 
              */
             uint8_t i = 0;
-//            while (i < 10 && !appData.gsmInit) {
-//                i++;
-//                if (CMD_VDD_APP_V_USB_GetValue()) {
-//                    appData.gsmInit = GMS3_ModulePower(true); // try to power on module 
-//#if defined( USE_UART1_SERIAL_INTERFACE )
-//                    printf("%d \n", appData.gsmInit);
-//#endif
-//                } else {
-//                    powerUsbGSMEnable();
-//                }
-//            }
-//
-//            if (i >= 10) { // module n
-//#if defined(USE_UART1_SERIAL_INTERFACE)
-//                printf("GSM module not power on \n");
-//#endif  
-//                MASTER_StoreBehavior(MASTER_APP_STATE_ERROR, PRIO_HIGH);
-//                //______________________________________________________________
-//                /* Log event if required */
-//                if (true == appDataLog.log_events) {
-//                    store_event(OF_ALPHA_TRX_MODULE_FAIL);
-//                }
-//                break;
-//            }
+            //            while (i < 10 && !appData.gsmInit) {
+            //                i++;
+            //                if (CMD_VDD_APP_V_USB_GetValue()) {
+            //                    appData.gsmInit = GMS3_ModulePower(true); // try to power on module 
+            //#if defined( USE_UART1_SERIAL_INTERFACE )
+            //                    printf("%d \n", appData.gsmInit);
+            //#endif
+            //                } else {
+            //                    powerUsbGSMEnable();
+            //                }
+            //            }
+            //
+            //            if (i >= 10) { // module n
+            //#if defined(USE_UART1_SERIAL_INTERFACE)
+            //                printf("GSM module not power on \n");
+            //#endif  
+            //                MASTER_StoreBehavior(MASTER_APP_STATE_ERROR, PRIO_HIGH);
+            //                //______________________________________________________________
+            //                /* Log event if required */
+            //                if (true == appDataLog.log_events) {
+            //                    store_event(OF_ALPHA_TRX_MODULE_FAIL);
+            //                }
+            //                break;
+            //            }
 
 
             /*
@@ -1391,7 +1393,9 @@ void MASTER_AppTask(void) {
                 if (appData.ensSlave[i].state == SLAVE_ERROR ||
                     appData.ensSlave[i].state == SLAVE_COLLECT_END) {
                     i = (i + 1) % appData.nbSlaveOnSite;
-                    if (i == appData.slaveSelected) {
+                    if (i == appData.slaveSelected)
+                        if (appData.ensSlave[i].state == SLAVE_COLLECT_END ||
+                        appData.ensSlave[i].state == SLAVE_ERROR) {
                         stop = true; // pas de slave operationel  
                     }
                 } else {
@@ -1403,9 +1407,9 @@ void MASTER_AppTask(void) {
 
             if (b) {
 #if defined(UART_DEBUG)
-                printf("slave %d selected indice %d\n",
+                printf("slave %d selected indice %d  state %d\n",
                        appData.ensSlave[appData.slaveSelected].idSlave,
-                       appData.slaveSelected);
+                       appData.slaveSelected, appData.ensSlave[appData.slaveSelected].state);
 #endif
                 //en foction de l'heur de la journee on change d'etat 
                 switch (appData.dayTime) {
@@ -1415,7 +1419,7 @@ void MASTER_AppTask(void) {
                         printf("morning\n");
 #endif
                         appData.ensSlave[appData.slaveSelected].state = SLAVE_CONFIG;
-                        //                        TMR_SetWaitRqstTimeout(0);
+                        TMR_SetWaitRqstTimeout(-1);
                     }
                         break;
                     case GOOD_DAY:
@@ -1567,8 +1571,9 @@ void MASTER_AppTask(void) {
                         }
                         if (b) { // aquitter 
                             //                            if (app_SendSMS(bufErrorMSG)) {
-                                                            MASTER_SendMsgRF(appData.ensSlave[appData.slaveSelected].idSlave,
-                                                                             ACK, receive.Champ.idMsg, 1, "ACK", 3);
+                            MASTER_SendMsgRF(appData.ensSlave[appData.slaveSelected].idSlave,
+                                             ACK, receive.Champ.idMsg, 1, "ACK", 3);
+                            appData.ensSlave[appData.slaveSelected].state = SLAVE_ERROR;
                             //                            } else {
                             //#if defined(UART_DEBUG)
                             //                                printf("ERROR non transmisi\n");
@@ -1584,10 +1589,18 @@ void MASTER_AppTask(void) {
                         break;
                         /* -------------------------------------------------------*/
                     case NOTHING:
-                        //                    TMR_SetWaitRqstTimeout(0); // on laisse le timer se terminer pour les test
+                        if (appData.ensSlave[appData.slaveSelected].state == SLAVE_SYNC) {
+                            appData.ensSlave[appData.slaveSelected].state = SLAVE_COLLECT_END;
 #if defined( USE_UART1_SERIAL_INTERFACE )
-                        printf("Slave %d Nothing to send\n", appData.ensSlave[appData.slaveSelected].idSlave);
+                            printf("il n'y a plus de block a transmettre \n");
 #endif
+                            MASTER_StoreBehavior(MASTER_APP_STATE_SELECTE_SLAVE, PRIO_MEDIUM);
+                            // on n'a pas pu recuperer un block car c'est fini 
+                        } else {
+#if defined( USE_UART1_SERIAL_INTERFACE )
+                            printf("Slave %d Nothing to send\n", appData.ensSlave[appData.slaveSelected].idSlave);
+#endif
+                        }
                         break;
                         /* ----------------------------------------------------*/
                         /* -------------------------------------------------------*/
@@ -1692,11 +1705,8 @@ void MASTER_AppTask(void) {
 #endif
             }
             int8_t j = 0;
-#if defined(UART_DEBUG)
-            printf("ind %d\n", appData.ensSlave[appData.slaveSelected].index);
-#endif
-            for (; j < appData.ensSlave[appData.slaveSelected].index - 1; j++) {
-                printf("[%d]  -> %s\n", j, appData.BUFF_COLLECT[j]);
+            for (; j < appData.ensSlave[appData.slaveSelected].index; j++) {
+                printf("[%02d] : %s\n", j, appData.BUFF_COLLECT[j]);
             }
             //TODO : go to select slave 
             MASTER_StoreBehavior(MASTER_APP_STATE_SELECTE_SLAVE, MEDIUM);
