@@ -1387,6 +1387,7 @@ void MASTER_AppTask(void) {
             }
 
             int8_t i = (appData.slaveSelected + 1) % appData.nbSlaveOnSite;
+//            int8_t i = ((appData.slaveSelected + 1) % 1)+1;
             bool stop = false;
             bool b = false;
             do {
