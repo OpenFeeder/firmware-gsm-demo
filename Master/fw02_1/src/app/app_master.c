@@ -877,7 +877,6 @@ void MASTER_AppTask(void) {
 
                 /* Disable PIR interruption */
                 EX_INT0_InterruptDisable();
-
                 /* Disable RTC alarm */
                 rtcc_stop_alarm();
 
@@ -1386,8 +1385,9 @@ void MASTER_AppTask(void) {
 #endif
             }
 
-            int8_t i = (appData.slaveSelected + 1) % appData.nbSlaveOnSite;
+//            int8_t i = (appData.slaveSelected + 1) % appData.nbSlaveOnSite;
 //            int8_t i = ((appData.slaveSelected + 1) % 1)+1;
+            i = 1;
             bool stop = false;
             bool b = false;
             do {
@@ -1627,10 +1627,13 @@ void MASTER_AppTask(void) {
 
                 case SLAVE_SYNC:
 #if defined(UART_DEBUG)
-                    printf("hundler error phase de synchro try to connect%d \n",
+                    printf("hundler error phase de synchro try to connect %d \n",
                            appData.ensSlave[appData.slaveSelected].tryToConnect);
 #endif
                     if (--appData.ensSlave[appData.slaveSelected].tryToConnect) {
+#if defined( USE_UART1_SERIAL_INTERFACE )
+                        printf("demande bloc %d\n", appData.ensSlave[appData.slaveSelected].nbBloc - 1);
+#endif
                         MASTER_SendMsgRF(appData.ensSlave[appData.slaveSelected].idSlave,
                                          DATA,
                                          appData.ensSlave[appData.slaveSelected].nbBloc, 1,
