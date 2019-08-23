@@ -57,7 +57,7 @@
 
 #define ENABLE_ERROR_LEDS
 
-//#define ENABLE_DEEP_SLEEP
+#define ENABLE_DEEP_SLEEP
 
 // *****************************************************************************
 // *****************************************************************************
@@ -226,7 +226,8 @@ typedef struct {
     int8_t nbError; // nombre d'erreurs, survenue pour ce slave
     uint8_t index; // le numero de paquet attendu, lors de la collecte des donnees 
     uint8_t nbBloc; // nombre de bloc re?u 
-    SLAVE_STATES state; // etat du slave 
+    SLAVE_STATES state; // etat du slave
+    bool errorNotify; // si on a deja notifier l'erreur de ce slave 
 } SlaveState;
 
 typedef enum {

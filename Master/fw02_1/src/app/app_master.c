@@ -223,7 +223,11 @@ void MASTER_AppTask(void) {
     int i;
     static bool enter_default_state = false;
 
-    appData.state = MASTER_GetBehavior();
+    if (!appError.OfInCriticalError)
+        appData.state = MASTER_GetBehavior();
+    else {
+        appData.state = MASTER_APP_STATE_ERROR;
+    }
     /* Check the Application State. */
     switch (appData.state) {
         case MASTER_APP_STATE_INITIALIZE:
@@ -1254,23 +1258,23 @@ void MASTER_AppTask(void) {
                 /* A critical error occured */
                 /* Stop the openfeeder to save battery */
                 /* Make status LEDs blink at long interval */
-
+                appError.OfInCriticalError = true;
                 Sleep();
 
-#if defined ( USE_UART1_SERIAL_INTERFACE )
-                printError();
-#endif
+//#if defined ( USE_UART1_SERIAL_INTERFACE )
+//                printError();
+//#endif
 
 #if defined (ENABLE_ERROR_LEDS)
                 /* Status LED blinks */
                 TMR3_Start();
-                setLedsStatusColor(appError.led_color_1);
+                LED_STATUS_R_Toggle();
                 setDelayMs(150);
                 while (0 == isDelayMsEnding());
-                setLedsStatusColor(appError.led_color_2);
-                setDelayMs(150);
-                while (0 == isDelayMsEnding());
-                setLedsStatusColor(LEDS_OFF);
+                LED_STATUS_R_Toggle();
+//                setDelayMs(150);
+//                while (0 == isDelayMsEnding());
+//                setLedsStatusColor(LEDS_OFF);
                 TMR3_Stop();
 #endif
             }
@@ -1722,7 +1726,7 @@ void MASTER_AppTask(void) {
                     printf("transmission Module radio ne demarre pas.\n");
 #endif      
 
-                    sprintf(bufErrorMSG, "OF %d du site %d module rf ne demmare pas",
+                    sprintf(bufErrorMSG, "OF %s du site %d module rf ne demmare pas",
                             appData.udid, appData.station);
                     r = false;
                     break;
@@ -1735,6 +1739,15 @@ void MASTER_AppTask(void) {
                             appData.ensSlave[appData.slaveSelected].uidSlave, appData.station);
                     r = false;
                     break;
+                case ERROR_MASTER_LOW_BATTERY:
+#if defined(UART_DEBUG)
+                    printf("transmission error niveau de battery master.\n");
+#endif      
+
+                    sprintf(bufErrorMSG, "master %s du site %d niveau de batterrie faible",
+                            appData.udid, appData.station);
+                    r = false;
+                    break;
                 default:
 #if defined(UART_DEBUG)
                     b = false;
@@ -1742,22 +1755,36 @@ void MASTER_AppTask(void) {
 #endif
                     break;
             }
-            if (b) { // aquitter 
+            if (b) {
                 //                            if (app_SendSMS(bufErrorMSG)) {
-                if (r)
+                if (r) {
                     MASTER_SendMsgRF(appData.ensSlave[appData.slaveSelected].idSlave,
                                      ACK, appData.receive.Champ.idMsg, 1, "", 0);
-                //                                            } else {
-                //                #if defined(UART_DEBUG)
-                //                                                printf("ERROR non transmisi\n");
-                //                #endif
-                //                                                }
+                    //                                            } else {
+                    //                #if defined(UART_DEBUG)
+                    //                                                printf("ERROR non transmisi\n");
+                    //                #endif
+                    //      
+                    MASTER_StoreBehavior(MASTER_APP_STATE_SELECTE_SLAVE, PRIO_MEDIUM);
+                } else {
+                    if (appError.number == ERROR_SLAVE_NO_REQUEST) {
+                        if (appData.dayTime == GOOD_NIGHT)
+                            MASTER_StoreBehavior(MASTER_APP_STATE_END, PRIO_LOW);
+                        else
+                            MASTER_StoreBehavior(MASTER_APP_STATE_SELECTE_SLAVE, PRIO_MEDIUM);
+                        appData.ensSlave[appData.slaveSelected].errorNotify = true;
+                    } else {
+                        // error suysteme envoyer
+                        MASTER_StoreBehavior(MASTER_APP_STATE_ERROR, PRIO_EXEPTIONNEL);
+                        appError.errorSend = true;
+                    }
+                }
             } else {
 #if defined(UART_DEBUG)
                 printf("ERROR non reconuue \n");
 #endif
             }
-            MASTER_StoreBehavior(MASTER_APP_STATE_SELECTE_SLAVE, PRIO_MEDIUM);
+
         }
             break;
             /* -------------------------------------------------------------- */
@@ -1773,7 +1800,6 @@ void MASTER_AppTask(void) {
             for (; j < appData.ensSlave[appData.slaveSelected].index; j++) {
                 printf("[%02d] : %s", j, appData.BUFF_COLLECT[j]);
             }
-            printf
             //TODO : go to select slave 
             MASTER_StoreBehavior(MASTER_APP_STATE_SELECTE_SLAVE, MEDIUM);
             // prepare l'attente d'un nouveau bloc ou c'est la fin 
@@ -1797,6 +1823,34 @@ void MASTER_AppTask(void) {
             // si on est pendant la journee
             //
             // si on est le matin 
+            if (appData.dayTime == GOOD_NIGHT) {
+                int8_t i;
+                uint8_t j = 0;
+                for (i = 0; i < appData.nbSlaveOnSite; i++) {
+                    if (appData.ensSlave[i].state == SLAVE_ERROR) {
+                        j++;
+                        if (!appData.ensSlave[i].errorNotify) {
+                            appData.ensSlave[appData.slaveSelected].state = SLAVE_NO_REQUEST;
+                            sprintf(appError.message, "Error Slave No Request");
+                            appError.current_line_number = __LINE__;
+                            sprintf(appError.current_file_name, "%s", __FILE__);
+                            appError.number = ERROR_SLAVE_NO_REQUEST;
+                            MASTER_StoreBehavior(MASTER_APP_STATE_ERROR, PRIO_EXEPTIONNEL);
+                        }
+                    }
+                }
+                if (j < appData.nbSlaveOnSite) { // tout les slave sont en etat d'erreur 
+                    MASTER_StoreBehavior(MASTER_APP_STATE_SLEEP, PRIO_HIGH);
+                    break;
+                }
+            }
+            MASTER_StoreBehavior(MASTER_APP_STATE_ERROR, PRIO_EXEPTIONNEL);
+            appData.ensSlave[appData.slaveSelected].state = SLAVE_NO_REQUEST;
+            sprintf(appError.message, "Error Rf module ");
+            appError.current_line_number = __LINE__;
+            sprintf(appError.current_file_name, "%s", __FILE__);
+            appError.number = ERROR_RF_MODULE;
+            appError.errorSend = true;
             break;
             /* -------------------------------------------------------------- */
         default:
@@ -1811,6 +1865,7 @@ void MASTER_AppTask(void) {
                 enter_default_state = true;
             }
             setLedsStatusColor(LED_RED);
+
             break;
     }
 }
@@ -1902,6 +1957,7 @@ void MASTER_AppInit(void) {
         appData.ensSlave[i].nbError = MAX_ERROR;
         appData.ensSlave[i].nbTimeout = MAX_TIMEOUT;
         appData.ensSlave[i].tryToConnect = MAX_TRY_TO_SYNC;
+        appData.ensSlave[i].errorNotify = false;
     }
 
     appData.dayTime = GOOD_MORNING; // a voir 
@@ -1947,6 +2003,7 @@ void MASTER_AppInit(void) {
     appError.current_line_number = 0;
     appError.is_data_flush_before_error = false;
     appError.errorSend = false;
+    appError.OfInCriticalError = false;
 
     appDataEvent.is_txt_file_name_set = false;
     appDataEvent.is_bin_file_name_set = false;

@@ -64,7 +64,7 @@ bool isPowerBatteryGood( void )
         strcpy( appError.message, "Low battery level" );
         appError.current_line_number = __LINE__;
         sprintf( appError.current_file_name, "%s", __FILE__ );
-        appError.number = ERROR_LOW_BATTERY;
+        appError.number = ERROR_MASTER_LOW_BATTERY;
     }
 
     return (battery_level_ok);

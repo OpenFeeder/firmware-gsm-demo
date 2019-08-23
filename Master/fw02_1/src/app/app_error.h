@@ -22,6 +22,7 @@ typedef enum {
     ERROR_NONE,
     /* Critical errors: the system stops if errors below occurred */
     ERROR_LOW_BATTERY,
+    ERROR_MASTER_LOW_BATTERY,
     ERROR_SLAVE_NO_REQUEST,
     ERROR_RF_MODULE,
     ERROR_LOW_FOOD,
@@ -123,8 +124,9 @@ typedef struct {
     struct tm time;
 
     bool is_data_flush_before_error;
-    
+
     bool errorSend;
+    bool OfInCriticalError;
 
 } APP_ERROR;
 
