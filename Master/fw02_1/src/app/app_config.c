@@ -68,7 +68,8 @@ INI_READ_STATE config_read_ini(void) {
     bool logs_found = false;
     bool siteid_found = false;
     bool attractiveleds_found = false;
-
+    bool gsm_found = false;
+    
     /* Log event if required */
     if (true == appDataLog.log_events) {
         store_event(OF_READ_INI);
@@ -102,10 +103,60 @@ INI_READ_STATE config_read_ini(void) {
         if (0 == strcmp(str, "attractiveleds")) {
             attractiveleds_found = true;
         }
-
+        
+        if (0 == strcmp(str, "gsm")) {
+            gsm_found = true;
+        }
 
     }
-
+    
+    if (gsm_found) {
+        /* get phone number for gsm communication */
+        s = ini_gets("gsm", "num", "XXXXXXXXXX", appData.gsm_num, sizearray(appData.gsm_num), "CONFIG.INI");
+        for (i = s; i < 10; i++) {
+            appData.gsm_num[i] = 'X';
+        }
+#if defined (USE_UART1_SERIAL_INTERFACE) && defined (DISPLAY_INI_READ_DATA)
+        printf("\tGSM NUM : %s ... read.\n", appData.gsm_num);
+#endif 
+        /* get ip server for gsm data communication */
+        s = ini_gets("gsm", "ip_server", "XXXXXXXXXXXX", appData.gsm_ip_server, sizearray(appData.gsm_ip_server), "CONFIG.INI");
+        for (i = s; i < 12; i++) {
+            appData.gsm_ip_server[i] = 'X';
+        }
+#if defined (USE_UART1_SERIAL_INTERFACE) && defined (DISPLAY_INI_READ_DATA)
+        printf("\tGSM IP Server : %s ... read.\n", appData.gsm_ip_server);
+#endif 
+        /* get pin code for gsm sim Card */
+        s = ini_gets("gsm", "pin", "XXXX", appData.gsm_pin, sizearray(appData.gsm_pin), "CONFIG.INI");
+        for (i = s; i < 4; i++) {
+            appData.gsm_pin[i] = 'X';
+        }
+#if defined (USE_UART1_SERIAL_INTERFACE) && defined (DISPLAY_INI_READ_DATA)
+        printf("\tGSM pin : %s ... read.\n", appData.gsm_pin);
+#endif 
+        
+        /* get ip server for gsm data communication */
+        s = ini_gets("gsm", "apn", "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0", 
+                     appData.gsm_apn, sizearray(appData.gsm_apn), "CONFIG.INI");
+        
+#if defined (USE_UART1_SERIAL_INTERFACE) && defined (DISPLAY_INI_READ_DATA)
+        printf("\tGSM APN : %s ... read.\n", appData.gsm_apn);
+#endif 
+        
+        /* get ip server for gsm data communication */
+        s = ini_gets("gsm", "port_server", "XXXX", appData.gsm_port, sizearray(appData.gsm_port), "CONFIG.INI");
+        for (i = s; i < 4; i++) {
+            appData.gsm_port[i] = 'X';
+        }
+#if defined (USE_UART1_SERIAL_INTERFACE) && defined (DISPLAY_INI_READ_DATA)
+        printf("\tGSM Port server : %s ... read.\n", appData.gsm_port);
+#endif
+    }
+    
+    /* Clear watch-dog timer because INI read take time */
+    ClrWdt();
+    
     if (siteid_found) {
         /* Site identification. */
         s = ini_gets("siteid", "zone", "XXXX", appData.siteid, sizearray(appData.siteid), "CONFIG.INI");

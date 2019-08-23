@@ -250,6 +250,13 @@ typedef enum {
  */
 
 typedef struct {
+    /*gsm parameter*/
+    char gsm_num [11]; // save phone number 
+    char gsm_ip_server[13]; // get the adress of server 
+    char gsm_apn[20]; 
+    char gsm_pin[5];
+    char gsm_port[5];
+    
     char siteid[5];
 
     /* Application current state */

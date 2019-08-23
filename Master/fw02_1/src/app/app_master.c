@@ -1963,7 +1963,14 @@ void MASTER_AppInit(void) {
     appData.dayTime = GOOD_MORNING; // a voir 
     appData.synchronizeTime = true;
     appData.timeToSynchronizeHologe = 3; // a lire depuis le fichier ini
-
+    
+    /* GSM Parameter */
+    memset(appData.gsm_ip_server, 0, 13);
+    memset(appData.gsm_num, 0, 11);
+    memset(appData.gsm_pin, 0, 5);
+    memset(appData.gsm_ip_server, 0, 20);
+    memset(appData.gsm_port, 0, 5);
+    
     /* Data logger */
     appDataLog.is_file_name_set = false;
     appDataLog.num_char_buffer = 0;
@@ -1983,7 +1990,7 @@ void MASTER_AppInit(void) {
 
     //power on and init raio module 
     //    powerRFEnable();
-
+    
 
     for (i = 0; i < 4; i++) {
         appData.siteid[i] = 'X';
