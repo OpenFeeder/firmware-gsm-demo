@@ -165,6 +165,7 @@ typedef enum {
     //alphaTRX states 
     MASTER_APP_STATE_SEND_DATE,
     MASTER_APP_STATE_SEND_FROM_GSM,
+    MASTER_APP_STATE_SEND_ERROR_TO_SERVER,
     MASTER_APP_STATE_SELECTE_SLAVE,
     MASTER_APP_STATE_MSG_RF_RECEIVE,
     MASTER_APP_STATE_MSG_GSM_RECEIVE,
@@ -207,6 +208,7 @@ typedef enum {
 typedef enum {
     SLAVE_SYNC, // phase de syncronisation 
     SLAVE_ERROR, // en etat d'erreur 
+    SLAVE_NO_REQUEST,
     SLAVE_DAYTIME, // on est en journee 
     SLAVE_CONFIG, // etat de configiration 
     SLAVE_COLLECT, // Slave en etat de collecte de donnee
@@ -219,9 +221,9 @@ typedef enum {
 typedef struct {
     uint8_t idSlave; // l'identifiant du slave
     uint8_t uidSlave; // l'identifiant reel du slave 
-    uint8_t tryToConnect; // nb d'essaie de connexion 
-    uint8_t nbTimeout; // le nombre consecutif de timeout lorsqu'on attend une reponse de ce slave
-    uint8_t nbError; // nombre d'erreurs, survenue pour ce slave
+    int8_t tryToConnect; // nb d'essaie de connexion 
+    int8_t nbTimeout; // le nombre consecutif de timeout lorsqu'on attend une reponse de ce slave
+    int8_t nbError; // nombre d'erreurs, survenue pour ce slave
     uint8_t index; // le numero de paquet attendu, lors de la collecte des donnees 
     uint8_t nbBloc; // nombre de bloc re?u 
     SLAVE_STATES state; // etat du slave 
@@ -369,13 +371,13 @@ typedef struct {
 
     //
     STEP_OF_DAY dayTime;
-    
-    
+
+    Frame receive;
 
     /* communication information */
     //gsm module 
     bool gsmInit;
-    
+
     //init rf module module 
     int8_t timeToSynchronizeHologe;
     bool synchronizeTime;

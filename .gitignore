@@ -54,3 +54,5 @@ dkms.conf
 /alpha_trx_radio_and_gsm.X/dist/
 /driver_gsm.X/build/
 /driver_gsm.X/dist/
+/Master/fw02_1/Master.X/dist/
+/Master/fw02_1/Master.X/build/

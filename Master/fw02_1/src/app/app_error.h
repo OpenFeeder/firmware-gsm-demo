@@ -18,11 +18,12 @@
 // *****************************************************************************
 // *****************************************************************************
 
-typedef enum
-{
+typedef enum {
     ERROR_NONE,
     /* Critical errors: the system stops if errors below occurred */
     ERROR_LOW_BATTERY,
+    ERROR_SLAVE_NO_REQUEST,
+    ERROR_RF_MODULE,
     ERROR_LOW_FOOD,
     ERROR_LOW_VBAT,
     ERROR_DOOR_CANT_CLOSE,
@@ -33,7 +34,7 @@ typedef enum
     ERROR_USB_MOUNT_DRIVE,
     ERROR_USB_UNMOUNT_DRIVE,
     ERROR_USB_RESUME_DEVICE,
-    ERROR_USB_SUSPEND_DEVICE, 
+    ERROR_USB_SUSPEND_DEVICE,
     ERROR_INI_FILE_NOT_FOUND,
     ERROR_INI_FILE_READ,
     ERROR_PIT_TAGS_PTONE1_FILE_OPEN,
@@ -104,13 +105,12 @@ typedef enum
     ERROR_CALIB_FILE_CLOSE,
     ERROR_ATTRACTIVE_LED_DRIVER_RESET,
     ERROR_OVERFLOW_DATA_BUFFER,
-        
+
     ERROR_TOO_MANY_SOFTWARE_RESET = 100
 
 } ERROR_NUMBER;
 
-typedef struct
-{
+typedef struct {
     char message[200]; // Error message buffer
     char current_file_name[200];
     uint16_t current_line_number;
@@ -119,16 +119,18 @@ typedef struct
     LED_STATUS led_color_2;
 
     ERROR_NUMBER number;
-    
+
     struct tm time;
-    
+
     bool is_data_flush_before_error;
+    
+    bool errorSend;
 
 } APP_ERROR;
 
 FILEIO_RESULT logError(void);
-void printError( void );
-void clearError( void );
+void printError(void);
+void clearError(void);
 
 #endif /* _APP_ERROR_HEADER_H */
 
