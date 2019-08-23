@@ -65,9 +65,10 @@
 //_________________________Radio Alpha TRX Infos_______________________________*/
 #define TIME_OUT_WAIT_RQST         5000
 #define TIME_OUT_COLLECT_LOG        500
-#define FRAME_LENGTH                 42 // Longueur total d'une trame en octet
+#define FRAME_LENGTH                 68 // Longueur total d'une trame en octet
+#define HEADER                        6
 #define ERROR_LENGTH                  8
-#define SIZE_DATA                    36
+#define SIZE_DATA                    61
 #define TIME_OUT_nIRQ                10 // en ms
 #define LAPS                         50 // on attend X ms avant de transmettre un nouveau msg 
 #define SEND_HORLOG_TIMEOUT           4 // en +1 min
@@ -140,7 +141,7 @@ typedef union {
     uint8_t paquet[FRAME_LENGTH];
     
     struct {
-        uint8_t head[5];
+        uint8_t head[HEADER];
         uint8_t Infos[SIZE_DATA];
     }Section;
     

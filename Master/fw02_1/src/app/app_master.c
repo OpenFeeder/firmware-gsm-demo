@@ -1579,7 +1579,7 @@ void MASTER_AppTask(void) {
 #endif
                     if (--appData.ensSlave[appData.slaveSelected].tryToConnect) {
 #if defined( USE_UART1_SERIAL_INTERFACE )
-                        printf("demande bloc %d\n", appData.ensSlave[appData.slaveSelected].nbBloc - 1);
+                        printf("[demande bloc %d]\n", appData.ensSlave[appData.slaveSelected].nbBloc - 1);
 #endif
                         MASTER_SendMsgRF(appData.ensSlave[appData.slaveSelected].idSlave,
                                          DATA,
@@ -1771,8 +1771,9 @@ void MASTER_AppTask(void) {
             }
             int8_t j = 0;
             for (; j < appData.ensSlave[appData.slaveSelected].index; j++) {
-                printf("[%02d] : %s\n", j, appData.BUFF_COLLECT[j]);
+                printf("[%02d] : %s", j, appData.BUFF_COLLECT[j]);
             }
+            printf
             //TODO : go to select slave 
             MASTER_StoreBehavior(MASTER_APP_STATE_SELECTE_SLAVE, MEDIUM);
             // prepare l'attente d'un nouveau bloc ou c'est la fin 
@@ -1791,6 +1792,11 @@ void MASTER_AppTask(void) {
 #endif
             }
             //TODO : gestion de fin
+            // si on est a la collecte de donnees
+            //     je verifie si j'ai collecte les donneer de tou le monde ==> SLLEEP
+            // si on est pendant la journee
+            //
+            // si on est le matin 
             break;
             /* -------------------------------------------------------------- */
         default:
