@@ -452,9 +452,26 @@ void APP_SerialDebugTasks(void) {
                     case 'B':
                         app_SendSMS("test sms : salut c'est anzilane!!");
                         break;
+                    case 'c':
+                    case 'C':
+                        app_StartTCPconnection(appData.gsm_ip_server, appData.gsm_port);
+                        app_TCPconnected();
+                        break;
                     case 'd':
                     case 'D':
                         MASTER_StoreBehavior(MASTER_APP_STATE_SEND_DATE, PRIO_EXEPTIONNEL);
+                        break;
+                    case 'g':
+                    case 'G':
+                        if (!app_EnableModuleInGPRSmode(true, appData.gsm_apn)) {
+                            app_EnableModuleInGPRSmode(true, appData.gsm_apn);
+                        }
+                        app_TCPconnected();
+                        break;
+                    case 'j':
+                    case 'J':
+                        app_EnableModuleInGPRSmode(false, appData.gsm_apn);
+                        app_TCPconnected();
                         break;
                     case 'i':
                     case 'I':

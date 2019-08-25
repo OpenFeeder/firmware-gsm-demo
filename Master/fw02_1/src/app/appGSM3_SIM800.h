@@ -313,7 +313,7 @@ bool app_TCPconnected();
  *          true  : module connected to server  
  *          false : module no connected to server 
  */
-bool app_StartTCPconnection(uint8_t * ipAdrr, int8_t* port);
+bool app_StartTCPconnection(uint8_t * ipAdrr, uint8_t* port);
 
 /**
  * 
