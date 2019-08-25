@@ -48,8 +48,9 @@
 
 /**------------------------->> I N C L U D E S <<------------------------------*/
 #include <xc.h> // include processor files - each processor file is guarded.  
-#include "../../../fw02_1.X/mcc_generated_files/driver/atCommandsGSM3_SIM800H.h"
-#include "../../../fw02_1.X/mcc_generated_files/driver/driverGSM3_SIM800.h"
+#include "../../fw02_1.X/mcc_generated_files/driver/atCommandsGSM3_SIM800H.h"
+#include "../../fw02_1.X/mcc_generated_files/driver/driverGSM3_SIM800.h"
+
 
 /******************************************************************************/
 /******************************************************************************/

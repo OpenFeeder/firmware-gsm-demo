@@ -13,7 +13,7 @@
 #include "app_datetime.h"
 #include "../../src/framework/AlphaTRX/radio_alpha_trx.h"
 #include "../../fw02_1.X/mcc_generated_files/pin_manager.h"
-#include "appGSM/appGSM3_SIM800.h"
+#include "appGSM3_SIM800.h"
 #include "../../fw02_1.X/mcc_generated_files/rtcc.h"
 
 #if defined (USE_UART1_SERIAL_INTERFACE)
@@ -447,6 +447,10 @@ void APP_SerialDebugTasks(void) {
                         appData.dayTime = GOOD_DAY;
                         MASTER_StoreBehavior(MASTER_APP_STATE_SELECTE_SLAVE, PRIO_MEDIUM);
                     }
+                        break;
+                    case 'b':
+                    case 'B':
+                        app_SendSMS("test sms : salut c'est anzilane!!");
                         break;
                     case 'd':
                     case 'D':

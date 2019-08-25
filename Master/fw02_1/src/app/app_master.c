@@ -265,30 +265,31 @@ void MASTER_AppTask(void) {
              * we try to power and init 10 repetition 
              */
             uint8_t i = 0;
-            //            while (i < 10 && !appData.gsmInit) {
-            //                i++;
-            //                if (CMD_VDD_APP_V_USB_GetValue()) {
-            //                    appData.gsmInit = GMS3_ModulePower(true); // try to power on module 
-            //#if defined( USE_UART1_SERIAL_INTERFACE )
-            //                    printf("%d \n", appData.gsmInit);
-            //#endif
-            //                } else {
-            //                    powerUsbGSMEnable();
-            //                }
-            //            }
-            //
-            //            if (i >= 10) { // module n
-            //#if defined(USE_UART1_SERIAL_INTERFACE)
-            //                printf("GSM module not power on \n");
-            //#endif  
-            //                MASTER_StoreBehavior(MASTER_APP_STATE_ERROR, PRIO_HIGH);
-            //                //______________________________________________________________
-            //                /* Log event if required */
-            //                if (true == appDataLog.log_events) {
-            //                    store_event(OF_ALPHA_TRX_MODULE_FAIL);
-            //                }
-            //                break;
-            //            }
+            while (i < 10 && !appData.gsmInit) {
+                i++;
+                if (CMD_VDD_APP_V_USB_GetValue()) {
+                    appData.gsmInit = GMS3_ModulePower(true); // try to power on module 
+                } else {
+                    powerUsbGSMEnable();
+                }
+            }
+
+            if (i >= 10) { // module n
+#if defined(USE_UART1_SERIAL_INTERFACE)
+                printf("GSM module not power on \n");
+#endif  
+                sprintf(appError.message, "Error GSM No POwer On");
+                appError.current_line_number = __LINE__;
+                sprintf(appError.current_file_name, "%s", __FILE__);
+                appError.number = ERROR_GSM_NO_POWER_ON;
+                MASTER_StoreBehavior(MASTER_APP_STATE_ERROR, PRIO_EXEPTIONNEL);
+                //______________________________________________________________
+                /* Log event if required */
+                if (true == appDataLog.log_events) {
+                    store_event(OF_ALPHA_TRX_MODULE_FAIL);
+                }
+                break;
+            }
 
 
             /*
@@ -1178,7 +1179,7 @@ void MASTER_AppTask(void) {
                 }
 
                 if ((appError.number < ERROR_CRITICAL || appError.number > ERROR_TOO_MANY_SOFTWARE_RESET)
-                    && !appError.errorSend) {
+                    && !appError.errorSend && appError.number != ERROR_GSM_NO_POWER_ON) {
                     MASTER_StoreBehavior(MASTER_APP_STATE_SEND_ERROR_TO_SERVER, PRIO_EXEPTIONNEL);
                     break;
                 }
@@ -1208,9 +1209,16 @@ void MASTER_AppTask(void) {
 #endif
                 rtcc_stop_alarm();
 
+
                 /* Unmount drive on USB device before power it off. */
                 if (USB_DRIVE_MOUNTED == appDataUsb.usb_drive_status) {
                     usbUnmountDrive();
+                }
+
+                if (appError.number != ERROR_GSM_NO_POWER_ON &&
+                    !appError.OfInCriticalError) { // indique que c'est la premiere fois qu'on entre dedans 
+                    TMR_Delay(30000); //permet d'attendre la fin des tache du gsm avant de couper l'alime  
+                    app_PowerDown(true);
                 }
                 USBHostShutdown();
                 powerUsbGSMDisable();
@@ -1259,22 +1267,25 @@ void MASTER_AppTask(void) {
                 /* Stop the openfeeder to save battery */
                 /* Make status LEDs blink at long interval */
                 appError.OfInCriticalError = true;
+                if (CMD_3V3_RF_GetValue() == false) {
+#if defined( USE_UART1_SERIAL_INTERFACE )
+                    printf("RF MODULE POWER OFF\n");
+#endif 
+                    powerRFDisable();
+                }
                 Sleep();
-
-//#if defined ( USE_UART1_SERIAL_INTERFACE )
-//                printError();
-//#endif
 
 #if defined (ENABLE_ERROR_LEDS)
                 /* Status LED blinks */
                 TMR3_Start();
+                setLedsStatusColor(appError.led_color_1);
                 LED_STATUS_R_Toggle();
                 setDelayMs(150);
                 while (0 == isDelayMsEnding());
                 LED_STATUS_R_Toggle();
-//                setDelayMs(150);
-//                while (0 == isDelayMsEnding());
-//                setLedsStatusColor(LEDS_OFF);
+                setDelayMs(150);
+                while (0 == isDelayMsEnding());
+                setLedsStatusColor(LEDS_OFF);
                 TMR3_Stop();
 #endif
             }
@@ -1288,7 +1299,6 @@ void MASTER_AppTask(void) {
                 printf("> MASTER_APP_STATE_BATTERY_LEVEL_CHECK\n");
 #endif
                 bool flag = isPowerBatteryGood();
-
                 if (appDataLog.num_battery_level_stored < NUM_BATTERY_LEVEL_TO_LOG) {
                     appDataLog.battery_level[appDataLog.num_battery_level_stored][0] = appData.current_time.tm_hour;
                     appDataLog.battery_level[appDataLog.num_battery_level_stored][1] = appData.battery_level;
@@ -1756,28 +1766,29 @@ void MASTER_AppTask(void) {
                     break;
             }
             if (b) {
-                //                            if (app_SendSMS(bufErrorMSG)) {
-                if (r) {
-                    MASTER_SendMsgRF(appData.ensSlave[appData.slaveSelected].idSlave,
-                                     ACK, appData.receive.Champ.idMsg, 1, "", 0);
-                    //                                            } else {
-                    //                #if defined(UART_DEBUG)
-                    //                                                printf("ERROR non transmisi\n");
-                    //                #endif
-                    //      
-                    MASTER_StoreBehavior(MASTER_APP_STATE_SELECTE_SLAVE, PRIO_MEDIUM);
-                } else {
-                    if (appError.number == ERROR_SLAVE_NO_REQUEST) {
-                        if (appData.dayTime == GOOD_NIGHT)
-                            MASTER_StoreBehavior(MASTER_APP_STATE_END, PRIO_LOW);
-                        else
-                            MASTER_StoreBehavior(MASTER_APP_STATE_SELECTE_SLAVE, PRIO_MEDIUM);
-                        appData.ensSlave[appData.slaveSelected].errorNotify = true;
+                if (app_SendSMS(bufErrorMSG)) {
+                    if (r) {
+                        MASTER_SendMsgRF(appData.ensSlave[appData.slaveSelected].idSlave,
+                                         ACK, appData.receive.Champ.idMsg, 1, "", 0);
+                        MASTER_StoreBehavior(MASTER_APP_STATE_SELECTE_SLAVE, PRIO_MEDIUM);
                     } else {
-                        // error suysteme envoyer
-                        MASTER_StoreBehavior(MASTER_APP_STATE_ERROR, PRIO_EXEPTIONNEL);
-                        appError.errorSend = true;
+                        if (appError.number == ERROR_SLAVE_NO_REQUEST) {
+                            if (appData.dayTime == GOOD_NIGHT)
+                                MASTER_StoreBehavior(MASTER_APP_STATE_END, PRIO_LOW);
+                            else
+                                MASTER_StoreBehavior(MASTER_APP_STATE_SELECTE_SLAVE, PRIO_MEDIUM);
+                            appData.ensSlave[appData.slaveSelected].errorNotify = true;
+                        } else {
+                            // error suysteme envoyer
+                            MASTER_StoreBehavior(MASTER_APP_STATE_ERROR, PRIO_EXEPTIONNEL);
+                            appError.errorSend = true;
+                        }
                     }
+                } else {
+#if defined( USE_UART1_SERIAL_INTERFACE )
+                    printf("Error no SEND \n");
+#endif  
+                    MASTER_StoreBehavior(MASTER_APP_STATE_SEND_ERROR_TO_SERVER, PRIO_HIGH);
                 }
             } else {
 #if defined(UART_DEBUG)
@@ -1963,14 +1974,14 @@ void MASTER_AppInit(void) {
     appData.dayTime = GOOD_MORNING; // a voir 
     appData.synchronizeTime = true;
     appData.timeToSynchronizeHologe = 3; // a lire depuis le fichier ini
-    
+
     /* GSM Parameter */
     memset(appData.gsm_ip_server, 0, 13);
     memset(appData.gsm_num, 0, 11);
     memset(appData.gsm_pin, 0, 5);
     memset(appData.gsm_ip_server, 0, 20);
     memset(appData.gsm_port, 0, 5);
-    
+
     /* Data logger */
     appDataLog.is_file_name_set = false;
     appDataLog.num_char_buffer = 0;
@@ -1990,7 +2001,7 @@ void MASTER_AppInit(void) {
 
     //power on and init raio module 
     //    powerRFEnable();
-    
+
 
     for (i = 0; i < 4; i++) {
         appData.siteid[i] = 'X';

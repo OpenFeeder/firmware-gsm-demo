@@ -23,6 +23,7 @@
 #include <stdio.h>
 
 #include "appGSM3_SIM800.h"
+#include "../framework/AlphaTRX/radio_alpha_trx.h"
 
 /******************************************************************************/
 /******************************************************************************/
@@ -223,7 +224,10 @@ bool app_SetPinCode(int16_t pincode) {
     GSM3_ReadyReceiveBuffer();
     GSM3_TransmitCommand(buf);
     TMR_Delay(1000);
-    uint8_t resp = GSM3_GetResponse();
+    char* resp = GSM3_GetResponse();
+#if defined( USE_UART1_SERIAL_INTERFACE )
+    printf("Pin Code ======> : %s\n", resp);
+#endif
     return GSM3_findStringInResponse("READY", resp);
 }
 
@@ -250,7 +254,11 @@ bool app_PowerDown(bool mode) {
     else
         GSM3_TransmitCommand("AT+CPOWD=0"); // urgent mode 
     TMR_Delay(1000);
-    return GSM3_findStringInResponse("NORMAL", GSM3_GetResponse());
+    char * resp = GSM3_GetResponse();
+#if defined( USE_UART1_SERIAL_INTERFACE )
+    printf("Power down GSM in Normal mode : %s\n", resp);
+#endif
+    return GSM3_findStringInResponse("NORMAL", resp);
 }
 
 /*##############*
@@ -356,11 +364,12 @@ bool app_UpdateRtcTimeFromGSM() {
 bool app_SetSmsFormat(bool mode) {
     GSM3_ReadyReceiveBuffer();
     if (mode)
-        GSM3_TransmitCommand("AT+CGMF=1");
+        GSM3_TransmitCommand("AT+CMGF=1");
     else
-        GSM3_TransmitCommand("AT+CGMF=0");
+        GSM3_TransmitCommand("AT+CMGF=0");
     TMR_Delay(1000);
-    return GSM3_findStringInResponse("OK", GSM3_GetResponse());
+    char * response = GSM3_GetResponse();
+    return GSM3_findStringInResponse("OK", response);
 }
 
 /*********************************************************************
@@ -381,20 +390,28 @@ bool app_SetSmsFormat(bool mode) {
  ********************************************************************/
 bool app_SendSMS(uint8_t * smsToSend) {
     GSM3_ReadyReceiveBuffer();
-    GSM3_TransmitCommand(SMS_SEND_NUM);
-    TMR_Delay(1000);
+#if defined( USE_UART1_SERIAL_INTERFACE )
+    printf("SEND SMS ===> %s\n", appData.gsm_num);
+#endif
+    uint8_t buf[30];
+    sprintf(buf, "AT+CMGS=\"%s\"", appData.gsm_num);
+    GSM3_TransmitCommand(buf);
+    TMR_Delay(100);
     char * response = GSM3_GetResponse();
+#if defined( USE_UART1_SERIAL_INTERFACE )
+    printf("%s : %s\n",response, smsToSend);
+#endif
     if (!GSM3_findStringInResponse(">", response)) {
-        return false;
+        return 0;
     }
     GSM3_ReadyReceiveBuffer();
     GSM3_TransmitString(smsToSend, TERMINATION_CHAR_ADD);
-    TMR_Delay(1000);
-#if defined(_DEBUG)
-    printf("SEND ok\n");
+    TMR_Delay(2000);
+#if defined( USE_UART1_SERIAL_INTERFACE )
+    printf("SEND OK : %s \n", GSM3_GetResponse());
 #endif
     // un test doit se faire ici pour etre sur que le sms est transmis
-    return true; //for the moment we do that 
+    return 1; //for the moment we do that 
 }
 
 /*##############*
@@ -513,7 +530,8 @@ bool app_ActivePDPContext(int8_t cid, bool state) {
  *
  * PreCondition:    None
  *
- * Input:           None
+ * Input: <\br>           
+ *      state : nitice the enabled mode, true enable gprs, false desable if enable  
  *
  * Output:          None
  *

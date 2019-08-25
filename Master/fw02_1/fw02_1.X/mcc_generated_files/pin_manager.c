@@ -116,7 +116,7 @@ void PIN_MANAGER_Initialize(void) {
      * Setting the Analog/Digital Configuration SFR(s)
      ***************************************************************************/
     ANSA = 0xC6ED;
-    ANSB = 0x0444;
+    ANSB = 0x0044;
     ANSC = 0x001E;
     ANSD = 0xF000;
     ANSE = 0x0300;

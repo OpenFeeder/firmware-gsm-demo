@@ -21,6 +21,7 @@
 typedef enum {
     ERROR_NONE,
     /* Critical errors: the system stops if errors below occurred */
+    ERROR_GSM_NO_POWER_ON,
     ERROR_LOW_BATTERY,
     ERROR_MASTER_LOW_BATTERY,
     ERROR_SLAVE_NO_REQUEST,
