@@ -152,10 +152,15 @@ void GSM3_TransmitCommand(uint8_t * inToSend) {
  ********************************************************************/
 void GSM3_TransmitString(uint8_t * string, uint8_t delimiter) {
     int8_t size = strlen(string);
-    uint8_t buf[size + 2];
-    sprintf(buf, "%s%c", string, delimiter);
-    GSM3_UART_WriteBuffer(string, size + 1);
+//    uint8_t buf[size + 2];
+//    sprintf(buf, "%s%c", string, delimiter);
+    GSM3_UART_WriteBuffer(string, size);
     GSM3_Write(delimiter);
+}
+
+
+void GSM3_TransmitChar(uint8_t * string) {
+    GSM3_UART_WriteBuffer(string, strlen(string));
 }
 
 /*********************************************************************
@@ -356,11 +361,9 @@ void GSM3_flush_buffer() {
  ********************************************************************/
 void GSM3_ReadyReceiveBuffer(void) {
     GSM3_flush_buffer();
+    UART2_flush_tx_buffer();
     gsm3_response_index = 0;
-    int i;
-    for (i = 0; i < gsm3_response_bufferSize; i++) {
-        gsm3_response_buffer[i] = 0;
-    }
+    memset(gsm3_response_buffer, 0, gsm3_response_bufferSize);
 }
 
 void gsm_flush_buffer() {

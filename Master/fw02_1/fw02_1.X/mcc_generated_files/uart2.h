@@ -646,6 +646,9 @@ UART2_STATUS UART2_StatusGet (void );
 */
 bool UART2_is_tx_done(void);
 
+
+void UART2_flush_tx_buffer(void);
+
 #ifdef __cplusplus  // Provide C++ Compatibility
 
     }

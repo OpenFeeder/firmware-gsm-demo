@@ -46,6 +46,8 @@
   Section: Included Files
 */
 
+#include <string.h>
+
 #include "uart2.h"
 
 /**
@@ -104,8 +106,8 @@ static UART_OBJECT uart2_obj ;
 
 */
 
-#define UART2_CONFIG_TX_BYTEQ_LENGTH 48
-#define UART2_CONFIG_RX_BYTEQ_LENGTH 48
+#define UART2_CONFIG_TX_BYTEQ_LENGTH 255
+#define UART2_CONFIG_RX_BYTEQ_LENGTH 255
 
 
 /** UART Driver Queue
@@ -458,6 +460,15 @@ UART2_STATUS UART2_StatusGet (void)
 bool UART2_is_tx_done(void)
 {
     return U2STAbits.TRMT;
+}
+
+void UART2_flush_tx_buffer(void) {
+    if (!uart2_obj.txStatus.s.empty) 
+    {
+        memset(uart2_txByteQ, 0, UART2_CONFIG_TX_BYTEQ_LENGTH);
+        uart2_obj.txHead = uart2_txByteQ;
+        uart2_obj.txTail = uart2_txByteQ;
+    }
 }
 
 

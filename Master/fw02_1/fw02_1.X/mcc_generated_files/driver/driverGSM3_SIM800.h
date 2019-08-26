@@ -88,6 +88,7 @@
 #define GSM3_StatusGet() UART2_StatusGet()
 #define GSM3_Receive_ISR() UART2_Receive_ISR()
 #define GSM3_ReceiveBufferIsEmpty() UART2_ReceiveBufferIsEmpty()
+#define GSM3_TransmitBufferIsFull() UART2_TransmitBufferIsFull()
 #define GSM3_SetRxInterruptHandler(handler) UART2_SetRxInterruptHandler(handler)
 
 //PIN MAPPING
@@ -131,6 +132,8 @@ void GSM3_TransmitCommand(uint8_t * inToSend);
  */
 void GSM3_TransmitString(uint8_t * string, uint8_t delimiter);
 
+
+void GSM3_TransmitChar(uint8_t * string);
 
 /**
  * recherche un mot cle dans la reponse recu

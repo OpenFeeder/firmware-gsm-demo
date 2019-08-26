@@ -461,6 +461,11 @@ void APP_SerialDebugTasks(void) {
                     case 'D':
                         MASTER_StoreBehavior(MASTER_APP_STATE_SEND_DATE, PRIO_EXEPTIONNEL);
                         break;
+                    case 'e':
+                    case 'E':
+                        app_TCPclose();
+                        app_TCPconnected();
+                        break;
                     case 'g':
                     case 'G':
                         if (!app_EnableModuleInGPRSmode(true, appData.gsm_apn)) {
@@ -506,10 +511,16 @@ void APP_SerialDebugTasks(void) {
                     case 's':
                     case 'S':
                     {
-                        appData.dayTime = SEE_YOU_TOMORROW;
-                        printf("GO TO SLEEP\n");
-                        setDateTime(19, 8, 12, 23, 58, 50);
-                        //                        MASTER_StoreBehavior(MASTER_APP_STATE_SLEEP, PRIO_EXEPTIONNEL);
+                        app_TCPsend("1#1#16/08/19,17:33:48,B3,OF09,31,0700EE2F75,1,0,0,0,100,0,0,L,0*"
+                                    "16/08/19,17:33:49,B3,OF09,31,0700EE2F75,1,0,0,0,100,0,0,L,0*"
+                                    "16/08/19,17:33:49,B3,OF09,31,0700EE2F75,1,0,0,0,100,0,0,L,0");
+                    }
+                        break;
+                    case 'v':
+                    case 'V':
+                    {
+                        app_TCPsend("2#1#16/08/19,17:33:48,B3,OF09,31,0700EE2F75,1,0,0,0,100,0,0,L,0*"
+                                    "16/08/19,17:33:49,B3,OF09,31,0700EE2F75,1,0,0,0,100,0,0,L,0");
                     }
                         break;
                     case 'u':
