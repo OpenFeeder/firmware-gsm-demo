@@ -29,6 +29,7 @@
 /**------------------------>> I N C L U D E <<---------------------------------*/
 
 #include "app_master.h"
+#include "appGSM3_SIM800.h"
 
 #define _DEBUG (1)
 
@@ -973,14 +974,27 @@ void MASTER_AppTask(void) {
                     }
 
                     USBHostShutdown();
-                    powerUsbGSMDisable();
+//                    powerUsbGSMDisable();
                 } else {
                     break;
                 }
             }
 
+            /* stop gsm module */
+            if (appData.gsmInit) {
+#if defined( USE_UART1_SERIAL_INTERFACE )
+                printf("power off GSM\n");
+#endif
+                appData.gsmInit = false;
+                app_PowerDown(true);
+                powerUsbGSMDisable();
+            }
+
             /* power off radio module */
             if (appData.RfModuleInit) {
+#if defined( USE_UART1_SERIAL_INTERFACE )
+                printf("RF Power OFF\n");
+#endif
                 appData.RfModuleInit = false;
                 powerRFDisable();
             }
@@ -992,7 +1006,7 @@ void MASTER_AppTask(void) {
             /* Next line for debugging sleep/wakeup only */
             /* Should be commented in normal mode */
             /* Modify time value according to wake up values in the CONFIG.INI file */
-            setDateTime(19, 8, 12, 4, 59, 50);
+            setDateTime(19, 8, 12, 4, 58, 50);
 #endif
             /* Set alarm for wake up time */
             rtcc_set_alarm(appDataAlarmWakeup.time.tm_hour, appDataAlarmWakeup.time.tm_min, appDataAlarmWakeup.time.tm_sec, EVERY_DAY);
@@ -1021,7 +1035,7 @@ void MASTER_AppTask(void) {
             DSCONbits.DSEN = 1;
 #endif
             Sleep();
-            //            MASTER_StoreBehavior(MASTER_APP_STATE_WAKE_UP, PRIO_EXEPTIONNEL);
+            MASTER_StoreBehavior(MASTER_APP_STATE_WAKE_UP, PRIO_EXEPTIONNEL);
             //            appData.state = MASTER_APP_STATE_WAKE_UP;
             break;
             /* -------------------------------------------------------------- */
@@ -1266,19 +1280,24 @@ void MASTER_AppTask(void) {
                 /* A critical error occured */
                 /* Stop the openfeeder to save battery */
                 /* Make status LEDs blink at long interval */
-                appError.OfInCriticalError = true;
-                if (CMD_3V3_RF_GetValue() == false) {
+                
+                if (!appError.OfInCriticalError) {
 #if defined( USE_UART1_SERIAL_INTERFACE )
                     printf("RF MODULE POWER OFF\n");
 #endif 
-                    powerRFDisable();
+                    // on a un bug ici, que je ne parviens pas a expliquer encore 
+                    // donc pour palier a cela on eteint pas le module radio
+                    // on l'empeche juste de ne plus recevoir ni d'emettre 
+//                    powerRFDisable();
+                    RF_PowerManagement.Val = PWR_MGMT_CMD_POR;
+                    radioAlphaTRX_Command(RF_PowerManagement.Val);
+                    appError.OfInCriticalError = true;
                 }
                 Sleep();
 
 #if defined (ENABLE_ERROR_LEDS)
                 /* Status LED blinks */
                 TMR3_Start();
-                setLedsStatusColor(appError.led_color_1);
                 LED_STATUS_R_Toggle();
                 setDelayMs(150);
                 while (0 == isDelayMsEnding());
@@ -1465,12 +1484,11 @@ void MASTER_AppTask(void) {
                     }
                     break; // fin de la selection du slave 
                 }
-            } else {
-#if defined(UART_DEBUG)
-                printf("Aucun slave en selection\n");
-#endif
-                MASTER_StoreBehavior(MASTER_APP_STATE_END, PRIO_LOW);
             }
+#if defined(UART_DEBUG)
+            printf("Aucun slave en selection\n");
+#endif
+            MASTER_StoreBehavior(MASTER_APP_STATE_END, PRIO_LOW);
         }
             break;
             /* -------------------------------------------------------------- */
@@ -1766,7 +1784,8 @@ void MASTER_AppTask(void) {
                     break;
             }
             if (b) {
-                if (app_SendSMS(bufErrorMSG)) {
+//                if (app_SendSMS(bufErrorMSG)) {
+                    if (true) {
                     if (r) {
                         MASTER_SendMsgRF(appData.ensSlave[appData.slaveSelected].idSlave,
                                          ACK, appData.receive.Champ.idMsg, 1, "", 0);
@@ -1807,16 +1826,49 @@ void MASTER_AppTask(void) {
                 printf(">MASTER_STATE_SEND_FROM_GSM\n");
 #endif
             }
+            //creer un seul tableau 
             int8_t j = 0;
-            for (; j < appData.ensSlave[appData.slaveSelected].index; j++) {
-                printf("[%02d] : %s", j, appData.BUFF_COLLECT[j]);
+            uint8_t nbLn = appData.ensSlave[appData.slaveSelected].index;
+            long size = nbLn * SIZE_DATA + nbLn + 3;
+            uint8_t dataToSendFromGsm[size]; //a explique en detail
+            memset(dataToSendFromGsm, 0, size);
+            //header
+            dataToSendFromGsm[0] = '1';
+            dataToSendFromGsm[1] = '#';
+            dataToSendFromGsm[2] = '1';
+            dataToSendFromGsm[3] = '#';
+            dataToSendFromGsm[4] = '1';
+            dataToSendFromGsm[5] = '#';
+#if defined( USE_UART1_SERIAL_INTERFACE )
+            printf("size %lu  , nbln %d\n", size, nbLn);
+#endif
+            for (; j < nbLn; j++) {
+                uint8_t i = 0;
+                for (; i < SIZE_DATA - 2; i++) {
+                    dataToSendFromGsm[6 + j * 60 + i] = appData.BUFF_COLLECT[j][i];
+                }
+                if (j < nbLn - 1) {
+#if defined( USE_UART1_SERIAL_INTERFACE )
+                    printf("%d i :    %d \n", i, 6 + j * 60 + i);
+#endif
+                    dataToSendFromGsm[6 + j * 60 + i] = '*';
+                }
             }
             //TODO : go to select slave 
-            MASTER_StoreBehavior(MASTER_APP_STATE_SELECTE_SLAVE, MEDIUM);
-            // prepare l'attente d'un nouveau bloc ou c'est la fin 
-            if (appData.ensSlave[appData.slaveSelected].state == SLAVE_COLLECT_END_BLOCK) {
-                appData.ensSlave[appData.slaveSelected].index = 1;
-                appData.ensSlave[appData.slaveSelected].nbBloc++;
+            if (app_TCPsend(dataToSendFromGsm)) {
+                MASTER_StoreBehavior(MASTER_APP_STATE_SELECTE_SLAVE, MEDIUM);
+                // prepare l'attente d'un nouveau bloc ou c'est la fin 
+                if (appData.ensSlave[appData.slaveSelected].state == SLAVE_COLLECT_END_BLOCK) {
+                    appData.ensSlave[appData.slaveSelected].index = 1;
+                    appData.ensSlave[appData.slaveSelected].nbBloc++;
+                }
+#if defined( USE_UART1_SERIAL_INTERFACE )
+                printf("Send To GSM OK \n");
+#endif
+            } else {
+#if defined( USE_UART1_SERIAL_INTERFACE )
+                printf("PROBleme No Send ==> stop debug ==> \n");
+#endif
             }
         }
             break;
@@ -1851,6 +1903,11 @@ void MASTER_AppTask(void) {
                     }
                 }
                 if (j < appData.nbSlaveOnSite) { // tout les slave sont en etat d'erreur 
+#if defined( USE_UART1_SERIAL_INTERFACE )
+                    printf("Sleep, rapport of collect \n");
+#endif
+                    if (app_TCPconnected())
+                        app_TCPsend("14#2#1");
                     MASTER_StoreBehavior(MASTER_APP_STATE_SLEEP, PRIO_HIGH);
                     break;
                 }

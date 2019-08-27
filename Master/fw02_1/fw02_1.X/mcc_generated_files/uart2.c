@@ -106,8 +106,8 @@ static UART_OBJECT uart2_obj ;
 
 */
 
-#define UART2_CONFIG_TX_BYTEQ_LENGTH 255
-#define UART2_CONFIG_RX_BYTEQ_LENGTH 255
+#define UART2_CONFIG_TX_BYTEQ_LENGTH 1024 // taille limite d'un msg 
+#define UART2_CONFIG_RX_BYTEQ_LENGTH 255  // Voir ce que ça donne lorqu'on change cette ligne 
 
 
 /** UART Driver Queue

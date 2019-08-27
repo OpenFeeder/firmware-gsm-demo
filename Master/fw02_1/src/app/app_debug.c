@@ -463,8 +463,9 @@ void APP_SerialDebugTasks(void) {
                         break;
                     case 'e':
                     case 'E':
-                        app_TCPclose();
-                        app_TCPconnected();
+                        if (app_TCPconnected())
+                            app_TCPclose();
+                        
                         break;
                     case 'g':
                     case 'G':
@@ -493,7 +494,14 @@ void APP_SerialDebugTasks(void) {
                     case 'N':
                     {
                         appData.dayTime = GOOD_NIGHT;
-                        MASTER_StoreBehavior(MASTER_APP_STATE_SELECTE_SLAVE, PRIO_MEDIUM);
+                        // active gprs mode 
+                        if (app_EnableModuleInGPRSmode(true, appData.gsm_apn))
+                            if (app_StartTCPconnection(appData.gsm_ip_server, appData.gsm_port))
+                                MASTER_StoreBehavior(MASTER_APP_STATE_SELECTE_SLAVE, PRIO_MEDIUM);
+                            else
+                                printf("TCP CONNECT KO!!!\n");
+                        else
+                            printf("GPSRS non enable !!\n");
 
                     }
                         break;
@@ -511,16 +519,14 @@ void APP_SerialDebugTasks(void) {
                     case 's':
                     case 'S':
                     {
-                        app_TCPsend("1#1#16/08/19,17:33:48,B3,OF09,31,0700EE2F75,1,0,0,0,100,0,0,L,0*"
-                                    "16/08/19,17:33:49,B3,OF09,31,0700EE2F75,1,0,0,0,100,0,0,L,0*"
-                                    "16/08/19,17:33:49,B3,OF09,31,0700EE2F75,1,0,0,0,100,0,0,L,0");
+                        MASTER_StoreBehavior(MASTER_APP_STATE_SLEEP, PRIO_HIGH);
                     }
                         break;
                     case 'v':
                     case 'V':
                     {
-                        app_TCPsend("2#1#16/08/19,17:33:48,B3,OF09,31,0700EE2F75,1,0,0,0,100,0,0,L,0*"
-                                    "16/08/19,17:33:49,B3,OF09,31,0700EE2F75,1,0,0,0,100,0,0,L,0");
+                        if (app_TCPconnected())
+                            app_TCPsend("1#2#1");
                     }
                         break;
                     case 'u':

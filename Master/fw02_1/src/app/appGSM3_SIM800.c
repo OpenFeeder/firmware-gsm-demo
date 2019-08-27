@@ -751,13 +751,19 @@ bool app_TCPsend(uint8_t * dataToSend) {
     printf("SEND %s \n", dataToSend);
 #endif
     GSM3_ReadyReceiveBuffer();
-    GSM3_TransmitCommand("AT+CIPSEND"); // may be we can add : AT+CIPSEND=length(dataToSend)
-    TMR_Delay(1000);
+    uint8_t buf[20];
+    sprintf(buf, "AT+CIPSEND=%d", strlen(dataToSend));
+#if defined( USE_UART1_SERIAL_INTERFACE )
+    printf("buf : %s\n", buf);
+#endif
+    GSM3_TransmitCommand(buf); // may be we can add : AT+CIPSEND=length(dataToSend)
+    TMR_Delay(100);
     uint8_t * response = GSM3_GetResponse();
     if (!GSM3_findStringInResponse(">", response)) return false;
     GSM3_ReadyReceiveBuffer();
-    GSM3_TransmitString(dataToSend, TERMINATION_CHAR_ADD);
-    TMR_Delay(3000);
+    GSM3_TransmitChar(dataToSend);
+//    GSM3_TransmitString(dataToSend, TERMINATION_CHAR_ADD);
+    TMR_Delay(2000);
     response = GSM3_GetResponse();
 #if defined( USE_UART1_SERIAL_INTERFACE )
     printf("recu : %s\n", response);
