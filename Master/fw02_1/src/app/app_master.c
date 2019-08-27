@@ -1784,8 +1784,8 @@ void MASTER_AppTask(void) {
                     break;
             }
             if (b) {
-//                if (app_SendSMS(bufErrorMSG)) {
-                    if (true) {
+                if (app_SendSMS(bufErrorMSG)) {
+//                    if (true) {
                     if (r) {
                         MASTER_SendMsgRF(appData.ensSlave[appData.slaveSelected].idSlave,
                                          ACK, appData.receive.Champ.idMsg, 1, "", 0);
@@ -1833,11 +1833,11 @@ void MASTER_AppTask(void) {
             uint8_t dataToSendFromGsm[size]; //a explique en detail
             memset(dataToSendFromGsm, 0, size);
             //header
-            dataToSendFromGsm[0] = '1';
+            dataToSendFromGsm[0] = appData.ensSlave[appData.slaveSelected].idSlave+48;
             dataToSendFromGsm[1] = '#';
             dataToSendFromGsm[2] = '1';
             dataToSendFromGsm[3] = '#';
-            dataToSendFromGsm[4] = '1';
+            dataToSendFromGsm[4] = appData.station+48;
             dataToSendFromGsm[5] = '#';
 #if defined( USE_UART1_SERIAL_INTERFACE )
             printf("size %lu  , nbln %d\n", size, nbLn);
