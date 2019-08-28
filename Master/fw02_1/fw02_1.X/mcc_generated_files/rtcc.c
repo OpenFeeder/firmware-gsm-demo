@@ -414,16 +414,23 @@ void __attribute__((interrupt, no_auto_psv)) _ISR _RTCCInterrupt(void) {
                 
                 
                 /* Day time gestion */
-//                if (appData.current_time.tm_hour < 6 && appData.dayTime != GOOD_MORNING)
-//                    appData.dayTime = GOOD_MORNING;
-//                if (appData.current_time.tm_hour > 6 && 
-//                    appData.current_time.tm_hour < 19 && 
-//                    appData.dayTime != GOOD_DAY)
-//                    appData.dayTime = GOOD_DAY;
-//                if (appData.current_time.tm_hour > 19 && 
-//                    appData.current_time.tm_hour < 23 && 
-//                    appData.dayTime != GOOD_DAY)
-//                    appData.dayTime = GOOD_NIGHT;
+                if (appData.current_time.tm_hour < 6 && appData.dayTime != GOOD_MORNING) {
+                    appData.dayTime = GOOD_MORNING;
+                }
+                
+                if (appData.current_time.tm_hour >= 6 && 
+                    appData.current_time.tm_hour < 19 && 
+                    appData.dayTime != GOOD_DAY) {
+                    appData.dayTime = GOOD_DAY;
+                    MASTER_StoreBehavior(MASTER_APP_STATE_SELECTE_SLAVE, PRIO_HIGH);
+                }
+                
+                if (appData.current_time.tm_hour >= 19 && 
+                    appData.current_time.tm_hour*60+appData.current_time.tm_min < 23*60+59 && 
+                    appData.dayTime != GOOD_NIGHT) {
+                    appData.dayTime = GOOD_NIGHT;
+                    MASTER_StoreBehavior(MASTER_APP_STATE_GPRS_ATTACHED, PRIO_EXEPTIONNEL);
+                }
                 
                 
                 

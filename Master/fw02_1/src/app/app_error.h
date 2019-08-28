@@ -21,14 +21,15 @@
 typedef enum {
     ERROR_NONE,
     /* Critical errors: the system stops if errors below occurred */
-    ERROR_GSM_NO_POWER_ON,
     ERROR_LOW_BATTERY,
-    ERROR_MASTER_LOW_BATTERY,
-    ERROR_SLAVE_NO_REQUEST,
-    ERROR_RF_MODULE,
     ERROR_LOW_FOOD,
     ERROR_LOW_VBAT,
     ERROR_DOOR_CANT_CLOSE,
+    ERROR_RF_MODULE,
+    ERROR_GSM_NO_POWER_ON,
+    ERROR_GPRS_NO_ATTACHED,
+    ERROR_MASTER_LOW_BATTERY,
+    ERROR_SLAVE_NO_REQUEST,
     ERROR_CRITICAL,
     /* Non critical errors: the system resets if errors below occurred */
     ERROR_USB,

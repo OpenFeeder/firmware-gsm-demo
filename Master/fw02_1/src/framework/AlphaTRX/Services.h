@@ -102,6 +102,7 @@
 #define NOTHING     5
 #define CONFIG      6
 #define ACK         7
+#define SLEEP       8
 
 
 //_______________________________IF__OF________________________________________*/ 

@@ -235,7 +235,7 @@ bool GMS3_ModulePower(bool powerState) {
 //#endif
 //            return false;
 //        }
-        
+        setDateTime(19, 8, 12, 5, 0, 0);
         // Set SMS Mode 
         if (!app_SetSmsFormat(true)) {
 #if defined( USE_UART1_SERIAL_INTERFACE )

@@ -444,8 +444,8 @@ void APP_SerialDebugTasks(void) {
                     case 'a':
                     case 'A':
                     {
-                        appData.dayTime = GOOD_DAY;
-                        MASTER_StoreBehavior(MASTER_APP_STATE_SELECTE_SLAVE, PRIO_MEDIUM);
+//                        appData.dayTime = GOOD_DAY;
+                        setDateTime(19, 8, 12, 6, 0, 0);
                     }
                         break;
                     case 'b':
@@ -486,23 +486,25 @@ void APP_SerialDebugTasks(void) {
                     case 'm':
                     case 'M':
                     {
-                        appData.dayTime = GOOD_MORNING;
-                        MASTER_StoreBehavior(MASTER_APP_STATE_SELECTE_SLAVE, PRIO_MEDIUM);
+                        setDateTime(19, 8, 12, 5, 0, 0);
+//                        appData.dayTime = GOOD_MORNING;
+//                        MASTER_StoreBehavior(MASTER_APP_STATE_SELECTE_SLAVE, PRIO_MEDIUM);
                     }
                         break;
                     case 'n':
                     case 'N':
                     {
-                        appData.dayTime = GOOD_NIGHT;
+//                        appData.dayTime = GOOD_NIGHT;
                         // active gprs mode 
-                        if (app_EnableModuleInGPRSmode(true, appData.gsm_apn))
-                            if (app_StartTCPconnection(appData.gsm_ip_server, appData.gsm_port))
-                                MASTER_StoreBehavior(MASTER_APP_STATE_SELECTE_SLAVE, PRIO_MEDIUM);
-                            else
-                                printf("TCP CONNECT KO!!!\n");
-                        else
-                            printf("GPSRS non enable !!\n");
-
+//                        if (app_EnableModuleInGPRSmode(true, appData.gsm_apn))
+//                            if (app_StartTCPconnection(appData.gsm_ip_server, appData.gsm_port))
+//                                MASTER_StoreBehavior(MASTER_APP_STATE_SEND_DATE, PRIO_MEDIUM);
+//                            else
+//                                printf("TCP CONNECT KO!!!\n");
+//                        else
+//                            printf("GPSRS non enable !!\n");
+                        setDateTime(19, 8, 12, 18, 59, 0);
+                        MASTER_StoreBehavior(MASTER_APP_STATE_SEND_DATE, PRIO_HIGH);
                     }
                         break;
                     case 'p':
@@ -519,7 +521,8 @@ void APP_SerialDebugTasks(void) {
                     case 's':
                     case 'S':
                     {
-                        MASTER_StoreBehavior(MASTER_APP_STATE_SLEEP, PRIO_HIGH);
+                        setDateTime(19, 8, 12, 23, 58, 50);
+//                        MASTER_StoreBehavior(MASTER_APP_STATE_SLEEP, PRIO_HIGH);
                     }
                         break;
                     case 'v':

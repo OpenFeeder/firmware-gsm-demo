@@ -406,7 +406,7 @@ bool app_SendSMS(uint8_t * smsToSend) {
     }
     GSM3_ReadyReceiveBuffer();
     GSM3_TransmitString(smsToSend, TERMINATION_CHAR_ADD);
-    TMR_Delay(2000);
+    TMR_Delay(10000);
 #if defined( USE_UART1_SERIAL_INTERFACE )
     printf("SEND OK : %s \n", GSM3_GetResponse());
 #endif
@@ -747,9 +747,6 @@ bool app_TCPclose(void) {
  * Note:            None
  ********************************************************************/
 bool app_TCPsend(uint8_t * dataToSend) {
-#if defined(_DEBUG)
-    printf("SEND %s \n", dataToSend);
-#endif
     GSM3_ReadyReceiveBuffer();
     uint8_t buf[20];
     sprintf(buf, "AT+CIPSEND=%d", strlen(dataToSend));
