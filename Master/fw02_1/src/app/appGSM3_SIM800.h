@@ -175,7 +175,7 @@ int8_t app_GetBatteryLevel();
  *          true  : pin code valide
  *          fasle : pin code error
  */
-bool app_SetPinCode(int16_t pincode);
+bool app_SetPinCode(uint8_t * pincode);
 
 /**
  * modify the pin code : the sim must be ready

@@ -152,12 +152,11 @@ void GSM3_TransmitCommand(uint8_t * inToSend) {
  ********************************************************************/
 void GSM3_TransmitString(uint8_t * string, uint8_t delimiter) {
     int8_t size = strlen(string);
-//    uint8_t buf[size + 2];
-//    sprintf(buf, "%s%c", string, delimiter);
+    //    uint8_t buf[size + 2];
+    //    sprintf(buf, "%s%c", string, delimiter);
     GSM3_UART_WriteBuffer(string, size);
     GSM3_Write(delimiter);
 }
-
 
 void GSM3_TransmitChar(uint8_t * string) {
     GSM3_UART_WriteBuffer(string, strlen(string));
@@ -227,15 +226,15 @@ bool GMS3_ModulePower(bool powerState) {
         printf("PIN OK ==> REDY \n");
 #endif
         // wait 10 second to have internet 
-        
+
         //update time 
-//        if (!app_UpdateRtcTimeFromGSM()) {
-//#if defined(_DEBUG)
-//            printf("TIME NO UPDATE \n");
-//#endif
-//            return false;
-//        }
-        setDateTime(19, 8, 12, 5, 0, 0);
+        if (!app_UpdateRtcTimeFromGSM()) {
+#if defined(_DEBUG)
+            printf("TIME NO UPDATE \n");
+#endif
+            return false;
+        }
+//        setDateTime(19, 8, 12, 5, 0, 0);
         // Set SMS Mode 
         if (!app_SetSmsFormat(true)) {
 #if defined( USE_UART1_SERIAL_INTERFACE )
@@ -338,12 +337,13 @@ void GSM3_CaptureReceiveMsg(void) {
 void GSM3_flush_buffer() {
     uint8_t c;
     //printf("Flushing...");
-    
+
     while (!GSM3_ReceiveBufferIsEmpty()) {
-        c = GSM3_Read(); 
+        c = GSM3_Read();
     }
     //printf("\n");
 }
+
 /*********************************************************************
  * Function:        static void GSM3_ReadyReceiveBuffer(void)
  *

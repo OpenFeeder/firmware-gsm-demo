@@ -218,11 +218,11 @@ int8_t app_GetBatteryLevel() {
  * Note:            None
  ********************************************************************/
 
-bool app_SetPinCode(int16_t pincode) {
+bool app_SetPinCode(uint8_t * pincode) {
     uint8_t buf[20];
-    sprintf(buf, "AT+CPIN=\"%d\"", pincode);
+ 
     GSM3_ReadyReceiveBuffer();
-    GSM3_TransmitCommand(buf);
+    GSM3_TransmitCommand("AT+CPIN=\"1234\"");
     TMR_Delay(1000);
     char* resp = GSM3_GetResponse();
 #if defined( USE_UART1_SERIAL_INTERFACE )

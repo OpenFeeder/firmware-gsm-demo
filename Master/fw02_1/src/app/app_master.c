@@ -1967,7 +1967,7 @@ void MASTER_AppTask(void) {
 #endif
                     if (app_TCPconnected()) {
                         uint8_t buf[20];
-                        sprintf(buf, "%d#%d#%d#%d#", appData.masterId, 2, appData.station, 0);
+                        sprintf(buf, "%d#%d#%d#%d#", appData.masterId+48, 2, appData.station+48, 0);
                         app_TCPsend(buf);
                     }
                     MASTER_StoreBehavior(MASTER_APP_STATE_SLEEP, PRIO_HIGH);
@@ -2101,7 +2101,6 @@ void MASTER_AppInit(void) {
     memset(appData.gsm_pin, 0, 5);
     memset(appData.gsm_ip_server, 0, 20);
     memset(appData.gsm_port, 0, 5);
-
     /* Data logger */
     appDataLog.is_file_name_set = false;
     appDataLog.num_char_buffer = 0;
