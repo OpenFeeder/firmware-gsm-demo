@@ -238,7 +238,6 @@ void MASTER_AppTask(void) {
              * 
              * Process:
              *  - Date and Time calibration
-             *  - Enable PIR sensor    
              * 
              * Next state: APP_STATE_CONFIGURE_SYSTEM
              */
@@ -937,10 +936,10 @@ void MASTER_AppTask(void) {
             /**
              * Application sleep state.
              *  - mise hors service de l'ensemble des fonctions hormis le capteur PIR
-             *  - mise en sommeil simple du système
+             *  - mise en sommeil simple du systï¿½me
              *    OPERATION DURING SLEEP MODES - PIR sensor and alarm deep sleep
              *  - lors de la sortie du mode SLEEP, remettre en service les fonctions de l'OpenFeeder
-             *  - passer à l'état APP_STATE_IDLE
+             *  - passer ï¿½ l'ï¿½tat APP_STATE_IDLE
              */
             if (appData.state != appData.previous_state) {
                 appData.previous_state = appData.state;
@@ -1884,14 +1883,14 @@ void MASTER_AppTask(void) {
                 printf(">MASTER_STATE_SEND_FROM_GSM\n");
 #endif
             }
-            appData.BUFF_COLLECT[i * (SIZE_DATA - 1)] = '#';
-            appData.BUFF_COLLECT[i * (SIZE_DATA - 1) + 1] = appData.ensSlave[appData.slaveSelected].idSlave + 48;
-            appData.BUFF_COLLECT[i * (SIZE_DATA - 1) + 2] = '#';
-            appData.BUFF_COLLECT[i * (SIZE_DATA - 1) + 3] = 1 + 48;
-            appData.BUFF_COLLECT[i * (SIZE_DATA - 1) + 4] = '#';
-            appData.BUFF_COLLECT[i * (SIZE_DATA - 1) + 5] = appData.station + 48;
-            appData.BUFF_COLLECT[i * (SIZE_DATA - 1) + 6] = '#';
-            appData.BUFF_COLLECT[i * (SIZE_DATA - 1) + 7] = appData.ensSlave[appData.slaveSelected].nbBloc + 48;
+            appData.BUFF_COLLECT[appData.ensSlave[appData.slaveSelected].index * (SIZE_DATA - 1)] = '#';
+            appData.BUFF_COLLECT[appData.ensSlave[appData.slaveSelected].index * (SIZE_DATA - 1) + 1] = appData.ensSlave[appData.slaveSelected].idSlave + 48;
+            appData.BUFF_COLLECT[appData.ensSlave[appData.slaveSelected].index * (SIZE_DATA - 1) + 2] = '#';
+            appData.BUFF_COLLECT[appData.ensSlave[appData.slaveSelected].index * (SIZE_DATA - 1) + 3] = 1 + 48;
+            appData.BUFF_COLLECT[appData.ensSlave[appData.slaveSelected].index * (SIZE_DATA - 1) + 4] = '#';
+            appData.BUFF_COLLECT[appData.ensSlave[appData.slaveSelected].index * (SIZE_DATA - 1) + 5] = appData.station + 48;
+            appData.BUFF_COLLECT[appData.ensSlave[appData.slaveSelected].index * (SIZE_DATA - 1) + 6] = '#';
+            appData.BUFF_COLLECT[appData.ensSlave[appData.slaveSelected].index * (SIZE_DATA - 1) + 7] = appData.ensSlave[appData.slaveSelected].nbBloc + 48;
             //TODO : go to select slave 
             if (app_TCPsend(appData.BUFF_COLLECT)) {
                 MASTER_StoreBehavior(MASTER_APP_STATE_SELECTE_SLAVE, PRIO_MEDIUM);
