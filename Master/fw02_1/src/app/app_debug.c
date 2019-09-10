@@ -444,7 +444,7 @@ void APP_SerialDebugTasks(void) {
                     case 'a':
                     case 'A':
                     {
-//                        appData.dayTime = GOOD_DAY;
+                        //                        appData.dayTime = GOOD_DAY;
                         setDateTime(19, 8, 12, 6, 0, 0);
                     }
                         break;
@@ -465,7 +465,7 @@ void APP_SerialDebugTasks(void) {
                     case 'E':
                         if (app_TCPconnected())
                             app_TCPclose();
-                        
+
                         break;
                     case 'g':
                     case 'G':
@@ -487,22 +487,22 @@ void APP_SerialDebugTasks(void) {
                     case 'M':
                     {
                         setDateTime(19, 8, 12, 5, 0, 0);
-//                        appData.dayTime = GOOD_MORNING;
-//                        MASTER_StoreBehavior(MASTER_APP_STATE_SELECTE_SLAVE, PRIO_MEDIUM);
+                        //                        appData.dayTime = GOOD_MORNING;
+                        //                        MASTER_StoreBehavior(MASTER_APP_STATE_SELECTE_SLAVE, PRIO_MEDIUM);
                     }
                         break;
                     case 'n':
                     case 'N':
                     {
-//                        appData.dayTime = GOOD_NIGHT;
+                        //                        appData.dayTime = GOOD_NIGHT;
                         // active gprs mode 
-//                        if (app_EnableModuleInGPRSmode(true, appData.gsm_apn))
-//                            if (app_StartTCPconnection(appData.gsm_ip_server, appData.gsm_port))
-//                                MASTER_StoreBehavior(MASTER_APP_STATE_SEND_DATE, PRIO_MEDIUM);
-//                            else
-//                                printf("TCP CONNECT KO!!!\n");
-//                        else
-//                            printf("GPSRS non enable !!\n");
+                        //                        if (app_EnableModuleInGPRSmode(true, appData.gsm_apn))
+                        //                            if (app_StartTCPconnection(appData.gsm_ip_server, appData.gsm_port))
+                        //                                MASTER_StoreBehavior(MASTER_APP_STATE_SEND_DATE, PRIO_MEDIUM);
+                        //                            else
+                        //                                printf("TCP CONNECT KO!!!\n");
+                        //                        else
+                        //                            printf("GPSRS non enable !!\n");
                         setDateTime(19, 8, 12, 18, 59, 0);
                         MASTER_StoreBehavior(MASTER_APP_STATE_SEND_DATE, PRIO_HIGH);
                     }
@@ -522,14 +522,44 @@ void APP_SerialDebugTasks(void) {
                     case 'S':
                     {
                         setDateTime(19, 8, 12, 23, 58, 50);
-//                        MASTER_StoreBehavior(MASTER_APP_STATE_SLEEP, PRIO_HIGH);
+                        //                        MASTER_StoreBehavior(MASTER_APP_STATE_SLEEP, PRIO_HIGH);
+                    }
+                        break;
+                    case 't':
+                    case 'T':
+                    {
+                        memset(appData.BUFF_COLLECT, 0, NB_BLOCK * SIZE_DATA);
+                        int i;
+                        for (i = 0; i < NB_BLOCK; i++) {
+                            strncpy(appData.BUFF_COLLECT + i * 60,
+                                    "16/08/19,17:02:50,B3,OF09,31,0700EE2F75,1,0,0,0,100,0,0,L,0\n",
+                                    SIZE_DATA);
+                        }
+                        //l'entete
+                        appData.BUFF_COLLECT[i * (SIZE_DATA - 1)] = '#';
+                        appData.BUFF_COLLECT[i * (SIZE_DATA - 1) + 1] = 1 + 48;
+                        appData.BUFF_COLLECT[i * (SIZE_DATA - 1) + 2] = '#';
+                        appData.BUFF_COLLECT[i * (SIZE_DATA - 1) + 3] = 1 + 48;
+                        appData.BUFF_COLLECT[i * (SIZE_DATA - 1) + 4] = '#';
+                        appData.BUFF_COLLECT[i * (SIZE_DATA - 1) + 5] = appData.station + 48;
+                        appData.BUFF_COLLECT[i * (SIZE_DATA - 1) + 6] = '#';
+                        appData.BUFF_COLLECT[i * (SIZE_DATA - 1) + 7] = 1 + 48;
+                        for (i = 0; i < NB_BLOCK * SIZE_DATA; i++) {
+                            printf("%c", appData.BUFF_COLLECT[i]);
+                        }
+                        printf("\n");
+                        app_TCPsend(appData.BUFF_COLLECT);
+
                     }
                         break;
                     case 'v':
                     case 'V':
                     {
-                        if (app_TCPconnected())
-                            app_TCPsend("1#2#1");
+                        if (app_TCPconnected()) {
+                            uint8_t buf[20];
+                            sprintf(buf, "msg de fin de collect#%d#%d#%d#%d", appData.masterId, 2, appData.station, 0);
+                            app_TCPsend(buf);
+                        }
                     }
                         break;
                     case 'u':

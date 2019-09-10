@@ -765,7 +765,7 @@ bool app_TCPsend(uint8_t * dataToSend) {
 #if defined( USE_UART1_SERIAL_INTERFACE )
     printf("recu : %s\n", response);
 #endif
-    return GSM3_findStringInResponse("SEND OK", response);
+    return GSM3_findStringInResponse("MSG RECU", response);
 }
 
 /****************                                         *********************/

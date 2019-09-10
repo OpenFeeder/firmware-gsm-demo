@@ -70,6 +70,7 @@ OBJECTFILES=${OBJECTDIR}/appGSM/appGSM3_SIM800.o ${OBJECTDIR}/mcc_generated_file
 SOURCEFILES=appGSM/appGSM3_SIM800.c mcc_generated_files/driver/driverGSM3_SIM800.c mcc_generated_files/driver_uart/uart.c mcc_generated_files/uart1.c mcc_generated_files/mcc.c mcc_generated_files/spi1.c mcc_generated_files/interrupt_manager.c mcc_generated_files/traps.c mcc_generated_files/pin_manager.c mcc_generated_files/tmr3.c mcc_generated_files/rtcc.c mcc_generated_files/tmr1.c mcc_generated_files/uart2.c main.c app.c app_debug.c app_power.c led_status.c delay.c app_timers_callback.c radio_alpha_trx.c Services.c timer.c temps.c master_api.c
 
 
+
 CFLAGS=
 ASFLAGS=
 LDLIBSOPTIONS=

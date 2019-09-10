@@ -394,7 +394,8 @@ typedef struct {
 
     volatile uint8_t behavior[MAX_LEVEL_PRIO][NB_BEHAVIOR_PER_PRIO];
     volatile uint8_t ptr[MAX_LEVEL_PRIO][3]; //READ - WRITE - OVFF (overflow)
-    uint8_t BUFF_COLLECT[NB_BLOCK][SIZE_DATA];
+//    uint8_t BUFF_COLLECT[NB_BLOCK][SIZE_DATA];
+    uint8_t BUFF_COLLECT[NB_BLOCK*SIZE_DATA];
     int8_t nbSlaveOnSite;
     SlaveState ensSlave[8]; // max of on site
     int8_t slaveSelected;

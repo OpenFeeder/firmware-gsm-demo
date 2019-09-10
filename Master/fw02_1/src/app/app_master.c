@@ -1191,10 +1191,10 @@ void MASTER_AppTask(void) {
                         break;
                     }
                 }
-                
-//#if defined( USE_UART1_SERIAL_INTERFACE )
-//                printf("error number %d, errorSend %d\n", appError.number, appError.errorSend);
-//#endif
+
+                //#if defined( USE_UART1_SERIAL_INTERFACE )
+                //                printf("error number %d, errorSend %d\n", appError.number, appError.errorSend);
+                //#endif
                 if ((appError.number < ERROR_CRITICAL || appError.number > ERROR_TOO_MANY_SOFTWARE_RESET)
                     && !appError.errorSend && appError.number != ERROR_GSM_NO_POWER_ON) {
                     MASTER_StoreBehavior(MASTER_APP_STATE_SEND_ERROR_TO_SERVER, PRIO_EXEPTIONNEL);
@@ -1516,8 +1516,12 @@ void MASTER_AppTask(void) {
 
                             if (appData.receive.Champ.idMsg == appData.ensSlave[appData.slaveSelected].index) {
                                 appData.ensSlave[appData.slaveSelected].state = SLAVE_COLLECT;
-                                strncpy(appData.BUFF_COLLECT[appData.ensSlave[appData.slaveSelected].index - 1],
-                                        appData.receive.Champ.data, appData.receive.Champ.size); // save data
+                                uint8_t buf[SIZE_DATA];
+                                memset(buf, 0, SIZE_DATA);
+                                sprintf(buf, "%s\n", appData.receive.Champ.data);
+                                strncpy(appData.BUFF_COLLECT +
+                                        appData.receive.Champ.size * (appData.ensSlave[appData.slaveSelected].index - 1),
+                                        buf, appData.receive.Champ.size); // save data
                                 if (appData.receive.Champ.nbR == MAX_W) {
                                     TMR_SetWaitRqstTimeout(-1);
                                     MASTER_StoreBehavior(MASTER_APP_STATE_SEND_FROM_GSM, PRIO_HIGH);
@@ -1554,10 +1558,10 @@ void MASTER_AppTask(void) {
                     case ERROR:
                     {
 #if defined( USE_UART1_SERIAL_INTERFACE )
-                        printf("ERROR RECEVE OF %d num Error %d\n", appData.ensSlave[appData.slaveSelected].uidSlave, 
+                        printf("ERROR RECEVE OF %d num Error %d\n", appData.ensSlave[appData.slaveSelected].uidSlave,
                                appData.receive.Champ.idMsg);
 #endif
-//                        appError.errorSend = false;
+                        //                        appError.errorSend = false;
                         appData.ensSlave[appData.slaveSelected].state = SLAVE_ERROR;
                         sprintf(appError.message, "Error Receive from Alpha TRX module");
                         appError.current_line_number = __LINE__;
@@ -1855,10 +1859,13 @@ void MASTER_AppTask(void) {
                     }
                 } else {
 #if defined( USE_UART1_SERIAL_INTERFACE )
-                    printf("Error no SEND \n");
+                    printf("Error SMS No SEND \n");
 #endif  
-                    // essayer 10 fois apres arreter 
-                    MASTER_StoreBehavior(MASTER_APP_STATE_SEND_ERROR_TO_SERVER, PRIO_HIGH);
+                    appError.nbErrorSendSms--;
+                    if (appError.nbErrorSendSms > 0)
+                        MASTER_StoreBehavior(MASTER_APP_STATE_SEND_ERROR_TO_SERVER, PRIO_EXEPTIONNEL);
+                    else
+                        MASTER_StoreBehavior(MASTER_APP_STATE_ERROR, PRIO_EXEPTIONNEL);
                 }
             } else {
 #if defined(UART_DEBUG)
@@ -1877,32 +1884,16 @@ void MASTER_AppTask(void) {
                 printf(">MASTER_STATE_SEND_FROM_GSM\n");
 #endif
             }
-            //creer un seul tableau 
-            int8_t j = 0;
-            uint8_t nbLn = appData.ensSlave[appData.slaveSelected].index;
-            long size = nbLn * SIZE_DATA + nbLn + 8;
-            uint8_t dataToSendFromGsm[size]; //a explique en detail
-            memset(dataToSendFromGsm, 0, size);
-            //header
-            dataToSendFromGsm[0] = appData.ensSlave[appData.slaveSelected].idSlave + 48;
-            dataToSendFromGsm[1] = '#';
-            dataToSendFromGsm[2] = '1';
-            dataToSendFromGsm[3] = '#';
-            dataToSendFromGsm[4] = appData.station + 48;
-            dataToSendFromGsm[5] = '#';
-            dataToSendFromGsm[6] = appData.ensSlave[appData.slaveSelected].nbBloc + 48;
-            dataToSendFromGsm[7] = '#';
-            for (; j < nbLn; j++) {
-                uint8_t i = 0;
-                for (; i < SIZE_DATA - 2; i++) {
-                    dataToSendFromGsm[8 + j * 60 + i] = appData.BUFF_COLLECT[j][i];
-                }
-                if (j < nbLn - 1) {
-                    dataToSendFromGsm[8 + j * 60 + i] = '*';
-                }
-            }
+            appData.BUFF_COLLECT[i * (SIZE_DATA - 1)] = '#';
+            appData.BUFF_COLLECT[i * (SIZE_DATA - 1) + 1] = appData.ensSlave[appData.slaveSelected].idSlave + 48;
+            appData.BUFF_COLLECT[i * (SIZE_DATA - 1) + 2] = '#';
+            appData.BUFF_COLLECT[i * (SIZE_DATA - 1) + 3] = 1 + 48;
+            appData.BUFF_COLLECT[i * (SIZE_DATA - 1) + 4] = '#';
+            appData.BUFF_COLLECT[i * (SIZE_DATA - 1) + 5] = appData.station + 48;
+            appData.BUFF_COLLECT[i * (SIZE_DATA - 1) + 6] = '#';
+            appData.BUFF_COLLECT[i * (SIZE_DATA - 1) + 7] = appData.ensSlave[appData.slaveSelected].nbBloc + 48;
             //TODO : go to select slave 
-            if (app_TCPsend(dataToSendFromGsm)) {
+            if (app_TCPsend(appData.BUFF_COLLECT)) {
                 MASTER_StoreBehavior(MASTER_APP_STATE_SELECTE_SLAVE, PRIO_MEDIUM);
                 // prepare l'attente d'un nouveau bloc ou c'est la fin 
                 if (appData.ensSlave[appData.slaveSelected].state == SLAVE_COLLECT_END_BLOCK) {
@@ -1916,10 +1907,9 @@ void MASTER_AppTask(void) {
 #if defined( USE_UART1_SERIAL_INTERFACE )
                 printf("[Send To GSM OK ]\n");
 #endif
-            }
-            else {
+            } else {
 #if defined( USE_UART1_SERIAL_INTERFACE )
-                printf("PROBleme No Send ==> stop debug ==> \n");
+                printf("bloc no send \n");
 #endif
                 MASTER_StoreBehavior(MASTER_APP_STATE_SEND_FROM_GSM, PRIO_HIGH);
             }
@@ -1966,8 +1956,8 @@ void MASTER_AppTask(void) {
                     printf("Sleep, rapport of collect \n");
 #endif
                     if (app_TCPconnected()) {
-                        uint8_t buf[20];
-                        sprintf(buf, "%d#%d#%d#%d#", appData.masterId+48, 2, appData.station+48, 0);
+                        uint8_t buf[40];
+                        sprintf(buf, "msg de fin de collect#%d#%d#%d#%d", appData.masterId, 2, appData.station, 0);
                         app_TCPsend(buf);
                     }
                     MASTER_StoreBehavior(MASTER_APP_STATE_SLEEP, PRIO_HIGH);
@@ -2057,8 +2047,9 @@ void MASTER_AppInit(void) {
     // gsm module
     appData.gsmInit = false;
     // rf module 
-    for (i = 0; i < NB_BLOCK; i++)
-        memset(appData.BUFF_COLLECT[i], '\0', SIZE_DATA);
+    memset(appData.BUFF_COLLECT, '\0', NB_BLOCK * SIZE_DATA);
+    //    for (i = 0; i < NB_BLOCK; i++)
+    //        memset(appData.BUFF_COLLECT[i], '\0', SIZE_DATA);
 
     for (i = 0; i < 8; i++) {
         appData.ensSlave[i].idSlave = i + 1;
@@ -2077,8 +2068,9 @@ void MASTER_AppInit(void) {
     /* communication */
     appData.broadCastId = 15;
 
-    for (i = 0; i < NB_BLOCK; i++)
-        memset(appData.BUFF_COLLECT[i], '\0', SIZE_DATA);
+    memset(appData.BUFF_COLLECT, '\0', NB_BLOCK * SIZE_DATA);
+    //    for (i = 0; i < NB_BLOCK; i++)
+    //        memset(appData.BUFF_COLLECT[i], '\0', SIZE_DATA);
 
     for (i = 0; i < 8; i++) {
         appData.ensSlave[i].idSlave = i + 1;
@@ -2141,6 +2133,7 @@ void MASTER_AppInit(void) {
     appError.is_data_flush_before_error = false;
     appError.errorSend = false;
     appError.OfInCriticalError = false;
+    appError.nbErrorSendSms = 10; // on esssaie 10 fois 
 
     appDataEvent.is_txt_file_name_set = false;
     appDataEvent.is_bin_file_name_set = false;
