@@ -760,12 +760,12 @@ bool app_TCPsend(uint8_t * dataToSend) {
     GSM3_ReadyReceiveBuffer();
     GSM3_TransmitChar(dataToSend);
 //    GSM3_TransmitString(dataToSend, TERMINATION_CHAR_ADD);
-    TMR_Delay(2000);
+    TMR_Delay(3000);
     response = GSM3_GetResponse();
 #if defined( USE_UART1_SERIAL_INTERFACE )
     printf("recu : %s\n", response);
 #endif
-    return GSM3_findStringInResponse("MSG RECU", response);
+    return GSM3_findStringInResponse("MSG", response);
 }
 
 /****************                                         *********************/

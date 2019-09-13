@@ -50,14 +50,14 @@
 #include "pin_manager.h"
 #include <stdint.h>
 #include <stdbool.h>
-#include "ext_int.h"
-#include "rtcc.h"
-#include "uart1.h"
-#include "spi1.h"
 #include "uart2.h"
 #include "interrupt_manager.h"
 #include "traps.h"
+#include "uart1.h"
+#include "spi1.h"
 #include "tmr1.h"
+#include "rtcc.h"
+#include "ext_int.h"
 
 #define _XTAL_FREQ  4000000UL
 

@@ -503,7 +503,7 @@ void APP_SerialDebugTasks(void) {
                         //                                printf("TCP CONNECT KO!!!\n");
                         //                        else
                         //                            printf("GPSRS non enable !!\n");
-                        setDateTime(19, 8, 12, 18, 59, 0);
+                        setDateTime(19, 8, 12, 18, 59, 50);
                         MASTER_StoreBehavior(MASTER_APP_STATE_SEND_DATE, PRIO_HIGH);
                     }
                         break;
@@ -536,14 +536,17 @@ void APP_SerialDebugTasks(void) {
                                     SIZE_DATA);
                         }
                         //l'entete
-                        appData.BUFF_COLLECT[i * (SIZE_DATA - 1)] = '#';
-                        appData.BUFF_COLLECT[i * (SIZE_DATA - 1) + 1] = 1 + 48;
-                        appData.BUFF_COLLECT[i * (SIZE_DATA - 1) + 2] = '#';
-                        appData.BUFF_COLLECT[i * (SIZE_DATA - 1) + 3] = 1 + 48;
-                        appData.BUFF_COLLECT[i * (SIZE_DATA - 1) + 4] = '#';
-                        appData.BUFF_COLLECT[i * (SIZE_DATA - 1) + 5] = appData.station + 48;
-                        appData.BUFF_COLLECT[i * (SIZE_DATA - 1) + 6] = '#';
-                        appData.BUFF_COLLECT[i * (SIZE_DATA - 1) + 7] = 1 + 48;
+                        uint8_t buf[9];
+                        sprintf(buf, "#%d#%d#%d#%d", 1, 1, appData.station, 3);
+                        strncpy(appData.BUFF_COLLECT + (SIZE_DATA-1) * i, buf, 9);
+//                        appData.BUFF_COLLECT[i * (SIZE_DATA - 1)] = '#';
+//                        appData.BUFF_COLLECT[i * (SIZE_DATA - 1) + 1] = 1;
+//                        appData.BUFF_COLLECT[i * (SIZE_DATA - 1) + 2] = '#';
+//                        appData.BUFF_COLLECT[i * (SIZE_DATA - 1) + 3] = 1;
+//                        appData.BUFF_COLLECT[i * (SIZE_DATA - 1) + 4] = '#';
+//                        appData.BUFF_COLLECT[i * (SIZE_DATA - 1) + 5] = appData.station;
+//                        appData.BUFF_COLLECT[i * (SIZE_DATA - 1) + 6] = '#';
+//                        appData.BUFF_COLLECT[i * (SIZE_DATA - 1) + 7] = 3;
                         for (i = 0; i < NB_BLOCK * SIZE_DATA; i++) {
                             printf("%c", appData.BUFF_COLLECT[i]);
                         }

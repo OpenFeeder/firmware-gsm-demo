@@ -18,23 +18,9 @@ int main(void) {
 
     printf("Init ok\n");
 
-#if defined(UART_DEBUG)
-    printf("Module GSM Power on\n");
-#endif
-    bool ok = false;
-    ok = GMS3_ModulePower(true);
-
     MASTER_AppInit();
     while (1) {
-        if (ok) {
-//            demo();
-            MASTER_AppTask();
-        } else {
-#if defined(UART_DEBUG)
-            printf("non conncter \n");
-#endif
-            ok = GMS3_ModulePower(true);
-        }
+        MASTER_AppTask();
     }
     return -1;
 }

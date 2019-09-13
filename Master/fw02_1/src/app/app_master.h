@@ -228,7 +228,8 @@ typedef struct {
     uint8_t index; // le numero de paquet attendu, lors de la collecte des donnees 
     uint8_t nbBloc; // nombre de bloc re?u 
     SLAVE_STATES state; // etat du slave
-    bool errorNotify; // si on a deja notifier l'erreur de ce slave 
+    bool errorNotify; // si on a deja notifier l'erreur de ce slave
+    int8_t nbRepet; //
 } SlaveState;
 
 typedef enum {
@@ -402,7 +403,7 @@ typedef struct {
     int8_t station;
     int8_t masterId;
     int8_t broadCastId;
-
+    
 } MASTER_APP_DATA;
 
 // *****************************************************************************

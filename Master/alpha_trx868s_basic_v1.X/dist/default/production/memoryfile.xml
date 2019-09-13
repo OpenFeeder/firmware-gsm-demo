@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <project>
-  <executable name="dist/Copy_of_OF_fw_2_1_brd_3_0_no_test/production/fw02_1.X.production.elf">
+  <executable name="dist/default/production/alpha_trx868s_basic_v1.X.production.elf">
     <memory name="data">
       <units>bytes</units>
       <length>16384</length>
-      <used>11674</used>
-      <free>4710</free>
+      <used>1402</used>
+      <free>14982</free>
     </memory>
     <memory name="program">
       <units>bytes</units>
       <length>263616</length>
-      <used>184017</used>
-      <free>79599</free>
+      <used>41775</used>
+      <free>221841</free>
     </memory>
   </executable>
 </project>

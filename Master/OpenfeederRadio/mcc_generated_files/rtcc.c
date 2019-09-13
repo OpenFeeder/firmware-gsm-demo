@@ -72,15 +72,15 @@ void RTCC_Initialize(void)
 
    RCFGCALbits.RTCEN = 0;
    
-   if(!RTCCTimeInitialized())
-   {
-       // set RTCC time 2019-02-04 10-43-44
-       RCFGCALbits.RTCPTR = 3;        // start the sequence
-       RTCVAL = 0x19;    // YEAR
-       RTCVAL = 0x204;    // MONTH-1/DAY-1
-       RTCVAL = 0x110;    // WEEKDAY/HOURS
-       RTCVAL = 0x4344;    // MINUTES/SECONDS
-   }
+//   if(!RTCCTimeInitialized())
+//   {
+//       // set RTCC time 2019-09-09 11-05-44
+//       RCFGCALbits.RTCPTR = 3;        // start the sequence
+//       RTCVAL = 0x19;    // YEAR
+//       RTCVAL = 0x909;    // MONTH-1/DAY-1
+//       RTCVAL = 0x111;    // WEEKDAY/HOURS
+//       RTCVAL = 0x544;    // MINUTES/SECONDS
+//   }
 
    // set Alarm time 2019-02-02 22-58-44
    ALCFGRPTbits.ALRMEN = 0;
@@ -89,8 +89,9 @@ void RTCC_Initialize(void)
    ALRMVAL = 0x622;
    ALRMVAL = 0x5844;
 
-   // ALRMPTR MIN_SEC; AMASK Every Minute; ARPT 0; CHIME enabled; ALRMEN enabled; 
-   ALCFGRPT = 0xCC00;
+   // ALRMPTR MIN_SEC; AMASK Every Day; ARPT 0; CHIME enabled; ALRMEN enabled; 
+   ALCFGRPT = 0xD800;
+   RCFGCALbits.RTCOE = 1; // Enable RTCC output
    // RTCOUT RTCC Clock; PWSPRE disabled; RTCLK SOSC; PWCPRE disabled; PWCEN disabled; PWCPOL disabled; 
    RTCPWC = 0x0200;
 
@@ -102,7 +103,6 @@ void RTCC_Initialize(void)
    //Enable RTCC interrupt
    IEC3bits.RTCIE = 1;
 }
-
 
 /**
  This function implements RTCC_TimeReset.This function is used to
@@ -171,7 +171,6 @@ void RTCC_TimeSet(struct tm *initialTime)
    // Enable RTCC, clear RTCWREN         
    RCFGCALbits.RTCEN = 1;  
    RCFGCALbits.RTCWREN = 0;
-   
    IEC3bits.RTCIE = 1;
 
 }

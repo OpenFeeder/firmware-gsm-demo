@@ -129,7 +129,7 @@ void OSCILLATOR_Initialize(void)
     // RODIV 0; 
     REFOCONH = 0x0000;
     // ROTRIM 0; 
-    REFOTRIML = 0x0000;
+    //REFOTRIML = 0x0000;
 }
 
 /**

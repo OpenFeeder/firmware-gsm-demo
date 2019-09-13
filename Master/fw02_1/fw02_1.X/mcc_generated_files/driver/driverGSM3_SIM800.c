@@ -269,22 +269,22 @@ void GSM3_TransmitCommandTest(uint8_t * inToSend) {
  * Note:            None
  ********************************************************************/
 bool GSM3_findStringInResponse(uint8_t* strToSearch, uint8_t * response) {
-    int8_t sizeStr = strlen(strToSearch);
-    int8_t i = 0;
-    int8_t j = 0;
-    if (sizeStr > 0) {
-        while (response[i] != '\0') {
-            if (strToSearch[j] == response[i]) {
-                j++;
-                if (j == sizeStr) {
-                    return 1;
-                }
-            } else
-                j = 0;
-            i++;
-        }
-    }
-    return 0;
+//    int8_t sizeStr = strlen(strToSearch);
+//    int8_t i = 0;
+//    int8_t j = 0;
+//    if (sizeStr > 0) {
+//        while (response[i] != '\0') {
+//            if (strToSearch[j] == response[i]) {
+//                j++;
+//                if (j == sizeStr) {
+//                    return 1;
+//                }
+//            } else
+//                j = 0;
+//            i++;
+//        }
+//    }
+    return strstr(response, strToSearch) != NULL;
 }
 
 /*********************************************************************

@@ -407,7 +407,7 @@ void MASTER_AppTask() { // machiine a etat general
                                 appData.ensSlave[appData.slaveSelected].state = SLAVE_COLLECT;
                                 uint8_t buf[SIZE_DATA];
                                 memset(buf, 0, SIZE_DATA);
-                                sprintf(buf, "%s\n", appData.receive.Champ.data);
+                                sprintf(buf, "%s\n", (const char* )appData.receive.Champ.data);
                                 strncpy(appData.BUFF_COLLECT +
                                         appData.receive.Champ.size * (appData.ensSlave[appData.slaveSelected].index - 1),
                                         buf, appData.receive.Champ.size); // save data
