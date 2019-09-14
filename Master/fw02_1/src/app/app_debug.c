@@ -43,7 +43,23 @@ void displayKeyMapping(void) {
     printf("\t   - r or R: toggle remain open parameter\n");
     printf("\t e or E: check status LEDs\n");
     printf("\t f or F: flush data on USB device\n");
-    printf("\t g or G: OF state mode : sleep or wakeup\n");
+    printf("\t g or G: use to test OF Communicaton \n");
+    printf("\t   - a or A: simule daytime\n");
+    printf("\t   - b or B: simule send sms\n");
+    printf("\t   - c or C: connect to server, GPRS must be enabled\n");
+    printf("\t   - d or D: send date to all slaves\n");
+    printf("\t   - e or E: close tcp connexion \n");
+    printf("\t   - g or G: enable gprs\n");
+    printf("\t   - i or I: display RF status register\n");
+    printf("\t   - j or J: desable gprs\n");
+    printf("\t   - m or M: simule morning time\n");
+    printf("\t   - n or N: simule night time-collecte log\n");
+    printf("\t   - p or P: print differents pointer to Master Behaviors\n");
+    printf("\t   - r or R: print gsm network quality \n");
+    printf("\t   - s or S: simule sleep mode\n");
+    printf("\t   - t or T: send data from gsm to server, The servers must be turn on\n");
+    printf("\t   - u or U: update time via gsm\n");
+    printf("\t   - v or V: simule end collect, sned to server\n");
     printf("\t h or H: firmware & hardware information\n");
     printf("\t i or I: IR barriers\n");
     printf("\t   - p or P: toggle IR barriers power\n");
@@ -284,9 +300,9 @@ void APP_SerialDebugTasks(void) {
                 } else {
                     for (i = 0; i < appDataLog.num_battery_level_stored; i++) {
                         printf("\t%02d - %04d - %2.3f\n",
-                               appDataLog.battery_level[i][0],
-                               appDataLog.battery_level[i][1],
-                               appDataLog.battery_level[i][1] * BATTERY_VOLTAGE_FACTOR);
+                                appDataLog.battery_level[i][0],
+                                appDataLog.battery_level[i][1],
+                                appDataLog.battery_level[i][1] * BATTERY_VOLTAGE_FACTOR);
                     }
                 }
 
@@ -297,9 +313,9 @@ void APP_SerialDebugTasks(void) {
                 } else {
                     for (i = 0; i < appDataLog.num_time_calib_stored; i++) {
                         printf("\t%02d:%02d - %.2f\n",
-                               (int) appDataLog.time_calibration[i][0],
-                               (int) appDataLog.time_calibration[i][1],
-                               appDataLog.time_calibration[i][2]);
+                                (int) appDataLog.time_calibration[i][0],
+                                (int) appDataLog.time_calibration[i][1],
+                                appDataLog.time_calibration[i][2]);
                     }
                 }
 
@@ -311,9 +327,9 @@ void APP_SerialDebugTasks(void) {
                 } else {
                     for (i = 0; i < appDataLog.num_ds3231_temp_stored; i++) {
                         printf("\t%02d:%02d - %.2f\n",
-                               (int) appDataLog.ds3231_temp[i][0],
-                               (int) appDataLog.ds3231_temp[i][1],
-                               (double) appDataLog.ds3231_temp[i][2]);
+                                (int) appDataLog.ds3231_temp[i][0],
+                                (int) appDataLog.ds3231_temp[i][1],
+                                (double) appDataLog.ds3231_temp[i][2]);
                     }
                 }
 
@@ -444,7 +460,6 @@ void APP_SerialDebugTasks(void) {
                     case 'a':
                     case 'A':
                     {
-                        //                        appData.dayTime = GOOD_DAY;
                         setDateTime(19, 8, 12, 6, 0, 0);
                     }
                         break;
@@ -474,35 +489,24 @@ void APP_SerialDebugTasks(void) {
                         }
                         app_TCPconnected();
                         break;
+                    case 'i':
+                    case 'I':
+                        display_STATUS_register_from_RF_module();
+                        break;
                     case 'j':
                     case 'J':
                         app_EnableModuleInGPRSmode(false, appData.gsm_apn);
                         app_TCPconnected();
                         break;
-                    case 'i':
-                    case 'I':
-                        display_STATUS_register_from_RF_module();
-                        break;
                     case 'm':
                     case 'M':
                     {
                         setDateTime(19, 8, 12, 5, 0, 0);
-                        //                        appData.dayTime = GOOD_MORNING;
-                        //                        MASTER_StoreBehavior(MASTER_APP_STATE_SELECTE_SLAVE, PRIO_MEDIUM);
                     }
                         break;
                     case 'n':
                     case 'N':
                     {
-                        //                        appData.dayTime = GOOD_NIGHT;
-                        // active gprs mode 
-                        //                        if (app_EnableModuleInGPRSmode(true, appData.gsm_apn))
-                        //                            if (app_StartTCPconnection(appData.gsm_ip_server, appData.gsm_port))
-                        //                                MASTER_StoreBehavior(MASTER_APP_STATE_SEND_DATE, PRIO_MEDIUM);
-                        //                            else
-                        //                                printf("TCP CONNECT KO!!!\n");
-                        //                        else
-                        //                            printf("GPSRS non enable !!\n");
                         setDateTime(19, 8, 12, 18, 59, 50);
                         MASTER_StoreBehavior(MASTER_APP_STATE_SEND_DATE, PRIO_HIGH);
                     }
@@ -522,7 +526,6 @@ void APP_SerialDebugTasks(void) {
                     case 'S':
                     {
                         setDateTime(19, 8, 12, 23, 58, 50);
-                        //                        MASTER_StoreBehavior(MASTER_APP_STATE_SLEEP, PRIO_HIGH);
                     }
                         break;
                     case 't':
@@ -538,15 +541,7 @@ void APP_SerialDebugTasks(void) {
                         //l'entete
                         uint8_t buf[9];
                         sprintf(buf, "#%d#%d#%d#%d", 1, 1, appData.station, 3);
-                        strncpy(appData.BUFF_COLLECT + (SIZE_DATA-1) * i, buf, 9);
-//                        appData.BUFF_COLLECT[i * (SIZE_DATA - 1)] = '#';
-//                        appData.BUFF_COLLECT[i * (SIZE_DATA - 1) + 1] = 1;
-//                        appData.BUFF_COLLECT[i * (SIZE_DATA - 1) + 2] = '#';
-//                        appData.BUFF_COLLECT[i * (SIZE_DATA - 1) + 3] = 1;
-//                        appData.BUFF_COLLECT[i * (SIZE_DATA - 1) + 4] = '#';
-//                        appData.BUFF_COLLECT[i * (SIZE_DATA - 1) + 5] = appData.station;
-//                        appData.BUFF_COLLECT[i * (SIZE_DATA - 1) + 6] = '#';
-//                        appData.BUFF_COLLECT[i * (SIZE_DATA - 1) + 7] = 3;
+                        strncpy(appData.BUFF_COLLECT + (SIZE_DATA - 1) * i, buf, 9);
                         for (i = 0; i < NB_BLOCK * SIZE_DATA; i++) {
                             printf("%c", appData.BUFF_COLLECT[i]);
                         }
@@ -554,17 +549,6 @@ void APP_SerialDebugTasks(void) {
                         app_TCPsend(appData.BUFF_COLLECT);
 
                     }
-                        break;
-                    case 'v':
-                    case 'V':
-                    {
-                        if (app_TCPconnected()) {
-                            uint8_t buf[20];
-                            sprintf(buf, "msg de fin de collect#%d#%d#%d#%d", appData.masterId, 2, appData.station, 0);
-                            app_TCPsend(buf);
-                        }
-                    }
-                        break;
                     case 'u':
                     case 'U':
                     {
@@ -576,10 +560,15 @@ void APP_SerialDebugTasks(void) {
                         //                            printf("on ne peut pas afficher la date\n");
                     }
                         break;
-                    case 'w':
-                    case 'W':
-                        printf("OF WAKEUP\n");
-                        MASTER_StoreBehavior(MASTER_APP_STATE_WAKE_UP, PRIO_EXEPTIONNEL);
+                    case 'v':
+                    case 'V':
+                    {
+                        if (app_TCPconnected()) {
+                            uint8_t buf[20];
+                            sprintf(buf, "msg de fin de collect#%d#%d#%d#%d", appData.masterId, 2, appData.station, 0);
+                            app_TCPsend(buf);
+                        }
+                    }
                         break;
                 }
             }
@@ -1126,8 +1115,9 @@ void APP_SerialDebugTasks(void) {
             case 'Q':
 
                 /* Quit serial communication state => back to idle state */
-                appData.state = MASTER_APP_STATE_IDLE;
-
+                for (i = 0; i < NB_BEHAVIOR_PER_PRIO; i++) {
+                    memset(appData.ptr[i], 0, 3);
+                }
                 printf("\r\n\t/!\\ Exit serial communication mode\r\n");
 
                 break;
@@ -1294,11 +1284,11 @@ void APP_SerialDebugTasks(void) {
                 }
 
                 if (date[2] < 1 || date[2] > 31 ||
-                    date[1] < 1 || date[1] > 12 ||
-                    date[0] < MIN_ADMISSIBLE_YEAR || date[0] > MAX_ADMISSIBLE_YEAR ||
-                    date[3] < 0 || date[3] > 23 ||
-                    date[4] < 0 || date[4] > 59 ||
-                    date[5] < 0 || date[5] > 59) {
+                        date[1] < 1 || date[1] > 12 ||
+                        date[0] < MIN_ADMISSIBLE_YEAR || date[0] > MAX_ADMISSIBLE_YEAR ||
+                        date[3] < 0 || date[3] > 23 ||
+                        date[4] < 0 || date[4] > 59 ||
+                        date[5] < 0 || date[5] > 59) {
                     printf("\tWrong value => Date and time not set.\n");
 
                     /* Log event if required */
@@ -1415,8 +1405,8 @@ void APP_SerialDebugTasks(void) {
             case 'X':
             {
                 MASTER_SendMsgRF(1,
-                                 INFOS,
-                                 1, 1, (uint8_t *) ("INFOS"), 5); // demande du paquet attendu
+                        INFOS,
+                        1, 1, (uint8_t *) ("INFOS"), 5); // demande du paquet attendu
                 //                uint8_t user_choice;
                 //
                 //                setDelayMsReadFromUart(MAX_READ_FROM_UART_DELAY);
@@ -1587,10 +1577,10 @@ void getUniqueDeviceId(void) {
 void displayUniqueDeviceId(void) {
 
     printf("UDID: %06lX %06lX %06lX %06lX %06lX\r\n", appData.udid.words[0],
-           appData.udid.words[1],
-           appData.udid.words[2],
-           appData.udid.words[3],
-           appData.udid.words[4]);
+            appData.udid.words[1],
+            appData.udid.words[2],
+            appData.udid.words[3],
+            appData.udid.words[4]);
 
 }
 

@@ -229,6 +229,7 @@ void MASTER_AppTask(void) {
     else {
         appData.state = MASTER_APP_STATE_ERROR;
     }
+
     /* Check the Application State. */
     switch (appData.state) {
         case MASTER_APP_STATE_INITIALIZE:
@@ -634,7 +635,7 @@ void MASTER_AppTask(void) {
                 }
             }
 
-#if defined ( USE_UART1_SERIAL_INTERFACE )
+#if defined ( PRINT_DATE )
             if (getDateTime()) {
                 if (appData.current_time.tm_sec % 15 == 0 && (print == true)) {
                     print = false;
@@ -799,7 +800,7 @@ void MASTER_AppTask(void) {
             if (MASTER_APP_STATE_SERIAL_COMMUNICATION != appData.state) {
 
             }
-
+            MASTER_StoreBehavior(MASTER_APP_STATE_SERIAL_COMMUNICATION, PRIO_LOW);
             break;
             /* -------------------------------------------------------------- */
 
@@ -1516,7 +1517,7 @@ void MASTER_AppTask(void) {
                             if (appData.receive.Champ.idMsg == appData.ensSlave[appData.slaveSelected].index) {
                                 appData.ensSlave[appData.slaveSelected].state = SLAVE_COLLECT;
                                 strncpy(appData.BUFF_COLLECT +
-                                        (SIZE_DATA-1) * (appData.ensSlave[appData.slaveSelected].index - 1),
+                                        (SIZE_DATA - 1) * (appData.ensSlave[appData.slaveSelected].index - 1),
                                         appData.receive.Champ.data, SIZE_DATA); // save data
                                 if (appData.receive.Champ.nbR == MAX_W) {
                                     TMR_SetWaitRqstTimeout(-1);
@@ -1530,7 +1531,7 @@ void MASTER_AppTask(void) {
                                     MASTER_StoreBehavior(MASTER_APP_STATE_SEND_FROM_GSM, PRIO_HIGH);
                                     appData.ensSlave[appData.slaveSelected].state = SLAVE_COLLECT_END;
 #if defined(UART_DEBUG)
-                                    printf("END BLOC Trans\n");
+                                    printf("END BLOC Collect End\n");
 #endif
                                 } else {
                                     appData.ensSlave[appData.slaveSelected].index += 1;
@@ -1804,6 +1805,15 @@ void MASTER_AppTask(void) {
                             appData.ensSlave[appData.slaveSelected].uidSlave, appData.station);
                     r = false;
                     break;
+                case ERROR_SERVER_NO_REQUEST:
+#if defined(UART_DEBUG)
+                    printf("transmission Server no request.\n");
+#endif      
+
+                    sprintf(bufErrorMSG, "Master %s du site %d le server ne repond pas",
+                            appData.siteid, appData.station);
+                    r = false;
+                    break;
                 case ERROR_MASTER_LOW_BATTERY:
 #if defined(UART_DEBUG)
                     printf("transmission error niveau de battery master.\n");
@@ -1832,8 +1842,8 @@ void MASTER_AppTask(void) {
                     break;
             }
             if (b) {
-                //                if (app_SendSMS(bufErrorMSG)) {
-                if (true) {
+                if (app_SendSMS(bufErrorMSG)) {
+                    //                if (true) {
                     if (r) {
                         MASTER_SendMsgRF(appData.ensSlave[appData.slaveSelected].idSlave,
                                 ACK, appData.receive.Champ.idMsg, 1, "", 0);
@@ -1881,19 +1891,11 @@ void MASTER_AppTask(void) {
 #endif
             }
             uint8_t buf[9];
-            sprintf(buf, "#%d#%d#%d#%d", 
-                    appData.ensSlave[appData.slaveSelected].idSlave, 
-                    1, appData.station, 
+            sprintf(buf, "#%d#%d#%d#%d",
+                    appData.ensSlave[appData.slaveSelected].idSlave,
+                    1, appData.station,
                     appData.ensSlave[appData.slaveSelected].nbBloc);
-            strncpy(appData.BUFF_COLLECT + (SIZE_DATA-1) * appData.ensSlave[appData.slaveSelected].index, buf, 9);
-            //            appData.BUFF_COLLECT[appData.ensSlave[appData.slaveSelected].index * (SIZE_DATA - 1)] = '#';
-            //            appData.BUFF_COLLECT[appData.ensSlave[appData.slaveSelected].index * (SIZE_DATA - 1) + 1] = appData.ensSlave[appData.slaveSelected].idSlave + 48;
-            //            appData.BUFF_COLLECT[appData.ensSlave[appData.slaveSelected].index * (SIZE_DATA - 1) + 2] = '#';
-            //            appData.BUFF_COLLECT[appData.ensSlave[appData.slaveSelected].index * (SIZE_DATA - 1) + 3] = 1 + 48;
-            //            appData.BUFF_COLLECT[appData.ensSlave[appData.slaveSelected].index * (SIZE_DATA - 1) + 4] = '#';
-            //            appData.BUFF_COLLECT[appData.ensSlave[appData.slaveSelected].index * (SIZE_DATA - 1) + 5] = appData.station + 48;
-            //            appData.BUFF_COLLECT[appData.ensSlave[appData.slaveSelected].index * (SIZE_DATA - 1) + 6] = '#';
-            //            appData.BUFF_COLLECT[appData.ensSlave[appData.slaveSelected].index * (SIZE_DATA - 1) + 7] = appData.ensSlave[appData.slaveSelected].nbBloc + 48;
+            strncpy(appData.BUFF_COLLECT + (SIZE_DATA - 1) * appData.ensSlave[appData.slaveSelected].index, buf, 9);
             //TODO : go to select slave 
             if (app_TCPsend(appData.BUFF_COLLECT)) {
                 appData.ensSlave[appData.slaveSelected].nbRepet = 0;
@@ -1907,18 +1909,16 @@ void MASTER_AppTask(void) {
                     MASTER_SendMsgRF(appData.ensSlave[appData.slaveSelected].idSlave,
                             SLEEP, 1, 1, "", 0);
                 }
-#if defined( USE_UART1_SERIAL_INTERFACE )
-                printf("[Send To GSM OK ]\n");
-#endif
             } else {
-#if defined( USE_UART1_SERIAL_INTERFACE )
-                printf("bloc no send \n");
-#endif
                 appData.ensSlave[appData.slaveSelected].nbRepet++;
                 if (appData.ensSlave[appData.slaveSelected].nbRepet < 10)
                     MASTER_StoreBehavior(MASTER_APP_STATE_SEND_FROM_GSM, PRIO_HIGH);
                 else {
-                    //TODO : ERROR : SERVER NO REQUEST
+                    sprintf(appError.message, "SERVER NO REQUEST");
+                    appError.current_line_number = __LINE__;
+                    sprintf(appError.current_file_name, "%s", __FILE__);
+                    appError.number = ERROR_SERVER_NO_REQUEST;
+                    MASTER_StoreBehavior(MASTER_APP_STATE_ERROR, PRIO_EXEPTIONNEL);
                 }
             }
         }
@@ -2022,14 +2022,6 @@ void MASTER_AppInit(void) {
     for (i = 0; i < NB_BEHAVIOR_PER_PRIO; i++) {
         memset(appData.ptr[i], 0, 3);
     }
-    //    appData.ptr[PRIO_EXEPTIONNEL][READ] = 0;
-    //    appData.ptr[PRIO_EXEPTIONNEL][WRITE] = 0;
-    //    appData.ptr[PRIO_HIGH][READ] = 0;
-    //    appData.ptr[PRIO_HIGH][WRITE] = 0;
-    //    appData.ptr[PRIO_MEDIUM][READ] = 0;
-    //    appData.ptr[PRIO_MEDIUM][WRITE] = 0;
-    //    appData.ptr[PRIO_LOW][READ] = 0;
-    //    appData.ptr[PRIO_LOW][WRITE] = 0;
 
     MASTER_StoreBehavior(MASTER_APP_STATE_INITIALIZE, PRIO_HIGH);
     //    appData.state = MASTER_APP_STATE_INITIALIZE;

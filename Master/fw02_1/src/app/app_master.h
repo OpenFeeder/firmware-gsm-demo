@@ -31,6 +31,7 @@
 
 #define DELAY_BEFORE_RESET 5000
 
+#define PRINT_DATE
 #define USE_UART1_SERIAL_INTERFACE  // uncomment to display information dsent to UART
 #define DISPLAY_CURRENT_STATE       // uncomment to display the current state of main state machine (app.c))
 
@@ -53,7 +54,7 @@
 
 #define DISPLAY_RESET_REGISTERS
 
-#define TEST_RTCC_SLEEP_WAKEUP
+//#define TEST_RTCC_SLEEP_WAKEUP
 
 #define ENABLE_ERROR_LEDS
 

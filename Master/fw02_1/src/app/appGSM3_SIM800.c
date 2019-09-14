@@ -309,13 +309,17 @@ inline uint8_t app_ConvDec(uint8_t g, uint8_t d) {
 //}
 
 bool app_UpdateRtcTimeFromGSM() {
+    if (!app_NetTimeSync()) return false;
     GSM3_ReadyReceiveBuffer();
     GSM3_TransmitCommand("AT+CCLK?");
     TMR_Delay(100);
     // il faudrait un test icii d'abord mais bon
     char * buff = GSM3_GetResponse();
+#if defined( USE_UART1_SERIAL_INTERFACE )
+    printf("heur : %s\n", buff);
+#endif
     if (!GSM3_findStringInResponse("+CCLK", buff)) return false;
-    ;
+    
     //
     struct tm timeToSet;
     int8_t i = 0;
@@ -345,6 +349,29 @@ bool app_UpdateRtcTimeFromGSM() {
 /*##############*
  * SMS SERVICE
  *##############*/
+
+/*********************************************************************
+ * Function:        bool app_NetTimeSync()
+ *
+ * PreCondition:    None
+ *
+ * Input:           None
+ *
+ * Output:          None
+ *
+ * Side Effects:    None
+ *
+ * Overview:        None
+ *
+ * Note:            None
+ ********************************************************************/
+bool app_NetTimeSync() {
+    GSM3_ReadyReceiveBuffer();
+    GSM3_TransmitCommand("AT+CLTS=1");
+    TMR_Delay(1000);
+    return GSM3_findStringInResponse("OK", GSM3_GetResponse());
+}
+
 
 /*********************************************************************
  * Function:        bool app_SetSmsFormat(bool mode)
@@ -396,7 +423,7 @@ bool app_SendSMS(uint8_t * smsToSend) {
     uint8_t buf[30];
     sprintf(buf, "AT+CMGS=\"%s\"", appData.gsm_num);
     GSM3_TransmitCommand(buf);
-    TMR_Delay(100);
+    TMR_Delay(1000);
     char * response = GSM3_GetResponse();
 #if defined( USE_UART1_SERIAL_INTERFACE )
     printf("%s : %s\n",response, smsToSend);

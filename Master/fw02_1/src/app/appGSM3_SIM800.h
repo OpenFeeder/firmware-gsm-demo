@@ -227,6 +227,12 @@ bool app_UpdateRtcTimeFromGSM();
 
 /**
  * 
+ * @return 
+ */
+bool app_NetTimeSync();
+
+/**
+ * 
  * @param mode : 
  *              1 = TXT mode 
  *              0 = PDU mode (default value)
