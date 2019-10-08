@@ -69,7 +69,7 @@ INI_READ_STATE config_read_ini(void) {
     bool siteid_found = false;
     bool attractiveleds_found = false;
     bool gsm_found = false;
-    
+
     /* Log event if required */
     if (true == appDataLog.log_events) {
         store_event(OF_READ_INI);
@@ -103,13 +103,13 @@ INI_READ_STATE config_read_ini(void) {
         if (0 == strcmp(str, "attractiveleds")) {
             attractiveleds_found = true;
         }
-        
+
         if (0 == strcmp(str, "gsm")) {
             gsm_found = true;
         }
 
     }
-    
+
     if (gsm_found) {
         /* get phone number for gsm communication */
         s = ini_gets("gsm", "num", "XXXXXXXXXX", appData.gsm_num, sizearray(appData.gsm_num), "CONFIG.INI");
@@ -135,15 +135,15 @@ INI_READ_STATE config_read_ini(void) {
 #if defined (USE_UART1_SERIAL_INTERFACE) && defined (DISPLAY_INI_READ_DATA)
         printf("\tGSM pin : %s ... read.\n", appData.gsm_pin);
 #endif 
-        
+
         /* get ip server for gsm data communication */
-        s = ini_gets("gsm", "apn", "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0", 
-                     appData.gsm_apn, sizearray(appData.gsm_apn), "CONFIG.INI");
-        
+        s = ini_gets("gsm", "apn", "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0",
+                appData.gsm_apn, sizearray(appData.gsm_apn), "CONFIG.INI");
+
 #if defined (USE_UART1_SERIAL_INTERFACE) && defined (DISPLAY_INI_READ_DATA)
         printf("\tGSM APN : %s ... read.\n", appData.gsm_apn);
 #endif 
-        
+
         /* get ip server for gsm data communication */
         s = ini_gets("gsm", "port_server", "XXXX", appData.gsm_port, sizearray(appData.gsm_port), "CONFIG.INI");
         for (i = s; i < 4; i++) {
@@ -153,10 +153,23 @@ INI_READ_STATE config_read_ini(void) {
         printf("\tGSM Port server : %s ... read.\n", appData.gsm_port);
 #endif
     }
-    
+
     /* Clear watch-dog timer because INI read take time */
     ClrWdt();
     
+    if (time_found) {
+        /* local site */
+        read_parameter = ini_getl("time", "send_horloge", -1, "CONFIG.INI");
+        if (read_parameter == -1) {
+            return INI_PB_SITEID_ZONE;
+        } else {
+            appData.timeToSynchronizeHologe = (int) read_parameter;
+#if defined (USE_UART1_SERIAL_INTERFACE) && defined (DISPLAY_INI_READ_DATA)
+            printf("\timeToSynchronizeHologe : %d ... read.\n", appData.timeToSynchronizeHologe);
+#endif     
+        }
+    }
+
     if (siteid_found) {
         /* Site identification. */
         s = ini_gets("siteid", "zone", "XXXX", appData.siteid, sizearray(appData.siteid), "CONFIG.INI");
@@ -177,15 +190,15 @@ INI_READ_STATE config_read_ini(void) {
 #endif     
         }
 
-        read_parameter = ini_getl("siteid", "master_id", -1, "CONFIG.INI");
-        if (read_parameter == -1) {
-            return INI_PB_SITEID_ZONE;
-        } else {
-            appData.masterId = (int) read_parameter;
-#if defined (USE_UART1_SERIAL_INTERFACE) && defined (DISPLAY_INI_READ_DATA)
-            printf("\tMaster id : %d ... read.\n", appData.masterId);
-#endif     
-        }
+        //        read_parameter = ini_getl("siteid", "master_id", -1, "CONFIG.INI");
+        //        if (read_parameter == -1) {
+        //            return INI_PB_SITEID_ZONE;
+        //        } else {
+        //            appData.masterId = (int) read_parameter;
+        //#if defined (USE_UART1_SERIAL_INTERFACE) && defined (DISPLAY_INI_READ_DATA)
+        //            printf("\tMaster id : %d ... read.\n", appData.masterId);
+        //#endif     
+        //        }
     }
 
     /* Clear watch-dog timer because INI read take time */
@@ -251,14 +264,14 @@ INI_READ_STATE config_read_ini(void) {
         int8_t i = 0;
         uint8_t buf[12];
         for (; i < appData.nbSlaveOnSite; i++) {
-            sprintf(buf, "slave_id%d", i+1);
+            sprintf(buf, "slave_id%d", i + 1);
             read_parameter = ini_getl("slave", buf, -1, "CONFIG.INI");
             if (-1 == read_parameter) {
                 return INI_PB_LOCAL_ID_SLAVE_NO_SET;
             } else {
                 appData.ensSlave[i].uidSlave = (int) read_parameter;
 #if defined (USE_UART1_SERIAL_INTERFACE) && defined (DISPLAY_INI_READ_DATA)
-                printf("\tslave id%d  uid %d ... read.\n", i+1, appData.ensSlave[i].uidSlave);
+                printf("\tslave id%d  uid %d ... read.\n", i + 1, appData.ensSlave[i].uidSlave);
 #endif
             }
         }
@@ -409,7 +422,8 @@ INI_READ_STATE config_read_ini(void) {
 
     } else {
         /* Data separator in the log file. */
-        ini_gets("logfile", "separator", DEFAULT_LOG_SEPARATOR, appDataLog.separator, sizearray(appDataLog.separator), "CONFIG.INI");;
+        ini_gets("logfile", "separator", DEFAULT_LOG_SEPARATOR, appDataLog.separator, sizearray(appDataLog.separator), "CONFIG.INI");
+        ;
         appDataLog.log_udid = true;
         appDataLog.log_events = true;
         appDataLog.log_errors = true;
@@ -430,15 +444,15 @@ void config_print(void) {
     printf("Configuration parameters\n");
 
     printf("\tSite ID\n\t\tZone: %s\n",
-           appData.siteid);
+            appData.siteid);
 
     printf("\tTime\n");
     printf("\t\tWake up: %02d:%02d\n",
-           appDataAlarmWakeup.time.tm_hour,
-           appDataAlarmWakeup.time.tm_min);
+            appDataAlarmWakeup.time.tm_hour,
+            appDataAlarmWakeup.time.tm_min);
     printf("\t\tSleep: %02d:%02d\n",
-           appDataAlarmSleep.time.tm_hour,
-           appDataAlarmSleep.time.tm_min);
+            appDataAlarmSleep.time.tm_hour,
+            appDataAlarmSleep.time.tm_min);
 
     printf("\tLoggers\n");
     printf("\t\tSeparator: %s\n", appDataLog.separator);
@@ -486,15 +500,15 @@ void config_print(void) {
         printf("\tAttractive LEDs\n");
 
         printf("\t\tLEDs order: %u %u %u %u\n",
-               appDataAttractiveLeds.leds_order[0], appDataAttractiveLeds.leds_order[1],
-               appDataAttractiveLeds.leds_order[2], appDataAttractiveLeds.leds_order[3]);
+                appDataAttractiveLeds.leds_order[0], appDataAttractiveLeds.leds_order[1],
+                appDataAttractiveLeds.leds_order[2], appDataAttractiveLeds.leds_order[3]);
 
         printf("\t\tOn time: %02d:%02d\n",
-               appDataAttractiveLeds.wake_up_time.tm_hour,
-               appDataAttractiveLeds.wake_up_time.tm_min);
+                appDataAttractiveLeds.wake_up_time.tm_hour,
+                appDataAttractiveLeds.wake_up_time.tm_min);
         printf("\t\tOff time: %02d:%02d\n",
-               appDataAttractiveLeds.sleep_time.tm_hour,
-               appDataAttractiveLeds.sleep_time.tm_min);
+                appDataAttractiveLeds.sleep_time.tm_hour,
+                appDataAttractiveLeds.sleep_time.tm_min);
     }
 
     printf("\n");
@@ -503,7 +517,7 @@ void config_print(void) {
 void getIniPbChar(INI_READ_STATE state, char *buf, uint8_t n) {
 
     switch (state) {
-        case INI_PB_LOCAL_ID_SLAVE_NO_SET : 
+        case INI_PB_LOCAL_ID_SLAVE_NO_SET:
             sprintf(buf, n, "slave local id");
         case INI_PB_SITEID_ZONE:
             snprintf(buf, n, "Site ID: zone");

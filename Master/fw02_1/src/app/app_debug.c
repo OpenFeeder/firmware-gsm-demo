@@ -476,6 +476,11 @@ void APP_SerialDebugTasks(void) {
                     case 'D':
                         MASTER_StoreBehavior(MASTER_APP_STATE_SEND_DATE, PRIO_EXEPTIONNEL);
                         break;
+                    case 'f':
+                    case 'F':
+                        app_NetTimeSync();
+
+                        break;
                     case 'e':
                     case 'E':
                         if (app_TCPconnected())
@@ -485,7 +490,7 @@ void APP_SerialDebugTasks(void) {
                     case 'g':
                     case 'G':
                         if (!app_EnableModuleInGPRSmode(true, appData.gsm_apn)) {
-                            app_EnableModuleInGPRSmode(true, appData.gsm_apn);
+                            printf("Impossible d'activer le GPRS\n");
                         }
                         app_TCPconnected();
                         break;
@@ -507,7 +512,7 @@ void APP_SerialDebugTasks(void) {
                     case 'n':
                     case 'N':
                     {
-                        setDateTime(19, 8, 12, 18, 59, 50);
+                        setDateTime(19, 8, 12, 20, 59, 50);
                         MASTER_StoreBehavior(MASTER_APP_STATE_SEND_DATE, PRIO_HIGH);
                     }
                         break;
@@ -546,18 +551,16 @@ void APP_SerialDebugTasks(void) {
                             printf("%c", appData.BUFF_COLLECT[i]);
                         }
                         printf("\n");
-                        app_TCPsend(appData.BUFF_COLLECT);
+                        app_TCPsend(appData.BUFF_COLLECT, 3000);
 
                     }
                     case 'u':
                     case 'U':
                     {
                         RTCC_TimeGet(&appData.current_time);
-                        //                        if (getDateTime()) {
+                        app_UpdateRtcTimeFromGSM();
                         printDateTime(appData.current_time);
-                        //                        app_UpdateRtcTimeFromGSM();
-                        //                        }else{
-                        //                            printf("on ne peut pas afficher la date\n");
+                        
                     }
                         break;
                     case 'v':
@@ -566,7 +569,7 @@ void APP_SerialDebugTasks(void) {
                         if (app_TCPconnected()) {
                             uint8_t buf[20];
                             sprintf(buf, "msg de fin de collect#%d#%d#%d#%d", appData.masterId, 2, appData.station, 0);
-                            app_TCPsend(buf);
+                            app_TCPsend(buf, 3000);
                         }
                     }
                         break;

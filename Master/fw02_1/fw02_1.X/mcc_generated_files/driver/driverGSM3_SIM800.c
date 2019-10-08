@@ -226,7 +226,9 @@ bool GMS3_ModulePower(bool powerState) {
         printf("PIN OK ==> REDY \n");
 #endif
         // wait 10 second to have internet 
-
+        
+        if (!app_NetTimeSync()) return false;
+        
         //update time 
         if (!app_UpdateRtcTimeFromGSM()) {
 #if defined(_DEBUG)
@@ -234,6 +236,7 @@ bool GMS3_ModulePower(bool powerState) {
 #endif
             return false;
         }
+
 //        setDateTime(19, 8, 12, 5, 0, 0);
         // Set SMS Mode 
         if (!app_SetSmsFormat(true)) {

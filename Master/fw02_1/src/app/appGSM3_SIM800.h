@@ -303,6 +303,9 @@ bool app_EnableModuleInGPRSmode(bool sate, uint8_t * APN);
  * TCP APPLICATION
  *#################*/
 
+//
+uint8_t * app_StatusGPRS(void);
+
 /**
  * 
  * @return :
@@ -330,7 +333,7 @@ bool app_StartTCPconnection(uint8_t * ipAdrr, uint8_t* port);
 bool app_TCPclose(void);
 
 
-bool app_TCPsend(uint8_t * dataToSend);
+bool app_TCPsend(uint8_t * dataToSend, uint16_t delay);
 
 /****************                                         *********************/
 /*************************                     ********************************/

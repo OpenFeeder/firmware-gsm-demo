@@ -65,10 +65,10 @@
 //_________________________Radio Alpha TRX Infos_______________________________*/
 #define TIME_OUT_WAIT_RQST        15000
 #define TIME_OUT_COLLECT_LOG        500
-#define FRAME_LENGTH                 68 // Longueur total d'une trame en octet
-#define HEADER                        6
+#define FRAME_LENGTH                 74 // Longueur total d'une trame en octet
+#define HEADER                        7
 #define ERROR_LENGTH                  8
-#define SIZE_DATA                    61
+#define SIZE_DATA                    67
 #define TIME_OUT_nIRQ                10 // en ms
 #define LAPS                         50 // on attend X ms avant de transmettre un nouveau msg 
 #define SEND_HORLOG_TIMEOUT           4 // en +1 min
@@ -76,13 +76,13 @@
 #define TIME_OUT_GET_FRAME         1500 // temps max, pour que le msg recu soit encore exploitable
 // au dela le mster ne m'ecoute pas donc cela ne sert ? rien 
 #define NB_ERR_BUF                   10 // nombre d'errerur possible 
-#define NB_BLOCK                     16 // pour l'instat on dit qye c'est 20 ==>
+#define NB_BLOCK                     14 // pour l'instat on dit qye c'est 20 ==>
 #define MAX_W                        10 // nombre MAX de paquet a transmettre avant d'attendre un ack 
 
-#define NB_SLAVE                      2
-#define MAX_TIMEOUT                   10 // nombre de timeout avant de decider que la liaison avec le slave est couper 
-#define MAX_ERROR                     10 // nombre du quel on considere que la communication est interompue entre le slave est le master
-#define MAX_TRY_TO_SYNC               10 // le nombre d'essaie avant de decider qu'on est pas connecte
+#define MAX_SLAVE                    20
+#define MAX_TIMEOUT                  10 // nombre de timeout avant de decider que la liaison avec le slave est couper 
+#define MAX_ERROR                    10 // nombre du quel on considere que la communication est interompue entre le slave est le master
+#define MAX_TRY_TO_SYNC               5 // le nombre d'essaie avant de decider qu'on est pas connecte
 #define MAX_LEVEL_PRIO                4 // 3 niveau de priorite, si l'on veut en ajouter il suiffit de modifier 
 
 #define MAX_LEVEL_PRIO 4
@@ -147,9 +147,9 @@ typedef union {
     }Section;
     
     struct {
-        unsigned dest    : 4;   //-----
-        unsigned src     : 4;   //    |
-        uint8_t station;        //    |
+        unsigned dest    : 8;   //-----
+        unsigned src     : 8;   //    |
+        unsigned station : 8;   //    |
         unsigned typeMsg : 4;   //    |  
         unsigned nbR     : 4;   //     }==> l'en tete  
         uint8_t idMsg;          //    |

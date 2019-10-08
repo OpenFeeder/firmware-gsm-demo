@@ -391,19 +391,22 @@ typedef struct {
 
     //init rf module module 
     int8_t timeToSynchronizeHologe;
-    bool synchronizeTime;
+    bool slaveSynchronizeTime;
+    bool masterSynchronizeTime;
     bool RfModuleInit;
+    bool connectToServer;
 
     volatile uint8_t behavior[MAX_LEVEL_PRIO][NB_BEHAVIOR_PER_PRIO];
     volatile uint8_t ptr[MAX_LEVEL_PRIO][3]; //READ - WRITE - OVFF (overflow)
 //    uint8_t BUFF_COLLECT[NB_BLOCK][SIZE_DATA];
     uint8_t BUFF_COLLECT[NB_BLOCK*SIZE_DATA];
     int8_t nbSlaveOnSite;
-    SlaveState ensSlave[8]; // max of on site
-    int8_t slaveSelected;
-    int8_t station;
-    int8_t masterId;
-    int8_t broadCastId;
+    SlaveState ensSlave[MAX_SLAVE]; // max of on site
+    uint8_t slaveSelected;
+    uint8_t station;
+    uint8_t masterId;
+    uint8_t broadCastId;
+    uint8_t nbCharPerLine;
     
 } MASTER_APP_DATA;
 
@@ -419,6 +422,8 @@ extern APP_DATA_USB appDataUsb; /* USB host application data. */
 extern APP_DATA_ALARM appDataAlarmSleep;
 extern APP_DATA_ALARM appDataAlarmWakeup;
 extern APP_DATA_LEDS appDataAttractiveLeds; /* Error application data. */
+extern APP_DATA_ALARM appDataAlarmDefaultStopOF;
+extern APP_DATA_ALARM appDataAlarmDefaultOnOF;
 extern APP_DATA_LOG appDataLog;
 extern APP_DATA_RC appDataRc; /* Remote control application data. */
 extern APP_DATA_EVENT appDataEvent;

@@ -388,8 +388,8 @@ void __attribute__((interrupt, no_auto_psv)) _ISR _RTCCInterrupt(void) {
 
             getDateTime();
             
-            if (appData.current_time.tm_hour >= appDataAlarmSleep.time.tm_hour &&
-                appData.current_time.tm_min >= appDataAlarmSleep.time.tm_min) {
+            if (appData.current_time.tm_hour >= appDataAlarmDefaultStopOF.time.tm_hour &&
+                appData.current_time.tm_min >= appDataAlarmDefaultStopOF.time.tm_min) {
                 // default time to sleep
 #if defined (USE_UART1_SERIAL_INTERFACE) && defined (DISPLAY_ISR_RTCC)
                 printf("- Sleep %d %d  vs %d %d \n", 
@@ -414,22 +414,25 @@ void __attribute__((interrupt, no_auto_psv)) _ISR _RTCCInterrupt(void) {
                 
                 
 //                /* Day time gestion */
-                if (appData.current_time.tm_hour < 6 && appData.dayTime != GOOD_MORNING) {
+                if (appData.current_time.tm_hour < appDataAlarmWakeup.time.tm_hour && 
+                        appData.dayTime != GOOD_MORNING) {
                     appData.dayTime = GOOD_MORNING;
                 }
                 
-                if (appData.current_time.tm_hour >= 6 && 
-                    appData.current_time.tm_hour < 19 && 
+                if (appData.current_time.tm_hour >= appDataAlarmWakeup.time.tm_hour && 
+                    appData.current_time.tm_hour*60+appData.current_time.tm_min < 
+                        appDataAlarmSleep.time.tm_hour*60+appDataAlarmSleep.time.tm_min && 
                     appData.dayTime != GOOD_DAY) {
                     appData.dayTime = GOOD_DAY;
                     MASTER_StoreBehavior(MASTER_APP_STATE_SELECTE_SLAVE, PRIO_HIGH);
                 }
                 
-                if (appData.current_time.tm_hour >= 19 && 
-                    appData.current_time.tm_hour*60+appData.current_time.tm_min < 23*60+59 && 
+                if (appData.current_time.tm_hour >= appDataAlarmSleep.time.tm_hour && 
+                    appData.current_time.tm_hour*60+appData.current_time.tm_min < 
+                        appDataAlarmDefaultStopOF.time.tm_hour*60+appDataAlarmDefaultStopOF.time.tm_min && 
                     appData.dayTime != GOOD_NIGHT) {
                     appData.dayTime = GOOD_NIGHT;
-                    MASTER_StoreBehavior(MASTER_APP_STATE_GPRS_ATTACHED, PRIO_EXEPTIONNEL);
+                    MASTER_StoreBehavior(MASTER_APP_STATE_SELECTE_SLAVE, PRIO_EXEPTIONNEL);
                 }
                 
                 
@@ -463,14 +466,19 @@ void __attribute__((interrupt, no_auto_psv)) _ISR _RTCCInterrupt(void) {
                 }
 //                
                 /* Horloge synchronize : ervry 5 min */
+                if (appData.current_time.tm_min%15 == 0 &&
+                    appData.current_time.tm_sec%15 == 0 &&
+                    !appData.masterSynchronizeTime) {
+                    appData.masterSynchronizeTime = true;
+                }
                 /* Horloge synchronize : ervry 5 min */
                 if ((appData.current_time.tm_min%appData.timeToSynchronizeHologe == 0) && 
-                    appData.synchronizeTime) {
-                    appData.synchronizeTime = false;
+                    appData.slaveSynchronizeTime) {
+                    appData.slaveSynchronizeTime = false;
                     MASTER_StoreBehavior(MASTER_APP_STATE_SEND_DATE, PRIO_EXEPTIONNEL);
                 }else if (appData.current_time.tm_min%appData.timeToSynchronizeHologe != 0
-                    && !appData.synchronizeTime) {
-                    appData.synchronizeTime = true;
+                    && !appData.slaveSynchronizeTime) {
+                    appData.slaveSynchronizeTime = true;
                 }
             }
         }
