@@ -3183,18 +3183,22 @@ unsigned int radioAlphaTRX_TransceiverConfigFq(unsigned char freqSelected) {
 
 } // end of FSK_Transceiver_ConfigFq()
 
-void radioAlphaTRX_Init(void) {
+bool radioAlphaTRX_Init(void) {
     //
     RF_StatusRead.Val = 0;
     //    RF_StatusRead.Val = radioAlphaTRX_Command(STATUS_READ_CMD); // intitial SPI transfer added to avoid power-up problem
     /**-------------> Frequency Setting Command @ 433 MHz <--------------------*/
-
-//    do {
+    int8_t i = 0;
+    do {
         RF_StatusRead.Val = radioAlphaTRX_Command(STATUS_READ_CMD); // intitial SPI transfer added to avoid power-up problem
 #if defined(UART_DEBUG)
         printf("A other Wait until RFM12B is out of power-up reset, status: 0x%04X\r\n", RF_StatusRead.Val);
 #endif
-//    } while (RF_StatusRead.bits.b14_POR);
+        i++;
+    } while (RF_StatusRead.bits.b14_POR != 0 && i < 10);
+    if (i >= 10) {
+        return false;
+    }
 
 
     /**-------------> Power Management Command(2) <---------------------------*/
@@ -3229,6 +3233,7 @@ void radioAlphaTRX_Init(void) {
     // 1600d --> 0x640
     //    ALPHA_TRX433S_Control(0xA640); // Set operation frequency: Fc= 430+F*0.0025 , soit 430+1600*0.0025= 434 MHz avec 0x640 --> 110 0100 0000
     RF_FrequencySet.Val = FQ_SET_CMD_POR;
+    RF_FrequencySet.Val = radioAlphaTRX_TransceiverConfigFq(FQ_119);
     //    RF_FrequencySet.REGbits.SetOperationFrequency_H = 0x6;
     //    RF_FrequencySet.REGbits.SetOperationFrequency_L = 0x40;
     radioAlphaTRX_Command(RF_FrequencySet.Val); // Set operation frequency: Fc= 430+F*0.0025 , soit 430+1600*0.0025= 434 MHz avec 0x640 --> 110 0100 0000
@@ -3327,7 +3332,8 @@ void radioAlphaTRX_Init(void) {
     RF_AfcCmd.REGbits.en = 0;
     RF_AfcCmd.REGbits.range_limit = PLUS_3_TO_MOINS_4;
     RF_AfcCmd.REGbits.SetCommandeOfAFC = KEEP_Fosette_VALUE_INDEP;
-    radioAlphaTRX_Command(RF_AfcCmd.Val); //0xC4F6
+    // verifier cette valeur 
+    radioAlphaTRX_Command(0xC4F6); //0xC4F6
 
 
     /**-------------> PLL Setting Command (12) <------------------------------*/
@@ -3355,6 +3361,7 @@ void radioAlphaTRX_Init(void) {
     // Clock Divider    = 1 Mhz
     radioAlphaTRX_Command(0xC009); // CLK OUTPUT = 1 MHz
     __delay32(SLEEP_AFTER_INIT);
+    return true;
 }
 
 // Initialiser la detection d'une nouvelle donnee
@@ -3363,8 +3370,8 @@ bool radioAlphaTRX_FlushFIFO() {
     bool stop = false;
     int i = 10;
     do { //attention risque de boocle infii 
-        RF_StatusRead.Val = radioAlphaTRX_Command(STATUS_READ_CMD);
-        if (!RF_StatusRead.bits.b9_FFEM && RF_StatusRead.bits.b6_DQD)
+        RF_StatusRead.Val = radioAlphaTRX_Command(STATUS_READ_CMD); // verifier
+        if ((!RF_StatusRead.bits.b9_FFEM && RF_StatusRead.bits.b6_DQD))
             radioAlphaTRX_Command(RX_FIFO_READ_CMD_POR); // vide la fifo
         else
             stop = true;
@@ -3372,10 +3379,11 @@ bool radioAlphaTRX_FlushFIFO() {
     } while (!stop && i > 0); // tant que la fifo nest pas vide 
     return !(i == 0); // 
 }
+
 void radioAlphaTRX_ReceivedMode(void) {
     //close TX mode 
     if (!radioAlphaTRX_FlushFIFO()) radioAlphaTRX_Init();
-    
+
     RF_PowerManagement.Val = PWR_MGMT_CMD_POR;
     RF_PowerManagement.bits.b0_dc = 1;
     radioAlphaTRX_Command(RF_PowerManagement.Val); //0x8209
@@ -3411,11 +3419,10 @@ void radioAlphaTRX_ReceivedMode(void) {
 
     RF_FIFOandResetMode.bits.b1_ff = 1; // FIFO fill will be enabled after synchronize pattern reception
     RF_StatusRead.Val = radioAlphaTRX_Command(RF_FIFOandResetMode.Val); // --> 0xCA83
-    //#if defined(UART_DEBUG)
-    //        printf("status 0x%04X\n", RF_StatusRead.Val);
-    //#endif
+
     sendMode = false; // on n'est plus en mode emission
 }
+
 
 // Configuration en mode TX avant l'envoie de donnee
 
@@ -3499,8 +3506,8 @@ int8_t radioAlphaTRX_SendData(Frame frameToSend) {
     //synchro pattern
     radioAlphaTRX_SendByte(0x2D, SEND_TIME_OUT);
     radioAlphaTRX_SendByte(0xD4, SEND_TIME_OUT);
-    //transmission des octet 
-    for (i = 0; i < frameToSend.Champ.size + 5; i++) {
+    //transmission des octets 
+    for (i = 0; i < frameToSend.Champ.size + HEADER; i++) {
         if (radioAlphaTRX_SendByte(frameToSend.paquet[i], SEND_TIME_OUT) == 0)
             break;
     }
@@ -3510,7 +3517,6 @@ int8_t radioAlphaTRX_SendData(Frame frameToSend) {
     radioAlphaTRX_SendByte(0x00, SEND_TIME_OUT);
     return i;
 }
-
 // Envoyer une commande au module RF (par liaison SPI)
 
 uint16_t radioAlphaTRX_Command(uint16_t cmdWrite) {
@@ -3594,7 +3600,9 @@ void radioAlphaTRX_CaptureFrame() {
         LED_STATUS_B_Toggle();
         // � ce niveau le msg est corectemnt re�u 
         MASTER_StoreBehavior(MASTER_STATE_MSG_RF_RECEIVE, PRIO_HIGH); // c'est une information tr�s importante 
-    } 
+    } else {
+        LED_STATUS_R_Toggle();
+    }
     //on se remet en ecoute 
     radioAlphaTRX_ReceivedMode();
 }

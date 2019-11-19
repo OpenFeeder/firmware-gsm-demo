@@ -20,10 +20,11 @@
 
 /*******************************************************************************/
 //_________________________Radio Alpha TRX Infos_______________________________*/
-#define TIME_OUT_WAIT_RQST         5000
+#define TIME_OUT_WAIT_RQST        30000
 #define TIME_OUT_COLLECT_LOG       1000
 #define FRAME_LENGTH                 25 // Longueur total d'une trame en octet
 #define ERROR_LENGTH                  8
+#define HEADER                        5
 #define SIZE_DATA                    20
 #define TIME_OUT_nIRQ                10 // en ms
 #define LAPS                         50 // on attend X ms avant de transmettre un nouveau msg 

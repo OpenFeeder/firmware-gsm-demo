@@ -2,6 +2,10 @@
 <project-private xmlns="http://www.netbeans.org/ns/project-private/1">
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
-        <group/>
+        <group>
+            <file>file:/home/mmadi-anzilane/Documents/stageM1/firmware-gsm-demo/Slave/fw02_1/src/app/app.c</file>
+            <file>file:/home/mmadi-anzilane/Documents/stageM1/firmware-gsm-demo/Slave/fw02_1/src/app/app_data_logger.c</file>
+            <file>file:/home/mmadi-anzilane/Documents/stageM1/firmware-gsm-demo/Slave/fw02_1/src/framework/AlphaTRX/radio_alpha_trx_slave_api.c</file>
+        </group>
     </open-files>
 </project-private>

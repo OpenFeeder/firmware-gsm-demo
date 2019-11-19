@@ -22,10 +22,9 @@
 /*------------------------------> I N C L U D E S  <--------------------------*/
 
 
-#include "atCommandsGSM3_SIM800H.h"
 #include "driverGSM3_SIM800.h"
 #include "appGSM3_SIM800.h"
-
+#include "../../../src/app/app_master.h"
 
 /******************************************************************************/
 /******************************************************************************/
@@ -130,7 +129,7 @@ bool GMS3_GetSTA(void) {
  * Note:            None
  ********************************************************************/
 void GSM3_TransmitCommand(uint8_t * inToSend) {
-    GSM3_UART_WriteBuffer(inToSend, strlen(inToSend));
+    GSM3_UART_WriteBuffer(inToSend, strlen((const char *)inToSend));
     GSM3_Write(TERMINATION_CHAR);
 }
 
@@ -151,7 +150,7 @@ void GSM3_TransmitCommand(uint8_t * inToSend) {
  * Note:            None
  ********************************************************************/
 void GSM3_TransmitString(uint8_t * string, uint8_t delimiter) {
-    int8_t size = strlen(string);
+    int8_t size = strlen((const char*)string);
     //    uint8_t buf[size + 2];
     //    sprintf(buf, "%s%c", string, delimiter);
     GSM3_UART_WriteBuffer(string, size);
@@ -159,7 +158,7 @@ void GSM3_TransmitString(uint8_t * string, uint8_t delimiter) {
 }
 
 void GSM3_TransmitChar(uint8_t * string) {
-    GSM3_UART_WriteBuffer(string, strlen(string));
+    GSM3_UART_WriteBuffer(string, strlen((const char*)string));
 }
 
 /*********************************************************************
@@ -188,20 +187,20 @@ bool GMS3_ModulePower(bool powerState) {
         GSM3_SetPWK(false);
         TMR_Delay(8000); //6 s
         uint8_t tryToConnect = 0;
-        char * read;
+        uint8_t * read;
         do {
             GSM3_ReadyReceiveBuffer(); // Prepare for next message
             //            sprintf(buf, "AT%c",TERMINATION_CHAR);
             GSM3_TransmitCommand((uint8_t*) "AT");
             TMR_Delay(1000);
-            read = GSM3_GetResponse(); // Read 'OK' String from Buffer
+            read = (uint8_t*)GSM3_GetResponse(); // Read 'OK' String from Buffer
             if (tryToConnect++ > GSM_TRY_TO_CON_MAX) {
 #if defined( USE_UART1_SERIAL_INTERFACE )
                 printf("Je sors la \n");
 #endif
                 return false;
             }
-        } while (!GSM3_findStringInResponse("OK", read));
+        } while (!GSM3_findStringInResponse((uint8_t*)"OK", read));
 #if defined(_DEBUG)
         printf("AT !! OK\n");
 #endif
@@ -210,11 +209,11 @@ bool GMS3_ModulePower(bool powerState) {
         /********/
         // pin code 
         read = app_GetSimState();
-        if (!GSM3_findStringInResponse("READY", read)) {
+        if (!GSM3_findStringInResponse((uint8_t*)"READY", read)) {
 #if defined( USE_UART1_SERIAL_INTERFACE )
             printf("PinCode Needed\n");
 #endif
-            if (app_SetPinCode(appData.gsm_pin) == false) {
+            if (app_SetPinCode((uint8_t*)appData.gsm_pin) == false) {
 #if defined(_DEBUG)
                 printf("PIN CODE ERROR !!!!\n");
 #endif
@@ -253,7 +252,7 @@ bool GMS3_ModulePower(bool powerState) {
 }
 
 void GSM3_TransmitCommandTest(uint8_t * inToSend) {
-    GSM3_UART_WriteBuffer(inToSend, strlen(inToSend));
+    GSM3_UART_WriteBuffer(inToSend, strlen((const char*)inToSend));
 }
 
 /*********************************************************************
@@ -272,22 +271,7 @@ void GSM3_TransmitCommandTest(uint8_t * inToSend) {
  * Note:            None
  ********************************************************************/
 bool GSM3_findStringInResponse(uint8_t* strToSearch, uint8_t * response) {
-//    int8_t sizeStr = strlen(strToSearch);
-//    int8_t i = 0;
-//    int8_t j = 0;
-//    if (sizeStr > 0) {
-//        while (response[i] != '\0') {
-//            if (strToSearch[j] == response[i]) {
-//                j++;
-//                if (j == sizeStr) {
-//                    return 1;
-//                }
-//            } else
-//                j = 0;
-//            i++;
-//        }
-//    }
-    return strstr(response, strToSearch) != NULL;
+    return strstr((const char*)response, (const char*)strToSearch) != NULL;
 }
 
 /*********************************************************************
@@ -330,10 +314,18 @@ char* GSM3_GetResponse(void) {
 void GSM3_CaptureReceiveMsg(void) {
     GSM3_Receive_ISR();
     uint8_t readByte = uart[GSM3].Read();
-    if ((readByte != '\0') && (gsm3_response_index < gsm3_response_bufferSize - 1)) {
+    if ((readByte != '\r') && (readByte != '\0') && (readByte != '\n')
+            && (gsm3_response_index < gsm3_response_bufferSize - 1)) {
+        LED_STATUS_B_Toggle();
         gsm3_response_buffer[gsm3_response_index++] = readByte;
     } else {
+        LED_STATUS_R_Toggle();
         gsm3_response_buffer[gsm3_response_index] = '\0';
+        if (appData.gsmMsgSend) { 
+            MASTER_StoreBehavior(MASTER_APP_STATE_MSG_GSM_RECEIVE, PRIO_HIGH);
+            TMR_SetWaitRqstTimeout(-1);
+            appData.typeTimeout = NONE_TIMEOUT;
+        }
     }
 }
 

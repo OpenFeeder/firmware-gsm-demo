@@ -460,7 +460,10 @@ void APP_SerialDebugTasks(void) {
                     case 'a':
                     case 'A':
                     {
-                        setDateTime(19, 8, 12, 6, 0, 0);
+                        RTCC_TimeGet(&appData.current_time);
+                        setDateTime(appData.current_time.tm_year, 
+                                appData.current_time.tm_mon, 
+                                appData.current_time.tm_mday, 6, 0, 0);
                     }
                         break;
                     case 'b':
@@ -506,13 +509,19 @@ void APP_SerialDebugTasks(void) {
                     case 'm':
                     case 'M':
                     {
-                        setDateTime(19, 8, 12, 5, 0, 0);
+                        RTCC_TimeGet(&appData.current_time);
+                        setDateTime(appData.current_time.tm_year, 
+                                appData.current_time.tm_mon, 
+                                appData.current_time.tm_mday, 5, 0, 0);
                     }
                         break;
                     case 'n':
                     case 'N':
                     {
-                        setDateTime(19, 8, 12, 20, 59, 50);
+                        RTCC_TimeGet(&appData.current_time);
+                        setDateTime(appData.current_time.tm_year, 
+                                appData.current_time.tm_mon, 
+                                appData.current_time.tm_mday, 20, 59, 50);
                         MASTER_StoreBehavior(MASTER_APP_STATE_SEND_DATE, PRIO_HIGH);
                     }
                         break;
@@ -530,7 +539,10 @@ void APP_SerialDebugTasks(void) {
                     case 's':
                     case 'S':
                     {
-                        setDateTime(19, 8, 12, 23, 58, 50);
+                        RTCC_TimeGet(&appData.current_time);
+                        setDateTime(appData.current_time.tm_year, 
+                                appData.current_time.tm_mon, 
+                                appData.current_time.tm_mday, 23, 58, 50);
                     }
                         break;
                     case 't':

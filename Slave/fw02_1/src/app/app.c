@@ -690,6 +690,16 @@ void APP_Tasks(void) {
 #endif
             }
             radioAlphaTRX_SlaveUpdateDatelog();
+            
+            if (false == setLogFileName()) {
+#if defined(_DEBUG)
+                printf("false == setLogFileName( )\n"
+                        "==> ERROR STATE\n");
+#endif
+                appDataUsb.is_device_needed = false;
+                appData.state = APP_STATE_ERROR;
+                break;
+            }
             appData.state = APP_STATE_IDLE;
             break;
             /* -------------------------------------------------------------- */
@@ -2444,7 +2454,7 @@ void APP_Initialize(void) {
 
     appError.OfInCriticalError = false;
     appError.errorSend = false;
-    
+
     //Stop OF 
     appDataAlarmDefaultStopOF.time.tm_hour = 23;
     appDataAlarmDefaultStopOF.time.tm_min = 50;

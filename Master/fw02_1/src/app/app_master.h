@@ -206,6 +206,15 @@ typedef enum {
     PTR_OVFF //10
 } PTR;
 
+
+/**-------------------------->> S T R U C T -O F- T I M E O U T <<------------*/
+typedef enum {
+    NONE_TIMEOUT,
+    RF_TIMEOUT,
+    GSM_TIMEOUT
+}TIMEOUT_Type;
+
+
 /**-------------------------->> S T R U C T -O F- S L A V E - S T A T E <<----*/
 typedef enum {
     SLAVE_SYNC, // phase de syncronisation 
@@ -407,6 +416,8 @@ typedef struct {
     uint8_t masterId;
     uint8_t broadCastId;
     uint8_t nbCharPerLine;
+    bool gsmMsgSend;
+    TIMEOUT_Type typeTimeout;
     
 } MASTER_APP_DATA;
 

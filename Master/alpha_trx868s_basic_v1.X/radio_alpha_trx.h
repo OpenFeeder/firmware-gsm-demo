@@ -843,7 +843,7 @@ extern STATUS_READ_VAL RF_StatusRead; // Status Read Command
 /**
  * \brief Initialise le module radio
  */
-void radioAlphaTRX_Init(void);
+bool radioAlphaTRX_Init(void);
 
 /**
  * Transmission d'une commande du MCU au modul Alpha TRX par liaison SPI

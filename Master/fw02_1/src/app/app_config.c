@@ -439,7 +439,7 @@ INI_READ_STATE config_read_ini(void) {
 }
 
 void config_print(void) {
-    int i, j;
+//    int i, j;
 
     printf("Configuration parameters\n");
 
