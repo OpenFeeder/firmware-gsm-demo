@@ -1477,9 +1477,9 @@ void MASTER_AppTask(void) {
             bool b = false;
 #if defined (USE_UART1_SERIAL_INTERFACE) 
             printf("avant satate %d vs %d ou %d\n", appData.ensSlave[appData.slaveSelected].state, SLAVE_NO_REQUEST, SLAVE_ERROR);
-            printf("i = %d et nbSlave on site %d\n", i, appData.nbSlaveOnSite);
+            printf("i = %d et nbSlave on site %d\n", i, appData.nbSlaveSite);
 #endif
-            for (i = 0; i < appData.nbSlaveOnSite; i++) {
+            for (i = 0; i < appData.nbSlaveSite; i++) {
 #if defined (USE_UART1_SERIAL_INTERFACE) 
                 printf("dans la boucle satate %d vs %d ou %d\n", appData.ensSlave[i].state, SLAVE_NO_REQUEST, SLAVE_ERROR);
 #endif
@@ -1491,13 +1491,13 @@ void MASTER_AppTask(void) {
             }
 
             if (b) {
-                i = (appData.slaveSelected + 1) % appData.nbSlaveOnSite;
+                i = (appData.slaveSelected + 1) % appData.nbSlaveSite;
                 b = false;
                 bool stop = false;
                 do {
                     if (appData.ensSlave[i].state == SLAVE_ERROR ||
                             appData.ensSlave[i].state == SLAVE_COLLECT_END) {
-                        i = (i + 1) % appData.nbSlaveOnSite;
+                        i = (i + 1) % appData.nbSlaveSite;
                         if (i == appData.slaveSelected)
                             if (appData.ensSlave[i].state == SLAVE_COLLECT_END ||
                                     appData.ensSlave[i].state == SLAVE_ERROR) {
@@ -1537,7 +1537,6 @@ void MASTER_AppTask(void) {
                             TMR_SetWaitRqstTimeout(0); // declenche une interuption logiciel 
                             appData.typeTimeout = RF_TIMEOUT;
                             memset(appData.BUFF_COLLECT, '\0', NB_BLOCK * SIZE_DATA);
-                            appData.pWrite = appData.BUFF_COLLECT;
                         }
                             break;
                         default:
@@ -2069,7 +2068,7 @@ void MASTER_AppTask(void) {
             if (appData.dayTime == GOOD_NIGHT) {
                 int8_t i;
                 int8_t j = 0;
-                for (i = 0; i < appData.nbSlaveOnSite; i++) {
+                for (i = 0; i < appData.nbSlaveSite; i++) {
                     if (appData.ensSlave[i].state == SLAVE_ERROR) {
 
                         if (!appData.ensSlave[i].errorNotify) {
@@ -2088,9 +2087,9 @@ void MASTER_AppTask(void) {
                     j++;
                 }
 
-                if (j >= appData.nbSlaveOnSite) {
+                if (j >= appData.nbSlaveSite) {
 #if defined( USE_UART1_SERIAL_INTERFACE )
-                    printf("Sleep, rapport of collect \n");
+                    printf("Sleep, rapport of collect %d\n", appData.nbSlaveSite);
 #endif
                     if (app_TCPconnected()) {
                         uint8_t buf[90];
@@ -2199,7 +2198,6 @@ void MASTER_AppInit(void) {
     appData.broadCastId = 255;
 
     memset(appData.BUFF_COLLECT, '\0', NB_BLOCK * SIZE_DATA);
-    appData.pWrite = 0;
     for (i = 0; i < MAX_SLAVE; i++) {
         appData.ensSlave[i].idSlave = i + 1;
         appData.ensSlave[i].index = 1;
@@ -2250,8 +2248,10 @@ void MASTER_AppInit(void) {
     appDataEvent.file_type = EVENT_FILE_BINARY;
 
     appData.ext_temperature = 0.0;
-
-
+    
+    // patch my issues
+    appData.nbSlaveSite = appData.nbSlaveSite; 
+            
     appError.led_color_1 = LEDS_OFF;
     appError.led_color_2 = LEDS_OFF;
     appError.number = ERROR_NONE;
