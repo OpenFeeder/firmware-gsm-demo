@@ -314,16 +314,19 @@ char* GSM3_GetResponse(void) {
 void GSM3_CaptureReceiveMsg(void) {
     GSM3_Receive_ISR();
     uint8_t readByte = uart[GSM3].Read();
-    if ((readByte != '\r') && (readByte != '\0') && (readByte != '\n')
+    //(readByte != '\r') && 
+    // * fin de msg 
+    if ((readByte != '*') && (readByte != '\0') && (readByte != '\n')
             && (gsm3_response_index < gsm3_response_bufferSize - 1)) {
         LED_STATUS_B_Toggle();
         gsm3_response_buffer[gsm3_response_index++] = readByte;
     } else {
-        LED_STATUS_R_Toggle();
-        gsm3_response_buffer[gsm3_response_index] = '\0';
-        if (appData.gsmMsgSend) { 
+//        gsm3_response_buffer[gsm3_response_index] = '\0';
+        if (appData.gsmMsgSend && (readByte == '*')) { 
+            LED_STATUS_R_Toggle();
             MASTER_StoreBehavior(MASTER_APP_STATE_MSG_GSM_RECEIVE, PRIO_HIGH);
             TMR_SetWaitRqstTimeout(-1);
+            appData.gsmMsgSend = false;
             appData.typeTimeout = NONE_TIMEOUT;
         }
     }

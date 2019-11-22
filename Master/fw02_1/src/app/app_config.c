@@ -255,7 +255,7 @@ INI_READ_STATE config_read_ini(void) {
         if (-1 == read_parameter) {
             return INI_PB_LOCAL_ID_SLAVE_NO_SET;
         } else {
-            appData.nbSlaveOnSite = (int) read_parameter;
+            appData.nbSlaveOnSite = (int8_t) read_parameter;
 #if defined (USE_UART1_SERIAL_INTERFACE) && defined (DISPLAY_INI_READ_DATA)
             printf("\tNumber of slave on site %d ... read.\n", appData.nbSlaveOnSite);
 #endif

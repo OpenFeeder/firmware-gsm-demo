@@ -319,7 +319,7 @@ bool app_UpdateRtcTimeFromGSM() {
 #endif
     if (!GSM3_findStringInResponse((uint8_t *)"+CCLK", buff)) return false;
 
-    //
+    // on se positione au bon endroit 
     struct tm timeToSet;
     int8_t i = 0;
     for (; i < strlen(buff); i++) {
@@ -328,6 +328,7 @@ bool app_UpdateRtcTimeFromGSM() {
     i++;
     timeToSet.tm_year = app_ConvDec(buff[i], buff[i + 1]);
     i += 3; //on saute le /
+    if (timeToSet.tm_year < CURENT_DATE) return false; // n'a pas reuissi a mettre a jour la date 
     timeToSet.tm_mon = app_ConvDec(buff[i], buff[i + 1]);
     i += 3;
     timeToSet.tm_mday = app_ConvDec(buff[i], buff[i + 1]);
@@ -338,8 +339,7 @@ bool app_UpdateRtcTimeFromGSM() {
     i += 3;
     timeToSet.tm_sec = app_ConvDec(buff[i], buff[i + 1]);
     i += 3;
-    //    timeToSet.tm_wday = app_ConvDec(buff[i], buff[i + 1]);
-    //    i += 3;
+    
     RTCC_TimeSet(&timeToSet);
     return true;
 }
@@ -834,10 +834,14 @@ void app_TCPsendToServer(uint8_t * dataToSend) {
     GSM3_TransmitCommand(buf); // may be we can add : AT+CIPSEND=length(dataToSend)
     TMR_Delay(100);
     uint8_t * response = GSM3_GetResponse();
+    #if defined (USE_UART1_SERIAL_INTERFACE) 
+    printf("resp : %s \n", response);
+#endif
     if (!GSM3_findStringInResponse((uint8_t*)">", response)) return false;
     GSM3_ReadyReceiveBuffer();
     GSM3_TransmitChar(dataToSend);
     appData.gsmMsgSend = true;
+    TMR_Delay(300);
 }
 /****************                                         *********************/
 /*************************                     ********************************/

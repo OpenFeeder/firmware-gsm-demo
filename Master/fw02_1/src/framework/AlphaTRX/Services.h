@@ -92,7 +92,7 @@
 #define TIME_LIMIT_OF_CONFIG          6 // avant 6h
 #define TIME_LIMIT_TO_GET_INFOS      19 // avant 19h
 #define TIME_LIMIT_TO_COLLECT_LOG    00 // avant 00h et apres 19h
-
+#define CURENT_DATE                  19
 /*******************************************************************************/
 
 //_______________________________TYPE__PAQUET________________________________________*/

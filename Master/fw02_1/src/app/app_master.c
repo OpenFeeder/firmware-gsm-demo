@@ -149,7 +149,6 @@ uint8_t MASTER_SendDateRF() {
     //____________________________
     //________UPDATE DATE_________
     // with GSM module 
-    // TODO: use GSM function to update date here
     if (appData.masterSynchronizeTime) {
         if (!app_UpdateRtcTimeFromGSM()) {
 #if defined(UART_DEBUG)
@@ -1439,7 +1438,6 @@ void MASTER_AppTask(void) {
             /* -------------------------------------------------------------- */
 
         case MASTER_APP_STATE_SEND_DATE:
-        {
             if (appData.state != appData.previous_state) {
                 appData.previous_state = appData.state;
 #if defined ( USE_UART1_SERIAL_INTERFACE ) && defined( DISPLAY_CURRENT_STATE )
@@ -1447,7 +1445,6 @@ void MASTER_AppTask(void) {
 #endif
                 MASTER_SendDateRF();
             }
-        }
             break;
             /* -------------------------------------------------------------- */
 
@@ -1476,9 +1473,16 @@ void MASTER_AppTask(void) {
             }
 
             //test si tous les slaves sont sans reponse 
-            uint8_t i;
+            uint8_t i = 0;
             bool b = false;
+#if defined (USE_UART1_SERIAL_INTERFACE) 
+            printf("avant satate %d vs %d ou %d\n", appData.ensSlave[appData.slaveSelected].state, SLAVE_NO_REQUEST, SLAVE_ERROR);
+            printf("i = %d et nbSlave on site %d\n", i, appData.nbSlaveOnSite);
+#endif
             for (i = 0; i < appData.nbSlaveOnSite; i++) {
+#if defined (USE_UART1_SERIAL_INTERFACE) 
+                printf("dans la boucle satate %d vs %d ou %d\n", appData.ensSlave[i].state, SLAVE_NO_REQUEST, SLAVE_ERROR);
+#endif
                 if (appData.ensSlave[i].state != SLAVE_NO_REQUEST &&
                         appData.ensSlave[i].state != SLAVE_ERROR) {
                     b = true;
@@ -1508,6 +1512,9 @@ void MASTER_AppTask(void) {
 
                 if (b) {
                     //en foction de l'heur de la journee on change d'etat 
+#if defined (USE_UART1_SERIAL_INTERFACE) 
+                    printf("slave seleceted %d\n", appData.ensSlave[appData.slaveSelected].idSlave);
+#endif
                     switch (appData.dayTime) {
                         case GOOD_MORNING:
                         {
@@ -1529,6 +1536,8 @@ void MASTER_AppTask(void) {
                             appData.ensSlave[appData.slaveSelected].state = SLAVE_SYNC;
                             TMR_SetWaitRqstTimeout(0); // declenche une interuption logiciel 
                             appData.typeTimeout = RF_TIMEOUT;
+                            memset(appData.BUFF_COLLECT, '\0', NB_BLOCK * SIZE_DATA);
+                            appData.pWrite = appData.BUFF_COLLECT;
                         }
                             break;
                         default:
@@ -1761,260 +1770,290 @@ void MASTER_AppTask(void) {
                         break;
                 }
             }
+        }
             break;
             /* -------------------------------------------------------------- */
-            case MASTER_APP_STATE_GPRS_ATTACHED:
-            {
-                if (appData.state != appData.previous_state) {
-                    appData.previous_state = appData.state;
+        case MASTER_APP_STATE_GPRS_ATTACHED:
+        {
+            if (appData.state != appData.previous_state) {
+                appData.previous_state = appData.state;
 #if defined( USE_UART1_SERIAL_INTERFACE ) && defined( DISPLAY_CURRENT_STATE )
-                    printf("> MASTER_APP_STATE_GPRS_ATTACHED\n");
+                printf("> MASTER_APP_STATE_GPRS_ATTACHED\n");
 #endif
-                }
+            }
 
-                int8_t i = 0;
-                bool stop = false;
-                bool gprsEnable = false;
-                do {
-                    if (!gprsEnable) {
-                        gprsEnable = app_EnableModuleInGPRSmode(true, appData.gsm_apn);
-                    }
-                    if (gprsEnable) {
-                        if (app_StartTCPconnection(appData.gsm_ip_server, appData.gsm_port)) {
+            int8_t i = 0;
+            bool stop = false;
+            bool gprsEnable = false;
+            do {
+                if (!gprsEnable) {
+                    gprsEnable = app_EnableModuleInGPRSmode(true, appData.gsm_apn);
+                }
+                if (gprsEnable) {
+                    if (app_StartTCPconnection(appData.gsm_ip_server, appData.gsm_port)) {
 #if defined( USE_UART1_SERIAL_INTERFACE )
-                            printf("TCP CONNECTED\n");
+                        printf("TCP CONNECTED\n");
 #endif
-                            appData.connectToServer = true;
-                            stop = true;
-                            break;
-                        } else
-                            i++;
+                        appData.connectToServer = true;
+                        stop = true;
+                        break;
                     } else
                         i++;
-                    TMR_Delay(1000);
-                } while (!stop && i < 40);
-                if (!stop) {
+                } else
+                    i++;
+                TMR_Delay(1000);
+            } while (!stop && i < 40);
+            if (!stop) {
 #if defined( USE_UART1_SERIAL_INTERFACE )
-                    printf("ERROR GPRS CONNECTION \n");
+                printf("ERROR GPRS CONNECTION \n");
 #endif
-                    sprintf(appError.message, "Error GSPRS no Attached");
-                    appError.current_line_number = __LINE__;
-                    sprintf(appError.current_file_name, "%s", __FILE__);
-                    appError.number = ERROR_GPRS_NO_ATTACHED;
-                    MASTER_StoreBehavior(MASTER_APP_STATE_ERROR, PRIO_EXEPTIONNEL);
-                }
+                sprintf(appError.message, "Error GSPRS no Attached");
+                appError.current_line_number = __LINE__;
+                sprintf(appError.current_file_name, "%s", __FILE__);
+                appError.number = ERROR_GPRS_NO_ATTACHED;
+                MASTER_StoreBehavior(MASTER_APP_STATE_ERROR, PRIO_EXEPTIONNEL);
             }
+        }
             break;
             /* -------------------------------------------------------------- */
-            case MASTER_APP_STATE_SEND_ERROR_TO_SERVER:
-            {
-                if (appData.state != appData.previous_state) {
-                    appData.previous_state = appData.state;
+        case MASTER_APP_STATE_SEND_ERROR_TO_SERVER:
+        {
+            if (appData.state != appData.previous_state) {
+                appData.previous_state = appData.state;
 #if defined( USE_UART1_SERIAL_INTERFACE ) && defined( DISPLAY_CURRENT_STATE )
-                    printf(">MASTER_APP_STATE_SEND_ERROR_TO_SERVER\n");
+                printf(">MASTER_APP_STATE_SEND_ERROR_TO_SERVER\n");
 #endif
+            }
+            bool b = true;
+            bool r = true; //error receve 
+            uint8_t bufErrorMSG [128];
+            //                    TMR_SetWaitRqstTimeout(0); // declencher le l'interuption logiciel  
+            //TODO : traitement d'erreur send ack
+            switch (appError.number) {
+                    //different type d'erreur 
+                case ERROR_NONE:
+#if defined(UART_DEBUG)
+                    printf("transmission d'une erreur inconnue\n");
+#endif
+                    sprintf(bufErrorMSG, "OF %d du site %s ERREUR CRITIQUE INCONNUE",
+                            appData.ensSlave[appData.slaveSelected].uidSlave, appData.siteid);
+                    break;
+                case ERROR_LOW_BATTERY:
+#if defined(UART_DEBUG)
+                    printf("transmission de niveau de batterie faible\n");
+#endif
+                    sprintf(bufErrorMSG, "OF %d du site %s niveau de batterie faible",
+                            appData.ensSlave[appData.slaveSelected].uidSlave, appData.siteid);
+                    break;
+                case ERROR_LOW_FOOD:
+#if defined(UART_DEBUG)
+                    printf("transmission de niveau de nourriture faible\n");
+#endif
+                    sprintf(bufErrorMSG, "OF %d du site %s niveau de nourriture faible",
+                            appData.ensSlave[appData.slaveSelected].uidSlave, appData.siteid);
+                    break;
+                case ERROR_LOW_VBAT:
+#if defined(UART_DEBUG)
+                    printf("transmission de ERROR_LOW_VBAT\n");
+#endif
+                    sprintf(bufErrorMSG, "OF %d du site %s niveau de batterie faible",
+                            appData.ensSlave[appData.slaveSelected].uidSlave, appData.siteid);
+                    break;
+                case ERROR_DOOR_CANT_CLOSE:
+#if defined(UART_DEBUG)
+                    printf("transmission de PORTE OUVERTE\n");
+#endif      
+
+                    sprintf(bufErrorMSG, "OF %d du site %s PORTE OUVERTE",
+                            appData.ensSlave[appData.slaveSelected].uidSlave, appData.siteid);
+                    break;
+                case ERROR_RF_MODULE:
+#if defined(UART_DEBUG)
+                    printf("transmission Module radio ne demarre pas.\n");
+#endif      
+
+                    sprintf(bufErrorMSG, "OF %s du site %s module rf ne demmare pas",
+                            appData.udid, appData.siteid);
+                    r = false;
+                    break;
+                case ERROR_SLAVE_NO_REQUEST:
+#if defined(UART_DEBUG)
+                    printf("transmission Slave no request.\n");
+#endif      
+
+                    sprintf(bufErrorMSG, "OF %d du site %s ne repond pas",
+                            appData.ensSlave[appData.slaveSelected].uidSlave, appData.siteid);
+                    r = false;
+                    break;
+                case ERROR_SERVER_NO_REQUEST:
+#if defined(UART_DEBUG)
+                    printf("transmission Server no request.\n");
+#endif      
+
+                    sprintf(bufErrorMSG, "Master %s du site %s le server ne repond pas",
+                            appData.udid, appData.siteid);
+                    r = false;
+                    break;
+                case ERROR_MASTER_LOW_BATTERY:
+#if defined(UART_DEBUG)
+                    printf("transmission error niveau de battery master.\n");
+#endif      
+
+                    sprintf(bufErrorMSG, "master %s du site %s niveau de batterrie faible",
+                            appData.udid, appData.siteid);
+                    r = false;
+                    break;
+                case ERROR_GPRS_NO_ATTACHED:
+                {
+#if defined(UART_DEBUG)
+                    printf("transmission error GSM No ATTACHED\n");
+#endif      
+
+                    sprintf(bufErrorMSG, "master %s du site %s echeque de transmission de donnee",
+                            appData.udid, appData.siteid);
+                    r = false;
                 }
-                bool b = true;
-                bool r = true; //error receve 
-                uint8_t bufErrorMSG [128];
-                //                    TMR_SetWaitRqstTimeout(0); // declencher le l'interuption logiciel  
-                //TODO : traitement d'erreur send ack
-                switch (appError.number) {
-                        //different type d'erreur 
-                    case ERROR_NONE:
+                    break;
+                default:
 #if defined(UART_DEBUG)
-                        printf("transmission d'une erreur inconnue\n");
+                    b = false;
+                    printf("Erreur non connue\n");
 #endif
-                        sprintf(bufErrorMSG, "OF %d du site %d ERREUR CRITIQUE INCONNUE",
-                                appData.ensSlave[appData.slaveSelected].uidSlave, appData.station);
-                        break;
-                    case ERROR_LOW_BATTERY:
-#if defined(UART_DEBUG)
-                        printf("transmission de niveau de batterie faible\n");
-#endif
-                        sprintf(bufErrorMSG, "OF %d du site %d niveau de batterie faible",
-                                appData.ensSlave[appData.slaveSelected].uidSlave, appData.station);
-                        break;
-                    case ERROR_LOW_FOOD:
-#if defined(UART_DEBUG)
-                        printf("transmission de niveau de nourriture faible\n");
-#endif
-                        sprintf(bufErrorMSG, "OF %d du site %d niveau de nourriture faible",
-                                appData.ensSlave[appData.slaveSelected].uidSlave, appData.station);
-                        break;
-                    case ERROR_LOW_VBAT:
-#if defined(UART_DEBUG)
-                        printf("transmission de ERROR_LOW_VBAT\n");
-#endif
-                        sprintf(bufErrorMSG, "OF %d du site %d niveau de .... faible: ERROR_LOW_VBAT",
-                                appData.ensSlave[appData.slaveSelected].uidSlave, appData.station);
-                        break;
-                    case ERROR_DOOR_CANT_CLOSE:
-#if defined(UART_DEBUG)
-                        printf("transmission de PORTE OUVERTE\n");
-#endif      
-
-                        sprintf(bufErrorMSG, "OF %d du site %d PORTE OUVERTE",
-                                appData.ensSlave[appData.slaveSelected].uidSlave, appData.station);
-                        break;
-                    case ERROR_RF_MODULE:
-#if defined(UART_DEBUG)
-                        printf("transmission Module radio ne demarre pas.\n");
-#endif      
-
-                        sprintf(bufErrorMSG, "OF %s du site %d module rf ne demmare pas",
-                                appData.udid, appData.station);
-                        r = false;
-                        break;
-                    case ERROR_SLAVE_NO_REQUEST:
-#if defined(UART_DEBUG)
-                        printf("transmission Slave no request.\n");
-#endif      
-
-                        sprintf(bufErrorMSG, "OF %d du site %d ne repond pas",
-                                appData.ensSlave[appData.slaveSelected].uidSlave, appData.station);
-                        r = false;
-                        break;
-                    case ERROR_SERVER_NO_REQUEST:
-#if defined(UART_DEBUG)
-                        printf("transmission Server no request.\n");
-#endif      
-
-                        sprintf(bufErrorMSG, "Master %s du site %d le server ne repond pas",
-                                appData.siteid, appData.station);
-                        r = false;
-                        break;
-                    case ERROR_MASTER_LOW_BATTERY:
-#if defined(UART_DEBUG)
-                        printf("transmission error niveau de battery master.\n");
-#endif      
-
-                        sprintf(bufErrorMSG, "master %s du site %d niveau de batterrie faible",
-                                appData.udid, appData.station);
-                        r = false;
-                        break;
-                    case ERROR_GPRS_NO_ATTACHED:
-                    {
-#if defined(UART_DEBUG)
-                        printf("transmission error GSM No ATTACHED\n");
-#endif      
-
-                        sprintf(bufErrorMSG, "master %s du site %d echeque de transmission de donnee",
-                                appData.udid, appData.station);
-                        r = false;
-                    }
-                        break;
-                    default:
-#if defined(UART_DEBUG)
-                        b = false;
-                        printf("Erreur non connue\n");
-#endif
-                        break;
-                }
-                if (b) {
-                    bool resp = false;
-                    if (!appData.connectToServer) {
-                        // try to send error with sms
-                        resp = app_SendSMS(bufErrorMSG);
-                    } else {
-                        // try to send with mail from server 
-                        uint8_t errorToSend[200];
-                        sprintf(errorToSend, "%s#%d#%d#%d#%d", bufErrorMSG,
-                                appData.ensSlave[appData.slaveSelected].uidSlave,
-                                0, appData.station, 0);
-                        resp = app_TCPsend(errorToSend, 5000);
-                    }
-
-                    if (resp) {
-                        if (r) {
-                            MASTER_SendMsgRF(appData.ensSlave[appData.slaveSelected].idSlave,
-                                    ACK, appData.receive.Champ.idMsg, 1, "", 0);
-                            MASTER_StoreBehavior(MASTER_APP_STATE_SELECTE_SLAVE, PRIO_MEDIUM);
-                        } else {
-                            if (appError.number == ERROR_SLAVE_NO_REQUEST) {
-                                if (appData.dayTime == GOOD_NIGHT)
-                                    MASTER_StoreBehavior(MASTER_APP_STATE_END, PRIO_LOW);
-                                else {
-
-                                    MASTER_StoreBehavior(MASTER_APP_STATE_SELECTE_SLAVE, PRIO_MEDIUM);
-                                }
-                                appData.ensSlave[appData.slaveSelected].errorNotify = true;
-                            } else {
-                                // error suysteme envoyer
-                                MASTER_StoreBehavior(MASTER_APP_STATE_ERROR, PRIO_EXEPTIONNEL);
-                                appError.errorSend = true;
-                            }
-                        }
-                    } else {
-#if defined( USE_UART1_SERIAL_INTERFACE )
-                        printf("Error No SEND To User\n");
-#endif  
-                        /* Log event if required */
-                        if (true == appDataLog.log_events) {
-                            store_event(OF_GSM_MSG_NOT_SEND_TO_SERVER);
-                        }
-                        appError.nbErrorSendSms--;
-                        if (appError.nbErrorSendSms > 0)
-                            MASTER_StoreBehavior(MASTER_APP_STATE_SEND_ERROR_TO_SERVER, PRIO_EXEPTIONNEL);
-                        else
-                            MASTER_StoreBehavior(MASTER_APP_STATE_ERROR, PRIO_EXEPTIONNEL);
-                    }
+                    break;
+            }
+            if (b) {
+                bool resp = false;
+                if (!appData.connectToServer) {
+                    // try to send error with sms
+                    resp = app_SendSMS(bufErrorMSG);
                 } else {
-#if defined(UART_DEBUG)
-                    printf("ERROR non reconuue \n");
-#endif
-                    MASTER_StoreBehavior(MASTER_APP_STATE_ERROR, PRIO_EXEPTIONNEL);
+                    // try to send with mail from server 
+                    uint8_t errorToSend[200];
+                    sprintf(errorToSend, "%s#%d#%d#%%s#%d", bufErrorMSG,
+                            appData.masterId,
+                            ERROR, appData.siteid, 0);
+                    resp = app_TCPsend(errorToSend, 5000);
                 }
 
-            }
-            break;
-            /* -------------------------------------------------------------- */
-            case MASTER_APP_STATE_SEND_FROM_GSM:
-            {
-                if (appData.state != appData.previous_state) {
-                    appData.previous_state = appData.state;
-#if defined( USE_UART1_SERIAL_INTERFACE ) && defined( DISPLAY_CURRENT_STATE )
-                    printf(">MASTER_STATE_SEND_FROM_GSM\n");
-#endif
-                }
-                uint8_t buf[40];
-                // 1 ==> data
-                sprintf(buf, "#%d#%d#%s#%d",
-                        appData.ensSlave[appData.slaveSelected].idSlave,
-                        DATA, appData.siteid,
-                        appData.ensSlave[appData.slaveSelected].nbBloc);
-                strncpy(appData.BUFF_COLLECT + (SIZE_DATA - 1) * appData.ensSlave[appData.slaveSelected].index, buf, 40);
-                //TODO : go to select slave 
-                app_TCPsendToServer(appData.BUFF_COLLECT); // 
-                // starrt timer 
-                TMR_SetWaitRqstTimeout(TIME_OUT_WAIT_GSM_RQST);
-                appData.typeTimeout = GSM_TIMEOUT;
-            }
-            break;
-            /* -------------------------------------------------------------- */
-
-            case MASTER_APP_STATE_MSG_GSM_RECEIVE:
-            {
-                uint8_t * read = GSM3_GetResponse(); // je recupere le numero de bloc envoye
-                //        if (GSM3_findStringInResponse((uint8_t*)"MSG", read)) {
-                if (appData.ensSlave[appData.slaveSelected].nbBloc == atoi(read)) {
-                    appData.ensSlave[appData.slaveSelected].nbRepet = 0;
-                    MASTER_StoreBehavior(MASTER_APP_STATE_SELECTE_SLAVE, PRIO_MEDIUM);
-                    // prepare l'attente d'un nouveau bloc ou c'est la fin 
-                    if (appData.ensSlave[appData.slaveSelected].state == SLAVE_COLLECT_END_BLOCK) {
-                        appData.ensSlave[appData.slaveSelected].index = 1;
-                        appData.ensSlave[appData.slaveSelected].nbBloc++;
-                    } else if (appData.ensSlave[appData.slaveSelected].state == SLAVE_COLLECT_END) {
-                        //ACK permettant au slave de sleep
+                if (resp) {
+                    if (r) {
                         MASTER_SendMsgRF(appData.ensSlave[appData.slaveSelected].idSlave,
-                                SLEEP, 1, 1, "", 0);
+                                ACK, appData.receive.Champ.idMsg, 1, "", 0);
+                        MASTER_StoreBehavior(MASTER_APP_STATE_SELECTE_SLAVE, PRIO_MEDIUM);
+                    } else {
+                        if (appError.number == ERROR_SLAVE_NO_REQUEST) {
+                            if (appData.dayTime == GOOD_NIGHT)
+                                MASTER_StoreBehavior(MASTER_APP_STATE_END, PRIO_LOW);
+                            else {
+
+                                MASTER_StoreBehavior(MASTER_APP_STATE_SELECTE_SLAVE, PRIO_MEDIUM);
+                            }
+                            appData.ensSlave[appData.slaveSelected].errorNotify = true;
+                        } else {
+                            // error suysteme envoyer
+                            MASTER_StoreBehavior(MASTER_APP_STATE_ERROR, PRIO_EXEPTIONNEL);
+                            appError.errorSend = true;
+                        }
                     }
                 } else {
-                    MSTER_RetransGsmData();
+#if defined( USE_UART1_SERIAL_INTERFACE )
+                    printf("Error No SEND To User\n");
+#endif  
+                    /* Log event if required */
+                    if (true == appDataLog.log_events) {
+                        store_event(OF_GSM_MSG_NOT_SEND_TO_SERVER);
+                    }
+                    appError.nbErrorSendSms--;
+                    if (appError.nbErrorSendSms > 0)
+                        MASTER_StoreBehavior(MASTER_APP_STATE_SEND_ERROR_TO_SERVER, PRIO_EXEPTIONNEL);
+                    else
+                        MASTER_StoreBehavior(MASTER_APP_STATE_ERROR, PRIO_EXEPTIONNEL);
                 }
+            } else {
+#if defined(UART_DEBUG)
+                printf("ERROR non reconuue \n");
+#endif
+                MASTER_StoreBehavior(MASTER_APP_STATE_ERROR, PRIO_EXEPTIONNEL);
             }
+
+        }
             break;
-            case MASTER_APP_STATE_END:
+            /* -------------------------------------------------------------- */
+        case MASTER_APP_STATE_SEND_FROM_GSM:
+        {
+            if (appData.state != appData.previous_state) {
+                appData.previous_state = appData.state;
+#if defined( USE_UART1_SERIAL_INTERFACE ) && defined( DISPLAY_CURRENT_STATE )
+                printf(">MASTER_STATE_SEND_FROM_GSM\n");
+#endif
+            }
+            uint8_t buf[40];
+            // 1 ==> data
+            sprintf(buf, "#%d#%d#%s#%d",
+                    appData.ensSlave[appData.slaveSelected].idSlave,
+                    DATA, appData.siteid,
+                    appData.ensSlave[appData.slaveSelected].nbBloc);
+            strncpy(appData.BUFF_COLLECT + (SIZE_DATA - 1) * appData.ensSlave[appData.slaveSelected].index, buf, 40);
+#if defined (USE_UART1_SERIAL_INTERFACE) 
+            int k;
+            for (k = 0; k < NB_BLOCK * SIZE_DATA; k++) {
+                printf("%c", appData.BUFF_COLLECT[k]);
+            }
+            printf("\n");
+#endif
+            //TODO : go to select slave 
+            app_TCPsendToServer(appData.BUFF_COLLECT); // 
+            // starrt timer 
+            TMR_SetWaitRqstTimeout(TIME_OUT_WAIT_GSM_RQST);
+            appData.typeTimeout = GSM_TIMEOUT;
+        }
+            break;
+            /* -------------------------------------------------------------- */
+
+        case MASTER_APP_STATE_MSG_GSM_RECEIVE:
+        {
+            if (appData.state != appData.previous_state) {
+                appData.previous_state = appData.state;
+#if defined( USE_UART1_SERIAL_INTERFACE ) && defined( DISPLAY_CURRENT_STATE )
+                printf(">MASTER_APP_STATE_MSG_GSM_RECEIVE\n");
+#endif
+            }
+            uint8_t * read = GSM3_GetResponse(); // je recupere le numero de bloc envoye
+#if defined (USE_UART1_SERIAL_INTERFACE) 
+            printf("==> %s\n", read);
+#endif
+            if (GSM3_findStringInResponse((uint8_t*) "MSG", read)) {
+                //                if (appData.ensSlave[appData.slaveSelected].nbBloc == atoi(read)) {
+                appData.ensSlave[appData.slaveSelected].nbRepet = 0;
+                MASTER_StoreBehavior(MASTER_APP_STATE_SELECTE_SLAVE, PRIO_MEDIUM);
+                // prepare l'attente d'un nouveau bloc ou c'est la fin 
+#if defined (USE_UART1_SERIAL_INTERFACE) 
+                printf("slave %d ==> state %d vs endBlock %d vs endTrans %d\n",
+                        appData.slaveSelected,
+                        appData.ensSlave[appData.slaveSelected].state, 
+                        SLAVE_COLLECT_END_BLOCK,
+                        SLAVE_COLLECT_END);
+#endif
+                if (appData.ensSlave[appData.slaveSelected].state == SLAVE_COLLECT_END_BLOCK) {
+#if defined (USE_UART1_SERIAL_INTERFACE) 
+                    printf("Slave end bloc\n");
+#endif
+                    appData.ensSlave[appData.slaveSelected].index = 1;
+                    appData.ensSlave[appData.slaveSelected].nbBloc++;
+                } else if (appData.ensSlave[appData.slaveSelected].state == SLAVE_COLLECT_END) {
+                    //ACK permettant au slave de sleep
+#if defined (USE_UART1_SERIAL_INTERFACE) 
+                    printf("Slave end trans\n");
+#endif
+                    MASTER_SendMsgRF(appData.ensSlave[appData.slaveSelected].idSlave,
+                            SLEEP, 1, 1, "", 0);
+                }
+            } else {
+                MSTER_RetransGsmData();
+            }
+        }
+            break;
+        case MASTER_APP_STATE_END:
             if (appData.state != appData.previous_state) {
                 appData.previous_state = appData.state;
 #if defined( USE_UART1_SERIAL_INTERFACE ) && defined( DISPLAY_CURRENT_STATE )
@@ -2026,7 +2065,7 @@ void MASTER_AppTask(void) {
             //     je verifie si j'ai collecte les donneer de tou le monde ==> SLLEEP
             // si on est pendant la journee
             //
-            // si on est le matin 
+            // si on est le soir
             if (appData.dayTime == GOOD_NIGHT) {
                 int8_t i;
                 int8_t j = 0;
@@ -2054,8 +2093,9 @@ void MASTER_AppTask(void) {
                     printf("Sleep, rapport of collect \n");
 #endif
                     if (app_TCPconnected()) {
-                        uint8_t buf[40];
-                        sprintf(buf, "msg de fin de collect#%d#%d#%d#%d", appData.masterId, 2, appData.station, 0);
+                        uint8_t buf[90];
+                        // nothing to say end 
+                        sprintf(buf, "La collecte est fini pour ce site#%d#%d#%s#%d", appData.masterId, NOTHING, appData.siteid, 0);
                         app_TCPsend(buf, 3000);
 
                         if (true == appDataLog.log_events) {
@@ -2067,7 +2107,7 @@ void MASTER_AppTask(void) {
             } else {
                 if (appData.connectToServer) {
                     uint8_t buf[100];
-                    sprintf(buf, "Aucun Slave Ne reponds#%d#%d#%d#%d", appData.masterId, 2, appData.station, 0);
+                    sprintf(buf, "Aucun Slave Ne repond#%d#%d#%s#%d", appData.masterId, 2, appData.siteid, 0);
                     app_TCPsend(buf, 3000);
                 }
 
@@ -2084,7 +2124,7 @@ void MASTER_AppTask(void) {
             }
             break;
             /* -------------------------------------------------------------- */
-            default:
+        default:
             if (false == enter_default_state) {
 #if defined ( USE_UART1_SERIAL_INTERFACE ) && defined( DISPLAY_CURRENT_STATE )
                 printf("> DEFAULT_STATE\n");
@@ -2098,7 +2138,6 @@ void MASTER_AppTask(void) {
             setLedsStatusColor(LED_RED);
 
             break;
-        }
     }
 }
 
@@ -2160,7 +2199,7 @@ void MASTER_AppInit(void) {
     appData.broadCastId = 255;
 
     memset(appData.BUFF_COLLECT, '\0', NB_BLOCK * SIZE_DATA);
-
+    appData.pWrite = 0;
     for (i = 0; i < MAX_SLAVE; i++) {
         appData.ensSlave[i].idSlave = i + 1;
         appData.ensSlave[i].index = 1;
@@ -2180,7 +2219,7 @@ void MASTER_AppInit(void) {
     memset(appData.gsm_ip_server, 0, 20);
     memset(appData.gsm_port, 0, 5);
     /* Data logger */
-    appData.nbCharPerLine = 60;
+    appData.nbCharPerLine = 66;
     appDataLog.is_file_name_set = false;
     appDataLog.num_char_buffer = 0;
     appDataLog.num_data_stored = 0;
@@ -2224,7 +2263,7 @@ void MASTER_AppInit(void) {
     // if we send msg we wait interuption else delay
     appData.gsmMsgSend = false;
     appData.typeTimeout = NONE_TIMEOUT;
-            
+
     appDataEvent.is_txt_file_name_set = false;
     appDataEvent.is_bin_file_name_set = false;
 

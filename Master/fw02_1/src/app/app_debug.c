@@ -556,14 +556,17 @@ void APP_SerialDebugTasks(void) {
                                     SIZE_DATA);
                         }
                         //l'entete
-                        uint8_t buf[9];
-                        sprintf(buf, "#%d#%d#%d#%d", 1, 1, appData.station, 3);
-                        strncpy(appData.BUFF_COLLECT + (SIZE_DATA - 1) * i, buf, 9);
+                        uint8_t buf[40];
+                        sprintf(buf, "#%d#%d#%s#%d", 1, 1, appData.siteid, DATA);
+                        strncpy(appData.BUFF_COLLECT + 60 * i, buf, 40);
                         for (i = 0; i < NB_BLOCK * SIZE_DATA; i++) {
                             printf("%c", appData.BUFF_COLLECT[i]);
                         }
                         printf("\n");
-                        app_TCPsend(appData.BUFF_COLLECT, 3000);
+                        app_TCPsendToServer(appData.BUFF_COLLECT);
+                        TMR_SetWaitRqstTimeout(TIME_OUT_WAIT_GSM_RQST);
+                        appData.typeTimeout = NONE_TIMEOUT;
+                        break;
 
                     }
                     case 'u':
