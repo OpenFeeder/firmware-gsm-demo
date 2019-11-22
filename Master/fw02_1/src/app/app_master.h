@@ -410,7 +410,6 @@ typedef struct {
 //    uint8_t BUFF_COLLECT[NB_BLOCK][SIZE_DATA];
     uint8_t BUFF_COLLECT[NB_BLOCK*SIZE_DATA];
     int8_t nbSlaveOnSite;
-    int8_t nbSlaveSite;
     SlaveState ensSlave[MAX_SLAVE]; // max of on site
     uint8_t slaveSelected;
     uint8_t station;
