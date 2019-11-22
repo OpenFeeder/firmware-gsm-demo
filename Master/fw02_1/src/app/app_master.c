@@ -1597,6 +1597,12 @@ void MASTER_AppTask(void) {
                                 appData.ensSlave[appData.slaveSelected].state = SLAVE_COLLECT_END_BLOCK;
 #if defined(UART_DEBUG)
                                 printf("END BLOC\n");
+                                //                                printf("nbOf On Site %d, Slave %d %d %d state %d\n",
+                                //                                        appData.nbSlaveOnSite,
+                                //                                        appData.ensSlave[appData.slaveSelected].idSlave,
+                                //                                        appData.ensSlave[appData.slaveSelected].uidSlave,
+                                //                                        appData.slaveSelected,
+                                //                                        appData.ensSlave[appData.slaveSelected].state);
 #endif  
                             } else if (appData.receive.Champ.nbR == MAX_W + 1) { // fin de trans
                                 TMR_SetWaitRqstTimeout(-1);
@@ -1994,28 +2000,36 @@ void MASTER_AppTask(void) {
                 printf(">MASTER_STATE_SEND_FROM_GSM\n");
 #endif
             }
+            //#if defined (USE_UART1_SERIAL_INTERFACE) 
+            //            printf("nbOf On Site %d, Slave %d %d %d state %d\n",
+            //                    appData.nbSlaveOnSite,
+            //                    appData.ensSlave[appData.slaveSelected].idSlave,
+            //                    appData.ensSlave[appData.slaveSelected].uidSlave,
+            //                    appData.slaveSelected,
+            //                    appData.ensSlave[appData.slaveSelected].state);
+            //#endif
             uint8_t buf[40];
-            // 1 ==> data
+            // 1 ==> stack overflow
             sprintf(buf, "#%d#%d#%s#%d",
                     appData.ensSlave[appData.slaveSelected].idSlave,
                     DATA, appData.siteid,
                     appData.ensSlave[appData.slaveSelected].nbBloc);
-            strncpy(appData.BUFF_COLLECT + (SIZE_DATA - 1) * appData.ensSlave[appData.slaveSelected].index, buf, 40);
-            //#if defined (USE_UART1_SERIAL_INTERFACE) 
-            //            int k;
-            //            for (k = 0; k < NB_BLOCK * SIZE_DATA; k++) {
-            //                printf("%c", appData.BUFF_COLLECT[k]);
-            //            }
-            //            printf("\n");
-            //#endif
+            strncpy(appData.BUFF_COLLECT + (SIZE_DATA - 1) * (appData.ensSlave[appData.slaveSelected].index - 1), buf, 40);
 #if defined (USE_UART1_SERIAL_INTERFACE) 
-            printf("nbOf On Site %d, Slave %d %d %d state %d\n",
-                    appData.nbSlaveOnSite,
-                    appData.ensSlave[appData.slaveSelected].idSlave,
-                    appData.ensSlave[appData.slaveSelected].uidSlave,
-                    appData.slaveSelected,
-                    appData.ensSlave[appData.slaveSelected].state);
+            int k;
+            for (k = 0; k < NB_BLOCK * SIZE_DATA; k++) {
+                printf("%c", appData.BUFF_COLLECT[k]);
+            }
+            printf("\n");
 #endif
+            //#if defined (USE_UART1_SERIAL_INTERFACE) 
+            //            printf("nbOf On Site %d, Slave %d %d %d state %d\n",
+            //                    appData.nbSlaveOnSite,
+            //                    appData.ensSlave[appData.slaveSelected].idSlave,
+            //                    appData.ensSlave[appData.slaveSelected].uidSlave,
+            //                    appData.slaveSelected,
+            //                    appData.ensSlave[appData.slaveSelected].state);
+            //#endif
             //TODO : go to select slave 
             app_TCPsendToServer(appData.BUFF_COLLECT); // 
             // starrt timer 
@@ -2042,13 +2056,13 @@ void MASTER_AppTask(void) {
                 appData.ensSlave[appData.slaveSelected].nbRepet = 0;
                 MASTER_StoreBehavior(MASTER_APP_STATE_SELECTE_SLAVE, PRIO_MEDIUM);
                 // prepare l'attente d'un nouveau bloc ou c'est la fin 
-#if defined (USE_UART1_SERIAL_INTERFACE) 
-                printf("slave %d ==> state %d vs endBlock %d vs endTrans %d\n",
-                        appData.slaveSelected,
-                        appData.ensSlave[appData.slaveSelected].state,
-                        SLAVE_COLLECT_END_BLOCK,
-                        SLAVE_COLLECT_END);
-#endif
+                //#if defined (USE_UART1_SERIAL_INTERFACE) 
+                //                printf("slave %d ==> state %d vs endBlock %d vs endTrans %d\n",
+                //                        appData.slaveSelected,
+                //                        appData.ensSlave[appData.slaveSelected].state,
+                //                        SLAVE_COLLECT_END_BLOCK,
+                //                        SLAVE_COLLECT_END);
+                //#endif
                 if (appData.ensSlave[appData.slaveSelected].state == SLAVE_COLLECT_END_BLOCK) {
 #if defined (USE_UART1_SERIAL_INTERFACE) 
                     printf("Slave end bloc\n");
