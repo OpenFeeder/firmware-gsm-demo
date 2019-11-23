@@ -76,6 +76,7 @@ void TMR_SetnIRQLowTimeout(uint16_t timeout) { TMR_nIRQLowTimeout = timeout; }
 void TMR_SetTimeout(uint16_t timeout) { TMR_Timeout = timeout; }
 uint16_t TMR_GetTimeout() { return TMR_Timeout; }
 
+void TMR_RstDelay() { TMR_DelayMs = 0; }
 void TMR_Delay(uint16_t delayMs) {
     TMR_DelayMs = delayMs;
     while (TMR_DelayMs > 0) { }

@@ -252,6 +252,21 @@ void MSTER_RetransGsmData(void) {
     }
 }
 
+void sendEndReportToServer(uint8_t * buf) {
+    bool sendOk = false;
+    int8_t k = 0;
+    do {
+        sendOk = app_TCPsend(buf, 5000);
+        k++;
+    } while (!sendOk && k < 10);
+
+    if (true == appDataLog.log_events && sendOk) {
+        store_event(OF_GSM_MSG_COLLECT_END);
+    } else {
+        store_event(OF_GSM_MSG_NOT_SEND_TO_SERVER);
+    }
+}
+
 /******************************************************************************
   Function:
     void MASTER_APP_Tasks( void )
@@ -682,15 +697,6 @@ void MASTER_AppTask(void) {
                 if (true == appDataLog.log_events) {
                     store_event(OF_STATE_IDLE);
                 }
-
-#if defined (USE_UART1_SERIAL_INTERFACE) 
-                printf("nbOf On Site %d, Slave %d %d %d state %d\n",
-                        appData.nbSlaveOnSite,
-                        appData.ensSlave[appData.slaveSelected].idSlave,
-                        appData.ensSlave[appData.slaveSelected].uidSlave,
-                        appData.slaveSelected,
-                        appData.ensSlave[appData.slaveSelected].state);
-#endif
             }
 
 #if defined ( PRINT_DATE )
@@ -1484,14 +1490,7 @@ void MASTER_AppTask(void) {
             //test si tous les slaves sont sans reponse 
             uint8_t i = 0;
             bool b = false;
-#if defined (USE_UART1_SERIAL_INTERFACE) 
-            printf("avant satate %d vs %d ou %d\n", appData.ensSlave[appData.slaveSelected].state, SLAVE_NO_REQUEST, SLAVE_ERROR);
-            printf("i = %d et nbSlave on site %d\n", i, appData.nbSlaveOnSite);
-#endif
             for (i = 0; i < appData.nbSlaveOnSite; i++) {
-#if defined (USE_UART1_SERIAL_INTERFACE) 
-                printf("dans la boucle satate %d vs %d ou %d\n", appData.ensSlave[i].state, SLAVE_NO_REQUEST, SLAVE_ERROR);
-#endif
                 if (appData.ensSlave[i].state != SLAVE_NO_REQUEST &&
                         appData.ensSlave[i].state != SLAVE_ERROR) {
                     b = true;
@@ -1521,9 +1520,6 @@ void MASTER_AppTask(void) {
 
                 if (b) {
                     //en foction de l'heur de la journee on change d'etat 
-#if defined (USE_UART1_SERIAL_INTERFACE) 
-                    printf("slave seleceted %d\n", appData.ensSlave[appData.slaveSelected].idSlave);
-#endif
                     switch (appData.dayTime) {
                         case GOOD_MORNING:
                         {
@@ -1550,6 +1546,13 @@ void MASTER_AppTask(void) {
                         default:
                             break;
                     }
+#if defined (USE_UART1_SERIAL_INTERFACE) 
+                    printf("slave Selected: local id %d, global id  %d  num in tab %d state %d\n",
+                            appData.ensSlave[appData.slaveSelected].idSlave,
+                            appData.ensSlave[appData.slaveSelected].uidSlave,
+                            appData.slaveSelected,
+                            appData.ensSlave[appData.slaveSelected].state);
+#endif
                     break; // fin de la selection du slave 
                 }
             }
@@ -1597,12 +1600,6 @@ void MASTER_AppTask(void) {
                                 appData.ensSlave[appData.slaveSelected].state = SLAVE_COLLECT_END_BLOCK;
 #if defined(UART_DEBUG)
                                 printf("END BLOC\n");
-                                //                                printf("nbOf On Site %d, Slave %d %d %d state %d\n",
-                                //                                        appData.nbSlaveOnSite,
-                                //                                        appData.ensSlave[appData.slaveSelected].idSlave,
-                                //                                        appData.ensSlave[appData.slaveSelected].uidSlave,
-                                //                                        appData.slaveSelected,
-                                //                                        appData.ensSlave[appData.slaveSelected].state);
 #endif  
                             } else if (appData.receive.Champ.nbR == MAX_W + 1) { // fin de trans
                                 TMR_SetWaitRqstTimeout(-1);
@@ -1691,14 +1688,15 @@ void MASTER_AppTask(void) {
                         break;
                     case SLAVE_SYNC:
 #if defined(UART_DEBUG)
-                        printf("hundler error phase de synchro try to connect %d \n",
+                        printf("synchro try to connect %d \n",
                                 appData.ensSlave[appData.slaveSelected].tryToConnect);
 #endif              
                         appData.ensSlave[appData.slaveSelected].tryToConnect--;
                         if (appData.ensSlave[appData.slaveSelected].tryToConnect > 0) {
 #if defined( USE_UART1_SERIAL_INTERFACE )
                             printf("[demande bloc %d]\n", appData.ensSlave[appData.slaveSelected].nbBloc - 1);
-#endif
+#endif  
+                            memset(appData.BUFF_COLLECT, '\0', NB_BLOCK * SIZE_DATA);
                             MASTER_SendMsgRF(appData.ensSlave[appData.slaveSelected].idSlave,
                                     DATA,
                                     appData.ensSlave[appData.slaveSelected].nbBloc, 1,
@@ -2000,25 +1998,17 @@ void MASTER_AppTask(void) {
                 printf(">MASTER_STATE_SEND_FROM_GSM\n");
 #endif
             }
-            //#if defined (USE_UART1_SERIAL_INTERFACE) 
-            //            printf("nbOf On Site %d, Slave %d %d %d state %d\n",
-            //                    appData.nbSlaveOnSite,
-            //                    appData.ensSlave[appData.slaveSelected].idSlave,
-            //                    appData.ensSlave[appData.slaveSelected].uidSlave,
-            //                    appData.slaveSelected,
-            //                    appData.ensSlave[appData.slaveSelected].state);
-            //#endif
+
             uint8_t buf[40];
-            // 1 ==> stack overflow
             sprintf(buf, "#%d#%d#%s#%d",
                     appData.ensSlave[appData.slaveSelected].idSlave,
                     DATA, appData.siteid,
                     appData.ensSlave[appData.slaveSelected].nbBloc);
             strncpy(appData.BUFF_COLLECT + (SIZE_DATA - 1) * (appData.ensSlave[appData.slaveSelected].index - 1), buf, 40);
 #if defined (USE_UART1_SERIAL_INTERFACE) 
-            int k;
-            for (k = 0; k < NB_BLOCK * SIZE_DATA; k++) {
-                printf("%c", appData.BUFF_COLLECT[k]);
+            int k = 0;
+            while (appData.BUFF_COLLECT[k] != '\0' && k < SIZE_DATA * NB_BLOCK) {
+                printf("%c", appData.BUFF_COLLECT[k++]);
             }
             printf("\n");
 #endif
@@ -2055,14 +2045,6 @@ void MASTER_AppTask(void) {
                 //                if (appData.ensSlave[appData.slaveSelected].nbBloc == atoi(read)) {
                 appData.ensSlave[appData.slaveSelected].nbRepet = 0;
                 MASTER_StoreBehavior(MASTER_APP_STATE_SELECTE_SLAVE, PRIO_MEDIUM);
-                // prepare l'attente d'un nouveau bloc ou c'est la fin 
-                //#if defined (USE_UART1_SERIAL_INTERFACE) 
-                //                printf("slave %d ==> state %d vs endBlock %d vs endTrans %d\n",
-                //                        appData.slaveSelected,
-                //                        appData.ensSlave[appData.slaveSelected].state,
-                //                        SLAVE_COLLECT_END_BLOCK,
-                //                        SLAVE_COLLECT_END);
-                //#endif
                 if (appData.ensSlave[appData.slaveSelected].state == SLAVE_COLLECT_END_BLOCK) {
 #if defined (USE_UART1_SERIAL_INTERFACE) 
                     printf("Slave end bloc\n");
@@ -2117,39 +2099,38 @@ void MASTER_AppTask(void) {
                     j++;
                 }
 
+                MASTER_StoreBehavior(MASTER_APP_STATE_SLEEP, PRIO_HIGH);
                 if (j >= appData.nbSlaveOnSite) {
 #if defined( USE_UART1_SERIAL_INTERFACE )
                     printf("Sleep, rapport of collect %d\n", appData.nbSlaveOnSite);
 #endif
-                    if (app_TCPconnected()) {
+                    if (appData.connectToServer) {
                         uint8_t buf[90];
                         // nothing to say end 
-                        sprintf(buf, "La collecte est fini pour ce site#%d#%d#%s#%d", appData.masterId, NOTHING, appData.siteid, 0);
-                        app_TCPsend(buf, 3000);
-
-                        if (true == appDataLog.log_events) {
-                            store_event(OF_GSM_MSG_COLLECT_END);
-                        }
+                        sprintf(buf, "Le site %s a fini la collecte pour %d/%d des OFs#%d#%d#%s#%d",
+                                appData.siteid, j, appData.nbSlaveOnSite,
+                                appData.masterId, NOTHING, appData.siteid, 0);
+                        sendEndReportToServer((uint8_t *) buf);
                     }
-                    MASTER_StoreBehavior(MASTER_APP_STATE_SLEEP, PRIO_HIGH);
                 }
             } else {
                 if (appData.connectToServer) {
-                    uint8_t buf[100];
-                    sprintf(buf, "Aucun Slave Ne repond#%d#%d#%s#%d", appData.masterId, 2, appData.siteid, 0);
-                    app_TCPsend(buf, 3000);
+                    uint8_t buf[90];
+                    sprintf(buf, "Le site %s aucuns OF Ne repond#%d#%d#%s#%d", 
+                            appData.siteid, appData.masterId, 2, appData.siteid, 0);
+                    sendEndReportToServer((uint8_t *) buf);
                 }
 
                 if (true == appDataLog.log_events) {
                     store_event(OF_ALPHA_TRX_SALAVE_NO_REQUEST);
                 }
-                MASTER_StoreBehavior(MASTER_APP_STATE_ERROR, PRIO_EXEPTIONNEL);
-                appData.ensSlave[appData.slaveSelected].state = SLAVE_NO_REQUEST;
-                sprintf(appError.message, "Error RF Module ");
-                appError.current_line_number = __LINE__;
-                sprintf(appError.current_file_name, "%s", __FILE__);
-                appError.number = ERROR_RF_MODULE;
-                appError.errorSend = true;
+                //                MASTER_StoreBehavior(MASTER_APP_STATE_ERROR, PRIO_EXEPTIONNEL);
+                //                appData.ensSlave[appData.slaveSelected].state = SLAVE_NO_REQUEST;
+                //                sprintf(appError.message, "Error RF Module ");
+                //                appError.current_line_number = __LINE__;
+                //                sprintf(appError.current_file_name, "%s", __FILE__);
+                //                appError.number = ERROR_RF_MODULE;
+                //                appError.errorSend = true;
             }
             break;
             /* -------------------------------------------------------------- */

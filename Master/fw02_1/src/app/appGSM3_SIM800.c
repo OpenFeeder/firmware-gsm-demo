@@ -810,7 +810,7 @@ bool app_TCPsend(uint8_t * dataToSend, uint16_t delays) {
     printf("buf : %s\n", buf);
 #endif
     GSM3_TransmitCommand(buf); // may be we can add : AT+CIPSEND=length(dataToSend)
-    TMR_Delay(100);
+    TMR_Delay(200);
     uint8_t * response = GSM3_GetResponse();
     if (!GSM3_findStringInResponse((uint8_t*)">", response)) return false;
     GSM3_ReadyReceiveBuffer();

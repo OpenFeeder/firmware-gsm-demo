@@ -135,6 +135,11 @@ uint16_t TMR_GetTimeout();
 /**
  * 
  */
+void TMR_RstDelay();
+
+/**
+ * 
+ */
 void TMR_Delay();
 
 /**
