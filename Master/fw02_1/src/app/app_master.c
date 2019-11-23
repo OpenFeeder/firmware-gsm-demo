@@ -1823,10 +1823,26 @@ void MASTER_AppTask(void) {
                 sprintf(appError.current_file_name, "%s", __FILE__);
                 appError.number = ERROR_GPRS_NO_ATTACHED;
                 MASTER_StoreBehavior(MASTER_APP_STATE_ERROR, PRIO_EXEPTIONNEL);
+            }else {
+                MASTER_StoreBehavior(MASTER_APP_STATE_SEND_STATUS_TO_SERVER, PRIO_LOW);
             }
         }
             break;
             /* -------------------------------------------------------------- */
+        case MASTER_APP_STATE_SEND_STATUS_TO_SERVER:
+        {
+            if (appData.state != appData.previous_state) {
+                appData.previous_state = appData.state;
+#if defined( USE_UART1_SERIAL_INTERFACE ) && defined( DISPLAY_CURRENT_STATE )
+                printf(">MASTER_APP_STATE_SEND_STATUS_TO_SERVER\n");
+#endif
+            }
+            uint8_t * buf[40]; // apres il faudrais reflechir a transmettre d'autre information
+            sprintf(buf, "Aucun probleme#%d#%d#%s#%d",
+                    appData.masterId, INFOS, appData.siteid, 0);
+            app_TCPsend(buf, 3000); // pour l'instant c'est bloquant
+        }
+            break;
         case MASTER_APP_STATE_SEND_ERROR_TO_SERVER:
         {
             if (appData.state != appData.previous_state) {
@@ -2000,10 +2016,11 @@ void MASTER_AppTask(void) {
             }
 
             uint8_t buf[40];
-            sprintf(buf, "#%d#%d#%s#%d",
+            sprintf(buf, "#%d#%d#%s#%d#%d",
                     appData.ensSlave[appData.slaveSelected].idSlave,
                     DATA, appData.siteid,
-                    appData.ensSlave[appData.slaveSelected].nbBloc);
+                    appData.ensSlave[appData.slaveSelected].nbBloc, 
+                    appData.ensSlave[appData.slaveSelected].uidSlave);
             strncpy(appData.BUFF_COLLECT + (SIZE_DATA - 1) * (appData.ensSlave[appData.slaveSelected].index - 1), buf, 40);
 #if defined (USE_UART1_SERIAL_INTERFACE) 
             int k = 0;
@@ -2116,7 +2133,7 @@ void MASTER_AppTask(void) {
             } else {
                 if (appData.connectToServer) {
                     uint8_t buf[90];
-                    sprintf(buf, "Le site %s aucuns OF Ne repond#%d#%d#%s#%d", 
+                    sprintf(buf, "Le site %s aucuns OF Ne repond#%d#%d#%s#%d",
                             appData.siteid, appData.masterId, 2, appData.siteid, 0);
                     sendEndReportToServer((uint8_t *) buf);
                 }

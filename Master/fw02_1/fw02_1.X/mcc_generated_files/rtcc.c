@@ -464,14 +464,20 @@ void __attribute__((interrupt, no_auto_psv)) _ISR _RTCCInterrupt(void) {
                     IFS3bits.RTCIF = false;
                     return;
                 }
-//                
-                /* Horloge synchronize : ervry 5 min */
+//              
+                /* Send status to server : ervry hour and 6 sec */
+                if (appData.current_time.tm_min == 0 &&
+                    appData.current_time.tm_sec == 6) {
+                    MASTER_StoreBehavior(MASTER_APP_STATE_SEND_STATUS_TO_SERVER, PRIO_LOW);
+                }
+                
+                /* Horloge synchronize from gsm : ervry 15 min */
                 if (appData.current_time.tm_min%15 == 0 &&
                     appData.current_time.tm_sec%15 == 0 &&
                     !appData.masterSynchronizeTime) {
                     appData.masterSynchronizeTime = true;
                 }
-                /* Horloge synchronize : ervry 5 min */
+                /* Horloge synchronize with slave  : ervry 5 min */
                 if ((appData.current_time.tm_min%appData.timeToSynchronizeHologe == 0) && 
                     appData.slaveSynchronizeTime) {
                     appData.slaveSynchronizeTime = false;

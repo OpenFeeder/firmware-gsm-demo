@@ -164,13 +164,15 @@ typedef enum {
 
     // GSM 
     MASTER_APP_STATE_GPRS_ATTACHED,
-    //alphaTRX states 
-    MASTER_APP_STATE_SEND_DATE,
+    MASTER_APP_STATE_SEND_STATUS_TO_SERVER,
     MASTER_APP_STATE_SEND_FROM_GSM,
     MASTER_APP_STATE_SEND_ERROR_TO_SERVER,
+    MASTER_APP_STATE_MSG_GSM_RECEIVE,
+    //alphaTRX states 
+    MASTER_APP_STATE_SEND_DATE,
+
     MASTER_APP_STATE_SELECTE_SLAVE,
     MASTER_APP_STATE_MSG_RF_RECEIVE,
-    MASTER_APP_STATE_MSG_GSM_RECEIVE,
     MASTER_APP_STATE_SEND_REQUEST_INFOS,
     MASTER_APP_STATE_TIMEOUT,
     MASTER_APP_STATE_END,
@@ -206,14 +208,12 @@ typedef enum {
     PTR_OVFF //10
 } PTR;
 
-
 /**-------------------------->> S T R U C T -O F- T I M E O U T <<------------*/
 typedef enum {
     NONE_TIMEOUT,
     RF_TIMEOUT,
     GSM_TIMEOUT
-}TIMEOUT_Type;
-
+} TIMEOUT_Type;
 
 /**-------------------------->> S T R U C T -O F- S L A V E - S T A T E <<----*/
 typedef enum {
@@ -407,7 +407,7 @@ typedef struct {
 
     volatile uint8_t behavior[MAX_LEVEL_PRIO][NB_BEHAVIOR_PER_PRIO];
     volatile uint8_t ptr[MAX_LEVEL_PRIO][3]; //READ - WRITE - OVFF (overflow)
-//    uint8_t BUFF_COLLECT[NB_BLOCK][SIZE_DATA];
+    //    uint8_t BUFF_COLLECT[NB_BLOCK][SIZE_DATA];
     uint8_t BUFF_COLLECT[NB_BLOCK*SIZE_DATA];
     int8_t nbSlaveOnSite;
     SlaveState ensSlave[MAX_SLAVE]; // max of on site
@@ -418,7 +418,7 @@ typedef struct {
     uint8_t nbCharPerLine;
     bool gsmMsgSend;
     TIMEOUT_Type typeTimeout;
-    
+
 } MASTER_APP_DATA;
 
 // *****************************************************************************
