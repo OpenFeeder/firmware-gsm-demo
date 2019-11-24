@@ -43,7 +43,8 @@
 
 /**-------------------------->> V A R I A B L E S <<---------------------------*/
 //for send data : mise a jour au fure et a mesure 
-int8_t BUF_DATA[NB_DATA_BUF][SIZE_DATA]; // taille : NB_DATA_BUF*SIZE_DATA
+// attention c'est variables sont initialisées int8_t ==> -127 à 127
+uint8_t BUF_DATA[NB_DATA_BUF][SIZE_DATA]; // taille : NB_DATA_BUF*SIZE_DATA
 int8_t nbFrameToSend = 0;
 int8_t curseur = 1; //le curseur
 int8_t ack_attedue = 1; //
@@ -99,14 +100,14 @@ int8_t radioAlphaTRX_SlaveSendMsgRF(uint8_t typeMsg,
     return ret;
 }
 
-void radioAlphaTRX_SlaveSendErr(int8_t errToSend) {
-    printf("send %d\n", radioAlphaTRX_SlaveSendMsgRF(DATA,
-            BUF_DATA[0],
-            1, 1, SIZE_DATA));
-}
+//void radioAlphaTRX_SlaveSendErr(int8_t errToSend) {
+//    printf("send %d\n", radioAlphaTRX_SlaveSendMsgRF(DATA,
+//            BUF_DATA[0],
+//            1, 1, SIZE_DATA));
+//}
 
 void radioAlphaTRX_SlaveSendNothing() {
-    radioAlphaTRX_SlaveSendMsgRF(NOTHING, "", 1, 1, 0);
+    radioAlphaTRX_SlaveSendMsgRF(NOTHING, (uint8_t *)"", 1, 1, 0);
 }
 
 void radioAlphaTRX_SlaveUpdateDate(uint8_t* date) {
@@ -119,17 +120,22 @@ void radioAlphaTRX_SlaveUpdateDate(uint8_t* date) {
 
     // deserealise
     struct tm time_set;
-#if defined(LOG_HOUR)
-    RTCC_TimeGet(&time_set);
-    oldTime = time_set;
-#endif
+    
+    getDateTime();
+    oldTime = appData.current_time;
     time_set.tm_sec = d.Format.sec;
     time_set.tm_min = d.Format.min;
     time_set.tm_hour = d.Format.h;
     time_set.tm_mday = d.Format.day;
     time_set.tm_mon = d.Format.mm;
     time_set.tm_year = d.Format.yy;
-
+    
+    if (time_set.tm_year != appData.current_time.tm_year || 
+        time_set.tm_mon != appData.current_time.tm_mon ||
+        time_set.tm_mday != appData.current_time.tm_mday) {
+        appData.setFilename = true;
+    }
+    
     updateTime = time_set;
     // mise a jour 
     //    if (setDateTime(time_set.tm_year, time_set.tm_mon, time_set.tm_mday,
@@ -147,20 +153,20 @@ void radioAlphaTRX_SlaveUpdateDate(uint8_t* date) {
 
 //______________________________________________________________________________
 
-int8_t getNbLignePerLigne(FILEIO_OBJECT * file) {
-    int8_t i = 0;
-    uint8_t c;
-    do {
-        c = (uint8_t) FILEIO_GetChar(&file);
-#if defined( USE_UART1_SERIAL_INTERFACE )
-        printf("%c\n", c);
-#endif
-        i++;
-        if (c == 10)
-            return i;
-    } while (i < 90); // maxi 90
-    return i;
-}
+//int8_t getNbLignePerLigne(FILEIO_OBJECT * file) {
+//    int8_t i = 0;
+//    uint8_t c;
+//    do {
+//        c = (uint8_t) FILEIO_GetChar(&file);
+//#if defined( USE_UART1_SERIAL_INTERFACE )
+//        printf("%c\n", c);
+//#endif
+//        i++;
+//        if (c == 10)
+//            return i;
+//    } while (i < 90); // maxi 90
+//    return i;
+//}
 
 FILEIO_RESULT radioAlphaTRX_GetLogFromDisk(int8_t block) {
 
@@ -197,7 +203,7 @@ FILEIO_RESULT radioAlphaTRX_GetLogFromDisk(int8_t block) {
             memset(BUF_DATA[i], 0, SIZE_DATA);
         while (nbFrameToSend < NB_DATA_BUF && !FILEIO_Eof(&file)) {
             FILEIO_Read(BUF_DATA[nbFrameToSend++], 1, appData.nbCharPerLine, &file);
-//            printf("size %d : %s", strlen(BUF_DATA[nbFrameToSend-1]), BUF_DATA[nbFrameToSend-1]);
+//            printf("\nsize %d : %s", strlen(BUF_DATA[nbFrameToSend-1]), BUF_DATA[nbFrameToSend-1]);
         }
     }
     if (FILEIO_RESULT_FAILURE == FILEIO_Close(&file)) {
@@ -260,7 +266,6 @@ FILEIO_RESULT radioAlphaTRX_SlaveUpdateDatelog() {
     }
 
     memset(buf, '\0', sizeof ( buf));
-    getDateTime();
     flag = sprintf(buf, "%c%c,OF%c%c,%02d/%02d/%04d,%02d:%02d:%02d : actuelle\n",
             appData.siteid[0],
             appData.siteid[1],
@@ -426,8 +431,9 @@ void radioAlphaTRX_SlaveUpdateSendLogParam(uint8_t numSeq) {
  * Note:            None
  ********************************************************************/
 void radioAlphaTRX_SlaveHundlerMsgReceived(Frame msgReceive) {
+    appData.msgReceive = false;
     appData.state = APP_STATE_IDLE; // etat endormie
-    int16_t timeout = TMR_GetMsgRecuTimeout();
+    uint16_t timeout = TMR_GetMsgRecuTimeout();
     switch (msgReceive.Champ.typeMsg) {
         case DATA:
 #if defined(UART_DEBUG)
@@ -444,14 +450,14 @@ void radioAlphaTRX_SlaveHundlerMsgReceived(Frame msgReceive) {
 #endif
                     radioAlphaTRX_GetLogFromDisk(nbBlock - 1);
                     if (nbFrameToSend == 0) { // il n'y a plus de bloc 
-                        radioAlphaTRX_SlaveSendMsgRF(NOTHING, "", 1, 1, 0);
+                        radioAlphaTRX_SlaveSendMsgRF(NOTHING, (uint8_t *)"", 1, 1, 0);
 #if defined( USE_UART1_SERIAL_INTERFACE )
                         printf("No Data To Send\n");
 #endif  
                         // on attend 10s et si on ne rçoit pas de demande c'est que 
                         // le msg de fin est reçu : si non je recevrais une nouvelle 
                         // demande 
-                        TMR_SetTimeout(10000);
+                        TMR_SetTimeout(50000);
                         appData.noDataToSend = true;
                         return;
                     }
@@ -468,13 +474,13 @@ void radioAlphaTRX_SlaveHundlerMsgReceived(Frame msgReceive) {
 #endif  
             if (timeout) { // si on est dans les temps, parrapport au master 
                 if (appError.OfInCriticalError) { //l'error a transmettre 
-                    TMR_Delay(50);
-                    radioAlphaTRX_SlaveSendMsgRF(ERROR, "", appError.number, 1, 0);
+                    TMR_Delay(20);
+                    radioAlphaTRX_SlaveSendMsgRF(ERROR, (uint8_t *)"", appError.number, 1, 0);
                     lastSend = ACK_STATES_ERROR;
                     appData.state = APP_STATE_ERROR;
                 } else {
                     TMR_Delay(50);
-                    radioAlphaTRX_SlaveSendMsgRF(NOTHING, "", 1, 1, 0);
+                    radioAlphaTRX_SlaveSendMsgRF(NOTHING, (uint8_t *)"", 1, 1, 0);
                     lastSend = ACK_STATES_NOTHING;
                 }
             }
@@ -491,8 +497,8 @@ void radioAlphaTRX_SlaveHundlerMsgReceived(Frame msgReceive) {
                     printf("[ACK ERROR] \n");
 #endif
                     appError.errorSend = true;
-                    powerRFDisable();
-                    appData.state = APP_STATE_ERROR;
+                    powerRFDisable(); // eteint le module radio
+                    appData.state = APP_STATE_ERROR; // je passe en etat d'erreur 
                     break;
                 case ACK_STATES_DATA:
                     curseur = msgReceive.Champ.idMsg; // on met a jour le curseur

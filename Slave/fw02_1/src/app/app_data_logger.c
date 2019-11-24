@@ -382,6 +382,9 @@ bool dataLog( bool newData )
     /* If buffer is full then write log file on the USB device */
     if ( appDataLog.num_data_stored == MAX_NUM_DATA_TO_STORE )
     {
+#if defined (USE_UART1_SERIAL_INTERFACE) 
+        printf(" save data to USB\n");
+#endif
         setLedsStatusColor( LED_USB_ACCESS );
 
         if ( USB_DRIVE_MOUNTED == appDataUsb.usb_drive_status )
@@ -1192,9 +1195,6 @@ int flushDataOnUsbDevice( )
     /* Bird data */
     if ( appDataLog.num_data_stored > 0 )
     {
-#if defined (USE_UART1_SERIAL_INTERFACE) 
-        printf( "\tFlush birds data.\n" );
-#endif
         /* Force data to be written on the USB device */
         appDataLog.num_data_stored = MAX_NUM_DATA_TO_STORE;
         if ( false == dataLog( false ) )

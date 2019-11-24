@@ -3609,11 +3609,13 @@ void radioAlphaTRX_CaptureFrame() {
             radioAlphaTRX_SlaveUpdateDate(frameReceive.Champ.data);
         } else {
             LED_STATUS_B_Toggle();
+            // si l'of est en erreur critique
             if (appError.OfInCriticalError && !appError.errorSend)
                 appData.state = APP_STATE_RADIO_RECEIVED;
-            else
-                APP_setMsgReceive(1);
-            TMR_SetMsgRecuTimeout(TIME_OUT_GET_FRAME); // on demare le timer, car le bufer est probablement remplie 
+            else {
+                appData.msgReceive = true;
+                TMR_SetMsgRecuTimeout(TIME_OUT_GET_FRAME); // on demare le timer, car le bufer est probablement remplie 
+            }
         }
     } else {
         LED_STATUS_R_Toggle();

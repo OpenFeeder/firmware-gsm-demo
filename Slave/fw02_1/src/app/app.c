@@ -56,16 +56,7 @@ APP_DATA_STIMULI appDataStimuli; /* Stimuli application data */
 
 //AlphaTRX modifcation 
 struct tm t;
-volatile int8_t msgReceive = 0;
 int8_t print = 0;
-
-int8_t APP_isMsgReceive() {
-    return msgReceive;
-}
-
-void APP_setMsgReceive(int8_t set) {
-    msgReceive = set;
-}
 
 //____________________________________________________________________________
 
@@ -219,14 +210,17 @@ void APP_Tasks(void) {
                 }
 
                 /* Set log file name => 20yymmdd.CSV (one log file per day). */
-                if (false == setLogFileName()) {
-#if defined(_DEBUG)
-                    printf("false == setLogFileName( )\n"
-                            "==> ERROR STATE\n");
-#endif
-                    appDataUsb.is_device_needed = false;
-                    appData.state = APP_STATE_ERROR;
-                    break;
+                if (appData.setFilename) {
+                    if (false == setLogFileName()) {
+    #if defined(_DEBUG)
+                        printf("false == setLogFileName( )\n"
+                                "==> ERROR STATE\n");
+    #endif
+                        appDataUsb.is_device_needed = false;
+                        appData.state = APP_STATE_ERROR;
+                        break;
+                    }
+                    appData.setFilename = false;
                 }
 
                 /* Power USB device */
@@ -529,8 +523,7 @@ void APP_Tasks(void) {
 #endif      
 
             //Alpha TRX modification 
-            if (APP_isMsgReceive() == 1) {
-                APP_setMsgReceive(0); // on effce le flag 
+            if (appData.msgReceive) {
                 appData.state = APP_STATE_RADIO_RECEIVED;
                 break;
             } else if (appData.noDataToSend) {
@@ -690,16 +683,6 @@ void APP_Tasks(void) {
 #endif
             }
             radioAlphaTRX_SlaveUpdateDatelog();
-            
-            if (false == setLogFileName()) {
-#if defined(_DEBUG)
-                printf("false == setLogFileName( )\n"
-                        "==> ERROR STATE\n");
-#endif
-                appDataUsb.is_device_needed = false;
-                appData.state = APP_STATE_ERROR;
-                break;
-            }
             appData.state = APP_STATE_IDLE;
             break;
             /* -------------------------------------------------------------- */
@@ -2433,7 +2416,8 @@ void APP_Initialize(void) {
 
     appDataEvent.is_txt_file_name_set = false;
     appDataEvent.is_bin_file_name_set = false;
-
+    appData.setFilename = true;
+    
     appData.secu_bird_reward_reopen = true;
     appData.secu_guillotine = true;
     appData.secu_guillotine_offset = DEFAULT_GUILLOTINE_TIME_OFFSET;
@@ -2451,10 +2435,10 @@ void APP_Initialize(void) {
     appData.broadCast = 255;
     appData.nbCharPerLine = 66;
     appData.noDataToSend = false;
-
+    appData.msgReceive = false;
     appError.OfInCriticalError = false;
     appError.errorSend = false;
-
+    
     //Stop OF 
     appDataAlarmDefaultStopOF.time.tm_hour = 23;
     appDataAlarmDefaultStopOF.time.tm_min = 50;

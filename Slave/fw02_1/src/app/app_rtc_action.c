@@ -29,8 +29,11 @@ void manageRtcAction() {
     if ((appData.current_time.tm_hour * 60 + appData.current_time.tm_min) >= 
         (appDataAlarmSleep.time.tm_hour * 60 + appDataAlarmSleep.time.tm_min)) {
         if (!appDataDoor.door_close_bird_sleep) {
+            flushDataOnUsbDevice(); // save data to usb 
             appDataDoor.door_close_bird_sleep = true;
         }
+    }else {
+        appDataDoor.door_close_bird_sleep = false;
     }
 
     /* Calibrate date and time using the external RTC module */

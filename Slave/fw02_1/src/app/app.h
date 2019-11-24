@@ -370,6 +370,8 @@ typedef struct {
     uint8_t masterId;
     uint8_t broadCast;
     uint8_t station;
+    bool setFilename;
+    bool volatile msgReceive;
 
 } APP_DATA;
 

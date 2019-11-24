@@ -292,9 +292,9 @@ void APP_SerialDebugTasks(void) {
                 } else {
                     for (i = 0; i < appDataLog.num_battery_level_stored; i++) {
                         printf("\t%02d - %04d - %2.3f\n",
-                               appDataLog.battery_level[i][0],
-                               appDataLog.battery_level[i][1],
-                               appDataLog.battery_level[i][1] * BATTERY_VOLTAGE_FACTOR);
+                                appDataLog.battery_level[i][0],
+                                appDataLog.battery_level[i][1],
+                                appDataLog.battery_level[i][1] * BATTERY_VOLTAGE_FACTOR);
                     }
                 }
 
@@ -306,9 +306,9 @@ void APP_SerialDebugTasks(void) {
                 } else {
                     for (i = 0; i < appDataLog.num_rfid_freq_stored; i++) {
                         printf("\t%02d:%02d - %06ld\n",
-                               appDataLog.rfid_freq[i][0],
-                               appDataLog.rfid_freq[i][1],
-                               (long) appDataLog.rfid_freq[i][2]*10);
+                                appDataLog.rfid_freq[i][0],
+                                appDataLog.rfid_freq[i][1],
+                                (long) appDataLog.rfid_freq[i][2]*10);
                     }
                 }
 
@@ -319,9 +319,9 @@ void APP_SerialDebugTasks(void) {
                 } else {
                     for (i = 0; i < appDataLog.num_time_calib_stored; i++) {
                         printf("\t%02d:%02d - %.2f\n",
-                               (int) appDataLog.time_calibration[i][0],
-                               (int) appDataLog.time_calibration[i][1],
-                               appDataLog.time_calibration[i][2]);
+                                (int) appDataLog.time_calibration[i][0],
+                                (int) appDataLog.time_calibration[i][1],
+                                appDataLog.time_calibration[i][2]);
                     }
                 }
 
@@ -333,9 +333,9 @@ void APP_SerialDebugTasks(void) {
                 } else {
                     for (i = 0; i < appDataLog.num_ds3231_temp_stored; i++) {
                         printf("\t%02d:%02d - %.2f\n",
-                               (int) appDataLog.ds3231_temp[i][0],
-                               (int) appDataLog.ds3231_temp[i][1],
-                               (double) appDataLog.ds3231_temp[i][2]);
+                                (int) appDataLog.ds3231_temp[i][0],
+                                (int) appDataLog.ds3231_temp[i][1],
+                                (double) appDataLog.ds3231_temp[i][2]);
                     }
                 }
 
@@ -616,9 +616,19 @@ void APP_SerialDebugTasks(void) {
                     case 'n':
                     case 'N':
                     {
+                        flushDataOnUsbDevice( );
                         printf("read : %s\n", appDataLog.filename);
                         radioAlphaTRX_GetLogFromDisk(0);
-                        printf("==================================================\n");
+                        printf("\n==================================================\n");
+                    }
+                        break;
+                    case 'm':
+                    case 'M':
+                    {
+                        flushDataOnUsbDevice( );
+                        printf("read : %s\n", appDataLog.filename);
+                        radioAlphaTRX_GetLogFromDisk(1);
+                        printf("\n==================================================\n");
                     }
                         break;
                     case 'o':
@@ -1443,11 +1453,11 @@ void APP_SerialDebugTasks(void) {
                 }
 
                 if (date[2] < 1 || date[2] > 31 ||
-                    date[1] < 1 || date[1] > 12 ||
-                    date[0] < MIN_ADMISSIBLE_YEAR || date[0] > MAX_ADMISSIBLE_YEAR ||
-                    date[3] < 0 || date[3] > 23 ||
-                    date[4] < 0 || date[4] > 59 ||
-                    date[5] < 0 || date[5] > 59) {
+                        date[1] < 1 || date[1] > 12 ||
+                        date[0] < MIN_ADMISSIBLE_YEAR || date[0] > MAX_ADMISSIBLE_YEAR ||
+                        date[3] < 0 || date[3] > 23 ||
+                        date[4] < 0 || date[4] > 59 ||
+                        date[5] < 0 || date[5] > 59) {
                     printf("\tWrong value => Date and time not set.\n");
 
                     /* Log event if required */
@@ -1764,10 +1774,10 @@ void getUniqueDeviceId(void) {
 void displayUniqueDeviceId(void) {
 
     printf("UDID: %06lX %06lX %06lX %06lX %06lX\r\n", appData.udid.words[0],
-           appData.udid.words[1],
-           appData.udid.words[2],
-           appData.udid.words[3],
-           appData.udid.words[4]);
+            appData.udid.words[1],
+            appData.udid.words[2],
+            appData.udid.words[3],
+            appData.udid.words[4]);
 
 }
 
