@@ -2295,7 +2295,6 @@ void MASTER_AppInit(void) {
     appError.errorSend = false;
     appError.OfInCriticalError = false;
     appError.nbErrorSendSms = 10; // on esssaie 10 fois 
-    appData.nbSlaveDataCollected = appData.nbSlaveOnSite;
     // if we send msg we wait interuption else delay
     appData.gsmMsgSend = false;
     appData.typeTimeout = NONE_TIMEOUT;
