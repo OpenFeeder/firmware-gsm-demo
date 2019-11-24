@@ -1050,6 +1050,8 @@ void MASTER_AppTask(void) {
                 printf("power off GSM\n");
 #endif
                 appData.gsmInit = false;
+                if (app_TCPconnected())
+                    app_TCPclose();
                 app_PowerDown(true);
                 powerUsbGSMDisable();
             }
@@ -1299,6 +1301,8 @@ void MASTER_AppTask(void) {
                 if (appError.number != ERROR_GSM_NO_POWER_ON &&
                         !appError.OfInCriticalError) { // indique que c'est la premiere fois qu'on entre dedans 
                     TMR_Delay(30000); //permet d'attendre la fin des tache du gsm avant de couper l'alime  
+                    if (app_TCPconnected())
+                        app_TCPclose();
                     app_PowerDown(true);
                 }
                 USBHostShutdown();
@@ -1795,25 +1799,31 @@ void MASTER_AppTask(void) {
 
             int8_t i = 0;
             bool stop = false;
-            bool gprsEnable = false;
-            do {
-                if (!gprsEnable) {
-                    gprsEnable = app_EnableModuleInGPRSmode(true, appData.gsm_apn);
-                }
-                if (gprsEnable) {
-                    if (app_StartTCPconnection(appData.gsm_ip_server, appData.gsm_port)) {
+            if (app_TCPconnected()) {
+                stop = true;
+                appData.connectToServer = true;
+            } else {
+                bool gprsEnable = app_StatusGPRS();
+                do {
+                    if (!gprsEnable) {
+                        gprsEnable = app_EnableModuleInGPRSmode(true, appData.gsm_apn);
+                    }
+                    if (gprsEnable || app_StatusGPRS()) {
+                        if (app_StartTCPconnection(appData.gsm_ip_server, appData.gsm_port)) {
 #if defined( USE_UART1_SERIAL_INTERFACE )
-                        printf("TCP CONNECTED\n");
+                            printf("TCP CONNECTED\n");
 #endif
-                        appData.connectToServer = true;
-                        stop = true;
-                        break;
-                    } else
+                            appData.connectToServer = true;
+                            stop = true;
+                            break;
+                        } else
+                            i++;
+                    } else {
                         i++;
-                } else
-                    i++;
-                TMR_Delay(1000);
-            } while (!stop && i < 40);
+                    }
+                    TMR_Delay(1000);
+                } while (!stop && i < 40);
+            }
             if (!stop) {
 #if defined( USE_UART1_SERIAL_INTERFACE )
                 printf("ERROR GPRS CONNECTION \n");
@@ -1823,8 +1833,12 @@ void MASTER_AppTask(void) {
                 sprintf(appError.current_file_name, "%s", __FILE__);
                 appError.number = ERROR_GPRS_NO_ATTACHED;
                 MASTER_StoreBehavior(MASTER_APP_STATE_ERROR, PRIO_EXEPTIONNEL);
-            }else {
-                MASTER_StoreBehavior(MASTER_APP_STATE_SEND_STATUS_TO_SERVER, PRIO_LOW);
+            } else {
+                if (appData.dayTime == GOOD_NIGHT) {
+                    MASTER_StoreBehavior(MASTER_APP_STATE_SELECTE_SLAVE, PRIO_LOW);
+                } else {
+                    MASTER_StoreBehavior(MASTER_APP_STATE_SEND_STATUS_TO_SERVER, PRIO_LOW);
+                }
             }
         }
             break;
@@ -1837,10 +1851,15 @@ void MASTER_AppTask(void) {
                 printf(">MASTER_APP_STATE_SEND_STATUS_TO_SERVER\n");
 #endif
             }
-            uint8_t * buf[40]; // apres il faudrais reflechir a transmettre d'autre information
-            sprintf(buf, "Aucun probleme#%d#%d#%s#%d",
-                    appData.masterId, INFOS, appData.siteid, 0);
-            app_TCPsend(buf, 3000); // pour l'instant c'est bloquant
+            if (!app_TCPconnected()) { // on teste une fois 
+                appData.connectToServer = app_StartTCPconnection(appData.gsm_ip_server, appData.gsm_port);
+            }
+            if (appData.connectToServer) {
+                uint8_t * buf[50]; // apres il faudrais reflechir a transmettre d'autre information
+                sprintf(buf, "alive#%d#%d#%s#%d",
+                        appData.masterId, INFOS, appData.siteid, 0);
+                app_TCPsend(buf, 2000); // pour l'instant c'est bloquant
+            }
         }
             break;
         case MASTER_APP_STATE_SEND_ERROR_TO_SERVER:
@@ -1853,7 +1872,7 @@ void MASTER_AppTask(void) {
             }
             bool b = true;
             bool r = true; //error receve 
-            uint8_t bufErrorMSG [128];
+            uint8_t bufErrorMSG [150];
             //                    TMR_SetWaitRqstTimeout(0); // declencher le l'interuption logiciel  
             //TODO : traitement d'erreur send ack
             switch (appError.number) {
@@ -1950,6 +1969,9 @@ void MASTER_AppTask(void) {
             }
             if (b) {
                 bool resp = false;
+                if (!app_TCPconnected()) { // on teste une fois 
+                    appData.connectToServer = app_StartTCPconnection(appData.gsm_ip_server, appData.gsm_port);
+                }
                 if (!appData.connectToServer) {
                     // try to send error with sms
                     resp = app_SendSMS(bufErrorMSG);
@@ -2019,7 +2041,7 @@ void MASTER_AppTask(void) {
             sprintf(buf, "#%d#%d#%s#%d#%d",
                     appData.ensSlave[appData.slaveSelected].idSlave,
                     DATA, appData.siteid,
-                    appData.ensSlave[appData.slaveSelected].nbBloc, 
+                    appData.ensSlave[appData.slaveSelected].nbBloc,
                     appData.ensSlave[appData.slaveSelected].uidSlave);
             strncpy(appData.BUFF_COLLECT + (SIZE_DATA - 1) * (appData.ensSlave[appData.slaveSelected].index - 1), buf, 40);
 #if defined (USE_UART1_SERIAL_INTERFACE) 
@@ -2029,14 +2051,6 @@ void MASTER_AppTask(void) {
             }
             printf("\n");
 #endif
-            //#if defined (USE_UART1_SERIAL_INTERFACE) 
-            //            printf("nbOf On Site %d, Slave %d %d %d state %d\n",
-            //                    appData.nbSlaveOnSite,
-            //                    appData.ensSlave[appData.slaveSelected].idSlave,
-            //                    appData.ensSlave[appData.slaveSelected].uidSlave,
-            //                    appData.slaveSelected,
-            //                    appData.ensSlave[appData.slaveSelected].state);
-            //#endif
             //TODO : go to select slave 
             app_TCPsendToServer(appData.BUFF_COLLECT); // 
             // starrt timer 
@@ -2110,13 +2124,14 @@ void MASTER_AppTask(void) {
                             appError.number = ERROR_SLAVE_NO_REQUEST;
                             MASTER_StoreBehavior(MASTER_APP_STATE_ERROR, PRIO_EXEPTIONNEL);
                             appData.slaveSelected = i;
-                            break; // stop loop
+                            appData.nbSlaveDataCollected--;
+                            return; // stop loop
                         }
                     }
                     j++;
                 }
 
-                MASTER_StoreBehavior(MASTER_APP_STATE_SLEEP, PRIO_HIGH);
+                MASTER_StoreBehavior(MASTER_APP_STATE_SLEEP, PRIO_LOW);
                 if (j >= appData.nbSlaveOnSite) {
 #if defined( USE_UART1_SERIAL_INTERFACE )
                     printf("Sleep, rapport of collect %d\n", appData.nbSlaveOnSite);
@@ -2125,7 +2140,7 @@ void MASTER_AppTask(void) {
                         uint8_t buf[90];
                         // nothing to say end 
                         sprintf(buf, "Le site %s a fini la collecte pour %d/%d des OFs#%d#%d#%s#%d",
-                                appData.siteid, j, appData.nbSlaveOnSite,
+                                appData.siteid, appData.nbSlaveDataCollected, appData.nbSlaveOnSite,
                                 appData.masterId, NOTHING, appData.siteid, 0);
                         sendEndReportToServer((uint8_t *) buf);
                     }
@@ -2141,13 +2156,6 @@ void MASTER_AppTask(void) {
                 if (true == appDataLog.log_events) {
                     store_event(OF_ALPHA_TRX_SALAVE_NO_REQUEST);
                 }
-                //                MASTER_StoreBehavior(MASTER_APP_STATE_ERROR, PRIO_EXEPTIONNEL);
-                //                appData.ensSlave[appData.slaveSelected].state = SLAVE_NO_REQUEST;
-                //                sprintf(appError.message, "Error RF Module ");
-                //                appError.current_line_number = __LINE__;
-                //                sprintf(appError.current_file_name, "%s", __FILE__);
-                //                appError.number = ERROR_RF_MODULE;
-                //                appError.errorSend = true;
             }
             break;
             /* -------------------------------------------------------------- */
@@ -2287,6 +2295,7 @@ void MASTER_AppInit(void) {
     appError.errorSend = false;
     appError.OfInCriticalError = false;
     appError.nbErrorSendSms = 10; // on esssaie 10 fois 
+    appData.nbSlaveDataCollected = appData.nbSlaveOnSite;
     // if we send msg we wait interuption else delay
     appData.gsmMsgSend = false;
     appData.typeTimeout = NONE_TIMEOUT;

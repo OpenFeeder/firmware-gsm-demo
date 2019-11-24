@@ -40,7 +40,7 @@
 
 #define gsm3_response_bufferSize  255
 static uint8_t gsm3_response_index = 0;
-static char gsm3_response_buffer[gsm3_response_bufferSize] = {0};
+uint8_t gsm3_response_buffer[gsm3_response_bufferSize] = {0};
 
 /*------------------------------> L O C A L - P R O T O T Y P E <-------------*/
 
@@ -314,14 +314,10 @@ char* GSM3_GetResponse(void) {
 void GSM3_CaptureReceiveMsg(void) {
     GSM3_Receive_ISR();
     uint8_t readByte = uart[GSM3].Read();
-    //(readByte != '\r') && 
-    // * fin de msg 
     if ((readByte != '*') && (readByte != '\0')
             && (gsm3_response_index < gsm3_response_bufferSize - 1)) {
-        LED_STATUS_B_Toggle();
         gsm3_response_buffer[gsm3_response_index++] = readByte;
     } else {
-//        gsm3_response_buffer[gsm3_response_index] = '\0';
         if (appData.gsmMsgSend && (readByte == '*')) { 
             LED_STATUS_R_Toggle();
             MASTER_StoreBehavior(MASTER_APP_STATE_MSG_GSM_RECEIVE, PRIO_HIGH);
@@ -329,7 +325,7 @@ void GSM3_CaptureReceiveMsg(void) {
             appData.gsmMsgSend = false;
             appData.typeTimeout = NONE_TIMEOUT;
         }else {
-            gsm3_response_buffer[gsm3_response_index] = '\0';
+            gsm3_response_buffer[gsm3_response_index++] = '\0';
         }
     }
 }
@@ -363,7 +359,7 @@ void GSM3_ReadyReceiveBuffer(void) {
     GSM3_flush_buffer();
     UART2_flush_tx_buffer();
     gsm3_response_index = 0;
-    memset(gsm3_response_buffer, '\0', gsm3_response_bufferSize);
+    memset(gsm3_response_buffer, 0, gsm3_response_bufferSize);
 }
 
 void gsm_flush_buffer() {

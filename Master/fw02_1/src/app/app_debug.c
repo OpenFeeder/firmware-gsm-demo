@@ -461,8 +461,8 @@ void APP_SerialDebugTasks(void) {
                     case 'A':
                     {
                         RTCC_TimeGet(&appData.current_time);
-                        setDateTime(appData.current_time.tm_year, 
-                                appData.current_time.tm_mon, 
+                        setDateTime(appData.current_time.tm_year,
+                                appData.current_time.tm_mon,
                                 appData.current_time.tm_mday, 6, 0, 0);
                     }
                         break;
@@ -506,12 +506,17 @@ void APP_SerialDebugTasks(void) {
                         app_EnableModuleInGPRSmode(false, appData.gsm_apn);
                         app_TCPconnected();
                         break;
+                    case 'k':
+                    case 'K':
+                        app_StatusGPRS();
+                        app_TCPconnected();
+                        break;
                     case 'm':
                     case 'M':
                     {
                         RTCC_TimeGet(&appData.current_time);
-                        setDateTime(appData.current_time.tm_year, 
-                                appData.current_time.tm_mon, 
+                        setDateTime(appData.current_time.tm_year,
+                                appData.current_time.tm_mon,
                                 appData.current_time.tm_mday, 5, 0, 0);
                     }
                         break;
@@ -519,8 +524,8 @@ void APP_SerialDebugTasks(void) {
                     case 'N':
                     {
                         RTCC_TimeGet(&appData.current_time);
-                        setDateTime(appData.current_time.tm_year, 
-                                appData.current_time.tm_mon, 
+                        setDateTime(appData.current_time.tm_year,
+                                appData.current_time.tm_mon,
                                 appData.current_time.tm_mday, 20, 59, 50);
                         MASTER_StoreBehavior(MASTER_APP_STATE_SEND_DATE, PRIO_HIGH);
                     }
@@ -540,8 +545,8 @@ void APP_SerialDebugTasks(void) {
                     case 'S':
                     {
                         RTCC_TimeGet(&appData.current_time);
-                        setDateTime(appData.current_time.tm_year, 
-                                appData.current_time.tm_mon, 
+                        setDateTime(appData.current_time.tm_year,
+                                appData.current_time.tm_mon,
                                 appData.current_time.tm_mday, 23, 58, 50);
                     }
                         break;
@@ -575,7 +580,7 @@ void APP_SerialDebugTasks(void) {
                         RTCC_TimeGet(&appData.current_time);
                         app_UpdateRtcTimeFromGSM();
                         printDateTime(appData.current_time);
-                        
+
                     }
                         break;
                     case 'v':

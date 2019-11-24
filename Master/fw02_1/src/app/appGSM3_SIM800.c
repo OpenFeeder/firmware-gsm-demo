@@ -568,11 +568,6 @@ bool app_ActivePDPContext(int8_t cid, bool state) {
  ********************************************************************/
 bool app_EnableModuleInGPRSmode(bool sate, uint8_t * APN) {
     if (sate) {
-//        GSM3_ReadyReceiveBuffer();
-//        GSM3_TransmitCommand("AT+CGATT=0"); // attache mode gprs 
-//        TMR_Delay(1000);
-//        if (!GSM3_findStringInResponse("OK", GSM3_GetResponse()))
-//            return 0;
         GSM3_ReadyReceiveBuffer();
         GSM3_TransmitCommand((uint8_t *)"AT+CIPSHUT"); // necessary, before etablish TCP or UDP connection
         TMR_Delay(2000);
@@ -606,6 +601,7 @@ bool app_EnableModuleInGPRSmode(bool sate, uint8_t * APN) {
             TMR_Delay(1000);
             char *read = GSM3_GetResponse();
             if (!GSM3_findStringInResponse((uint8_t*)"OK", read)) return false;
+            
             memset(buf, 0, 100); // surveiller cette ligne source d'erreur 
             sprintf(buf, (const char *)"AT+CSTT=\"%s\"", APN);
             GSM3_ReadyReceiveBuffer();
@@ -687,14 +683,15 @@ bool app_EnableModuleInGPRSmode(bool sate, uint8_t * APN) {
  *
  * Note:            None
  ********************************************************************/
-uint8_t * app_StatusGPRS(void) {
+bool app_StatusGPRS(void) {
     GSM3_ReadyReceiveBuffer();
     GSM3_TransmitCommand((uint8_t*)"AT+CIPSTATUS");
     TMR_Delay(100);
 #if defined( USE_UART1_SERIAL_INTERFACE )
     printf("status : %s\n", GSM3_GetResponse());
 #endif
-    return GSM3_GetResponse();
+    return (GSM3_findStringInResponse((uint8_t*)"GPRSACT", GSM3_GetResponse()) ||
+            GSM3_findStringInResponse((uint8_t*)"TCP CLOSED", GSM3_GetResponse()));
 }
 
 /*********************************************************************
@@ -740,7 +737,7 @@ bool app_TCPconnected() {
 bool app_StartTCPconnection(uint8_t * ipAdrr, uint8_t* port) {
     GSM3_ReadyReceiveBuffer();
     GSM3_TransmitCommand((uint8_t*)"AT+CIPSHUT"); // necessary, before etablish TCP or UDP connection
-    TMR_Delay(2000);
+    TMR_Delay(1000);
     if (!GSM3_findStringInResponse((uint8_t*)"SHUT OK", GSM3_GetResponse())) return false;
 #if defined(_DEBUG)
     printf("Disconnect all socket ok \n");
@@ -752,8 +749,8 @@ bool app_StartTCPconnection(uint8_t * ipAdrr, uint8_t* port) {
 #endif
     GSM3_ReadyReceiveBuffer();
     GSM3_TransmitCommand(buf);
-    TMR_Delay(2000);
-    char * response = GSM3_GetResponse();
+    TMR_Delay(1000);
+    uint8_t * response = GSM3_GetResponse();
 #if defined( USE_UART1_SERIAL_INTERFACE )
     printf("response: %s \n", response);
 #endif
@@ -811,13 +808,13 @@ bool app_TCPsend(uint8_t * dataToSend, uint16_t delays) {
 #endif
     GSM3_TransmitCommand(buf); // may be we can add : AT+CIPSEND=length(dataToSend)
     TMR_Delay(100);
-    uint8_t * response = GSM3_GetResponse();
-    if (!GSM3_findStringInResponse((uint8_t*)">", response)) return false;
+//    uint8_t * response = GSM3_GetResponse();
+    if (!GSM3_findStringInResponse((uint8_t*)">", GSM3_GetResponse())) return false;
     GSM3_ReadyReceiveBuffer();
     GSM3_TransmitChar(dataToSend);
     //    GSM3_TransmitString(dataToSend, TERMINATION_CHAR_ADD);
     TMR_Delay(delays);
-    response = GSM3_GetResponse();
+    uint8_t *response = GSM3_GetResponse();
 #if defined( USE_UART1_SERIAL_INTERFACE )
     printf("recu : %s\n", response);
 #endif
@@ -837,7 +834,7 @@ void app_TCPsendToServer(uint8_t * dataToSend) {
     #if defined (USE_UART1_SERIAL_INTERFACE) 
     printf("resp : %s \n", response);
 #endif
-    if (!GSM3_findStringInResponse((uint8_t*)">", response)) return false;
+    if (!GSM3_findStringInResponse((uint8_t*)">", GSM3_GetResponse())) return false;
     GSM3_ReadyReceiveBuffer();
     GSM3_TransmitChar(dataToSend);
     appData.gsmMsgSend = true;

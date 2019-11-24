@@ -432,7 +432,7 @@ void __attribute__((interrupt, no_auto_psv)) _ISR _RTCCInterrupt(void) {
                         appDataAlarmDefaultStopOF.time.tm_hour*60+appDataAlarmDefaultStopOF.time.tm_min && 
                     appData.dayTime != GOOD_NIGHT) {
                     appData.dayTime = GOOD_NIGHT;
-                    MASTER_StoreBehavior(MASTER_APP_STATE_SELECTE_SLAVE, PRIO_EXEPTIONNEL);
+                    MASTER_StoreBehavior(MASTER_APP_STATE_GPRS_ATTACHED, PRIO_EXEPTIONNEL);
                 }
                 
                 

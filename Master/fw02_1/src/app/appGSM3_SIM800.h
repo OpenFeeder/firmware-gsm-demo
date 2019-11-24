@@ -304,7 +304,7 @@ bool app_EnableModuleInGPRSmode(bool sate, uint8_t * APN);
  *#################*/
 
 //
-uint8_t * app_StatusGPRS(void);
+bool app_StatusGPRS(void);
 
 /**
  * 
