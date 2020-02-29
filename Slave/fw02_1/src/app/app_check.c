@@ -59,7 +59,7 @@ APP_CHECK checkImportantParameters(void)
     printf("ok\n");
 #endif
     }
-    
+ 
     /* Check RFID frequency. */
 #if defined (USE_UART1_SERIAL_INTERFACE) && defined (DISPLAY_CHECK_INFO)
     printf("\tRFID frequency: ");
