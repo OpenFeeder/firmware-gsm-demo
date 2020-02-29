@@ -247,6 +247,7 @@ bool GMS3_ModulePower(bool powerState) {
 #if defined( USE_UART1_SERIAL_INTERFACE )
         printf("SMS Mode TXT OK\n");
 #endif
+        app_SleepMode();
     }
     return true;
 }

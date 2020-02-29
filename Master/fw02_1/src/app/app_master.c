@@ -348,8 +348,6 @@ void MASTER_AppTask(void) {
                     store_event(OF_ALPHA_TRX_MODULE_FAIL);
                 }
                 break;
-            } else {
-                // test du timestamp
             }
 
 
@@ -439,6 +437,7 @@ void MASTER_AppTask(void) {
                 if (true == appDataLog.log_events) {
                     store_event(OF_STATE_CONFIGURE_SYSTEM);
                 }
+
 
                 /* Set log file name => 20yymmdd.CSV (one log file per day). */
                 if (false == setLogFileName()) {
@@ -696,6 +695,37 @@ void MASTER_AppTask(void) {
                 /* Log event if required */
                 if (true == appDataLog.log_events) {
                     store_event(OF_STATE_IDLE);
+                }
+            }
+
+            // gsm init 
+            if (!appData.gsmInit) {
+                uint8_t i = 0;
+                while (i < 10 && !appData.gsmInit) {
+                    i++;
+                    if (CMD_VDD_APP_V_USB_GetValue()) {
+                        appData.gsmInit = GMS3_ModulePower(true); // try to power on module 
+                    } else {
+                        powerUsbGSMEnable();
+                    }
+                    TMR_Delay(1000);
+                }
+
+                if (i >= 10) { // module n
+#if defined(USE_UART1_SERIAL_INTERFACE)
+                    printf("GSM module not power on \n");
+#endif  
+                    sprintf(appError.message, "Error GSM No POwer On");
+                    appError.current_line_number = __LINE__;
+                    sprintf(appError.current_file_name, "%s", __FILE__);
+                    appError.number = ERROR_GSM_NO_POWER_ON;
+                    MASTER_StoreBehavior(MASTER_APP_STATE_ERROR, PRIO_EXEPTIONNEL);
+                    //______________________________________________________________
+                    /* Log event if required */
+                    if (true == appDataLog.log_events) {
+                        store_event(OF_ALPHA_TRX_MODULE_FAIL);
+                    }
+                    break;
                 }
             }
 
@@ -1653,16 +1683,16 @@ void MASTER_AppTask(void) {
                         break;
                         /* -------------------------------------------------------*/
                         case NOTHING:
-                        if (appData.ensSlave[appData.slaveSelected].state == SLAVE_SYNC) {
-                            appData.ensSlave[appData.slaveSelected].state = SLAVE_COLLECT_END;
-                            MASTER_StoreBehavior(MASTER_APP_STATE_SELECTE_SLAVE, PRIO_MEDIUM);
-                            // on n'a pas pu recuperer un block car c'est fini 
-                        } else {
-#if defined( USE_UART1_SERIAL_INTERFACE )
-                            printf("Slave %d Nothing to send\n", appData.ensSlave[appData.slaveSelected].idSlave);
-#endif
-                        }
-                        break;
+                            if (appData.ensSlave[appData.slaveSelected].state == SLAVE_SYNC) {
+                                appData.ensSlave[appData.slaveSelected].state = SLAVE_COLLECT_END;
+                                MASTER_StoreBehavior(MASTER_APP_STATE_SELECTE_SLAVE, PRIO_MEDIUM);
+                                // on n'a pas pu recuperer un block car c'est fini 
+                            } else {
+    #if defined( USE_UART1_SERIAL_INTERFACE )
+                                printf("Slave %d Nothing to send\n", appData.ensSlave[appData.slaveSelected].idSlave);
+    #endif
+                            }
+                            break;
                         /* ----------------------------------------------------*/
                         /* -------------------------------------------------------*/
                     }

@@ -317,8 +317,10 @@ bool app_UpdateRtcTimeFromGSM() {
 #if defined( USE_UART1_SERIAL_INTERFACE )
     printf("heur : %s\n", buff);
 #endif
-    if (!GSM3_findStringInResponse((uint8_t *)"+CCLK", buff)) return false;
-
+    if (!GSM3_findStringInResponse((uint8_t *)"+CCLK", buff)) {
+        appData.gsmInit = false;
+        return false;
+    }
     // on se positione au bon endroit 
     struct tm timeToSet;
     int8_t i = 0;
@@ -396,6 +398,32 @@ bool app_SetSmsFormat(bool mode) {
     char * response = GSM3_GetResponse();
     return GSM3_findStringInResponse((uint8_t *)"OK", response);
 }
+
+/*********************************************************************
+ * Function:        bool app_SleepMode(void)
+ *
+ * PreCondition:    None
+ *
+ * Input:           None
+ *
+ * Output:          None
+ *
+ * Side Effects:    None
+ *
+ * Overview:        None
+ *
+ * Note:            None
+ ********************************************************************/
+bool app_SleepMode(void) {
+    GSM3_ReadyReceiveBuffer();
+    GSM3_TransmitCommand((uint8_t *)"AT+CSCLK=0");
+    uint8_t * rep = GSM3_GetResponse();
+#if defined (USE_UART1_SERIAL_INTERFACE) 
+    printf("rep : %s\n", rep);
+#endif
+    return GSM3_findStringInResponse((uint8_t *)"OK", rep);
+}
+
 
 /*********************************************************************
  * Function:        bool app_SendSMS(uint8_t * smsToSend)
