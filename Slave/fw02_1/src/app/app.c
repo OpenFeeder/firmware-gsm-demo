@@ -82,6 +82,17 @@ void APP_Tasks(void) {
         }
     }
 
+    if (appError.OfInCriticalError) {
+        if (appError.errorSend) {
+            appData.state = APP_STATE_ERROR;
+        } else {
+            if (appData.state != APP_STATE_RADIO_RECEIVED) {
+                appData.state = APP_STATE_ERROR;
+            } else {
+                appData.state = APP_STATE_IDLE;
+            }
+        }
+    }
     /* Check the Application State. */
     switch (appData.state) {
         case APP_STATE_INITIALIZE:
@@ -212,10 +223,10 @@ void APP_Tasks(void) {
                 /* Set log file name => 20yymmdd.CSV (one log file per day). */
                 if (appData.setFilename) {
                     if (false == setLogFileName()) {
-    #if defined(_DEBUG)
+#if defined(_DEBUG)
                         printf("false == setLogFileName( )\n"
                                 "==> ERROR STATE\n");
-    #endif
+#endif
                         appDataUsb.is_device_needed = false;
                         appData.state = APP_STATE_ERROR;
                         break;
@@ -2417,7 +2428,7 @@ void APP_Initialize(void) {
     appDataEvent.is_txt_file_name_set = false;
     appDataEvent.is_bin_file_name_set = false;
     appData.setFilename = true;
-    
+
     appData.secu_bird_reward_reopen = true;
     appData.secu_guillotine = true;
     appData.secu_guillotine_offset = DEFAULT_GUILLOTINE_TIME_OFFSET;
@@ -2438,7 +2449,7 @@ void APP_Initialize(void) {
     appData.msgReceive = false;
     appError.OfInCriticalError = false;
     appError.errorSend = false;
-    
+
     //Stop OF 
     appDataAlarmDefaultStopOF.time.tm_hour = 23;
     appDataAlarmDefaultStopOF.time.tm_min = 50;
